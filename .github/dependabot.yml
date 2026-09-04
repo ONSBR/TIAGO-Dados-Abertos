@@ -9,6 +9,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Um PR por semana com todas as actions juntas, em vez de um PR por action.
+    groups:
+      github-actions:
+        patterns: ["*"]
   - package-ecosystem: docker
     directory: /
     schedule:
