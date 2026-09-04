@@ -152,6 +152,8 @@ _BLOCKED_RE = re.compile(r"\b(" + "|".join(_BLOCKED_KEYWORDS) + r")\b", re.IGNOR
 
 # Literais de string (para backstop)
 _STRING_LITERAL_RE = re.compile(r"'(?:[^']|'')*'")
+# Comentario de linha (-- ate o fim da linha) e de bloco (/* ... */), sem aninhamento.
+_COMMENT_RE = re.compile(r"--[^\n]*|/\*.*?\*/", re.S)
 
 # HTTP/LFI (backstop). http:// cleartext = SEMPRE bloqueado (IMDS/metadata/SSRF).
 # https:// = permitido SO para hosts na allowlist (ALLOWED_HTTPS_HOST_SUFFIXES).
@@ -524,10 +526,12 @@ def _count_from_sources(select_node: exp.Expression) -> int:
 
 
 def _has_join_condition(select_node: exp.Expression) -> bool:
-    """Verifica se ha condicao de join (ON ou WHERE) no SELECT especifico."""
-    # Tem clausula ON em algum JOIN
+    """Verifica se ha condicao de join (ON, USING ou WHERE) no SELECT especifico."""
+    # Tem clausula ON ou USING em algum JOIN. USING e condicao de igualdade tanto
+    # quanto ON; sem esta linha, "a JOIN b USING (k) JOIN c USING (k)" era tratado
+    # como produto cartesiano.
     for join in select_node.args.get("joins") or []:
-        if join.args.get("on"):
+        if join.args.get("on") or join.args.get("using"):
             return True
     # Tem WHERE
     if select_node.args.get("where"):
@@ -538,32 +542,17 @@ def _has_join_condition(select_node: exp.Expression) -> bool:
 def _check_cartesian_product(root: exp.Expression) -> Optional[str]:
     """Verifica se ha produto cartesiano sem condicao (DoS potencial).
 
-    Analisa cada SELECT individualmente (UNION nao e cartesiano, cada lado e independente).
+    Percorre TODOS os SELECTs da arvore: o de fora, os lados de um UNION, as CTEs e
+    as subqueries. Antes so o SELECT externo era verificado, e o mesmo produto
+    cartesiano passava escondido num WITH ou num FROM (subquery).
     """
-    # Para UNION, analisa cada lado separadamente
-    if isinstance(root, exp.Union):
-        err = _check_cartesian_product(root.left)
-        if err:
-            return err
-        err = _check_cartesian_product(root.right)
-        if err:
-            return err
-        return None
-
-    # Para SELECT direto
-    if isinstance(root, exp.Select):
-        source_count = _count_from_sources(root)
-        if source_count > MAX_UNCONSTRAINED_SOURCES:
-            if not _has_join_condition(root):
-                return (
-                    f"Produto cartesiano de {source_count} fontes sem condicao de join. "
-                    "Adicione clausula ON ou WHERE para limitar o resultado."
-                )
-
-    # Para CTEs (WITH), analisa o corpo principal
-    if hasattr(root, "this") and isinstance(root.this, (exp.Select, exp.Union)):
-        return _check_cartesian_product(root.this)
-
+    for select_node in root.find_all(exp.Select):
+        source_count = _count_from_sources(select_node)
+        if source_count > MAX_UNCONSTRAINED_SOURCES and not _has_join_condition(select_node):
+            return (
+                f"Produto cartesiano de {source_count} fontes sem condicao de join. "
+                "Adicione clausula ON ou WHERE para limitar o resultado."
+            )
     return None
 
 
@@ -592,6 +581,10 @@ def _backstop_check(sql: str) -> Optional[str]:
     """Checagem de backstop via regex (caso algo escape o AST)."""
     # Remove literais de string para o scan de keyword
     skeleton = _STRING_LITERAL_RE.sub("''", sql)
+    # Remove comentarios: "-- create resumo" num titulo ou "/* drop ... */" num aparte
+    # nao sao comandos. Seguro porque os literais ja sairam (um "--" dentro de string
+    # nao chega aqui) e porque o AST em is_safe continua sendo a barreira real.
+    skeleton = _COMMENT_RE.sub(" ", skeleton)
 
     # Verifica keywords bloqueadas
     m = _BLOCKED_RE.search(skeleton)

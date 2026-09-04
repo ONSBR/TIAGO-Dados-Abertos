@@ -500,3 +500,62 @@ class TestNoCrash:
         with ctx.Pool(1) as pool:
             result = pool.apply(_run_crash_test)
             assert result is True, "Validator crashed on giant literal"
+
+
+# ------------------------------------------------------------------------------
+# Revisao de 04/09/2026: dois achados no validador.
+# ------------------------------------------------------------------------------
+_SRC = "read_parquet('s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet')"
+_CINCO = ", ".join(f"{_SRC} t{i}" for i in range(5))
+
+
+def _validador_isolado():
+    import duckdb
+
+    from mcp_tiago_dados_abertos.execucao.validator import SqlValidator
+
+    return SqlValidator(duckdb.connect())
+
+
+def test_produto_cartesiano_escondido_em_cte_e_bloqueado():
+    """Defeito: o limite de fontes sem join so olhava o SELECT externo; o mesmo produto
+    cartesiano dentro de um WITH ou de uma subquery passava e o DuckDB explodia."""
+    v = _validador_isolado()
+    ok_cte, msg_cte = v.validate(f"WITH x AS (SELECT * FROM {_CINCO}) SELECT * FROM x LIMIT 1")
+    ok_sub, msg_sub = v.validate(f"SELECT * FROM (SELECT * FROM {_CINCO}) LIMIT 1")
+    assert not ok_cte and "cartesiano" in msg_cte
+    assert not ok_sub and "cartesiano" in msg_sub
+
+
+def test_produto_cartesiano_com_where_em_cte_passa():
+    v = _validador_isolado()
+    ok, msg = v.validate(
+        f"WITH x AS (SELECT * FROM {_CINCO} WHERE t0.din_instante = t1.din_instante) SELECT * FROM x LIMIT 1"
+    )
+    assert ok, msg
+
+
+def test_join_using_nao_e_produto_cartesiano():
+    """USING e condicao de join como ON; tres fontes ligadas por USING passavam por
+    produto cartesiano, fora e dentro de CTE."""
+    v = _validador_isolado()
+    sql = f"SELECT * FROM {_SRC} a JOIN {_SRC} b USING (din_instante) JOIN {_SRC} c USING (din_instante) LIMIT 1"
+    ok, msg = v.validate(sql)
+    assert ok, msg
+    ok, msg = v.validate(f"WITH x AS ({sql.replace(' LIMIT 1', '')}) SELECT * FROM x LIMIT 1")
+    assert ok, msg
+
+
+def test_palavra_proibida_em_comentario_nao_bloqueia():
+    """Defeito: "-- create resumo" como titulo da consulta era barrado pelo backstop de
+    regex, que nao removia comentarios antes de procurar comandos proibidos."""
+    v = _validador_isolado()
+    for sql in ("-- create resumo\nSELECT 1", "SELECT 1 -- create resumo", "SELECT /* drop tabela */ 1"):
+        ok, msg = v.validate(sql)
+        assert ok, (sql, msg)
+
+
+def test_comando_proibido_fora_de_comentario_continua_bloqueado():
+    v = _validador_isolado()
+    ok, msg = v.validate("-- titulo\nCREATE TABLE x AS SELECT 1")
+    assert not ok

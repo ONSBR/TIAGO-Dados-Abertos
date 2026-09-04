@@ -133,7 +133,9 @@ def _get_unit_from_metric(metric: dict, sql: str) -> Optional[str]:
     return metric.get("unit_native") or None
 
 
-async def executar_sql(sql_query: str, limit: int = 100, offset: int = 0) -> str:
+async def executar_sql(
+    sql_query: str, limit: int = 100, offset: int = 0, catalog: Optional[dict] = None
+) -> str:
     """Executa SQL DuckDB no S3 do setor eletrico com paginacao.
 
     IMPORTANTE: Antes de gerar SQL, use descrever_dataset(nome_dataset) para obter os nomes
@@ -152,6 +154,11 @@ async def executar_sql(sql_query: str, limit: int = 100, offset: int = 0) -> str
         return "[TIAGO Dados Abertos] DuckDB indisponivel."
 
     from mcp_tiago_dados_abertos.catalogo.catalog import load_all_contracts
+
+    # Catalogo UMA vez por chamada: o servidor passa o que ja carregou; sem ele,
+    # carrega aqui. Antes eram tres cargas por consulta (78 YAML parseados 3x).
+    if catalog is None:
+        catalog = load_all_contracts()
     from mcp_tiago_dados_abertos.execucao.db import executar_sql_raw
     from mcp_tiago_dados_abertos.resposta.provenance import datasets_do_sql
 
@@ -162,7 +169,7 @@ async def executar_sql(sql_query: str, limit: int = 100, offset: int = 0) -> str
 
     if not sucesso:
         resultado = _hint_varchar_error(resultado)
-        resultado = _hint_timeout_particao(resultado, sql_query, load_all_contracts())
+        resultado = _hint_timeout_particao(resultado, sql_query, catalog)
         return f"[ERRO] {resultado}."
 
     # ── computed_facts para o caminho manual (executar_sql) ──────────────────
@@ -173,7 +180,6 @@ async def executar_sql(sql_query: str, limit: int = 100, offset: int = 0) -> str
     # 4. Não truncado
     facts = None
     try:
-        catalog = load_all_contracts()
         metas = datasets_do_sql(sql_query, catalog)
 
         # Gate: EXATAMENTE 1 dataset
@@ -230,14 +236,14 @@ async def executar_sql(sql_query: str, limit: int = 100, offset: int = 0) -> str
         result_schema_do_sql,
     )
 
-    rs = result_schema_do_sql(sql_query, columns, load_all_contracts(), rows=rows)
+    rs = result_schema_do_sql(sql_query, columns, catalog, rows=rows)
     try:
         from mcp_tiago_dados_abertos.infra.telemetry import evento
         from mcp_tiago_dados_abertos.resposta.computed_facts import facts_by_rows_com_motivo
         from mcp_tiago_dados_abertos.resposta.lineage import rotulos_rollup
         from mcp_tiago_dados_abertos.resposta.provenance import rodape_participacao_multi
 
-        metas_br = datasets_do_sql(sql_query, load_all_contracts())
+        metas_br = datasets_do_sql(sql_query, catalog)
         br, motivos = facts_by_rows_com_motivo(
             columns, rows, schema=rs, truncated=truncated,
             exclude_labels=rotulos_rollup(metas_br),

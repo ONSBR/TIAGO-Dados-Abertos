@@ -7,6 +7,10 @@ WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY src/ ./src/
 RUN pip install --no-cache-dir .
+# Extensao httpfs do DuckDB na imagem: sem isto o primeiro boot baixa a extensao
+# da internet, e um container sem saida de rede nao sobe. HOME=/app e o home do
+# usuario de runtime, onde o DuckDB procura ~/.duckdb/extensions.
+RUN HOME=/app python -c "import duckdb; duckdb.connect().execute('INSTALL httpfs')"
 
 # Contratos ODCS: a fonte de verdade do servidor
 COPY contracts/ ./contracts/

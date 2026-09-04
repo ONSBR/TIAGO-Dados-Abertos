@@ -144,7 +144,10 @@ try:
     # Secret HTTP default: User-Agent das leituras https (read_csv/read_json). Nao se
     # aplica a s3://, que e a origem de todo o corpus ONS.
     try:
-        con.execute(f"CREATE SECRET http_ua (TYPE HTTP, EXTRA_HTTP_HEADERS MAP{{'User-Agent': '{MCP_HTTP_UA}'}})")
+        # Valor vem do operador (env), mas uma aspa simples derrubaria a conexao inteira:
+        # escapa como literal SQL.
+        _ua = MCP_HTTP_UA.replace("'", "''")
+        con.execute(f"CREATE SECRET http_ua (TYPE HTTP, EXTRA_HTTP_HEADERS MAP{{'User-Agent': '{_ua}'}})")
     except Exception as _e:
         logger.warning("secret http_ua nao criado: %s", _e)
     validator = SqlValidator(con)
