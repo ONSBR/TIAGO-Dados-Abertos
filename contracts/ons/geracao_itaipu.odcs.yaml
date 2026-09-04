@@ -1,0 +1,747 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:geracao_itaipu
+name: geracao_itaipu
+tenant: ons
+tags:
+- 50hz
+- 60hz
+- Itaipu
+- Itaipu 60Hz
+- Itaipu Binacional
+- ONS
+- SIN
+- UHE Itaipu
+- binacional
+- brasil
+- geração Itaipu
+- geração hidrelétrica
+- itaipu
+- paraguai
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/geracao_itaipu/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar a contribuição horária da UHE Itaipu Binacional ao Sistema Interligado Nacional (SIN),
+    suportando operadores do ONS no despacho de geração, analistas de planejamento energético na avaliação
+    da participação de Itaipu na matriz elétrica brasileira, e pesquisadores na análise do cumprimento
+    dos acordos binacionais Brasil-Paraguai. Permite calcular índices de atendimento à carga, avaliar
+    complementaridade com outras fontes e subsidiar decisões de intercâmbio de energia.
+  limitations: Valor máximo de 14. Valor máximo de 7. Valor máximo de 8.
+  usage: Recuperar este dataset quando a pergunta envolver geração de energia da UHE Itaipu Binacional,
+    contribuição de Itaipu ao SIN, divisão de energia entre Brasil e Paraguai, ou análise dos setores
+    de frequência 60 Hz e 50 Hz da usina.
+domain: geração
+schema:
+- name: geracao_itaipu
+  physicalType: parquet
+  logicalType: object
+  physicalName: geracao_itaipu
+  properties:
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante de referência horária da medição de geração da UHE Itaipu Binacional. Representa
+      o início do intervalo horário correspondente ao registro.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - hora
+      - instante
+      - timestamp
+      - data_hora
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_itaipu_total
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração total da UHE Itaipu Binacional no instante horário, somando os setores de 60
+      Hz e 50 Hz. Representa a potência bruta gerada pela usina antes da segregação por frequência ou
+      país beneficiário. Pode assumir valor zero em períodos de parada total da usina.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração total itaipu
+      - total itaipu
+      - potência total
+      - val_itaipu_total
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_itaipu_60hz
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração da UHE Itaipu Binacional no setor de 60 Hz, destinada ao Sistema Interligado
+      Nacional (SIN) brasileiro. Corresponde às unidades geradoras conectadas à rede de 60 Hz, cujo fornecimento
+      é integralmente direcionado ao Brasil. Pode assumir valor zero em paradas parciais do setor.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - itaipu 60hz
+      - setor 60hz
+      - geração 60hz
+      - val_itaipu_60hz
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_itaipu_50hz
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração da UHE Itaipu Binacional no setor de 50 Hz, compartilhada entre Brasil e Paraguai
+      conforme o Tratado de Itaipu. A parcela destinada ao Brasil neste setor é registrada separadamente
+      em val_itaipu_50hz_br. Pode assumir valor zero em paradas parciais do setor.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - itaipu 50hz
+      - setor 50hz
+      - geração 50hz
+      - val_itaipu_50hz
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_itaipu_50hz_br
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Parcela da geração do setor de 50 Hz da UHE Itaipu Binacional destinada ao Brasil. Representa
+      a energia cedida pelo Paraguai ao Brasil no setor de 50 Hz, conforme acordos binacionais. Apresenta
+      mínimo histórico de 2,05 MW, indicando geração mínima garantida ao Brasil neste setor — nunca assume
+      valor zero.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - itaipu 50hz brasil
+      - cessão paraguai brasil
+      - 50hz br
+      - val_itaipu_50hz_br
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_itaipu_br
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração total da UHE Itaipu Binacional destinada ao Brasil, somando a geração do setor
+      de 60 Hz (integralmente brasileira) e a parcela do setor de 50 Hz cedida pelo Paraguai ao Brasil
+      (val_itaipu_50hz_br). Representa a contribuição efetiva de Itaipu ao Sistema Interligado Nacional.
+      Mínimo histórico de 13,28 MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - itaipu brasil
+      - geração itaipu brasil
+      - contribuição itaipu SIN
+      - val_itaipu_br
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_itaipu_py
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração da UHE Itaipu Binacional destinada ao Paraguai, correspondente à parcela do
+      setor de 50 Hz retida pelo país. Representa a energia consumida pelo sistema elétrico paraguaio
+      ou exportada. Mínimo histórico de 0,2 MW, indicando raros momentos de geração quase nula ao Paraguai.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - itaipu paraguai
+      - geração itaipu paraguai
+      - val_itaipu_py
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for geracao_itaipu:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count between 185344\
+      \ and 278016:\n      name: Volume esperado entre 185,344 e 278,016 registros\n\n  # Unicidade da\
+      \ chave primária (candidata LLM — confirmar com dados reais)\n  - duplicate_count(din_instante)\
+      \ = 0:\n      name: din_instante não deve ter duplicatas (chave primária)\n\n  # Freshness: din_instante\
+      \ deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_instante) < 3d:\n   \
+      \   name: din_instante não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/geracao_itaipu
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - geracao de itaipu
+  - quanto itaipu gerou
+  - energia da binacional
+  - itaipu 50 hz e 60 hz
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver geração de energia da UHE Itaipu Binacional,
+    contribuição de Itaipu ao SIN, divisão de energia entre Brasil e Paraguai, ou análise dos setores
+    de frequência 60 Hz e 50 Hz da usina. Também relevante para perguntas sobre participação de Itaipu
+    na matriz hidrelétrica brasileira em base horária ou avaliação de acordos binacionais de energia.
+- property: agentInstructions
+  value: '- [val_itaipu_total] Máximo de 14.348,863 MW supera a capacidade instalada nominal de Itaipu
+    (~14.000 MW). Registros acima de 14.100 MW devem ser investigados como possíveis erros de medição,
+    sobrecargas transitórias ou arredondamentos do sistema SCADA do ONS.
+
+
+    - [val_itaipu_60hz] Máximo de 7.265,429 MW supera a capacidade nominal do setor de 60 Hz (~7.000 MW,
+    10 geradores × ~700 MW cada). Registros acima de 7.100 MW devem ser verificados como possíveis sobrecargas
+    ou erros de medição.
+
+
+    - [val_itaipu_50hz] Máximo de 8.872,7 MW supera significativamente a capacidade nominal do setor de
+    50 Hz (~7.000 MW, 10 geradores × ~700 MW cada). Diferença de ~1.872 MW acima da capacidade nominal
+    é expressiva e pode indicar erros de medição, sobrecargas prolongadas ou inconsistência de contabilização
+    entre os setores.
+
+
+    - [val_itaipu_50hz_br] Mínimo de 2,05 MW nunca atinge zero, mesmo quando val_itaipu_50hz pode ser
+    zero. Isso indica possível geração mínima de serviços auxiliares das estações conversoras ou arredondamento
+    sistemático de medição. Verificar consistência com val_itaipu_50hz em períodos de parada do setor.
+
+
+    - [val_itaipu_br] Mínimo de 13,28 MW nunca atinge zero, sugerindo geração mínima de serviços auxiliares
+    ou arredondamento. Adicionalmente, val_itaipu_br deve ser aproximadamente igual a val_itaipu_60hz
+    + val_itaipu_50hz_br; desvios significativos indicam inconsistência de contabilização.
+
+
+    - [val_itaipu_py] Máximo de 10.905,0 MW para a parcela paraguaia supera a capacidade total do setor
+    de 50 Hz (~7.000 MW). Valores acima de 7.100 MW para val_itaipu_py são fisicamente impossíveis e devem
+    ser investigados como erros de medição ou de contabilização da cessão de energia do Paraguai ao Brasil.
+
+
+    - [din_instante] Série horária de 2000-01-01 a 2026-06-12 com 231.680 registros. O total esperado
+    para o período (~231.480 horas considerando anos bissextos) é próximo ao observado, mas gaps horários
+    ou duplicatas podem existir. Verificar ausência de horas e duplicatas na chave primária.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a geração média horária de Itaipu destinada ao Brasil em 2023?
+  - Qual a participação percentual de Itaipu no total hidrelétrico do SIN por mês?
+  - Em quais horas do dia Itaipu apresenta maior geração no setor de 60 Hz?
+  - Qual foi a geração máxima registrada de Itaipu e em que data ocorreu?
+  - Como evoluiu a cessão de energia do Paraguai ao Brasil (50 Hz) ao longo dos anos?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_itaipu/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: itaipu_total
+      label: Itaipu Total
+      columns:
+      - val_itaipu_total
+      expression: val_itaipu_total
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - itaipu_total
+      - geração total itaipu
+      - total itaipu
+      - potência total itaipu
+      - val_itaipu_total
+      - geracao total binacional
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_itaipu_total) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(val_itaipu_total)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_itaipu_total)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_itaipu_total)
+          unit: MWmed
+        comparison:
+          sql: AVG(val_itaipu_total)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração total itaipu
+      - total itaipu
+      - potência total
+      - val_itaipu_total
+      - geracao binacional total
+    - id: itaipu_60hz
+      label: Itaipu 60Hz
+      columns:
+      - val_itaipu_60hz
+      expression: val_itaipu_60hz
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - itaipu_60hz
+      - itaipu 60hz
+      - setor 60hz
+      - geração 60hz
+      - val_itaipu_60hz
+      - frequencia 60hz itaipu
+      - geradores 60hz
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_itaipu_60hz) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(val_itaipu_60hz)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_itaipu_60hz)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_itaipu_60hz)
+          unit: MWmed
+        comparison:
+          sql: AVG(val_itaipu_60hz)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - itaipu 60hz
+      - setor 60hz
+      - geração 60hz
+      - val_itaipu_60hz
+      - frequencia 60 hertz itaipu
+    - id: itaipu_50hz
+      label: Itaipu 50Hz
+      columns:
+      - val_itaipu_50hz
+      expression: val_itaipu_50hz
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - itaipu_50hz
+      - itaipu 50hz
+      - setor 50hz
+      - geração 50hz
+      - val_itaipu_50hz
+      - frequencia 50hz itaipu
+      - geradores 50hz
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_itaipu_50hz) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(val_itaipu_50hz)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_itaipu_50hz)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_itaipu_50hz)
+          unit: MWmed
+        comparison:
+          sql: AVG(val_itaipu_50hz)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - itaipu 50hz
+      - setor 50hz
+      - geração 50hz
+      - val_itaipu_50hz
+      - frequencia 50 hertz itaipu
+    - id: itaipu_50hz_br
+      label: Itaipu 50Hz Brasil
+      columns:
+      - val_itaipu_50hz_br
+      expression: val_itaipu_50hz_br
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - itaipu_50hz_br
+      - itaipu 50hz brasil
+      - cessão paraguai brasil
+      - 50hz br
+      - val_itaipu_50hz_br
+      - parcela brasileira 50hz
+      - energia cedida paraguai brasil
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_itaipu_50hz_br) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(val_itaipu_50hz_br)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_itaipu_50hz_br)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_itaipu_50hz_br)
+          unit: MWmed
+        comparison:
+          sql: AVG(val_itaipu_50hz_br)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - itaipu 50hz brasil
+      - cessão paraguai brasil
+      - 50hz br
+      - val_itaipu_50hz_br
+      - parcela brasileira setor 50hz
+    - id: itaipu_br
+      label: Itaipu Brasil
+      columns:
+      - val_itaipu_br
+      expression: val_itaipu_br
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - itaipu_br
+      - itaipu brasil
+      - geração itaipu brasil
+      - contribuição itaipu SIN
+      - val_itaipu_br
+      - itaipu para o brasil
+      - participacao itaipu sin
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_itaipu_br) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(val_itaipu_br)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_itaipu_br)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_itaipu_br)
+          unit: MWmed
+        comparison:
+          sql: AVG(val_itaipu_br)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - itaipu brasil
+      - geração itaipu brasil
+      - contribuição itaipu SIN
+      - val_itaipu_br
+      - itaipu destinado ao brasil
+    - id: itaipu_py
+      label: Itaipu Paraguai
+      columns:
+      - val_itaipu_py
+      expression: val_itaipu_py
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - itaipu_py
+      - itaipu paraguai
+      - geração itaipu paraguai
+      - val_itaipu_py
+      - parcela paraguaia itaipu
+      - energia paraguai itaipu
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_itaipu_py) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(val_itaipu_py)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_itaipu_py)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_itaipu_py)
+          unit: MWmed
+        comparison:
+          sql: AVG(val_itaipu_py)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - itaipu paraguai
+      - geração itaipu paraguai
+      - val_itaipu_py
+      - parcela paraguaia
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - itaipu_total
+      - itaipu_60hz
+      - itaipu_50hz
+      - itaipu_50hz_br
+      - itaipu_br
+      - itaipu_py
+      preferred_for:
+      - setor 60hz itaipu
+      - setor 50hz itaipu
+      - cessão paraguai brasil
+      - divisão frequencia itaipu
+      - parcela brasileira itaipu
+      - parcela paraguaia itaipu
+      - tratado itaipu binacional
+      - contribuição itaipu SIN
+      - acordos binacionais energia
+      - conversão frequencia itaipu
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao termica
+      - carga subsistema
+      - fator capacidade
+      - outras hidreletricas
+    sql_patterns:
+      itaipu_total_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  AVG(val_itaipu_total)\
+          \ AS media_mwmed,\n  SUM(val_itaipu_total) * 1.0 AS energia_mwh\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed (media), MWh (energia)
+        matches:
+          output_modes:
+          - average_power
+          - total_energy
+          metrics:
+          - itaipu_total
+          grain: month
+        validated_params:
+          year: '2011'
+      itaipu_brasil_vs_paraguai_anual:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano,\n  AVG(val_itaipu_br)\
+          \ AS media_brasil_mwmed,\n  AVG(val_itaipu_py) AS media_paraguai_mwmed,\n  SUM(val_itaipu_br)\
+          \ * 1.0 AS energia_brasil_mwh,\n  SUM(val_itaipu_py) * 1.0 AS energia_paraguai_mwh\nFROM {source}\n\
+          GROUP BY 1\nORDER BY 1"
+        output_unit: MWmed (media), MWh (energia)
+        matches:
+          output_modes:
+          - average_power
+          - total_energy
+          metrics:
+          - itaipu_br
+          - itaipu_py
+          grain: year
+      itaipu_60hz_vs_50hz_horario:
+        template: "SELECT EXTRACT(HOUR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS hora_dia,\n  AVG(val_itaipu_60hz)\
+          \ AS media_60hz_mwmed,\n  AVG(val_itaipu_50hz) AS media_50hz_mwmed\nFROM {source}\nWHERE din_instante\
+          \ BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - itaipu_60hz
+          - itaipu_50hz
+          grain: hour_of_day
+        validated_params:
+          data_inicio: '2000-01-01 00:00:00'
+          data_fim: '2011-05-31 23:00:00'
+      itaipu_pico_historico:
+        template: "SELECT din_instante,\n  val_itaipu_total,\n  val_itaipu_60hz,\n  val_itaipu_50hz,\n\
+          \  val_itaipu_br,\n  val_itaipu_py\nFROM {source}\nORDER BY val_itaipu_total DESC\nLIMIT 10"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - peak_power
+          metrics:
+          - itaipu_total
+          grain: hour
+      geracao_itaipu_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_50hz\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_itaipu_50hz_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_50hz_br\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_itaipu_50hz_br_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_60hz\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_itaipu_60hz_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_br\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_itaipu_br_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_total\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_itaipu_total_gwh\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      geracao_itaipu_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_50hz\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_itaipu_50hz_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_50hz_br AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante\
+          \ AS TIMESTAMP)), 1) AS val_itaipu_50hz_br_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_60hz\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_itaipu_60hz_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_br AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante\
+          \ AS TIMESTAMP)), 1) AS val_itaipu_br_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_itaipu_total\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_itaipu_total_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+    ambiguity_policy:
+      default_assumptions:
+      - when: geração de itaipu
+        assume_metric: itaipu_total
+        assume_output: average_power
+        note: Sem especificação de setor ou país, assume-se total da usina com média de potência.
+      - when: itaipu para o brasil
+        assume_metric: itaipu_br
+        assume_output: average_power
+        note: Contribuição total ao SIN inclui 60 Hz + parcela 50 Hz cedida pelo Paraguai.
+      - when: energia gerada por itaipu
+        assume_metric: itaipu_total
+        assume_output: total_energy
+        note: Termo "energia" implica acumulado; calcular SUM * interval_hours para MWh.
+      - when: potência média de itaipu
+        assume_metric: itaipu_total
+        assume_output: average_power
+        note: Potência média corresponde a AVG(val_itaipu_total) em MWmed.
+      - when: cessão paraguai
+        assume_metric: itaipu_50hz_br
+        assume_output: average_power
+        note: Cessão do Paraguai ao Brasil refere-se à parcela 50 Hz destinada ao Brasil.
+      must_clarify_when:
+      - trigger_terms:
+        - setor
+        - frequencia
+        - hz
+        question: Você deseja dados do setor de 60 Hz (destinado integralmente ao Brasil), do setor de
+          50 Hz (compartilhado entre Brasil e Paraguai), ou de ambos?
+        options:
+        - 60 Hz (val_itaipu_60hz)
+        - 50 Hz total (val_itaipu_50hz)
+        - 50 Hz parcela Brasil (val_itaipu_50hz_br)
+        - ambos os setores
+      - trigger_terms:
+        - brasil
+        - paraguai
+        - divisão
+        - partilha
+        question: Você deseja a parcela destinada ao Brasil (val_itaipu_br), ao Paraguai (val_itaipu_py),
+          ou a comparação entre ambos?
+        options:
+        - apenas Brasil (val_itaipu_br)
+        - apenas Paraguai (val_itaipu_py)
+        - comparação Brasil vs Paraguai
+      redirect_when:
+      - user_mentions:
+        - ceg
+        - ranking de usinas
+        - outras usinas
+        - usina especifica
+        reason: Schema não contém CEG ou identificador de usina individual. Apenas dados agregados de
+          Itaipu.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        - termonuclear
+        reason: Itaipu é exclusivamente hidrelétrica. Dados nucleares não estão presentes neste dataset.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema não contém coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - carga
+        - consumo
+        - demanda
+        reason: Dataset contém apenas geração de Itaipu, não dados de carga ou consumo do sistema.
+        redirect: carga-energia
+      - user_mentions:
+        - termica
+        - gas
+        - carvao
+        - biomassa
+        - oleo
+        reason: Itaipu é usina hidrelétrica. Dados de geração térmica não estão presentes neste dataset.
+        redirect: geracao-termica-despacho-2
+- property: fewShotQueries
+  value:
+  - question: Qual foi a geração média mensal de Itaipu no setor de 60 Hz e no setor de 50 Hz em cada
+      ano?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, AVG(val_itaipu_60hz)
+      AS media_60hz_mw, AVG(val_itaipu_50hz) AS media_50hz_mw, AVG(val_itaipu_total) AS media_total_mw
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_itaipu/*.parquet') GROUP BY DATE_TRUNC('month',
+      TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY mes;
+  - question: Qual foi a participação percentual da geração destinada ao Brasil em relação ao total de
+      Itaipu em cada ano?
+    sql: SELECT EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano, SUM((val_itaipu_br) * 1.0)
+      AS geracao_brasil_gwh, SUM((val_itaipu_total) * 1.0) AS geracao_total_gwh, ROUND(100.0 * SUM((val_itaipu_br)
+      * 1.0) / NULLIF(SUM((val_itaipu_total) * 1.0), 0), 2) AS participacao_brasil_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_itaipu/*.parquet')
+      GROUP BY EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY ano;
+  - question: Qual foi o fator de capacidade anual de Itaipu considerando capacidade instalada de 14.000
+      MW?
+    sql: SELECT EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano, COUNT(*) AS horas_operacao,
+      AVG(val_itaipu_total) AS geracao_media_mw, ROUND(100.0 * AVG(val_itaipu_total) / 14000.0, 2) AS
+      fator_capacidade_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_itaipu/*.parquet')
+      GROUP BY EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY ano;
+- property: license
+  value: CC-BY

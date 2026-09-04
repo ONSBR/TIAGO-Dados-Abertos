@@ -1,0 +1,903 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:interrupcao_carga
+name: interrupcao_carga
+tenant: ons
+tags:
+- ENS
+- confiabilidade
+- desligamento forçado
+- desligamento-forcado
+- energia não suprida
+- energia-nao-suprida
+- interrupcao-de-carga
+- interrupção de carga
+- perturbacao
+- perturbação de carga
+- qualidade-do-fornecimento
+- rede-basica
+- rede-de-operacao
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/interrupcao_carga/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar analistas de confiabilidade, operadores do sistema elétrico e agentes regulados no
+    monitoramento da qualidade do fornecimento de energia elétrica, apuração de energia não suprida (ENS),
+    identificação de padrões de perturbação por subsistema e agente, e suporte a processos regulatórios
+    de consistência de dados conforme a RO-AO.BR.03. Permite calcular indicadores de desempenho do sistema,
+    embasar decisões de reforço de rede e subsidiar processos de penalização e compensação junto à ANEEL
+    e CCEE.
+  limitations: Coluna apresenta valores negativos (mín=-64182. Coluna apresenta valores negativos (mín=-7487.
+    Valor máximo de 6700.
+  usage: Recuperar este dataset quando a pergunta envolver interrupção de carga, energia não suprida (ENS),
+    desligamentos forçados, perturbações no sistema elétrico ou confiabilidade do fornecimento por subsistema
+    ou agente.
+domain: carga
+schema:
+- name: interrupcao_carga
+  physicalType: parquet
+  logicalType: object
+  physicalName: interrupcao_carga
+  properties:
+  - name: cod_perturbacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador único da perturbação registrada no sistema elétrico. Referencia
+      o evento de desligamento forçado que originou a interrupção de carga, conforme apurado na RO-AO.BR.03.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_perturbacao
+      - perturbacao
+      - id_perturbacao
+      - cod_evento
+    - property: semanticType
+      value: IDENTIFIER
+  - name: din_interrupcaocarga
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora do início da interrupção de carga associada à perturbação. Registra o momento
+      exato do evento com precisão de timestamp. Período real dos dados: 2007-01-01 a 2026-05-26.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_interrupcao
+      - data_hora_interrupcao
+      - din_interrupcao
+      - timestamp_evento
+      - data_perturbacao
+    - property: semanticType
+      value: TIMESTAMP
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico onde ocorreu a interrupção de carga. Dimensão
+      geográfica primária de operação do ONS. Valores típicos: SE, S, NE, N.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - cod_subsistema
+      - regiao
+      - id_regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome descritivo do subsistema elétrico onde ocorreu a interrupção de carga. Complementa
+      id_subsistema com a denominação por extenso.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - subsistema_nome
+      - regiao_nome
+      - nome_regiao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE/CENTRO-OESTE
+      - SUL
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do estado (UF) onde ocorreu a interrupção de carga. Presente no
+      schema mas sem coluna de nome por extenso correspondente. Permite granularidade estadual além da
+      subsistema.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - uf
+      - sig_estado
+      - cod_uf
+      - sigla_estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_agente
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do agente do setor elétrico responsável pelo equipamento ou rede envolvida na perturbação
+      que causou a interrupção de carga. Pode ser transmissora, distribuidora ou geradora conforme o tipo
+      de rede envolvida.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - nome_agente
+      - empresa
+      - concessionaria
+      - operador
+    - property: semanticType
+      value: DIMENSION
+  - name: val_cargainterrompida_mw
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor da carga interrompida em megawatts (MW) durante o evento de perturbação. Conforme
+      critério CKAN, eventos devem ser superiores a 100 MW por 10 minutos ou mais para serem registrados.
+      Valores observados: mín=0.01 MW, máx=6700.0 MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - carga_interrompida
+      - carga_interrompida_mw
+      - potencia_interrompida
+      - val_carga_mw
+      - interrupcao_mw
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_tempomedio_minutos
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Tempo médio de duração da interrupção de carga em minutos. Apresenta valores negativos
+      (mín=-64182.0), indicando possíveis inconsistências nos dados submetidos pelos agentes ou correções
+      retroativas. Valores positivos esperados para eventos válidos; máximo observado: 68102.7 minutos
+      (~47 dias).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - tempo_medio
+      - duracao_minutos
+      - tempo_interrupcao
+      - duracao_media
+      - val_tempo_minutos
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: min
+  - name: val_energianaosuprida_mwh
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Energia não suprida em megawatt-hora (MWh) decorrente da interrupção de carga. Calculada
+      a partir da carga interrompida e do tempo de duração. Apresenta valores negativos (mín=-7487.9 MWh),
+      sugerindo correções retroativas ou ajustes de consistência após revisão pelos agentes. Máximo observado:
+      77509.6 MWh.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - energia_nao_suprida
+      - ens
+      - energia_nao_fornecida
+      - val_ens
+      - energia_interrompida_mwh
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWh
+  - name: flg_envolveuredebasica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Flag indicando se a perturbação envolveu a Rede Básica do sistema elétrico (linhas de
+      transmissão e equipamentos de alta tensão sob responsabilidade das transmissoras). Valores esperados:
+      ''S'' (sim) ou ''N'' (não), ou equivalentes.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - envolve_rede_basica
+      - flg_rede_basica
+      - rede_basica
+      - flag_rede_basica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - N
+      - S
+  - name: flg_envolveuredeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Flag indicando se a perturbação envolveu a Rede de Operação do ONS, conforme definição
+      da RO-AO.BR.03. Valores esperados: ''S'' (sim) ou ''N'' (não), ou equivalentes. Perturbações na
+      Rede de Distribuição acima de 100 MW por 10 minutos também são registradas.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - envolve_rede_operacao
+      - flg_rede_operacao
+      - rede_operacao
+      - flag_rede_operacao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - N
+      - S
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for interrupcao_carga:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE/CENTRO-OESTE'\n        - 'SUL'\n      name:\
+      \ nom_subsistema deve ser um dos valores válidos\n  - invalid_count(id_estado) = 0:\n      valid\
+      \ values:\n        - 'AC'\n        - 'AL'\n        - 'AM'\n        - 'AP'\n        - 'BA'\n    \
+      \    - 'CE'\n        - 'DF'\n        - 'ES'\n        - 'GO'\n        - 'MA'\n        - 'MG'\n  \
+      \      - 'MS'\n        - 'MT'\n        - 'PA'\n        - 'PB'\n        - 'PE'\n        - 'PI'\n\
+      \        - 'PR'\n        - 'RJ'\n        - 'RN'\n        - 'RO'\n        - 'RR'\n        - 'RS'\n\
+      \        - 'SC'\n        - 'SE'\n        - 'SP'\n        - 'TO'\n      name: id_estado deve ser\
+      \ um dos valores válidos\n  - invalid_count(flg_envolveuredebasica) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'S'\n      name: flg_envolveuredebasica deve ser um dos valores válidos\n\
+      \  - invalid_count(flg_envolveuredeoperacao) = 0:\n      valid values:\n        - 'N'\n        -\
+      \ 'S'\n      name: flg_envolveuredeoperacao deve ser um dos valores válidos\n\n  # Baseline de volume\
+      \ — margem ±20% do row_count validado\n  - row_count between 6609 and 9914:\n      name: Volume\
+      \ esperado entre 6,609 e 9,914 registros\n\n  # Unicidade da chave primária composta ['cod_perturbacao',\
+      \ 'din_interrupcaocarga'] (candidata LLM)\n  - failed rows:\n      name: Chave composta (cod_perturbacao,\
+      \ din_interrupcaocarga) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM interrupcao_carga\n\
+      \        WHERE (cod_perturbacao, din_interrupcaocarga) IN (\n          SELECT cod_perturbacao, din_interrupcaocarga\
+      \ FROM interrupcao_carga\n          GROUP BY cod_perturbacao, din_interrupcaocarga\n          HAVING\
+      \ COUNT(*) > 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/interrupcao_carga
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - interrupcao de carga
+  - corte de carga
+  - quanto de carga foi cortada
+  - desligamento com corte de carga
+  - quanto tempo durou a interrupcao
+  - apagao por subsistema
+  - energia nao suprida por evento
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver interrupção de carga, energia não suprida (ENS),
+    desligamentos forçados, perturbações no sistema elétrico ou confiabilidade do fornecimento por subsistema
+    ou agente. Também relevante para análises de qualidade do serviço de transmissão, apuração de penalidades
+    regulatórias e monitoramento de eventos críticos no sistema interligado nacional.
+- property: agentInstructions
+  value: '- [val_tempomedio_minutos] Campo apresenta valores negativos (mín=-64182.0 minutos, equivalente
+    a ~44 dias negativos), o que é fisicamente impossível para duração de interrupção. Indica erros de
+    registro ou dados em processo de revisão pelos agentes conforme fluxo da norma RO-AO.BR.03. Afeta
+    diretamente o cálculo de energia não suprida se utilizado como fator multiplicador.
+
+
+    - [val_energianaosuprida_mwh] Campo apresenta valores negativos (mín=-7487.9 MWh), fisicamente impossível
+    para energia não suprida. Possivelmente decorrente de ajustes retroativos ou revisões de dados submetidos
+    pelos agentes. Impacta indicadores de qualidade do fornecimento e relatórios de desempenho do sistema
+    elétrico se não filtrado.
+
+
+    - [id_estado] Coluna id_estado está presente sem coluna nom_estado correspondente no schema, dificultando
+    interpretação. O formato dos valores (sigla UF, código IBGE ou código interno ONS) não foi confirmado
+    pelos metadados disponíveis. Requer validação do domínio de valores reais antes de uso em filtros
+    geográficos.
+
+
+    - [cod_perturbacao] cod_perturbacao é a chave primária natural esperada do dataset. Dado que os dados
+    podem ser revisados após submissão pelos agentes (conforme CKAN), podem existir múltiplos registros
+    com o mesmo cod_perturbacao representando versões distintas do mesmo evento. Requer verificação de
+    unicidade antes de joins e agregações.
+
+
+    - [flg_envolveuredebasica] Flag armazenada como VARCHAR com domínio esperado ''S''/''N'', mas o tipo
+    VARCHAR permite valores inesperados (ex: ''SIM'', ''NAO'', ''1'', ''0'', string vazia). Requer validação
+    do domínio real para garantir integridade dos filtros de análise por tipo de rede envolvida.
+
+
+    - [flg_envolveuredeoperacao] Flag armazenada como VARCHAR com domínio esperado ''S''/''N'', mas o
+    tipo VARCHAR permite valores inesperados (ex: ''SIM'', ''NAO'', ''1'', ''0'', string vazia). Requer
+    validação do domínio real para garantir integridade dos filtros de análise por tipo de rede envolvida
+    na perturbação.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a energia não suprida total por subsistema em 2023?
+  - Quais agentes acumularam mais horas de interrupção de carga nos últimos 5 anos?
+  - Qual a evolução anual do número de perturbações com interrupção de carga acima de 500 MW?
+  - Quais subsistemas tiveram maior carga interrompida média por evento em 2022?
+  - Quantas perturbações envolveram a Rede Básica e resultaram em ENS superior a 1000 MWh?
+- property: granularity
+  value: 15min
+- property: spatialGranularity
+  value: subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/interrupcao_carga/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2007-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 15min
+      temporal_column: din_interrupcaocarga
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - din_interrupcaocarga
+      - id_subsistema
+      - cod_perturbacao
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: cargainterrompida_mw
+      label: Carga Interrompida
+      columns:
+      - val_cargainterrompida_mw
+      expression: val_cargainterrompida_mw
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - cargainterrompida_mw
+      - carga_interrompida
+      - carga_interrompida_mw
+      - potencia_interrompida
+      - val_carga_mw
+      - interrupcao_mw
+      aggregation_modes:
+        total:
+          sql: SUM(val_cargainterrompida_mw)
+          unit: MW
+        maximum:
+          sql: MAX(val_cargainterrompida_mw)
+          unit: MW
+        time_series:
+          sql: SUM(val_cargainterrompida_mw)
+          unit: MW
+        ranking:
+          sql: SUM(val_cargainterrompida_mw)
+          unit: MW
+        comparison:
+          sql: SUM(val_cargainterrompida_mw)
+          unit: MW
+      aliases:
+      - carga_interrompida
+      - carga_interrompida_mw
+      - potencia_interrompida
+      - val_carga_mw
+      - interrupcao_mw
+    - id: tempomedio_minutos
+      label: Tempo Medio de Interrupcao
+      columns:
+      - val_tempomedio_minutos
+      expression: val_tempomedio_minutos
+      quantity_kind: duration_minutes
+      unit_native: min
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - tempomedio_minutos
+      - tempo_medio
+      - duracao_minutos
+      - tempo_interrupcao
+      - duracao_media
+      - val_tempo_minutos
+      aggregation_modes:
+        total:
+          sql: SUM(val_tempomedio_minutos)
+          unit: min
+        average:
+          sql: AVG(val_tempomedio_minutos)
+          unit: min
+        maximum:
+          sql: MAX(val_tempomedio_minutos)
+          unit: min
+        time_series:
+          sql: AVG(val_tempomedio_minutos)
+          unit: min
+        ranking:
+          sql: AVG(val_tempomedio_minutos)
+          unit: min
+        comparison:
+          sql: AVG(val_tempomedio_minutos)
+          unit: min
+      aliases:
+      - tempo_medio
+      - duracao_minutos
+      - tempo_interrupcao
+      - duracao_media
+      - val_tempo_minutos
+    - id: energianaosuprida_mwh
+      label: Energia Nao Suprida (ENS)
+      columns:
+      - val_energianaosuprida_mwh
+      expression: val_energianaosuprida_mwh
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - energianaosuprida_mwh
+      - energia_nao_suprida
+      - ens
+      - energia_nao_fornecida
+      - val_ens
+      - energia_interrompida_mwh
+      aggregation_modes:
+        total:
+          sql: SUM(val_energianaosuprida_mwh)
+          unit: MWh
+        average:
+          sql: AVG(val_energianaosuprida_mwh)
+          unit: MWh
+        maximum:
+          sql: MAX(val_energianaosuprida_mwh)
+          unit: MWh
+        time_series:
+          sql: SUM(val_energianaosuprida_mwh)
+          unit: MWh
+        ranking:
+          sql: SUM(val_energianaosuprida_mwh)
+          unit: MWh
+        comparison:
+          sql: SUM(val_energianaosuprida_mwh)
+          unit: MWh
+      aliases:
+      - energia_nao_suprida
+      - ens
+      - energia_nao_fornecida
+      - val_ens
+      - energia_interrompida_mwh
+    - id: contagem_perturbacoes
+      label: Numero de Perturbacoes
+      columns:
+      - cod_perturbacao
+      expression: cod_perturbacao
+      quantity_kind: count
+      unit_native: eventos
+      default_aggregation: count
+      forbidden_aggregations:
+      - sum
+      - avg
+      valid_intents:
+      - numero_perturbacoes
+      - contagem_eventos
+      - frequencia_interrupcoes
+      - quantas_perturbacoes
+      - numero_eventos
+      aggregation_modes:
+        total:
+          sql: COUNT(DISTINCT cod_perturbacao)
+          unit: eventos
+        time_series:
+          sql: COUNT(DISTINCT cod_perturbacao)
+          unit: eventos
+        ranking:
+          sql: COUNT(DISTINCT cod_perturbacao)
+          unit: eventos
+        comparison:
+          sql: COUNT(DISTINCT cod_perturbacao)
+          unit: eventos
+      aliases:
+      - numero_perturbacoes
+      - contagem_eventos
+      - frequencia_interrupcoes
+      - numero_eventos
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - cargainterrompida_mw
+      - tempomedio_minutos
+      - energianaosuprida_mwh
+      - contagem_perturbacoes
+      preferred_for:
+      - energia nao suprida
+      - ENS por subsistema
+      - carga interrompida MW
+      - perturbacao sistema eletrico
+      - interrupcao de carga
+      - desligamento forcado carga
+      - confiabilidade fornecimento SIN
+      - RO-AO.BR.03
+      - eventos criticos transmissao
+      - rede basica interrupcao
+      - rede operacao perturbacao
+      - penalidade regulatoria ENS
+      - duracao interrupcao minutos
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao verificada
+      - programacao diaria
+      - capacidade instalada
+      - fator capacidade
+      - preco energia
+      - CVU termico
+      - reservatorio volume
+      - cota nivel agua
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE/CENTRO-OESTE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - sudeste/centro-oeste
+          filter: nom_subsistema = 'SUDESTE/CENTRO-OESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema = 'SUL'
+      flg_envolveuredebasica:
+        S:
+          aliases:
+          - sim
+          - rede basica
+          - envolve rede basica
+          - transmissao
+          filter: flg_envolveuredebasica = 'S'
+        N:
+          aliases:
+          - nao
+          - sem rede basica
+          filter: flg_envolveuredebasica = 'N'
+      flg_envolveuredeoperacao:
+        S:
+          aliases:
+          - sim
+          - rede operacao
+          - envolve rede operacao
+          filter: flg_envolveuredeoperacao = 'S'
+        N:
+          aliases:
+          - nao
+          - sem rede operacao
+          filter: flg_envolveuredeoperacao = 'N'
+    sql_patterns:
+      ens_total_por_subsistema_ano:
+        template: "SELECT id_subsistema,\n  EXTRACT(YEAR FROM TRY_CAST(din_interrupcaocarga AS TIMESTAMP))\
+          \ AS ano,\n  SUM(val_energianaosuprida_mwh) AS ens_total_mwh\nFROM {source}\nWHERE val_energianaosuprida_mwh\
+          \ > 0\n  AND EXTRACT(YEAR FROM TRY_CAST(din_interrupcaocarga AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1, 2\nORDER BY 3 DESC"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - energianaosuprida_mwh
+          grain: year
+        validated_params:
+          year: '2026'
+      cargainterrompida_mw_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_interrupcaocarga AS TIMESTAMP)) AS mes,\n \
+          \ id_subsistema,\n  SUM(val_cargainterrompida_mw) AS carga_interrompida_mw\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(din_interrupcaocarga AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\n\
+          ORDER BY 1, 2"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - cargainterrompida_mw
+          grain: month
+        validated_params:
+          year: '2026'
+      contagem_perturbacoes_rede_basica:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_interrupcaocarga AS TIMESTAMP)) AS ano,\n  id_subsistema,\n\
+          \  COUNT(DISTINCT cod_perturbacao) AS num_perturbacoes\nFROM {source}\nWHERE flg_envolveuredebasica\
+          \ = 'S'\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: eventos
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - contagem_perturbacoes
+          grain: year
+      duracao_media_por_agente:
+        template: "SELECT nom_agente,\n  AVG(val_tempomedio_minutos) AS duracao_media_min,\n  COUNT(DISTINCT\
+          \ cod_perturbacao) AS num_eventos\nFROM {source}\nWHERE val_tempomedio_minutos > 0\n  AND EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_interrupcaocarga AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 2 DESC"
+        output_unit: min
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - tempomedio_minutos
+          grain: agente
+        validated_params:
+          year: '2026'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre interrupcao sem especificar metrica
+        assume_metric: energianaosuprida_mwh
+        assume_output: total
+        note: ENS e a metrica primaria de impacto de interrupcao de carga no setor eletrico brasileiro
+      - when: usuario pergunta sobre duracao ou tempo sem especificar agregacao
+        assume_metric: tempomedio_minutos
+        assume_output: average
+        note: Tempo medio de interrupcao e naturalmente uma media, nao uma soma
+      - when: usuario pergunta sobre carga interrompida sem especificar agregacao
+        assume_metric: cargainterrompida_mw
+        assume_output: total
+        note: Carga interrompida acumulada e o indicador padrao de impacto de potencia
+      - when: usuario pergunta sobre numero de eventos ou perturbacoes
+        assume_metric: contagem_perturbacoes
+        assume_output: total
+        note: Contagem de perturbacoes distintas e o indicador de frequencia de eventos
+      must_clarify_when:
+      - ambiguity: filtro_rede_basica_vs_operacao
+        question: Voce quer filtrar por perturbacoes que envolveram a Rede Basica (transmissao de alta
+          tensao) ou a Rede de Operacao do ONS, ou ambas?
+        trigger_terms:
+        - rede basica
+        - rede operacao
+        - transmissao
+        - distribuicao
+      - ambiguity: agente_vs_subsistema
+        question: Voce quer o resultado agregado por agente responsavel ou por subsistema eletrico?
+        trigger_terms:
+        - agente
+        - empresa
+        - concessionaria
+        - transmissora
+        - distribuidora
+      - ambiguity: incluir_negativos
+        question: Deseja incluir registros com valores negativos de ENS ou tempo (possiveis correcoes
+          retroativas) ou filtrar apenas valores positivos validos?
+        trigger_terms:
+        - todos os registros
+        - incluindo correcoes
+        - dados brutos
+        - sem filtro
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - ranking de usinas
+        - geracao por usina
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina. Granularidade minima e
+          subsistema/agente.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - programacao
+        - programada
+        - prevista
+        - dessem
+        - pmo
+        reason: Dataset contem apenas dados realizados de interrupcao. Nao ha programacao ou previsao.
+        redirect: programacao_diaria
+      - user_mentions:
+        - preco
+        - pld
+        - cvu
+        - custo variavel
+        reason: Schema nao contem colunas de preco ou custo.
+        redirect: cvu-usitermica
+- property: fewShotQueries
+  value:
+  - question: Qual foi a energia não suprida total por subsistema em cada ano?
+    sql: SELECT id_subsistema, nom_subsistema, EXTRACT(YEAR FROM TRY_CAST(din_interrupcaocarga AS TIMESTAMP))
+      AS ano, COUNT(*) AS qtd_eventos, SUM(val_cargainterrompida_mw) AS total_carga_interrompida_mw, SUM(val_energianaosuprida_mwh)
+      AS total_ens_mwh FROM read_parquet('s3://ons-aws-prod-opendata/dataset/interrupcao_carga/*.parquet')
+      WHERE val_energianaosuprida_mwh >= 0 AND val_cargainterrompida_mw >= 0 AND id_subsistema NOT IN
+      ('SIN') GROUP BY id_subsistema, nom_subsistema, EXTRACT(YEAR FROM TRY_CAST(din_interrupcaocarga
+      AS TIMESTAMP)) ORDER BY ano DESC, total_ens_mwh DESC;
+  - question: Quais agentes acumularam maior carga interrompida nos últimos 5 anos?
+    sql: SELECT nom_agente, COUNT(*) AS qtd_eventos, SUM(val_cargainterrompida_mw) AS total_carga_interrompida_mw,
+      SUM(val_energianaosuprida_mwh) AS total_ens_mwh, AVG(val_tempomedio_minutos) AS media_duracao_minutos
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/interrupcao_carga/*.parquet') WHERE din_interrupcaocarga
+      >= CURRENT_DATE - INTERVAL '5 years' AND val_cargainterrompida_mw >= 0 AND val_energianaosuprida_mwh
+      >= 0 AND val_tempomedio_minutos >= 0 GROUP BY nom_agente ORDER BY total_ens_mwh DESC LIMIT 20;
+  - question: Quais foram os 10 maiores eventos de interrupção de carga em MW desde 2010?
+    sql: SELECT cod_perturbacao, din_interrupcaocarga, id_subsistema, nom_subsistema, nom_agente, val_cargainterrompida_mw,
+      val_energianaosuprida_mwh, val_tempomedio_minutos, flg_envolveuredebasica, flg_envolveuredeoperacao
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/interrupcao_carga/*.parquet') WHERE din_interrupcaocarga
+      >= '2010-01-01' AND val_cargainterrompida_mw >= 0 ORDER BY val_cargainterrompida_mw DESC LIMIT 10;
+- property: relatedDatasets
+  value:
+    restricao_coff_eolica_usi:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    disponibilidade_usina:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    capacidade-geracao:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    capacidade-transformacao:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    usina_pqu:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    res_volumeespera:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    subestacao:
+      join_keys:
+      - id_subsistema
+      - id_estado
+    equipamento-controle-reativo:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    cvu-usitermica:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    fator-capacidade-2:
+      join_keys:
+      - id_subsistema
+      - id_estado
+    geracao-usina-2:
+      join_keys:
+      - id_subsistema
+      - id_estado
+    energia-vertida-turbinavel:
+      join_keys:
+      - id_subsistema
+      - nom_agente
+- property: license
+  value: CC-BY

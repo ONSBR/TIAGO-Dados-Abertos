@@ -1,0 +1,853 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:programacao_fluxo_controlado
+name: programacao_fluxo_controlado
+tenant: ons
+tags:
+- 30min
+- MW
+- ONS
+- SIN
+- elementos controlados de transmissão
+- elementos-de-transmissao
+- fluxo controlado
+- fluxo controlado programado
+- fluxo programado SIN
+- fluxo-controlado
+- patamar
+- patamar 30 min transmissão
+- programacao-operativa
+- programação de transmissão
+- submercado
+- transmissao
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/programacao_fluxo_controlado/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos operadores e planejadores do ONS os valores programados de fluxo em elementos
+    controlados de transmissão do SIN, com granularidade de 30 minutos e discriminação por terminal, suportando
+    decisões de despacho, controle de sobrecargas, verificação de segurança da rede elétrica e análise
+    de consistência entre programação operativa de transmissão e demanda por submercado.
+  limitations: Coluna val_carga armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Coluna din_programacaodia armazenada como VARCHAR no Parquet. Verificar se existem registros com num_patamar
+    fora do intervalo esperado [1, 48].
+  usage: Recuperar este dataset quando a pergunta envolver valores programados de fluxo ou carga em elementos
+    de transmissão controlados do SIN com granularidade de 30 minutos ou por patamar intradiário.
+domain: transmissão
+schema:
+- name: programacao_fluxo_controlado
+  physicalType: parquet
+  logicalType: object
+  physicalName: programacao_fluxo_controlado
+  properties:
+  - name: din_programacaodia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da programação operativa, representando o dia ao qual os patamares
+      de 30 minutos se referem. Armazenada como VARCHAR no Parquet; requer CAST(din_programacaodia AS
+      DATE) para operações temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_programacao
+      - data_referencia
+      - dia_programacao
+      - din_referencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_patamar
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Número sequencial do patamar de 30 minutos dentro do dia de programação. Varia de 1
+      a 48, onde 1 representa o intervalo 00:00–00:30 e 48 representa 23:30–24:00. Confirma granularidade
+      intradiária de 30 minutos (48 × 30min = 24h).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - patamar
+      - intervalo
+      - slot_30min
+      - periodo_30min
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+  - name: nom_elementofluxocontrolado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome ou código identificador do elemento de fluxo controlado no Sistema Interligado
+      Nacional (SIN). Representa linhas de transmissão ou transformadores sujeitos a controle de fluxo
+      pelo ONS. Utilizado como chave de identificação do elemento na programação operativa.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - nome_elemento
+      - elemento_controlado
+      - nome_linha
+      - elemento_transmissao
+      - nom_elemento
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BtB 1 CPV - T1
+      - BtB 1 CPV - T2
+      - BtB 2 CPV - T1
+      - BtB 2 CPV - T2
+      - CF MELO - T1
+      - CF RIVERA - T1
+      - CF URUGUAIANA - T1
+      - Defasador Angra - T1
+      - Defasador Angra - T2
+      - Defasador Porto Colombia - T1
+      - Defasador Porto Colombia - T2
+      - GARABI 1B - T1
+      - GARABI 2B - T1
+      - IMP PARAGUAI CONT - T1
+      - IMP PARAGUAI INT - T1
+      - LT 230 KV Boa Vista / Sta Elena - T1
+      - Polo 1 CPV-ARA2 - T1
+      - Polo 1 CPV-ARA2 - T2
+      - Polo 1 FOZ-IBI - T1
+      - Polo 1 FOZ-IBI - T2
+      - Polo 1 XNG-EST - T1
+      - Polo 1 XNG-EST - T2
+      - Polo 2 CPV-ARA2 - T1
+      - Polo 2 CPV-ARA2 - T2
+      - Polo 2 FOZ-IBI - T1
+      - Polo 2 FOZ-IBI - T2
+      - Polo 2 XNG-EST - T1
+      - Polo 2 XNG-EST - T2
+      - Polo 3 CPV-ARA2 - T1
+      - Polo 3 CPV-ARA2 - T2
+      - Polo 3 FOZ-IBI - T1
+      - Polo 3 FOZ-IBI - T2
+      - Polo 3 Xingu - Terminal Rio - T1
+      - Polo 3 Xingu - Terminal Rio - T2
+      - Polo 4 CPV-ARA2 - T1
+      - Polo 4 CPV-ARA2 - T2
+      - Polo 4 FOZ-IBI - T1
+      - Polo 4 FOZ-IBI - T2
+      - Polo 4 Xingu - Terminal Rio - T1
+      - Polo 4 Xingu - Terminal Rio - T2
+  - name: dsc_elementofluxocontrolado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Descrição textual completa do elemento de fluxo controlado, fornecendo informações adicionais
+      sobre o elemento de transmissão (linha ou transformador), como tensão, terminais e circuito. Complementa
+      nom_elementofluxocontrolado com detalhamento descritivo.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - descricao_elemento
+      - descricao_linha
+      - dsc_elemento
+      - descricao_elemento_controlado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Back to Back 1 C. Porto Velho
+      - Back to Back 2 C. Porto Velho
+      - CF MELO
+      - CF Uruguaiana
+      - GARABI 1B
+      - GARABI 2B
+      - IMP PARAGUAI CONT
+      - IMP PARAGUAI INT
+      - Interligação Brasil / Venezuela
+      - Polo 1 C. Porto Velho - Araraquara 2
+      - Polo 1 Foz Iguaçu - Ibiuna
+      - Polo 1 Xingu - Estreito
+      - Polo 2 C. Porto Velho - Araraquara 2
+      - Polo 2 Foz Iguaçu - Ibiuna
+      - Polo 2 Xingu - Estreito
+      - Polo 3 C. Porto Velho - Araraquara 2
+      - Polo 3 Foz Iguaçu - Ibiuna
+      - Polo 4 C. Porto Velho - Araraquara 2
+      - Polo 4 Foz Iguaçu - Ibiuna
+      - RIVERA
+      - Transformador Defasador Angra
+      - Transformador Defasador Porto Colombia
+      - Xingu - Terminal Rio
+  - name: tip_terminal
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Indicador do terminal do elemento de fluxo controlado ao qual o valor de carga/fluxo
+      se refere. Assume valor 1 para o terminal de origem (barra de envio) e valor 2 para o terminal de
+      destino (barra de recepção). Permite distinguir o sentido do fluxo no elemento bidirecional.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - terminal
+      - tipo_terminal
+      - sentido_fluxo
+      - origem_destino
+      - polo_terminal
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 1
+      - 2
+  - name: cod_submercado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código do submercado elétrico (subsistema) associado ao terminal do elemento de fluxo
+      controlado. Indica a região elétrica do SIN à qual o terminal pertence, permitindo agregações por
+      submercado. Valores típicos: SE (Sudeste/Centro-Oeste), S (Sul), NE (Nordeste), N (Norte).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - submercado
+      - subsistema
+      - regiao_eletrica
+      - cod_subsistema
+      - mercado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - RR
+      - S
+      - SE
+  - name: val_carga
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor programado de carga/fluxo no elemento de fluxo controlado para o terminal e patamar
+      especificados, em MW. Armazenado como VARCHAR devido ao formato de serialização. Requer TRY_CAST(val_carga
+      AS DOUBLE) para uso em cálculos numéricos e agregações. Valores podem ser positivos (fluxo no sentido
+      convencional) ou negativos (fluxo reverso).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - fluxo_programado
+      - carga_programada
+      - valor_fluxo
+      - fluxo_mw
+      - val_fluxo
+      - potencia_programada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_carga AS DOUBLE)
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for programacao_fluxo_controlado:\n  - row_count > 0:\n      name: Tabela\
+      \ não pode estar vazia\n\n  # Referential integrity\n  - invalid_count(nom_elementofluxocontrolado)\
+      \ = 0:\n      valid values:\n        - 'BtB 1 CPV - T1'\n        - 'BtB 1 CPV - T2'\n        - 'BtB\
+      \ 2 CPV - T1'\n        - 'BtB 2 CPV - T2'\n        - 'CF MELO - T1'\n        - 'CF RIVERA - T1'\n\
+      \        - 'CF URUGUAIANA - T1'\n        - 'Defasador Angra - T1'\n        - 'Defasador Angra -\
+      \ T2'\n        - 'Defasador Porto Colombia - T1'\n        - 'Defasador Porto Colombia - T2'\n  \
+      \      - 'GARABI 1B - T1'\n        - 'GARABI 2B - T1'\n        - 'IMP PARAGUAI CONT - T1'\n    \
+      \    - 'IMP PARAGUAI INT - T1'\n        - 'LT 230 KV Boa Vista / Sta Elena - T1'\n        - 'Polo\
+      \ 1 CPV-ARA2 - T1'\n        - 'Polo 1 CPV-ARA2 - T2'\n        - 'Polo 1 FOZ-IBI - T1'\n        -\
+      \ 'Polo 1 FOZ-IBI - T2'\n        - 'Polo 1 XNG-EST - T1'\n        - 'Polo 1 XNG-EST - T2'\n    \
+      \    - 'Polo 2 CPV-ARA2 - T1'\n        - 'Polo 2 CPV-ARA2 - T2'\n        - 'Polo 2 FOZ-IBI - T1'\n\
+      \        - 'Polo 2 FOZ-IBI - T2'\n        - 'Polo 2 XNG-EST - T1'\n        - 'Polo 2 XNG-EST - T2'\n\
+      \        - 'Polo 3 CPV-ARA2 - T1'\n        - 'Polo 3 CPV-ARA2 - T2'\n        - 'Polo 3 FOZ-IBI -\
+      \ T1'\n        - 'Polo 3 FOZ-IBI - T2'\n        - 'Polo 3 Xingu - Terminal Rio - T1'\n        -\
+      \ 'Polo 3 Xingu - Terminal Rio - T2'\n        - 'Polo 4 CPV-ARA2 - T1'\n        - 'Polo 4 CPV-ARA2\
+      \ - T2'\n        - 'Polo 4 FOZ-IBI - T1'\n        - 'Polo 4 FOZ-IBI - T2'\n        - 'Polo 4 Xingu\
+      \ - Terminal Rio - T1'\n        - 'Polo 4 Xingu - Terminal Rio - T2'\n      name: nom_elementofluxocontrolado\
+      \ deve ser um dos valores válidos\n  - invalid_count(dsc_elementofluxocontrolado) = 0:\n      valid\
+      \ values:\n        - 'Back to Back 1 C. Porto Velho'\n        - 'Back to Back 2 C. Porto Velho'\n\
+      \        - 'CF MELO'\n        - 'CF Uruguaiana'\n        - 'GARABI 1B'\n        - 'GARABI 2B'\n\
+      \        - 'IMP PARAGUAI CONT'\n        - 'IMP PARAGUAI INT'\n        - 'Interligação Brasil / Venezuela'\n\
+      \        - 'Polo 1 C. Porto Velho - Araraquara 2'\n        - 'Polo 1 Foz Iguaçu - Ibiuna'\n    \
+      \    - 'Polo 1 Xingu - Estreito'\n        - 'Polo 2 C. Porto Velho - Araraquara 2'\n        - 'Polo\
+      \ 2 Foz Iguaçu - Ibiuna'\n        - 'Polo 2 Xingu - Estreito'\n        - 'Polo 3 C. Porto Velho\
+      \ - Araraquara 2'\n        - 'Polo 3 Foz Iguaçu - Ibiuna'\n        - 'Polo 4 C. Porto Velho - Araraquara\
+      \ 2'\n        - 'Polo 4 Foz Iguaçu - Ibiuna'\n        - 'RIVERA'\n        - 'Transformador Defasador\
+      \ Angra'\n        - 'Transformador Defasador Porto Colombia'\n        - 'Xingu - Terminal Rio'\n\
+      \      name: dsc_elementofluxocontrolado deve ser um dos valores válidos\n  - invalid_count(cod_submercado)\
+      \ = 0:\n      valid values:\n        - 'N'\n        - 'RR'\n        - 'S'\n        - 'SE'\n    \
+      \  name: cod_submercado deve ser um dos valores válidos\n\n  # Circuit breaker: colunas numéricas\
+      \ VARCHAR (formato de origem)\n  - missing_percent(val_carga) < 5:\n      name: val_carga não pode\
+      \ ter >5% nulos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count between\
+      \ 2995 and 4492:\n      name: Volume esperado entre 2,995 e 4,492 registros\n\n  # Unicidade da\
+      \ chave primária composta ['din_programacaodia', 'num_patamar', 'nom_elementofluxocontrolado', 'tip_terminal']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (din_programacaodia, num_patamar,\
+      \ nom_elementofluxocontrolado, tip_terminal) não deve ter duplicatas\n      fail query: |\n    \
+      \    SELECT * FROM programacao_fluxo_controlado\n        WHERE (din_programacaodia, num_patamar,\
+      \ nom_elementofluxocontrolado, tip_terminal) IN (\n          SELECT din_programacaodia, num_patamar,\
+      \ nom_elementofluxocontrolado, tip_terminal FROM programacao_fluxo_controlado\n          GROUP BY\
+      \ din_programacaodia, num_patamar, nom_elementofluxocontrolado, tip_terminal\n          HAVING COUNT(*)\
+      \ > 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente com programação operativa do dia seguinte; sujeito a revisões retroativas
+    por consistência
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/programacao_fluxo_controlado
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - fluxo programado nas linhas
+  - limite programado de transmissao
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver valores programados de fluxo ou carga em elementos
+    de transmissão controlados do SIN com granularidade de 30 minutos ou por patamar intradiário. Também
+    relevante quando a análise requer comparação entre programação operativa de transmissão e demanda
+    ou intercâmbios regionais, ou quando se busca identificar sobrecargas programadas em linhas e transformadores
+    controlados pelo ONS.
+- property: agentInstructions
+  value: '- [val_carga] Coluna val_carga armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos representando fluxo em MW, mas operações aritméticas diretas falharão. Nenhum
+    nulo detectado (null_percent=0.0%), porém strings não numéricas ou vazias podem existir e causarão
+    NULL silencioso no TRY_CAST.
+
+
+    - [din_programacaodia] Coluna din_programacaodia armazenada como VARCHAR; pode conter formatos de
+    data inconsistentes (ex: YYYY-MM-DD vs DD/MM/YYYY) dependendo da versão do pipeline de exportação
+    ONS. Requer validação de formato antes de operações temporais.
+
+
+    - [tip_terminal] Coluna tip_terminal deve conter apenas valores 1 ou 2 (terminal De/Para). Valores
+    fora deste domínio indicam inconsistência no dado fonte e podem comprometer análises de fluxo bidirecional
+    por elemento de rede.
+
+
+    - [num_patamar] Coluna num_patamar deve variar estritamente entre 1 e 48 para granularidade de 30
+    minutos. Valores fora deste intervalo indicam corrupção de dado ou mudança de granularidade temporal
+    no pipeline de exportação.
+
+
+    - [nom_elementofluxocontrolado] Possível duplicidade de registros para a mesma combinação de (din_programacaodia,
+    num_patamar, nom_elementofluxocontrolado, tip_terminal) por reprocessamento retroativo do pipeline
+    ONS. Com apenas 3.744 linhas para 333 dias (~11 registros/dia), duplicatas podem distorcer análises.
+
+
+    - [cod_submercado] Coluna cod_submercado pode conter variações de capitalização ou valores inesperados
+    fora do domínio padrão ONS (SE, S, NE, N). Valores não padronizados dificultam joins com outros datasets
+    por submercado.
+
+
+    - [cod_submercado] Valores com trailing spaces detectados em ''cod_submercado''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Qual foi o fluxo programado na linha de transmissão X no patamar de pico do dia Y?
+  - Quais elementos de fluxo controlado do submercado SE tiveram maior fluxo programado em outubro de
+    2024?
+  - Como evoluiu o fluxo programado no terminal de origem de um elemento controlado ao longo de um dia
+    típico?
+  - Quais patamares de 30 minutos apresentaram fluxo programado acima de 500 MW em elementos do submercado
+    N?
+  - Qual a diferença entre o fluxo programado no terminal 1 e no terminal 2 de um mesmo elemento controlado?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_fluxo_controlado/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-10-01'
+- property: semantics
+  value:
+    temporal_perspective: programado
+    row_grain:
+      temporal: 30 min
+      temporal_column: din_programacaodia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_programacaodia
+      - cod_submercado
+      - num_patamar
+      - nom_elementofluxocontrolado
+      - tip_terminal
+    dimension_columns:
+      subsistema: cod_submercado
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: num_patamar
+    metrics:
+    - id: carga
+      label: Fluxo Programado no Elemento Controlado
+      columns:
+      - val_carga
+      expression: TRY_CAST(val_carga AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - carga
+      - fluxo_programado
+      - carga_programada
+      - valor_fluxo
+      - fluxo_mw
+      - val_fluxo
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_carga AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_carga AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - fluxo_programado
+      - carga_programada
+      - valor_fluxo
+      - fluxo_mw
+      - val_fluxo
+      - potencia_programada
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      preferred_for:
+      - fluxo controlado patamar
+      - elemento transmissao controlado
+      - Back to Back Porto Velho
+      - Garabi fluxo
+      - interligacao Venezuela
+      - Foz Iguacu Ibiuna polo
+      - Xingu Estreito polo
+      - defasador Angra
+      - fluxo terminal origem destino
+      - sobrecarga linha controlada
+      - programacao transmissao intradiaria
+      - fluxo bidirecional elemento
+      covers_metrics:
+      - carga
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+      - balanco geracao carga subsistema
+      - intercambio liquido subsistema
+      - geracao por fonte
+      - carga verificada subsistema
+    value_aliases:
+      dsc_elementofluxocontrolado:
+        Back to Back 1 C. Porto Velho:
+          aliases:
+          - Back to Back 1 C. Porto Velho
+          - BtB 1 Porto Velho
+          - back to back 1 CPV
+          filter: dsc_elementofluxocontrolado = 'Back to Back 1 C. Porto Velho'
+        Back to Back 2 C. Porto Velho:
+          aliases:
+          - Back to Back 2 C. Porto Velho
+          - BtB 2 Porto Velho
+          - back to back 2 CPV
+          filter: dsc_elementofluxocontrolado = 'Back to Back 2 C. Porto Velho'
+        CF MELO:
+          aliases:
+          - CF MELO
+          - conversora Melo
+          filter: dsc_elementofluxocontrolado = 'CF MELO'
+        CF Uruguaiana:
+          aliases:
+          - CF Uruguaiana
+          - conversora Uruguaiana
+          filter: dsc_elementofluxocontrolado = 'CF Uruguaiana'
+        GARABI 1B:
+          aliases:
+          - GARABI 1B
+          - Garabi 1
+          filter: dsc_elementofluxocontrolado = 'GARABI 1B'
+        GARABI 2B:
+          aliases:
+          - GARABI 2B
+          - Garabi 2
+          filter: dsc_elementofluxocontrolado = 'GARABI 2B'
+        IMP PARAGUAI CONT:
+          aliases:
+          - IMP PARAGUAI CONT
+          - importacao Paraguai continua
+          filter: dsc_elementofluxocontrolado = 'IMP PARAGUAI CONT'
+        IMP PARAGUAI INT:
+          aliases:
+          - IMP PARAGUAI INT
+          - importacao Paraguai intermitente
+          filter: dsc_elementofluxocontrolado = 'IMP PARAGUAI INT'
+        Interligação Brasil / Venezuela:
+          aliases:
+          - Interligacao Brasil Venezuela
+          - interligacao Venezuela
+          - Boa Vista Santa Elena
+          filter: dsc_elementofluxocontrolado = 'Interligação Brasil / Venezuela'
+        Polo 1 C. Porto Velho - Araraquara 2:
+          aliases:
+          - Polo 1 CPV Araraquara 2
+          - polo 1 Porto Velho Araraquara
+          filter: dsc_elementofluxocontrolado = 'Polo 1 C. Porto Velho - Araraquara 2'
+        Polo 1 Foz Iguaçu - Ibiuna:
+          aliases:
+          - Polo 1 Foz Iguacu Ibiuna
+          - polo 1 FOZ IBI
+          filter: dsc_elementofluxocontrolado = 'Polo 1 Foz Iguaçu - Ibiuna'
+        Polo 1 Xingu - Estreito:
+          aliases:
+          - Polo 1 Xingu Estreito
+          - polo 1 XNG EST
+          filter: dsc_elementofluxocontrolado = 'Polo 1 Xingu - Estreito'
+        Polo 2 C. Porto Velho - Araraquara 2:
+          aliases:
+          - Polo 2 CPV Araraquara 2
+          - polo 2 Porto Velho Araraquara
+          filter: dsc_elementofluxocontrolado = 'Polo 2 C. Porto Velho - Araraquara 2'
+        Polo 2 Foz Iguaçu - Ibiuna:
+          aliases:
+          - Polo 2 Foz Iguacu Ibiuna
+          - polo 2 FOZ IBI
+          filter: dsc_elementofluxocontrolado = 'Polo 2 Foz Iguaçu - Ibiuna'
+        Polo 2 Xingu - Estreito:
+          aliases:
+          - Polo 2 Xingu Estreito
+          - polo 2 XNG EST
+          filter: dsc_elementofluxocontrolado = 'Polo 2 Xingu - Estreito'
+        Polo 3 C. Porto Velho - Araraquara 2:
+          aliases:
+          - Polo 3 CPV Araraquara 2
+          - polo 3 Porto Velho Araraquara
+          filter: dsc_elementofluxocontrolado = 'Polo 3 C. Porto Velho - Araraquara 2'
+        Polo 3 Foz Iguaçu - Ibiuna:
+          aliases:
+          - Polo 3 Foz Iguacu Ibiuna
+          - polo 3 FOZ IBI
+          filter: dsc_elementofluxocontrolado = 'Polo 3 Foz Iguaçu - Ibiuna'
+        Polo 4 C. Porto Velho - Araraquara 2:
+          aliases:
+          - Polo 4 CPV Araraquara 2
+          - polo 4 Porto Velho Araraquara
+          filter: dsc_elementofluxocontrolado = 'Polo 4 C. Porto Velho - Araraquara 2'
+        Polo 4 Foz Iguaçu - Ibiuna:
+          aliases:
+          - Polo 4 Foz Iguacu Ibiuna
+          - polo 4 FOZ IBI
+          filter: dsc_elementofluxocontrolado = 'Polo 4 Foz Iguaçu - Ibiuna'
+        RIVERA:
+          aliases:
+          - RIVERA
+          - Rivera
+          - CF Rivera
+          filter: dsc_elementofluxocontrolado = 'RIVERA'
+        Transformador Defasador Angra:
+          aliases:
+          - Transformador Defasador Angra
+          - defasador Angra
+          - phase shifter Angra
+          filter: dsc_elementofluxocontrolado = 'Transformador Defasador Angra'
+        Transformador Defasador Porto Colombia:
+          aliases:
+          - Transformador Defasador Porto Colombia
+          - defasador Porto Colombia
+          - phase shifter Porto Colombia
+          filter: dsc_elementofluxocontrolado = 'Transformador Defasador Porto Colombia'
+        Xingu - Terminal Rio:
+          aliases:
+          - Xingu Terminal Rio
+          - polo Xingu Rio
+          filter: dsc_elementofluxocontrolado = 'Xingu - Terminal Rio'
+      tip_terminal:
+        '1':
+          aliases:
+          - '1'
+          - terminal 1
+          - terminal origem
+          - barra envio
+          - terminal de
+          filter: tip_terminal = 1
+        '2':
+          aliases:
+          - '2'
+          - terminal 2
+          - terminal destino
+          - barra recepcao
+          - terminal para
+          filter: tip_terminal = 2
+      cod_submercado:
+        N:
+          aliases:
+          - N
+          - Norte
+          - submercado Norte
+          filter: TRIM(cod_submercado) = 'N'
+        RR:
+          aliases:
+          - RR
+          - Roraima
+          - submercado Roraima
+          filter: TRIM(cod_submercado) = 'RR'
+        S:
+          aliases:
+          - S
+          - Sul
+          - submercado Sul
+          filter: TRIM(cod_submercado) = 'S'
+        SE:
+          aliases:
+          - SE
+          - Sudeste
+          - Centro-Oeste
+          - submercado SE
+          filter: TRIM(cod_submercado) = 'SE'
+    sql_patterns:
+      carga_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_programacaodia AS DATE)) AS mes,\n  SUM((TRY_CAST(val_carga\
+          \ AS DOUBLE)) * 0.5) / 1000 AS valor_gwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_programacaodia\
+          \ AS DATE)) = {year}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - carga
+          grain: month
+        validated_params:
+          year: '2026'
+      fluxo_por_elemento_dia:
+        template: "SELECT nom_elementofluxocontrolado,\n  tip_terminal,\n  AVG(TRY_CAST(val_carga AS DOUBLE))\
+          \ AS fluxo_medio_mwmed\nFROM {source}\nWHERE TRY_CAST(din_programacaodia AS DATE) = '{date}'\n\
+          GROUP BY 1, 2\nORDER BY fluxo_medio_mwmed DESC\n"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - carga
+          grain: day
+        validated_params:
+          date: '2024-11-20'
+      fluxo_intradiario:
+        template: "SELECT num_patamar,\n  AVG(TRY_CAST(val_carga AS DOUBLE)) AS fluxo_medio_mwmed\nFROM\
+          \ {source}\nWHERE TRY_CAST(din_programacaodia AS DATE) = '{date}'\n  AND nom_elementofluxocontrolado\
+          \ = '{elemento}'\n  AND tip_terminal = {terminal}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - carga
+          grain: 30min
+        validated_params:
+          date: '2026-07-20'
+          elemento: BtB 1 CPV - T1
+          terminal: '1'
+      fluxo_acima_limite:
+        template: "SELECT din_programacaodia,\n  num_patamar,\n  nom_elementofluxocontrolado,\n  tip_terminal,\n\
+          \  TRY_CAST(val_carga AS DOUBLE) AS fluxo_mw\nFROM {source}\nWHERE TRY_CAST(val_carga AS DOUBLE)\
+          \ > {limite_mw}\n  AND TRIM(cod_submercado) = '{submercado}'\nORDER BY din_programacaodia, num_patamar\n"
+        output_unit: MW
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - carga
+          grain: 30min
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta fluxo sem especificar terminal
+        assume_metric: carga
+        assume_output: average_power
+        assume_filter: null
+        note: Retornar ambos os terminais (tip_terminal 1 e 2) agrupados por nom_elementofluxocontrolado,
+          ou solicitar esclarecimento se analise bidirecional for relevante.
+      - when: usuario pergunta fluxo medio diario
+        assume_metric: carga
+        assume_output: average_power
+        note: AVG(TRY_CAST(val_carga AS DOUBLE)) agrupado por dia. Unidade MWmed.
+      - when: usuario pergunta energia total transmitida
+        assume_metric: carga
+        assume_output: total_energy
+        note: SUM(TRY_CAST(val_carga AS DOUBLE) * 0.5) / 1000. Unidade GWh. Requer cuidado com fluxos
+          negativos (reversos).
+      - when: usuario pergunta pico de fluxo
+        assume_metric: carga
+        assume_output: peak_power
+        note: MAX(TRY_CAST(val_carga AS DOUBLE)). Unidade MWmed.
+      must_clarify_when:
+      - trigger_terms:
+        - terminal
+        - sentido
+        - origem
+        - destino
+        - bidirecional
+        question: Voce deseja analisar o terminal de origem (tip_terminal=1), o terminal de destino (tip_terminal=2),
+          ou ambos separadamente?
+        reason: tip_terminal distingue sentido do fluxo; soma dos dois terminais pode duplicar valores
+          para elementos bidirecionais.
+      - trigger_terms:
+        - diferenca
+        - balanco
+        - liquido
+        question: Voce deseja a diferenca entre terminal 1 e terminal 2 do mesmo elemento (fluxo liquido),
+          ou o fluxo em cada terminal separadamente?
+        reason: Diferenca entre terminais requer self-join ou pivot por tip_terminal; semantica diferente
+          de fluxo por terminal.
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - belo monte
+        - ranking de usinas
+        - geracao por usina
+        reason: Schema nao contem CEG, nome de usina geradora ou identificador fisico de usina. Dataset
+          cobre elementos de transmissao controlados.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra 1
+        - angra 2
+        reason: Angra aparece neste dataset apenas como Transformador Defasador Angra (elemento de transmissao),
+          nao como usina nuclear geradora.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear para dados de geracao
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada. Dataset cobre apenas transmissao controlada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - balanco energetico
+        - geracao total
+        - carga total subsistema
+        - intercambio liquido
+        - mix de geracao
+        - matriz eletrica
+        reason: Dataset nao contem balanco geracao-carga nem intercambio liquido entre subsistemas.
+        redirect: balanco-energia-subsistema
+- property: fewShotQueries
+  value:
+  - question: Como evolui o fluxo programado em cada elemento controlado ao longo dos 48 patamares de
+      um dia específico?
+    sql: SELECT nom_elementofluxocontrolado, tip_terminal, num_patamar, TRY_CAST(val_carga AS DOUBLE)
+      AS fluxo_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_fluxo_controlado/*.parquet')
+      WHERE TRY_CAST(din_programacaodia AS DATE) = DATE '2025-01-15' AND tip_terminal = 1 ORDER BY nom_elementofluxocontrolado,
+      num_patamar LIMIT 100
+  - question: Quais elementos de fluxo controlado do submercado SE apresentaram maior fluxo médio programado
+      no mês de janeiro de 2025?
+    sql: SELECT nom_elementofluxocontrolado, cod_submercado, AVG(TRY_CAST(val_carga AS DOUBLE)) AS fluxo_medio_mw,
+      MAX(TRY_CAST(val_carga AS DOUBLE)) AS fluxo_max_mw, COUNT(*) AS qtd_patamares FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_fluxo_controlado/*.parquet')
+      WHERE TRIM(cod_submercado) = 'SE' AND TRY_CAST(din_programacaodia AS DATE) >= DATE '2025-01-01'
+      AND TRY_CAST(din_programacaodia AS DATE) <= DATE '2025-01-31' AND tip_terminal = 1 GROUP BY nom_elementofluxocontrolado,
+      cod_submercado ORDER BY fluxo_medio_mw DESC LIMIT 20
+  - question: Qual a diferença de fluxo programado entre o terminal De (1) e o terminal Para (2) de cada
+      elemento controlado, indicando perdas ou inconsistências?
+    sql: SELECT t1.din_programacaodia, t1.num_patamar, t1.nom_elementofluxocontrolado, t1.cod_submercado,
+      TRY_CAST(t1.val_carga AS DOUBLE) AS fluxo_terminal_de, TRY_CAST(t2.val_carga AS DOUBLE) AS fluxo_terminal_para,
+      ABS(TRY_CAST(t1.val_carga AS DOUBLE) - TRY_CAST(t2.val_carga AS DOUBLE)) AS diferenca_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_fluxo_controlado/*.parquet')
+      AS t1 INNER JOIN read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_fluxo_controlado/*.parquet')
+      AS t2 ON t1.din_programacaodia = t2.din_programacaodia AND t1.num_patamar = t2.num_patamar AND t1.nom_elementofluxocontrolado
+      = t2.nom_elementofluxocontrolado AND t2.tip_terminal = 2 WHERE t1.tip_terminal = 1 AND TRY_CAST(t1.din_programacaodia
+      AS DATE) = DATE '2025-03-10' ORDER BY diferenca_mw DESC LIMIT 50
+- property: relatedDatasets
+  value:
+    programacao_x_previsao:
+      join_keys:
+      - num_patamar
+- property: license
+  value: CC-BY

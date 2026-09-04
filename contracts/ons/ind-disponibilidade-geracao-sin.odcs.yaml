@@ -1,0 +1,792 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind-disponibilidade-geracao-sin
+name: ind-disponibilidade-geracao-sin
+tenant: ons
+tags:
+- DISPF
+- DISPF SIN
+- INDISPFF
+- INDISPFF SIN
+- INDISPPF
+- INDISPPF SIN
+- ONS
+- SIN
+- Submódulo 9.2
+- confiabilidade
+- disponibilidade
+- disponibilidade geração SIN
+- disponibilidade geração nacional
+- geração
+- indicadores de desempenho de geração SIN
+- indisponibilidade
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind-disponibilidade-geracao-sin/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos analistas de confiabilidade, planejadores do sistema elétrico e reguladores os
+    indicadores mensais consolidados de desempenho do parque gerador nacional, permitindo monitorar tendências
+    de disponibilidade e indisponibilidade do SIN ao longo do tempo, suportar decisões de planejamento
+    da expansão da geração, avaliar o cumprimento de metas regulatórias estabelecidas pelo ONS e pela
+    ANEEL, e subsidiar estudos de confiabilidade do sistema elétrico brasileiro.
+  limitations: A coluna dat_referencia está armazenada como VARCHAR no Parquet em vez de DATE. Verificar
+    se a soma dos três indicadores (DISPF + INDISPPF + INDISPFF) é aproximadamente 100% para cada registro.
+    O valor máximo de INDISPPF observado é 12,67%, consideravelmente acima da mediana esperada para indisponibilidade
+    programada.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores mensais de disponibilidade, indisponibilidade
+    programada ou indisponibilidade forçada das funções geração agregados para o Sistema Interligado Nacional
+    como um todo.
+domain: geração
+schema:
+- name: ind_disponibilidade_geracao_sin
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_disponibilidade_geracao_sin
+  properties:
+  - name: dat_referencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência do indicador mensal, armazenada como VARCHAR no Parquet. Representa
+      o primeiro dia do mês de competência (ex: "2023-01-01" = janeiro/2023). Recomenda-se conversão para
+      DATE via TRY_CAST em consultas analíticas.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - mês de referência
+      - competência
+      - período
+      - data
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_dispf
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador de Disponibilidade das Funções Geração (DISPF) agregado para o SIN, expresso
+      em percentual. Representa a fração do tempo em que as unidades geradoras estiveram disponíveis para
+      operação no mês de referência, conforme Submódulo 9.2 dos Procedimentos de Rede do ONS. Valores
+      observados entre 84,28% e 92,33%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade
+      - DISPF
+      - fator de disponibilidade
+      - disponibilidade de geração
+      - disponibilidade das funções geração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+    - property: enum
+      value:
+      - 84.2794
+      - 85.5454
+      - 85.9262
+      - 86.1431
+      - 86.2129
+      - 86.3558
+      - 87.2625
+      - 87.9323
+      - 89.1306
+      - 89.1319
+      - 89.4033
+      - 89.4923
+      - 89.9321
+      - 90.8068
+      - 90.8367
+      - 91.6162
+      - 92.3255
+  - name: val_indisppf
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador de Indisponibilidade Programada das Funções Geração (INDISPPF) agregado para
+      o SIN, expresso em percentual. Representa a fração do tempo em que as unidades geradoras estiveram
+      indisponíveis por manutenção programada ou paradas planejadas no mês de referência, conforme Submódulo
+      9.2 dos Procedimentos de Rede do ONS. Valores observados entre 5,44% e 12,67%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - indisponibilidade programada
+      - INDISPPF
+      - indisponibilidade planejada
+      - manutenção programada
+      - parada programada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+    - property: enum
+      value:
+      - 5.441
+      - 6.2588
+      - 6.6729
+      - 6.9962
+      - 7.8279
+      - 8.0744
+      - 8.083
+      - 8.1742
+      - 9.0251
+      - 9.1576
+      - 10.3941
+      - 10.4326
+      - 11.6687
+      - 11.9081
+      - 11.937
+      - 12.1362
+      - 12.6718
+  - name: val_indispff
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador de Indisponibilidade Forçada das Funções Geração (INDISPFF) agregado para
+      o SIN, expresso em percentual. Representa a fração do tempo em que as unidades geradoras estiveram
+      indisponíveis por falhas não planejadas ou eventos forçados no mês de referência, conforme Submódulo
+      9.2 dos Procedimentos de Rede do ONS. Valores observados entre 1,45% e 3,71%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - indisponibilidade forçada
+      - INDISPFF
+      - falha forçada
+      - desligamento forçado
+      - indisponibilidade não programada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+    - property: enum
+      value:
+      - 1.4477
+      - 1.5175
+      - 1.6345
+      - 1.7325
+      - 1.7502
+      - 1.7756
+      - 1.8047
+      - 1.9649
+      - 2.1182
+      - 2.1804
+      - 2.203
+      - 2.4245
+      - 2.4333
+      - 2.5606
+      - 2.6951
+      - 3.25
+      - 3.7123
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_disponibilidade_geracao_sin:\n  - row_count > 0:\n      name: Tabela\
+      \ não pode estar vazia\n\n  # Unicidade da chave primária (candidata LLM — confirmar com dados reais)\n\
+      \  - duplicate_count(dat_referencia) = 0:\n      name: dat_referencia não deve ter duplicatas (chave\
+      \ primária)\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind-disponibilidade-geracao-sin
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - disponibilidade do parque gerador do sin
+  - indisponibilidade agregada da geracao
+  - quanto da geracao ficou indisponivel
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores mensais de disponibilidade, indisponibilidade
+    programada ou indisponibilidade forçada das funções geração agregados para o Sistema Interligado Nacional
+    como um todo. Também recuperar quando o analista precisar de uma visão consolidada nacional de desempenho
+    do parque gerador para comparação com metas regulatórias ou análise de tendência histórica do SIN.
+- property: agentInstructions
+  value: '- [dat_referencia] A coluna dat_referencia está armazenada como VARCHAR no Parquet em vez de
+    DATE. O formato observado é YYYY-MM-DD (ex: ''2023-01-01''), sempre com dia 01 representando o primeiro
+    dia do mês de competência. Operações de filtro temporal, ordenação e extração de ano/mês falharão
+    silenciosamente se a coluna for tratada como string sem conversão explícita.
+
+
+    - [val_dispf] O dataset ind-disponibilidade-geracao-sin contém apenas 17 registros para um período
+    de aproximadamente 40 meses (2023-01 a 2026-05), indicando que cerca de 57% das competências mensais
+    estão ausentes. Análises de tendência e médias móveis devem considerar as competências faltantes antes
+    de interpretar resultados para val_dispf.
+
+
+    - [val_indispff] A Indisponibilidade Forçada (INDISPFF) no dataset ind-disponibilidade-geracao-sin
+    apresenta variação relativa elevada entre o mínimo (1,45%) e o máximo (3,71%), representando variação
+    de ~156% entre os extremos. Valores acima de 3,5% podem indicar períodos de estresse operativo ou
+    eventos climáticos extremos que impactaram o parque gerador nacional.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a disponibilidade média das funções geração do SIN em 2024?
+  - Em quais meses a indisponibilidade forçada do SIN superou 3%?
+  - Como evoluiu a indisponibilidade programada do parque gerador nacional ao longo de 2023?
+  - Qual o mês com menor disponibilidade de geração do SIN desde 2023?
+  - Qual a tendência de DISPF, INDISPPF e INDISPFF do SIN nos últimos 12 meses disponíveis?
+- property: granularity
+  value: mensal
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind-disponibilidade-geracao-sin/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 mes
+      temporal_column: dat_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - dat_referencia
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dispf
+      label: Disponibilidade Funcoes Geracao SIN (DISPF)
+      columns:
+      - val_dispf
+      expression: val_dispf
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - dispf
+      - disponibilidade
+      - DISPF
+      - fator de disponibilidade
+      - disponibilidade de geracao
+      - disponibilidade das funcoes geracao
+      - disponibilidade SIN
+      - desempenho parque gerador
+      aggregation_modes:
+        average:
+          sql: AVG(val_dispf)
+          unit: '%'
+        maximum:
+          sql: MAX(val_dispf)
+          unit: '%'
+        minimum:
+          sql: MIN(val_dispf)
+          unit: '%'
+        time_series:
+          sql: val_dispf
+          unit: '%'
+        comparison:
+          sql: AVG(val_dispf)
+          unit: '%'
+      interval_hours: 730.0
+      aliases:
+      - disponibilidade
+      - DISPF
+      - fator de disponibilidade
+      - disponibilidade de geracao
+      - disponibilidade das funcoes geracao
+      - disponibilidade SIN
+    - id: indisppf
+      label: Indisponibilidade Programada Funcoes Geracao SIN (INDISPPF)
+      columns:
+      - val_indisppf
+      expression: val_indisppf
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - indisppf
+      - indisponibilidade programada
+      - INDISPPF
+      - indisponibilidade planejada
+      - manutencao programada
+      - parada programada
+      - parada planejada SIN
+      aggregation_modes:
+        average:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indisppf)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indisppf)
+          unit: '%'
+        time_series:
+          sql: val_indisppf
+          unit: '%'
+        comparison:
+          sql: AVG(val_indisppf)
+          unit: '%'
+      interval_hours: 730.0
+      aliases:
+      - indisponibilidade programada
+      - INDISPPF
+      - indisponibilidade planejada
+      - manutencao programada
+      - parada programada
+    - id: indispff
+      label: Indisponibilidade Forcada Funcoes Geracao SIN (INDISPFF)
+      columns:
+      - val_indispff
+      expression: val_indispff
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - indispff
+      - indisponibilidade forcada
+      - INDISPFF
+      - falha forcada
+      - desligamento forcado
+      - indisponibilidade nao programada
+      - estresse operativo SIN
+      aggregation_modes:
+        average:
+          sql: AVG(val_indispff)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indispff)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indispff)
+          unit: '%'
+        time_series:
+          sql: val_indispff
+          unit: '%'
+        comparison:
+          sql: AVG(val_indispff)
+          unit: '%'
+      interval_hours: 730.0
+      aliases:
+      - indisponibilidade forcada
+      - INDISPFF
+      - falha forcada
+      - desligamento forcado
+      - indisponibilidade nao programada
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - dispf
+      - indisppf
+      - indispff
+      preferred_for:
+      - DISPF SIN consolidado
+      - INDISPPF SIN nacional
+      - INDISPFF SIN nacional
+      - disponibilidade parque gerador nacional
+      - indisponibilidade forcada SIN
+      - indisponibilidade programada SIN
+      - desempenho confiabilidade geracao SIN
+      - meta regulatoria disponibilidade geracao
+      - Submodulo 9.2 geracao SIN
+      - tendencia historica DISPF nacional
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - usina especifica
+      - nuclear
+      - MMGD
+      - disponibilidade por UGE
+      - disponibilidade por unidade geradora
+      - disponibilidade subsistema
+      - disponibilidade fonte especifica
+      - transmissao
+      - conversor HVDC
+    value_aliases:
+      val_dispf:
+        '84.2794':
+          aliases:
+          - '84.2794'
+          filter: val_dispf = 84.2794
+        '85.5454':
+          aliases:
+          - '85.5454'
+          filter: val_dispf = 85.5454
+        '85.9262':
+          aliases:
+          - '85.9262'
+          filter: val_dispf = 85.9262
+        '86.1431':
+          aliases:
+          - '86.1431'
+          filter: val_dispf = 86.1431
+        '86.2129':
+          aliases:
+          - '86.2129'
+          filter: val_dispf = 86.2129
+        '86.3558':
+          aliases:
+          - '86.3558'
+          filter: val_dispf = 86.3558
+        '87.2625':
+          aliases:
+          - '87.2625'
+          filter: val_dispf = 87.2625
+        '87.9323':
+          aliases:
+          - '87.9323'
+          filter: val_dispf = 87.9323
+        '89.1306':
+          aliases:
+          - '89.1306'
+          filter: val_dispf = 89.1306
+        '89.1319':
+          aliases:
+          - '89.1319'
+          filter: val_dispf = 89.1319
+        '89.4033':
+          aliases:
+          - '89.4033'
+          filter: val_dispf = 89.4033
+        '89.4923':
+          aliases:
+          - '89.4923'
+          filter: val_dispf = 89.4923
+        '89.9321':
+          aliases:
+          - '89.9321'
+          filter: val_dispf = 89.9321
+        '90.8068':
+          aliases:
+          - '90.8068'
+          filter: val_dispf = 90.8068
+        '90.8367':
+          aliases:
+          - '90.8367'
+          filter: val_dispf = 90.8367
+        '91.6162':
+          aliases:
+          - '91.6162'
+          filter: val_dispf = 91.6162
+        '92.3255':
+          aliases:
+          - '92.3255'
+          filter: val_dispf = 92.3255
+      val_indisppf:
+        '5.441':
+          aliases:
+          - '5.441'
+          filter: val_indisppf = 5.441
+        '6.2588':
+          aliases:
+          - '6.2588'
+          filter: val_indisppf = 6.2588
+        '6.6729':
+          aliases:
+          - '6.6729'
+          filter: val_indisppf = 6.6729
+        '6.9962':
+          aliases:
+          - '6.9962'
+          filter: val_indisppf = 6.9962
+        '7.8279':
+          aliases:
+          - '7.8279'
+          filter: val_indisppf = 7.8279
+        '8.0744':
+          aliases:
+          - '8.0744'
+          filter: val_indisppf = 8.0744
+        '8.083':
+          aliases:
+          - '8.083'
+          filter: val_indisppf = 8.083
+        '8.1742':
+          aliases:
+          - '8.1742'
+          filter: val_indisppf = 8.1742
+        '9.0251':
+          aliases:
+          - '9.0251'
+          filter: val_indisppf = 9.0251
+        '9.1576':
+          aliases:
+          - '9.1576'
+          filter: val_indisppf = 9.1576
+        '10.3941':
+          aliases:
+          - '10.3941'
+          filter: val_indisppf = 10.3941
+        '10.4326':
+          aliases:
+          - '10.4326'
+          filter: val_indisppf = 10.4326
+        '11.6687':
+          aliases:
+          - '11.6687'
+          filter: val_indisppf = 11.6687
+        '11.9081':
+          aliases:
+          - '11.9081'
+          filter: val_indisppf = 11.9081
+        '11.937':
+          aliases:
+          - '11.937'
+          filter: val_indisppf = 11.937
+        '12.1362':
+          aliases:
+          - '12.1362'
+          filter: val_indisppf = 12.1362
+        '12.6718':
+          aliases:
+          - '12.6718'
+          filter: val_indisppf = 12.6718
+      val_indispff:
+        '1.4477':
+          aliases:
+          - '1.4477'
+          filter: val_indispff = 1.4477
+        '1.5175':
+          aliases:
+          - '1.5175'
+          filter: val_indispff = 1.5175
+        '1.6345':
+          aliases:
+          - '1.6345'
+          filter: val_indispff = 1.6345
+        '1.7325':
+          aliases:
+          - '1.7325'
+          filter: val_indispff = 1.7325
+        '1.7502':
+          aliases:
+          - '1.7502'
+          filter: val_indispff = 1.7502
+        '1.7756':
+          aliases:
+          - '1.7756'
+          filter: val_indispff = 1.7756
+        '1.8047':
+          aliases:
+          - '1.8047'
+          filter: val_indispff = 1.8047
+        '1.9649':
+          aliases:
+          - '1.9649'
+          filter: val_indispff = 1.9649
+        '2.1182':
+          aliases:
+          - '2.1182'
+          filter: val_indispff = 2.1182
+        '2.1804':
+          aliases:
+          - '2.1804'
+          filter: val_indispff = 2.1804
+        '2.203':
+          aliases:
+          - '2.203'
+          filter: val_indispff = 2.203
+        '2.4245':
+          aliases:
+          - '2.4245'
+          filter: val_indispff = 2.4245
+        '2.4333':
+          aliases:
+          - '2.4333'
+          filter: val_indispff = 2.4333
+        '2.5606':
+          aliases:
+          - '2.5606'
+          filter: val_indispff = 2.5606
+        '2.6951':
+          aliases:
+          - '2.6951'
+          filter: val_indispff = 2.6951
+        '3.25':
+          aliases:
+          - '3.25'
+          filter: val_indispff = 3.25
+        '3.7123':
+          aliases:
+          - '3.7123'
+          filter: val_indispff = 3.7123
+    sql_patterns:
+      dispf_serie_mensal:
+        template: "SELECT\n  TRY_CAST(dat_referencia AS DATE) AS mes,\n  val_dispf AS disponibilidade_pct\n\
+          FROM {source}\nWHERE TRY_CAST(dat_referencia AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\n\
+          ORDER BY 1\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - dispf
+          grain: month
+        validated_params:
+          data_inicio: '2026-01-01'
+          data_fim: '2026-06-01'
+      dispf_media_anual:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(dat_referencia AS DATE)) AS ano,\n  AVG(val_dispf)\
+          \ AS dispf_medio_pct,\n  MIN(val_dispf) AS dispf_minimo_pct,\n  MAX(val_dispf) AS dispf_maximo_pct\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(dat_referencia AS DATE)) = {year}\nGROUP BY\
+          \ 1\nORDER BY 1\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - dispf
+          grain: year
+        validated_params:
+          year: '2026'
+      indispff_acima_limiar:
+        template: "SELECT\n  TRY_CAST(dat_referencia AS DATE) AS mes,\n  val_indispff AS indisponibilidade_forcada_pct\n\
+          FROM {source}\nWHERE val_indispff > {limiar}\nORDER BY val_indispff DESC\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          - comparison
+          metrics:
+          - indispff
+          grain: month
+      tres_indicadores_serie:
+        template: "SELECT\n  TRY_CAST(dat_referencia AS DATE) AS mes,\n  val_dispf   AS dispf_pct,\n \
+          \ val_indisppf AS indisppf_pct,\n  val_indispff AS indispff_pct\nFROM {source}\nORDER BY 1\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - dispf
+          - indisppf
+          - indispff
+          grain: month
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta disponibilidade sem especificar metrica
+        assume_metric: dispf
+        assume_output: average
+        note: DISPF e o indicador principal de disponibilidade. Se usuario mencionar 'indisponibilidade'
+          sem qualificar, perguntar se e programada (INDISPPF) ou forcada (INDISPFF).
+      - when: usuario pede media de disponibilidade em periodo
+        assume_metric: dispf
+        assume_output: average
+        note: Media de percentual — usar AVG, nunca SUM.
+      - when: usuario pede pior mes de disponibilidade
+        assume_metric: dispf
+        assume_output: minimum
+        note: Menor DISPF = pior disponibilidade.
+      - when: usuario pede melhor mes de disponibilidade
+        assume_metric: dispf
+        assume_output: maximum
+        note: Maior DISPF = melhor disponibilidade.
+      must_clarify_when:
+      - ambiguity: indisponibilidade_sem_tipo
+        question: Voce quer indisponibilidade programada (manutencao planejada, INDISPPF) ou indisponibilidade
+          forcada (falhas nao planejadas, INDISPFF)?
+        trigger_terms:
+        - indisponibilidade
+        - indisponivel
+        - parada
+        - falha
+        note: Nao perguntar se o usuario ja usou INDISPPF, INDISPFF, 'programada' ou 'forcada' explicitamente.
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - belo monte
+        - tucurui
+        - angra
+        - UGE
+        - unidade geradora
+        reason: Schema nao contem identificador de usina ou UGE. Granularidade e SIN consolidado.
+        redirect: ind_disponibilidade_fgeracao_uge_mensal
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem dimensao por tipo de fonte ou combustivel.
+        redirect: ind_disponibilidade_fgeracao_uge_mensal com filtro de tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - transmissao
+        - linha de transmissao
+        - disponibilidade de transmissao
+        reason: Indicadores de transmissao estao em dataset separado.
+        redirect: ind_disponibilidade_ft_trlt
+      - user_mentions:
+        - conversor
+        - HVDC
+        reason: Indicadores de conversores estao em dataset separado.
+        redirect: ind_disponibilidade_ft_conversor
+      data_coverage_warning: 'O dataset possui apenas 17 registros para o periodo 2023-01 a 2026-04 (aproximadamente
+        40 meses), indicando que cerca de 57% das competencias mensais estao ausentes. Alertar o usuario
+        sobre lacunas antes de interpretar medias moveis ou tendencias.
+
+        '
+- property: fewShotQueries
+  value:
+  - question: Como evoluíram os indicadores DISPF, INDISPPF e INDISPFF do SIN mês a mês desde 2023?
+    sql: "SELECT\n  TRY_CAST(dat_referencia AS DATE) AS competencia,\n  EXTRACT(YEAR FROM TRY_CAST(dat_referencia\
+      \ AS DATE)) AS ano,\n  EXTRACT(MONTH FROM TRY_CAST(dat_referencia AS DATE)) AS mes,\n  ROUND(val_dispf,\
+      \ 4) AS dispf_pct,\n  ROUND(val_indisppf, 4) AS indisppf_pct,\n  ROUND(val_indispff, 4) AS indispff_pct,\n\
+      \  ROUND(val_dispf + val_indisppf + val_indispff, 4) AS soma_total\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind-disponibilidade-geracao-sin/*.parquet')\n\
+      WHERE TRY_CAST(dat_referencia AS DATE) IS NOT NULL\nORDER BY TRY_CAST(dat_referencia AS DATE)"
+  - question: Qual foi a disponibilidade média do parque gerador nacional por ano?
+    sql: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(dat_referencia AS DATE)) AS ano,\n  ROUND(AVG(val_dispf),\
+      \ 4) AS dispf_medio_pct,\n  ROUND(AVG(val_indisppf), 4) AS indisppf_medio_pct,\n  ROUND(AVG(val_indispff),\
+      \ 4) AS indispff_medio_pct,\n  COUNT(*) AS qtd_competencias\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind-disponibilidade-geracao-sin/*.parquet')\n\
+      WHERE TRY_CAST(dat_referencia AS DATE) IS NOT NULL\nGROUP BY EXTRACT(YEAR FROM TRY_CAST(dat_referencia\
+      \ AS DATE))\nORDER BY ano"
+  - question: Em quais meses a indisponibilidade forçada do SIN foi mais elevada?
+    sql: "SELECT\n  TRY_CAST(dat_referencia AS DATE) AS competencia,\n  ROUND(val_indispff, 4) AS indispff_pct,\n\
+      \  ROUND(val_dispf, 4) AS dispf_pct,\n  ROUND(val_indisppf, 4) AS indisppf_pct\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind-disponibilidade-geracao-sin/*.parquet')\n\
+      WHERE TRY_CAST(dat_referencia AS DATE) IS NOT NULL\nORDER BY val_indispff DESC\nLIMIT 5"
+- property: relatedDatasets
+  value:
+    ind_disponibilidade_ft_trlt:
+      join_keys:
+      - dat_referencia
+    ind_disponibilidade_ft_conversor:
+      join_keys:
+      - dat_referencia
+- property: license
+  value: CC-BY

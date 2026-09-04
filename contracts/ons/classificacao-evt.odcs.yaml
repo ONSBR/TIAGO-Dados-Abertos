@@ -1,0 +1,527 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:classificacao-evt
+name: classificacao-evt
+tenant: ons
+tags:
+- EVT
+- SIN
+- classificacao EVT
+- energia vertida turbinável
+- energia vertida turbinável EVT
+- energia-vertida-turbinavel
+- hidrologia
+- horario
+- operacao-hidraulica
+- perdas-hidraulicas
+- razao-eletrica
+- razao-energetica
+- vertimento
+- vertimento energético
+- vertimento turbinável
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/classificacao_evt/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar analistas de planejamento energético, operadores do ONS e pesquisadores na avaliação
+    de perdas hidráulicas horárias do SIN, identificando a causa raiz do vertimento turbinável (energética
+    ou elétrica) para suporte a decisões de despacho, gestão de reservatórios, avaliação de restrições
+    de transmissão e estudos de eficiência operativa do sistema hidrelétrico brasileiro.
+  limitations: Coluna armazenada como VARCHAR no Parquet em vez de TIMESTAMP. Coluna numérica armazenada
+    como VARCHAR devido a formato de serialização  (dataset classificacao-evt). Coluna numérica armazenada
+    como VARCHAR devido ao formato de serialização  (dataset classificacao-evt).
+  usage: Recuperar este dataset quando a pergunta envolver vertimento turbinável, EVT, perdas hidráulicas
+    horárias do SIN, classificação de vertimento por razão energética ou elétrica, ou análise de eficiência
+    do aproveitamento hídrico no sistema interligado nacional para o período 2024-2025.
+domain: hidrologia
+schema:
+- name: classificacao_evt
+  physicalType: parquet
+  logicalType: object
+  physicalName: classificacao_evt
+  properties:
+  - name: din_instante
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Instante de referência horária do registro de Energia Vertida Turbinável (EVT), armazenado
+      como string no formato ISO 8601 (ex: "2024-01-01T00:00:00"). Representa o início de cada hora do
+      Sistema Interligado Nacional (SIN). Requer TRY_CAST para uso em filtros temporais e joins com outros
+      datasets horários.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data_hora
+      - timestamp
+      - hora
+      - data_instante
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_evt_verificado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor verificado (realizado) da Energia Vertida Turbinável (EVT) do Sistema Interligado
+      Nacional para o instante horário correspondente. Representa o total de energia que foi vertida e
+      poderia ter sido turbinada, mas não foi aproveitada. Armazenado como VARCHAR devido ao formato de
+      serialização; requer TRY_CAST para uso analítico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - evt_verificado
+      - energia_vertida_turbinavel
+      - evt_realizado
+      - vertimento_turbinavel
+      - val_evt
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_evt_verificado AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_evt_razaoenergetica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Parcela da Energia Vertida Turbinável (EVT) classificada como de razão energética, ou
+      seja, vertimento causado por limitações de capacidade de armazenamento ou afluência excessiva sob
+      perspectiva do balanço energético do sistema. Armazenado como VARCHAR devido ao formato de serialização;
+      requer TRY_CAST para uso analítico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - evt_razao_energetica
+      - razao_energetica
+      - evt_energetico
+      - vertimento_energetico
+      - val_razao_energetica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_evt_razaoenergetica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_evt_razaoeletrica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Parcela da Energia Vertida Turbinável (EVT) classificada como de razão elétrica, ou
+      seja, vertimento causado por restrições elétricas do sistema de transmissão (congestionamentos,
+      limites de intercâmbio, etc.) que impedem o aproveitamento da energia disponível. Armazenado como
+      VARCHAR devido ao formato de serialização; requer TRY_CAST para uso analítico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - evt_razao_eletrica
+      - razao_eletrica
+      - evt_eletrico
+      - vertimento_eletrico
+      - val_razao_eletrica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_evt_razaoeletrica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for classificacao_evt:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_evt_verificado)\
+      \ < 5:\n      name: val_evt_verificado não pode ter >5% nulos\n  - missing_percent(val_evt_razaoenergetica)\
+      \ < 5:\n      name: val_evt_razaoenergetica não pode ter >5% nulos\n  - missing_percent(val_evt_razaoeletrica)\
+      \ < 5:\n      name: val_evt_razaoeletrica não pode ter >5% nulos\n\n  # Unicidade da chave primária\
+      \ (candidata LLM — confirmar com dados reais)\n  - duplicate_count(din_instante) = 0:\n      name:\
+      \ din_instante não deve ter duplicatas (chave primária)\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/classificacao-evt
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - por que houve vertimento
+  - motivo do vertimento
+  - vertimento por razao energetica
+  - agua desperdicada por motivo
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver vertimento turbinável, EVT, perdas hidráulicas
+    horárias do SIN, classificação de vertimento por razão energética ou elétrica, ou análise de eficiência
+    do aproveitamento hídrico no sistema interligado nacional para o período 2024-2025. Também relevante
+    para perguntas sobre restrições elétricas que causam desperdício de energia hidráulica ou sobre o
+    impacto de reservatórios cheios no vertimento do SIN.
+- property: agentInstructions
+  value: '- [din_instante] Coluna armazenada como VARCHAR no Parquet em vez de TIMESTAMP. Requer conversão
+    explícita para operações temporais (filtros por período, truncamento por hora/dia/mês). Verificar
+    se o formato é consistente (''YYYY-MM-DD HH:MM:SS'') ao longo de todo o dataset classificacao-evt.
+
+
+    - [val_evt_verificado] Coluna numérica do dataset classificacao-evt armazenada como VARCHAR devido
+    ao formato de serialização. Qualquer agregação (SUM, AVG, MIN, MAX) sem TRY_CAST retornará erro ou
+    resultado incorreto. Verificar presença de valores não numéricos ou strings vazias que causariam NULL
+    no cast.
+
+
+    - [val_evt_razaoenergetica] Coluna numérica do dataset classificacao-evt armazenada como VARCHAR devido
+    ao formato de serialização. Verificar se os valores após TRY_CAST estão no intervalo esperado [0,
+    1] ou [0, 100] para uma razão/proporção, e se há valores negativos inesperados.
+
+
+    - [val_evt_razaoeletrica] Coluna numérica do dataset classificacao-evt armazenada como VARCHAR devido
+    ao formato de serialização. Verificar se os valores após TRY_CAST estão no intervalo esperado [0,
+    1] ou [0, 100] para uma razão/proporção, e se a soma de razão energética + razão elétrica é consistente
+    (esperado ≈ 1.0 ou 100% por instante).
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o total de energia vertida turbinável verificada no SIN em 2024?
+  - Qual a proporção do EVT causado por razão elétrica versus razão energética em cada mês?
+  - Em quais horas do dia ocorre maior concentração de vertimento turbinável de razão elétrica?
+  - Qual foi o pico horário de EVT verificado no período 2024-2025 e quando ocorreu?
+  - Como evoluiu mensalmente a participação do EVT de razão energética no total vertido?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/classificacao_evt/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-01-01'
+- property: temporalCoverageEnd
+  value: '2025-12-31'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: evt_verificado
+      label: Evt Verificado
+      columns:
+      - val_evt_verificado
+      expression: TRY_CAST(val_evt_verificado AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - evt_verificado
+      - energia_vertida_turbinavel
+      - evt_realizado
+      - vertimento_turbinavel
+      - val_evt
+      aggregation_modes:
+        total_energy:
+          sql: SUM(TRY_CAST(val_evt_verificado AS DOUBLE)) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(TRY_CAST(val_evt_verificado AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_evt_verificado AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: SUM(TRY_CAST(val_evt_verificado AS DOUBLE)) * 1.0
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_evt_verificado AS DOUBLE)) * 1.0
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - evt_verificado
+      - energia_vertida_turbinavel
+      - evt_realizado
+      - vertimento_turbinavel
+      - val_evt
+    - id: evt_razaoenergetica
+      label: EVT Razao Energetica
+      columns:
+      - val_evt_razaoenergetica
+      expression: TRY_CAST(val_evt_razaoenergetica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - evt_razaoenergetica
+      - evt_razao_energetica
+      - razao_energetica
+      - evt_energetico
+      - vertimento_energetico
+      - val_razao_energetica
+      aggregation_modes:
+        total_energy:
+          sql: SUM(TRY_CAST(val_evt_razaoenergetica AS DOUBLE)) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(TRY_CAST(val_evt_razaoenergetica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_evt_razaoenergetica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: SUM(TRY_CAST(val_evt_razaoenergetica AS DOUBLE)) * 1.0
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_evt_razaoenergetica AS DOUBLE)) * 1.0
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - evt_razao_energetica
+      - razao_energetica
+      - evt_energetico
+      - vertimento_energetico
+      - val_razao_energetica
+    - id: evt_razaoeletrica
+      label: EVT Razao Eletrica
+      columns:
+      - val_evt_razaoeletrica
+      expression: TRY_CAST(val_evt_razaoeletrica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - evt_razaoeletrica
+      - evt_razao_eletrica
+      - razao_eletrica
+      - evt_eletrico
+      - vertimento_eletrico
+      - val_razao_eletrica
+      aggregation_modes:
+        total_energy:
+          sql: SUM(TRY_CAST(val_evt_razaoeletrica AS DOUBLE)) * 1.0
+          unit: MWh
+        average_power:
+          sql: AVG(TRY_CAST(val_evt_razaoeletrica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_evt_razaoeletrica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: SUM(TRY_CAST(val_evt_razaoeletrica AS DOUBLE)) * 1.0
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_evt_razaoeletrica AS DOUBLE)) * 1.0
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - evt_razao_eletrica
+      - razao_eletrica
+      - evt_eletrico
+      - vertimento_eletrico
+      - val_razao_eletrica
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - evt_verificado
+      - evt_razaoenergetica
+      - evt_razaoeletrica
+      preferred_for:
+      - classificacao EVT
+      - razao eletrica vertimento
+      - razao energetica vertimento
+      - vertimento turbinavel SIN
+      - desperdicio hidraulico eletrico
+      - restricao transmissao vertimento
+      - afluencia excessiva vertimento
+      - parcela eletrica EVT
+      - parcela energetica EVT
+      - causa vertimento hidraulico
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+      - subsistema
+      - geracao termica
+      - fator capacidade
+      - carga energia
+    sql_patterns:
+      evt_verificado_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM(TRY_CAST(val_evt_verificado\
+          \ AS DOUBLE)) * 1.0 AS energia_mwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante\
+          \ AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - evt_verificado
+          grain: month
+        validated_params:
+          year: '2025'
+      evt_classificacao_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM(TRY_CAST(val_evt_razaoeletrica\
+          \ AS DOUBLE)) * 1.0 AS evt_eletrico_mwh,\n  SUM(TRY_CAST(val_evt_razaoenergetica AS DOUBLE))\
+          \ * 1.0 AS evt_energetico_mwh,\n  SUM(TRY_CAST(val_evt_verificado AS DOUBLE)) * 1.0 AS evt_total_mwh\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - evt_razaoeletrica
+          - evt_razaoenergetica
+          - evt_verificado
+          grain: month
+        validated_params:
+          year: '2025'
+      evt_pico_horario:
+        template: "SELECT TRY_CAST(din_instante AS TIMESTAMP) AS instante,\n  TRY_CAST(val_evt_verificado\
+          \ AS DOUBLE) AS evt_mwmed\nFROM {source}\nORDER BY TRY_CAST(val_evt_verificado AS DOUBLE) DESC\n\
+          LIMIT 10"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - peak_power
+          metrics:
+          - evt_verificado
+          grain: hour
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre EVT sem especificar classificacao
+        assume_metric: evt_verificado
+        assume_output: total_energy
+        note: EVT verificado e o total do vertimento turbinavel; classificacao por razao requer intencao
+          explicita
+      - when: usuario pergunta sobre total de vertimento
+        assume_metric: evt_verificado
+        assume_output: total_energy
+        note: Total de vertimento corresponde ao EVT verificado agregado
+      - when: usuario pergunta sobre media de vertimento
+        assume_metric: evt_verificado
+        assume_output: average_power
+        note: Media de potencia media horaria em MWmed
+      - when: usuario pergunta sobre pico de vertimento
+        assume_metric: evt_verificado
+        assume_output: peak_power
+        note: Pico horario de EVT em MWmed
+      must_clarify_when:
+      - trigger_terms:
+        - razao
+        - causa
+        - motivo
+        - classificacao
+        question: Voce quer analisar o EVT por razao eletrica (restricoes de transmissao) ou razao energetica
+          (afluencia/armazenamento), ou ambas comparadas?
+        options:
+        - razao eletrica (val_evt_razaoeletrica)
+        - razao energetica (val_evt_razaoenergetica)
+        - ambas comparadas
+      - trigger_terms:
+        - proporcao
+        - percentual
+        - participacao
+        - share
+        question: Voce quer a proporcao de EVT eletrico vs energetico em relacao ao total verificado?
+          Isso requer calcular razao_eletrica/verificado e razao_energetica/verificado por periodo.
+        options:
+        - proporcao percentual por periodo
+        - valores absolutos em MWh
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - belo monte
+        - tucurui
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina. Dataset e agregado nacional
+          SIN.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - subsistema
+        - sudeste
+        - nordeste
+        - sul
+        - norte
+        - SE/CO
+        reason: Dataset nao tem granularidade por subsistema. Granularidade e nacional (SIN).
+        redirect: dataset com dimensao nom_subsistema quando disponivel
+      - user_mentions:
+        - carga
+        - demanda
+        - consumo
+        reason: Dataset contem apenas EVT (vertimento turbinavel), nao carga do sistema.
+        redirect: carga-energia
+      - user_mentions:
+        - fator capacidade
+        - fator de capacidade
+        reason: Dataset nao contem potencia instalada nem calcula fator de capacidade.
+        redirect: fator-capacidade-2
+- property: fewShotQueries
+  value:
+  - question: Qual foi o volume mensal de energia vertida turbinável verificada no SIN em 2024?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia, SUM((TRY_CAST(val_evt_verificado
+      AS DOUBLE)) * 1.0) AS evt_verificado_total_mwmed, COUNT(*) AS horas_com_registro FROM read_parquet('s3://ons-aws-prod-opendata/dataset/classificacao_evt/*.parquet')
+      WHERE TRY_CAST(din_instante AS TIMESTAMP) >= TIMESTAMP '2024-01-01' AND TRY_CAST(din_instante AS
+      TIMESTAMP) < TIMESTAMP '2025-01-01' GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
+      ORDER BY mes_referencia
+  - question: Qual a proporção média entre razão energética e razão elétrica do EVT ao longo do período
+      coberto?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia, AVG(TRY_CAST(val_evt_razaoenergetica
+      AS DOUBLE)) AS media_razao_energetica, AVG(TRY_CAST(val_evt_razaoeletrica AS DOUBLE)) AS media_razao_eletrica,
+      AVG( TRY_CAST(val_evt_razaoenergetica AS DOUBLE) + TRY_CAST(val_evt_razaoeletrica AS DOUBLE) ) AS
+      media_soma_razoes FROM read_parquet('s3://ons-aws-prod-opendata/dataset/classificacao_evt/*.parquet')
+      WHERE TRY_CAST(din_instante AS TIMESTAMP) IS NOT NULL GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY mes_referencia
+  - question: Em quais horas do dia ocorre maior concentração de vertimento turbinável no SIN?
+    sql: SELECT EXTRACT(hour FROM TRY_CAST(din_instante AS TIMESTAMP)) AS hora_do_dia, AVG(TRY_CAST(val_evt_verificado
+      AS DOUBLE)) AS evt_medio_mwmed, SUM(TRY_CAST(val_evt_verificado AS DOUBLE)) AS evt_total_mwmed,
+      COUNT(*) AS num_registros FROM read_parquet('s3://ons-aws-prod-opendata/dataset/classificacao_evt/*.parquet')
+      WHERE TRY_CAST(din_instante AS TIMESTAMP) IS NOT NULL AND TRY_CAST(val_evt_verificado AS DOUBLE)
+      IS NOT NULL GROUP BY EXTRACT(hour FROM TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY hora_do_dia
+- property: license
+  value: CC-BY

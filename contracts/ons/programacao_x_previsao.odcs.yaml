@@ -1,0 +1,728 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:programacao_x_previsao
+name: programacao_x_previsao
+tenant: ons
+tags:
+- ONS
+- PDP
+- PDP programação
+- aderência despacho
+- aderência despacho eólico solar
+- desvio previsão
+- desvio previsão geração renovável
+- geração eólica
+- geração renovável
+- geração solar
+- patamares 30 minutos
+- previsão de geração
+- previsão versus programado
+- previsão versus programado geração renovável
+- programacao x previsao
+- programação de geração
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/programacao_x_previsao/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que operadores do ONS, agentes do setor elétrico e analistas de planejamento avaliem
+    a aderência entre a previsão de geração renovável e o despacho programado em patamares de 30 minutos,
+    suportando decisões de programação da operação, análise de desempenho de modelos de previsão e identificação
+    de desvios sistemáticos por usina, tecnologia ou período do dia.
+  limitations: 'Coluna val_previsao armazenada como VARCHAR devido ao formato de serialização. Coluna
+    val_programado armazenada como VARCHAR devido ao formato de serialização. Coluna dat_programacao armazenada
+    como VARCHAR, podendo conter formatos de data inconsistentes (ex: ''YYYY-MM-DD'', ''DD/MM/YYYY'')
+    entre diferentes arquivos Parquet.'
+  usage: Recuperar este dataset quando a pergunta envolver comparação entre valores previstos e programados
+    de geração eólica ou solar, análise de aderência de despacho renovável, avaliação de desempenho de
+    modelos de previsão PDP do ONS ou cálculo de desvios de geração renovável em patamares de 30 minutos.
+domain: geração
+schema:
+- name: programacao_x_previsao
+  physicalType: parquet
+  logicalType: object
+  physicalName: programacao_x_previsao
+  properties:
+  - name: dat_programacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de programação da operação no formato string (ex: ''YYYY-MM-DD''). Identifica o
+      dia ao qual o patamar de 30 minutos se refere. Requer conversão explícita para DATE em operações
+      temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de programação
+      - data programada
+      - data do despacho
+      - dat_prog
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_patamar
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número do patamar de 30 minutos dentro do dia de programação. Varia de 1 a 48, onde
+      1 corresponde ao intervalo 00:00–00:30 e 48 ao intervalo 23:30–00:00. Combinado com dat_programacao,
+      define o instante temporal exato da medição.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - patamar
+      - intervalo
+      - slot temporal
+      - half-hour slot
+      - num_pat
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+  - name: cod_usinapdp
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador único da usina eólica ou solar no contexto PDP (Previsão De Produção)
+      do ONS. Sufixo PDP indica que a usina está cadastrada no sistema de previsão de geração renovável.
+      Utilizado como chave de join com cadastros de usinas.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da usina
+      - código PDP
+      - cod_usina
+      - id usina
+      - usina PDP
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_usinapdp
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo da usina eólica ou solar conforme cadastro ONS no sistema PDP. Campo descritivo
+      complementar ao cod_usinapdp, utilizado para exibição e identificação humana da usina.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome da usina
+      - nome PDP
+      - nom_usina
+      - usina
+      - nome usina eólica
+      - nome usina solar
+    - property: semanticType
+      value: DIMENSION
+  - name: val_previsao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor previsto de geração da usina eólica ou solar para o patamar de 30 minutos correspondente.
+      Representa a previsão de produção (PDP) em MW. Armazenado fisicamente como VARCHAR devido ao formato
+      de serialização; requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - previsão
+      - valor previsto
+      - geração prevista
+      - previsão de geração
+      - PDP previsto
+      - val_prev
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_previsao AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_programado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor programado de geração da usina eólica ou solar para o patamar de 30 minutos correspondente.
+      Representa o despacho programado em MW. Armazenado fisicamente como VARCHAR devido ao formato de
+      serialização; requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - programado
+      - valor programado
+      - geração programada
+      - despacho programado
+      - val_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_programado AS DOUBLE)
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for programacao_x_previsao:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_previsao)\
+      \ < 5:\n      name: val_previsao não pode ter >5% nulos\n  - missing_percent(val_programado) < 5:\n\
+      \      name: val_programado não pode ter >5% nulos\n\n  # Baseline de volume — margem ±20% do row_count\
+      \ validado\n  - row_count between 39974 and 59961:\n      name: Volume esperado entre 39,974 e 59,961\
+      \ registros\n\n  # Unicidade da chave primária composta ['dat_programacao', 'num_patamar', 'cod_usinapdp']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (dat_programacao, num_patamar, cod_usinapdp)\
+      \ não deve ter duplicatas\n      fail query: |\n        SELECT * FROM programacao_x_previsao\n \
+      \       WHERE (dat_programacao, num_patamar, cod_usinapdp) IN (\n          SELECT dat_programacao,\
+      \ num_patamar, cod_usinapdp FROM programacao_x_previsao\n          GROUP BY dat_programacao, num_patamar,\
+      \ cod_usinapdp\n          HAVING COUNT(*) > 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente; dados do dia anterior disponíveis em até 1 dia útil
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/programacao_x_previsao
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - previsto contra programado
+  - acerto da previsao de geracao
+  - desvio entre previsao e programacao
+  - previsao de eolica e solar
+  - quanto a previsao errou
+  - carga prevista contra realizada
+  - previsao de geracao renovavel
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: 'Recuperar este dataset quando a pergunta envolver comparação entre valores previstos e programados
+    de geração eólica ou solar, análise de aderência de despacho renovável, avaliação de desempenho de
+    modelos de previsão PDP do ONS ou cálculo de desvios de geração renovável em patamares de 30 minutos.
+    Termos relacionados: PDP programação, aderência despacho, aderência despacho eólico solar, desvio
+    previsão, desvio previsão geração renovável.'
+- property: agentInstructions
+  value: '- [val_previsao] Coluna armazenada como VARCHAR em vez de DOUBLE devido ao formato de serialização.
+    Contém strings numéricas representando valores de geração em MW. Qualquer operação aritmética ou agregação
+    (SUM, AVG, MIN, MAX) exige conversão explícita. Valores não numéricos eventuais retornarão NULL com
+    TRY_CAST, sem erro de execução.
+
+
+    - [val_programado] Coluna armazenada como VARCHAR em vez de DOUBLE devido ao formato de serialização.
+    Contém strings numéricas representando valores de geração programada em MW. Qualquer operação aritmética
+    ou agregação (SUM, AVG, MIN, MAX) exige conversão explícita. Valores não numéricos eventuais retornarão
+    NULL com TRY_CAST, sem erro de execução.
+
+
+    - [dat_programacao] Coluna de data armazenada como VARCHAR em vez de DATE. Pode conter variações de
+    formato dependendo da origem do arquivo parquet. Recomenda-se TRY_CAST para garantir ordenação e filtros
+    corretos.
+
+
+    - [num_patamar] O campo deve variar estritamente entre 1 e 48 (48 patamares de 30 minutos por dia).
+    Valores fora desse intervalo indicam corrupção de dados ou erro de geração do arquivo. Verificação
+    preventiva recomendada em pipelines de ingestão.
+
+
+    - [cod_usinapdp] A chave primária natural é (dat_programacao, num_patamar, cod_usinapdp). Duplicatas
+    nessa combinação indicam registros redundantes ou erro de carga de múltiplos arquivos parquet para
+    o mesmo período. Deve ser verificado antes de agregações por usina e patamar.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o desvio médio entre previsão e programado para usinas eólicas em determinado dia?
+  - Quais usinas apresentaram maior diferença entre geração prevista e programada no último mês?
+  - Como evoluiu a aderência entre previsão e programado ao longo dos patamares do dia?
+  - Qual é a soma da geração prevista versus programada por patamar para uma data específica?
+  - Quais usinas solares tiveram maior erro de previsão em relação ao programado?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_x_previsao/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-10-01'
+- property: semantics
+  value:
+    temporal_perspective: previsto
+    row_grain:
+      temporal: 30 min
+      temporal_column: dat_programacao
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_programacao
+      - num_patamar
+      - cod_usinapdp
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: num_patamar
+    metrics:
+    - id: previsao
+      label: Previsao
+      columns:
+      - val_previsao
+      expression: TRY_CAST(val_previsao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - previsao
+      - previsão
+      - valor previsto
+      - geração prevista
+      - previsão de geração
+      - PDP previsto
+      aggregation_modes:
+        total_energy:
+          sql: SUM(TRY_CAST(val_previsao AS DOUBLE)) * 0.5
+          unit: MWh
+        average_power:
+          sql: AVG(TRY_CAST(val_previsao AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_previsao AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: AVG(TRY_CAST(val_previsao AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM(TRY_CAST(val_previsao AS DOUBLE)) * 0.5
+          unit: MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_previsao AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - previsão
+      - valor previsto
+      - geração prevista
+      - previsão de geração
+      - PDP previsto
+      - val_prev
+      - previsao PDP
+      - producao prevista
+    - id: programado
+      label: Programado
+      columns:
+      - val_programado
+      expression: TRY_CAST(val_programado AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - programado
+      - valor programado
+      - geração programada
+      - despacho programado
+      - val_prog
+      aggregation_modes:
+        total_energy:
+          sql: SUM(TRY_CAST(val_programado AS DOUBLE)) * 0.5
+          unit: MWh
+        average_power:
+          sql: AVG(TRY_CAST(val_programado AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: AVG(TRY_CAST(val_programado AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM(TRY_CAST(val_programado AS DOUBLE)) * 0.5
+          unit: MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_programado AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - programado
+      - valor programado
+      - geração programada
+      - despacho programado
+      - val_prog
+      - despacho renovavel
+    - id: desvio_absoluto
+      label: Desvio Absoluto Previsao vs Programado
+      columns:
+      - val_previsao
+      - val_programado
+      expression: TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: average
+      forbidden_aggregations: []
+      valid_intents:
+      - desvio absoluto
+      - diferença previsão programado
+      - erro absoluto
+      - desvio de geração
+      - diferença previsto programado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+          unit: MW
+      interval_hours: 0.5
+      aliases:
+      - desvio
+      - erro de previsão
+      - diferença previsto programado
+      - desvio absoluto
+      - erro absoluto PDP
+    - id: desvio_relativo
+      label: Desvio Relativo Previsao vs Programado
+      columns:
+      - val_previsao
+      - val_programado
+      expression: "CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado AS DOUBLE)\
+        \ IS NOT NULL\n     THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))\
+        \ / TRY_CAST(val_programado AS DOUBLE) * 100.0\n     ELSE NULL END"
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: average
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - desvio relativo
+      - erro relativo
+      - aderência de previsão
+      - percentual de desvio
+      - acurácia de previsão
+      - erro percentual
+      aggregation_modes:
+        average:
+          sql: "AVG(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado AS DOUBLE)\
+            \ IS NOT NULL\n         THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS\
+            \ DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n         ELSE NULL END)"
+          unit: '%'
+        maximum:
+          sql: "MAX(ABS(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado\
+            \ AS DOUBLE) IS NOT NULL\n              THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado\
+            \ AS DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n              ELSE NULL END))"
+          unit: '%'
+        minimum:
+          sql: "MIN(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado AS DOUBLE)\
+            \ IS NOT NULL\n         THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS\
+            \ DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n         ELSE NULL END)"
+          unit: '%'
+        time_series:
+          sql: "AVG(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado AS DOUBLE)\
+            \ IS NOT NULL\n         THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS\
+            \ DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n         ELSE NULL END)"
+          unit: '%'
+        ranking:
+          sql: "AVG(ABS(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado\
+            \ AS DOUBLE) IS NOT NULL\n              THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado\
+            \ AS DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n              ELSE NULL END))"
+          unit: '%'
+      interval_hours: 0.5
+      aliases:
+      - desvio relativo
+      - erro relativo
+      - aderência
+      - acurácia PDP
+      - erro percentual previsão
+      - percentual desvio
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - previsao
+      - programado
+      - desvio_absoluto
+      - desvio_relativo
+      preferred_for:
+      - desvio previsao programado
+      - aderencia despacho renovavel
+      - erro previsao PDP
+      - comparacao previsto programado usina
+      - acuracia modelo previsao ONS
+      - desvio geracao eolica solar patamar
+      - aderencia PDP usina
+      - erro percentual previsao renovavel
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - geracao hidraulica
+      - geracao termica
+      - subsistema agregado
+      - balanco carga geracao
+      - fluxo transmissao
+      - intercambio
+      - carga verificada
+    sql_patterns:
+      previsao_mensal_por_usina:
+        template: "SELECT nom_usinapdp,\n  DATE_TRUNC('month', TRY_CAST(dat_programacao AS DATE)) AS mes,\n\
+          \  AVG(TRY_CAST(val_previsao AS DOUBLE)) AS previsao_media_mwmed,\n  SUM(TRY_CAST(val_previsao\
+          \ AS DOUBLE)) * 0.5 AS previsao_total_mwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(dat_programacao\
+          \ AS DATE)) = {year}\nGROUP BY 1, 2\nORDER BY 2, 1"
+        output_unit: MWmed / MWh
+        matches:
+          output_modes:
+          - average_power
+          - total_energy
+          metrics:
+          - previsao
+          grain: month
+      desvio_medio_por_usina:
+        template: "SELECT nom_usinapdp,\n  AVG(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado\
+          \ AS DOUBLE)) AS desvio_medio_mw,\n  AVG(ABS(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado\
+          \ AS DOUBLE))) AS desvio_absoluto_medio_mw\nFROM {source}\nWHERE TRY_CAST(dat_programacao AS\
+          \ DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1\nORDER BY desvio_absoluto_medio_mw\
+          \ DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - desvio_absoluto
+          grain: usina
+      desvio_relativo_por_usina:
+        template: "SELECT nom_usinapdp,\n  AVG(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado\
+          \ AS DOUBLE) IS NOT NULL\n       THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado\
+          \ AS DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n       ELSE NULL END) AS desvio_relativo_pct\n\
+          FROM {source}\nWHERE TRY_CAST(dat_programacao AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\n\
+          GROUP BY 1\nORDER BY ABS(AVG(CASE WHEN TRY_CAST(val_programado AS DOUBLE) <> 0 AND TRY_CAST(val_programado\
+          \ AS DOUBLE) IS NOT NULL\n                     THEN (TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado\
+          \ AS DOUBLE)) / TRY_CAST(val_programado AS DOUBLE) * 100.0\n                     ELSE NULL END))\
+          \ DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - desvio_relativo
+          grain: usina
+      comparacao_previsto_programado_patamar:
+        template: "SELECT num_patamar,\n  AVG(TRY_CAST(val_previsao AS DOUBLE)) AS previsao_media_mwmed,\n\
+          \  AVG(TRY_CAST(val_programado AS DOUBLE)) AS programado_medio_mwmed\nFROM {source}\nWHERE TRY_CAST(dat_programacao\
+          \ AS DATE) = '{data}'\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          - comparison
+          metrics:
+          - previsao
+          - programado
+          grain: patamar
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre desvio sem especificar tipo
+        assume_metric: desvio_absoluto
+        assume_output: average_power
+        note: Desvio absoluto medio em MW e mais interpretavel que relativo sem contexto
+      - when: usuario pergunta sobre previsao sem especificar agregacao
+        assume_metric: previsao
+        assume_output: average_power
+        note: Potencia media em MWmed e mais adequada para series temporais de 30 min
+      - when: usuario pergunta sobre programado sem especificar agregacao
+        assume_metric: programado
+        assume_output: average_power
+        note: Potencia media em MWmed e mais adequada para series temporais de 30 min
+      - when: usuario pergunta sobre energia total prevista ou programada
+        assume_metric: previsao
+        assume_output: total_energy
+        note: Multiplicar SUM por 0.5 para converter MWmed*30min em MWh
+      - when: usuario pergunta sobre aderencia ou acuracia de previsao
+        assume_metric: desvio_relativo
+        assume_output: average
+        note: Desvio relativo percentual e a metrica padrao para aderencia de modelos PDP
+      must_clarify_when:
+      - trigger_terms:
+        - energia
+        - total
+        question: Voce quer a energia total em MWh (soma dos patamares x 0,5h) ou a potencia media em
+          MWmed?
+        reason: Ambiguidade entre potencia media e energia acumulada e critica para unidade do resultado
+      - trigger_terms:
+        - melhor
+        - pior
+        - ranking
+        question: Voce quer ranquear por desvio absoluto (MW) ou desvio relativo (%)? E para qual periodo?
+        reason: Ranking de aderencia pode usar metrica absoluta ou relativa com interpretacoes distintas
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        - eletronuclear
+        reason: Dataset cobre apenas usinas eolicas e solares cadastradas no sistema PDP do ONS.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        - GD
+        reason: Schema nao contem coluna MMGD separada; dataset e restrito a usinas PDP renovaveis.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - subsistema
+        - SE
+        - S
+        - NE
+        - N
+        - SIN agregado
+        reason: Dataset nao possui coluna de subsistema; granularidade e por usina individual PDP.
+        redirect: balanco_dessem_geral para visao agregada por subsistema
+      - user_mentions:
+        - intercambio
+        - fluxo
+        - transmissao
+        - linha de transmissao
+        reason: Schema nao contem colunas de intercambio ou fluxo de transmissao.
+        redirect: programacao_fluxo_controlado para fluxo em elementos controlados
+      - user_mentions:
+        - carga
+        - demanda
+        - consumo
+        reason: Schema nao contem coluna de carga; dataset e exclusivo de geracao renovavel prevista e
+          programada.
+        redirect: dataset de carga verificada ou balanco_dessem_geral
+      - user_mentions:
+        - hidraulica
+        - hidreletrica
+        - UHE
+        - PCH
+        - reservatorio
+        reason: Dataset cobre apenas eolica e solar no sistema PDP; hidraulica nao possui previsao PDP
+          neste dataset.
+        redirect: programacao_diaria ou balanco_dessem_geral para geracao hidraulica
+      - user_mentions:
+        - termica
+        - gas
+        - carvao
+        - biomassa
+        - nuclear
+        - UTE
+        reason: Dataset cobre apenas eolica e solar no sistema PDP; termica nao possui previsao PDP neste
+          dataset.
+        redirect: programacao_diaria ou balanco_dessem_geral para geracao termica
+- property: fewShotQueries
+  value:
+  - question: Qual foi o desvio médio diário entre val_previsao e val_programado para cada usina em novembro
+      de 2024?
+    sql: SELECT dat_programacao, cod_usinapdp, nom_usinapdp, AVG(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado
+      AS DOUBLE)) AS desvio_medio_mw, AVG(ABS(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado
+      AS DOUBLE))) AS desvio_absoluto_medio_mw, COUNT(*) AS qtd_patamares FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_x_previsao/*.parquet')
+      WHERE TRY_CAST(dat_programacao AS DATE) >= DATE '2024-11-01' AND TRY_CAST(dat_programacao AS DATE)
+      <= DATE '2024-11-30' AND TRY_CAST(val_previsao AS DOUBLE) IS NOT NULL AND TRY_CAST(val_programado
+      AS DOUBLE) IS NOT NULL GROUP BY dat_programacao, cod_usinapdp, nom_usinapdp ORDER BY desvio_absoluto_medio_mw
+      DESC LIMIT 100
+  - question: Quais são as 20 usinas com maior erro absoluto acumulado entre previsão e programação no
+      período disponível?
+    sql: SELECT cod_usinapdp, nom_usinapdp, SUM(ABS(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado
+      AS DOUBLE))) AS erro_absoluto_acumulado_mw, AVG(ABS(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado
+      AS DOUBLE))) AS erro_absoluto_medio_mw, COUNT(*) AS total_patamares FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_x_previsao/*.parquet')
+      WHERE TRY_CAST(val_previsao AS DOUBLE) IS NOT NULL AND TRY_CAST(val_programado AS DOUBLE) IS NOT
+      NULL GROUP BY cod_usinapdp, nom_usinapdp ORDER BY erro_absoluto_acumulado_mw DESC LIMIT 20
+  - question: Como varia o desvio médio entre previsão e programação ao longo dos 48 patamares do dia?
+    sql: SELECT num_patamar, AVG(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE))
+      AS desvio_medio_mw, AVG(ABS(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS DOUBLE)))
+      AS desvio_absoluto_medio_mw, STDDEV(TRY_CAST(val_previsao AS DOUBLE) - TRY_CAST(val_programado AS
+      DOUBLE)) AS desvio_padrao_mw, COUNT(*) AS total_registros FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_x_previsao/*.parquet')
+      WHERE TRY_CAST(val_previsao AS DOUBLE) IS NOT NULL AND TRY_CAST(val_programado AS DOUBLE) IS NOT
+      NULL AND num_patamar BETWEEN 1 AND 48 GROUP BY num_patamar ORDER BY num_patamar
+- property: relatedDatasets
+  value:
+    programacao_diaria:
+      join_keys:
+      - num_patamar
+    balanco_dessem_geral:
+      join_keys:
+      - num_patamar
+    programacao_fluxo_controlado:
+      join_keys:
+      - num_patamar
+- property: license
+  value: CC-BY

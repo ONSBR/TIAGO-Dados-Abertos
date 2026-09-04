@@ -1,0 +1,410 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:cargaglobal-roraima
+name: cargaglobal-roraima
+tenant: ons
+tags:
+- 30min
+- carga
+- carga RR
+- carga Roraima
+- carga global Roraima
+- carga_global
+- demanda
+- demanda RR
+- demanda Roraima
+- ons
+- planejamento_operacao
+- roraima
+- semi_horario
+- sistema isolado Roraima
+- sistema_isolado
+- subsistema_rr
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/cargaglobal_roraima/*.parquet
+  format: parquet
+description:
+  purpose: Prover série temporal semi-horária de demanda agregada do sistema isolado de Roraima para analistas
+    do ONS, agentes do setor elétrico e reguladores da ANEEL, suportando decisões de despacho de geração,
+    planejamento da operação, identificação de picos de demanda, estudos de expansão da capacidade instalada
+    e monitoramento do balanço oferta-demanda no subsistema isolado RR.
+  limitations: Coluna numérica armazenada como VARCHAR no Parquet físico devido ao formato de serialização
+    (dtype object convertido para UTF8). Coluna de instante temporal armazenada como VARCHAR em vez de
+    TIMESTAMP no Parquet físico. O dataset cobre ~1.
+  usage: Recuperar este dataset quando a pergunta envolver demanda, carga ou consumo de energia elétrica
+    no sistema isolado de Roraima em qualquer granularidade temporal (semi-horária, diária, mensal ou
+    anual).
+domain: carga
+schema:
+- name: cargaglobal_roraima
+  physicalType: parquet
+  logicalType: object
+  physicalName: cargaglobal_roraima
+  properties:
+  - name: din_instante
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data e hora do instante de medição da carga global de Roraima, com granularidade de
+      30 minutos. Armazenado como VARCHAR no Parquet físico devido ao pipeline de exportação ONS; requer
+      CAST para TIMESTAMP em operações temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data_hora
+      - timestamp
+      - data
+      - horario
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_carga_mw
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor da carga global consumida no sistema isolado de Roraima no instante correspondente,
+      expresso em megawatts (MW). Armazenado como VARCHAR no Parquet físico devido ao formato de serialização
+      (dtype object convertido para UTF8); requer TRY_CAST para operações numéricas.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - carga
+      - carga_mw
+      - demanda
+      - demanda_mw
+      - consumo
+      - valor_carga
+      - potencia
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_carga_mw AS DOUBLE)
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for cargaglobal_roraima:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_carga_mw)\
+      \ < 5:\n      name: val_carga_mw não pode ter >5% nulos\n\n  # Unicidade da chave primária (candidata\
+      \ LLM — confirmar com dados reais)\n  - duplicate_count(din_instante) = 0:\n      name: din_instante\
+      \ não deve ter duplicatas (chave primária)\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P30D
+  description: Atualizado mensalmente com possibilidade de revisão retroativa por processo de consistência
+    recorrente do ONS
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/cargaglobal-roraima
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver demanda, carga ou consumo de energia elétrica
+    no sistema isolado de Roraima em qualquer granularidade temporal (semi-horária, diária, mensal ou
+    anual). Também recuperar quando a análise exigir balanço oferta-demanda, picos de demanda, fator de
+    carga ou planejamento da operação do subsistema RR isolado do SIN.
+- property: agentInstructions
+  value: '- [val_carga_mw] Coluna val_carga_mw está armazenada como VARCHAR no Parquet devido ao formato
+    de serialização. Qualquer operação aritmética, agregação (SUM, AVG, MAX, MIN) ou comparação numérica
+    exige conversão explícita via TRY_CAST. Valores não conversíveis retornarão NULL silenciosamente.
+
+
+    - [din_instante] O total de 13.848 registros ao longo de aproximadamente 1.277 dias resulta em ~10,8
+    registros/dia, muito inferior ao esperado de 48 registros/dia para granularidade de 30 minutos. Indica
+    lacunas temporais significativas, possivelmente por indisponibilidade de dados, períodos sem medição
+    ou processo de consistência recorrente com dados parciais.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a demanda máxima de Roraima em 2024 e em qual horário ocorreu?
+  - Como evoluiu a carga média mensal de Roraima entre 2022 e 2025?
+  - Quais são os horários de pico de demanda no sistema isolado de Roraima?
+  - Qual é o fator de carga médio de Roraima por mês?
+  - Existem lacunas na série temporal de carga de Roraima e em quais períodos?
+- property: vectorTags
+  value:
+  - consumo de energia
+  - consumo eletrico
+  - consumo de eletricidade
+  - consumo residencial
+  - consumo industrial
+  - demanda de energia
+  - consumo de roraima
+  - carga de boa vista
+  - demanda do sistema isolado
+  - energia em roraima
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/cargaglobal_roraima/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2022-02-01'
+- property: temporalCoverageEnd
+  value: '2025-08-31'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: STATIC
+      temporal_column: din_instante
+      spatial: subsistema
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: carga_mw
+      label: Carga Verificada
+      columns:
+      - val_carga_mw
+      expression: TRY_CAST(val_carga_mw AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      interval_hours: 0.5
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - carga_mw
+      - carga
+      - demanda
+      - demanda_mw
+      - consumo
+      aggregation_modes:
+        total_energy:
+          sql: SUM(TRY_CAST(val_carga_mw AS DOUBLE)) * 0.5
+          unit: MWh
+          note: Energia total = SUM(MW) * 0.5h por intervalo de 30 minutos
+        average_power:
+          sql: AVG(TRY_CAST(val_carga_mw AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_carga_mw AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: AVG(TRY_CAST(val_carga_mw AS DOUBLE))
+          unit: MWmed
+          note: Para serie temporal use media; para energia acumulada multiplique por interval_hours
+        ranking:
+          sql: AVG(TRY_CAST(val_carga_mw AS DOUBLE))
+          unit: MWmed
+        comparison:
+          sql: AVG(TRY_CAST(val_carga_mw AS DOUBLE))
+          unit: MWmed
+      aliases:
+      - carga
+      - carga_mw
+      - demanda
+      - demanda_mw
+      - consumo
+      - valor_carga
+      - potencia
+    query_routing:
+      supports_listing: true
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal_carga_roraima
+    selection_policy:
+      covers_metrics:
+      - carga_mw
+      preferred_for:
+      - carga Roraima
+      - demanda sistema isolado RR
+      - consumo Roraima semi-horario
+      - pico demanda Roraima
+      - fator de carga Roraima
+      - balanco oferta-demanda Roraima
+      - subsistema isolado Roraima
+      - serie temporal carga RR
+      - planejamento operacao Roraima
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao por fonte
+      - subsistema SE
+      - subsistema S
+      - subsistema NE
+      - subsistema N
+      - SIN
+      - intercambio
+      - geracao hidraulica
+      - geracao termica
+    sql_patterns:
+      carga_media_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  AVG(TRY_CAST(val_carga_mw\
+          \ AS DOUBLE)) AS carga_media_mwmed,\n  MAX(TRY_CAST(val_carga_mw AS DOUBLE)) AS carga_pico_mw,\n\
+          \  SUM(TRY_CAST(val_carga_mw AS DOUBLE)) * 0.5 AS energia_total_mwh\nFROM {source}\nWHERE TRY_CAST(din_instante\
+          \ AS TIMESTAMP) IS NOT NULL\n  AND TRY_CAST(val_carga_mw AS DOUBLE) IS NOT NULL\nGROUP BY 1\n\
+          ORDER BY 1\n"
+        output_unit: MWmed / MW / MWh
+        matches:
+          output_modes:
+          - average_power
+          - peak_power
+          - total_energy
+          metrics:
+          - carga_mw
+          grain: month
+      pico_demanda_com_horario:
+        template: "SELECT TRY_CAST(din_instante AS TIMESTAMP) AS instante,\n  TRY_CAST(val_carga_mw AS\
+          \ DOUBLE) AS carga_mw\nFROM {source}\nWHERE TRY_CAST(val_carga_mw AS DOUBLE) IS NOT NULL\n \
+          \ AND EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nORDER BY TRY_CAST(val_carga_mw\
+          \ AS DOUBLE) DESC\nLIMIT 1\n"
+        output_unit: MW
+        matches:
+          output_modes:
+          - peak_power
+          metrics:
+          - carga_mw
+          grain: instant
+      serie_temporal_diaria:
+        template: "SELECT DATE_TRUNC('day', TRY_CAST(din_instante AS TIMESTAMP)) AS dia,\n  AVG(TRY_CAST(val_carga_mw\
+          \ AS DOUBLE)) AS carga_media_mwmed,\n  MAX(TRY_CAST(val_carga_mw AS DOUBLE)) AS carga_pico_mw,\n\
+          \  COUNT(*) AS registros_dia\nFROM {source}\nWHERE TRY_CAST(din_instante AS TIMESTAMP) IS NOT\
+          \ NULL\n  AND TRY_CAST(val_carga_mw AS DOUBLE) IS NOT NULL\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          - peak_power
+          metrics:
+          - carga_mw
+          grain: day
+        note: registros_dia < 48 indica lacuna temporal naquele dia
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pede "carga" ou "demanda" sem especificar agregacao
+        assume_metric: carga_mw
+        assume_output: average_power
+        assume_unit: MWmed
+        note: Carga em MW e potencia media; SUM sem multiplicar por interval_hours nao representa energia
+          acumulada corretamente
+      - when: usuario pede "energia consumida" ou "consumo em MWh"
+        assume_metric: carga_mw
+        assume_output: total_energy
+        assume_unit: MWh
+        note: Energia = SUM(MW) * 0.5h; alertar sobre lacunas temporais que podem subestimar o total
+      - when: usuario pede "pico" ou "maximo" ou "horario de pico"
+        assume_metric: carga_mw
+        assume_output: peak_power
+        assume_unit: MW
+      must_clarify_when:
+      - ambiguity: energia_vs_potencia
+        question: Voce quer a carga media em MWmed (potencia media no periodo) ou a energia total consumida
+          em MWh (soma dos intervalos de 30 minutos)?
+        trigger_terms:
+        - energia
+        - consumo total
+        - MWh
+        - GWh
+        note: Dataset tem lacunas temporais; alertar que energia total pode estar subestimada
+      - ambiguity: periodo_com_lacunas
+        question: O dataset de Roraima possui lacunas temporais significativas (~78% dos intervalos ausentes).
+          Deseja prosseguir com os dados disponiveis ou prefere uma analise de cobertura primeiro?
+        trigger_terms:
+        - serie completa
+        - todos os dados
+        - historico completo
+        - sem lacunas
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - usina individual
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina. Dataset e agregado no nivel
+          do sistema isolado de Roraima.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - SE
+        - Sul
+        - Nordeste
+        - Norte
+        - SIN
+        - subsistema SE
+        - subsistema S
+        - subsistema NE
+        - subsistema N
+        reason: Dataset cobre exclusivamente o sistema isolado de Roraima. Para outros subsistemas use
+          dataset de carga do SIN.
+        redirect: carga-energia
+      - user_mentions:
+        - intercambio
+        - importacao
+        - exportacao
+        - fluxo entre subsistemas
+        reason: Dataset nao contem dados de intercambio energetico.
+        redirect: intercambio-energia ou balanco-energia-subsistema
+      - user_mentions:
+        - geracao hidraulica
+        - geracao termica
+        - geracao eolica
+        - geracao solar
+        - mix de geracao
+        - matriz eletrica
+        reason: Dataset contem apenas carga consumida total, sem desagregacao por fonte geradora.
+        redirect: geracao-usina-2 ou balanco-energia-subsistema
+- property: fewShotQueries
+  value:
+  - question: Qual foi a carga máxima e mínima registrada em cada mês em Roraima?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, MAX(TRY_CAST(val_carga_mw
+      AS DOUBLE)) AS carga_max_mw, MIN(TRY_CAST(val_carga_mw AS DOUBLE)) AS carga_min_mw, AVG(TRY_CAST(val_carga_mw
+      AS DOUBLE)) AS carga_media_mw, COUNT(*) AS num_registros FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cargaglobal_roraima/*.parquet')
+      WHERE TRY_CAST(val_carga_mw AS DOUBLE) IS NOT NULL GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY mes
+  - question: Qual é o perfil típico de carga ao longo do dia em Roraima (média por hora do dia)?
+    sql: SELECT EXTRACT(hour FROM TRY_CAST(din_instante AS TIMESTAMP)) AS hora_do_dia, AVG(TRY_CAST(val_carga_mw
+      AS DOUBLE)) AS carga_media_mw, MAX(TRY_CAST(val_carga_mw AS DOUBLE)) AS carga_max_mw, COUNT(*) AS
+      num_registros FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cargaglobal_roraima/*.parquet')
+      WHERE TRY_CAST(val_carga_mw AS DOUBLE) IS NOT NULL GROUP BY EXTRACT(hour FROM TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY hora_do_dia
+  - question: Como a demanda média de energia em Roraima evoluiu ano a ano entre 2022 e 2025?
+    sql: SELECT EXTRACT(year FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano, AVG(TRY_CAST(val_carga_mw
+      AS DOUBLE)) AS carga_media_mw, MAX(TRY_CAST(val_carga_mw AS DOUBLE)) AS carga_pico_mw, COUNT(*)
+      AS num_registros FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cargaglobal_roraima/*.parquet')
+      WHERE TRY_CAST(val_carga_mw AS DOUBLE) IS NOT NULL GROUP BY EXTRACT(year FROM TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY ano
+- property: license
+  value: CC-BY

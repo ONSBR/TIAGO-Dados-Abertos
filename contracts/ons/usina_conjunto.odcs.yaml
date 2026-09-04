@@ -1,0 +1,912 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:usina_conjunto
+name: usina_conjunto
+tenant: ons
+tags:
+- ANEEL
+- CEG
+- ONS
+- Tipo II-C
+- cadastro
+- composição de conjunto
+- conjunto
+- conjunto de usinas
+- conjunto usinas Tipo II-C
+- geração
+- relacionamento conjunto usina
+- subsistema
+- usina
+- usina conjunto ONS
+- usinas Tipo II-C
+- vigência
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/usina_conjunto/*.parquet
+  format: parquet
+description:
+  purpose: Suportar equipes de planejamento, operação e regulação do ONS na identificação da composição
+    histórica e atual dos conjuntos de usinas Tipo II-C, permitindo decisões de despacho, contabilização
+    de geração agregada, supervisão do parque gerador cadastrado e cruzamento com bases regulatórias da
+    ANEEL via Código de Empreendimento de Geração (CEG).
+  limitations: Coluna de data armazenada como VARCHAR no Parquet em vez de DATE. Coluna de data de fim
+    armazenada como VARCHAR. Coexistência de dois identificadores de conjunto (id_conjuntousina INTEGER
+    e id_ons_conjunto VARCHAR) pode gerar inconsistências se um conjunto possuir múltiplos id_conjuntousina
+    ou vice-versa.
+  usage: Recuperar este dataset quando a pergunta envolver composição, membros ou histórico de conjuntos
+    de usinas Tipo II-C, identificação de usinas por conjunto ou conjunto por usina, ou cruzamento de
+    identificadores ONS (id_ons_usina, id_ons_conjunto) com CEG da ANEEL.
+domain: geração
+schema:
+- name: usina_conjunto
+  physicalType: parquet
+  logicalType: object
+  physicalName: usina_conjunto
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a usina pertence (ex: SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - submercado
+      - cod_subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome descritivo do subsistema elétrico (ex: Sudeste/Centro-Oeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - região elétrica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: estad_id
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código identificador do estado federativo onde a usina está localizada (sigla UF)
+    customProperties:
+    - property: aliases
+      value:
+      - uf
+      - estado_id
+      - sigla_estado
+      - cod_estado
+      - UF
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BA
+      - CE
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PB
+      - PE
+      - PI
+      - PR
+      - RN
+      - RS
+      - SC
+      - SP
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado federativo onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - nome estado
+      - nome do estado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BAHIA
+      - CEARA
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - SANTA CATARINA
+      - SAO PAULO
+  - name: id_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do tipo de usina conforme classificação ONS (ex: II-C para usinas
+      de conjunto)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo usina
+      - cod_tipo_usina
+      - tipo_usina
+      - classificacao_usina
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - UEE
+      - UFV
+      - UHE
+      - UTE
+  - name: nom_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Descrição textual do tipo de usina conforme classificação ONS
+    customProperties:
+    - property: aliases
+      value:
+      - nome tipo usina
+      - descricao tipo usina
+      - tipo de usina
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Eolielétrica
+      - Fotovoltaica
+      - Hidroelétrica
+      - Térmica
+  - name: id_conjuntousina
+    physicalType: INTEGER
+    logicalType: integer
+    description: Identificador numérico interno do conjunto de usinas no sistema ONS. Chave interna sequencial;
+      coexiste com id_ons_conjunto. Valores observados entre 3 e 316.
+    customProperties:
+    - property: aliases
+      value:
+      - id conjunto
+      - id_conjunto
+      - conjunto_id
+      - identificador conjunto
+    - property: semanticType
+      value: IDENTIFIER
+  - name: id_ons_conjunto
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código oficial ONS do conjunto de usinas. Representa o identificador público/regulatório
+      do conjunto, distinto do id_conjuntousina interno.
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo ons conjunto
+      - cod_ons_conjunto
+      - id ons conjunto
+      - codigo conjunto ons
+    - property: semanticType
+      value: IDENTIFIER
+  - name: id_ons_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código oficial ONS da usina individual. Identificador único da usina no sistema ONS,
+      utilizado para joins com outros datasets de geração.
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo ons usina
+      - cod_ons_usina
+      - id ons usina
+      - codigo usina ons
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_conjunto
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome descritivo do conjunto de usinas ao qual a usina individual está associada
+    customProperties:
+    - property: aliases
+      value:
+      - nome conjunto
+      - nome do conjunto
+      - conjunto
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome descritivo da usina individual componente do conjunto
+    customProperties:
+    - property: aliases
+      value:
+      - nome usina
+      - nome da usina
+      - usina
+    - property: semanticType
+      value: DIMENSION
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração da ANEEL. Identificador regulatório único da usina
+      perante a ANEEL, utilizado para cruzamento com bases regulatórias externas.
+    customProperties:
+    - property: aliases
+      value:
+      - codigo empreendimento
+      - cod_empreendimento
+      - ceg aneel
+      - codigo aneel
+      - empreendimento geração
+    - property: semanticType
+      value: IDENTIFIER
+  - name: dat_iniciorelacionamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de início da vigência do relacionamento entre a usina e o conjunto. Armazenada como
+      VARCHAR no Parquet; requer conversão para DATE em consultas temporais. Representa atributo cadastral
+      de vigência, não dimensão de série temporal.
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data inicio
+      - inicio relacionamento
+      - data inicio vigencia
+      - dat_inicio
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_fimrelacionamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de fim da vigência do relacionamento entre a usina e o conjunto. Armazenada como
+      VARCHAR no Parquet; pode conter valor sentinela para registros ativos (ex: ''9999-12-31'' ou ''2999-12-31'').
+      Requer conversão para DATE em consultas temporais.'
+    customProperties:
+    - property: aliases
+      value:
+      - data fim
+      - fim relacionamento
+      - data fim vigencia
+      - dat_fim
+      - data encerramento
+    - property: semanticType
+      value: TIMESTAMP
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for usina_conjunto:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'Nordeste'\n        - 'Norte'\n        - 'Sudeste/Centro-Oeste'\n        - 'Sul'\n      name:\
+      \ nom_subsistema deve ser um dos valores válidos\n  - invalid_count(estad_id) = 0:\n      valid\
+      \ values:\n        - 'BA'\n        - 'CE'\n        - 'GO'\n        - 'MA'\n        - 'MG'\n    \
+      \    - 'MS'\n        - 'MT'\n        - 'PB'\n        - 'PE'\n        - 'PI'\n        - 'PR'\n  \
+      \      - 'RN'\n        - 'RS'\n        - 'SC'\n        - 'SP'\n      name: estad_id deve ser um\
+      \ dos valores válidos\n  - invalid_count(nom_estado) = 0:\n      valid values:\n        - 'BAHIA'\n\
+      \        - 'CEARA'\n        - 'GOIAS'\n        - 'MARANHAO'\n        - 'MATO GROSSO'\n        -\
+      \ 'MATO GROSSO DO SUL'\n        - 'MINAS GERAIS'\n        - 'PARAIBA'\n        - 'PARANA'\n    \
+      \    - 'PERNAMBUCO'\n        - 'PIAUI'\n        - 'RIO GRANDE DO NORTE'\n        - 'RIO GRANDE DO\
+      \ SUL'\n        - 'SANTA CATARINA'\n        - 'SAO PAULO'\n      name: nom_estado deve ser um dos\
+      \ valores válidos\n  - invalid_count(id_tipousina) = 0:\n      valid values:\n        - 'UEE'\n\
+      \        - 'UFV'\n        - 'UHE'\n        - 'UTE'\n      name: id_tipousina deve ser um dos valores\
+      \ válidos\n  - invalid_count(nom_tipousina) = 0:\n      valid values:\n        - 'Eolielétrica'\n\
+      \        - 'Fotovoltaica'\n        - 'Hidroelétrica'\n        - 'Térmica'\n      name: nom_tipousina\
+      \ deve ser um dos valores válidos\n\n  # Baseline de volume — margem ±20% do row_count validado\n\
+      \  - row_count between 1656 and 2485:\n      name: Volume esperado entre 1,656 e 2,485 registros\n\
+      \n  # Unicidade da chave primária composta ['id_ons_conjunto', 'id_ons_usina', 'dat_iniciorelacionamento']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (id_ons_conjunto, id_ons_usina,\
+      \ dat_iniciorelacionamento) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM\
+      \ usina_conjunto\n        WHERE (id_ons_conjunto, id_ons_usina, dat_iniciorelacionamento) IN (\n\
+      \          SELECT id_ons_conjunto, id_ons_usina, dat_iniciorelacionamento FROM usina_conjunto\n\
+      \          GROUP BY id_ons_conjunto, id_ons_usina, dat_iniciorelacionamento\n          HAVING COUNT(*)\
+      \ > 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/usina_conjunto
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quais usinas formam o conjunto
+  - composicao dos conjuntos de usinas
+  - conjunto de usinas eolicas
+  - ceg das usinas do conjunto
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver composição, membros ou histórico de conjuntos
+    de usinas Tipo II-C, identificação de usinas por conjunto ou conjunto por usina, ou cruzamento de
+    identificadores ONS (id_ons_usina, id_ons_conjunto) com CEG da ANEEL. Também relevante quando a consulta
+    requer filtro de vigência de associação usina-conjunto para análises de geração agregada ou restrições
+    operativas por conjunto.
+- property: agentInstructions
+  value: '- [dat_iniciorelacionamento] Coluna de data armazenada como VARCHAR no Parquet em vez de DATE/TIMESTAMP.
+    Pode conter formatos variados (YYYY-MM-DD, DD/MM/YYYY) ou valores inválidos que impedem ordenação
+    e filtragem direta sem conversão explícita.
+
+
+    - [dat_fimrelacionamento] Coluna de data armazenada como VARCHAR no Parquet em vez de DATE/TIMESTAMP.
+    Pode conter formatos variados ou valores inválidos que impedem operações de intervalo de vigência
+    sem conversão explícita via TRY_CAST.
+
+
+    - [id_conjuntousina] Identificador numérico interno com range 3–317, indicando que os IDs não são
+    sequenciais a partir de 1. Pode haver lacunas na sequência que representam conjuntos inativos ou removidos
+    do sistema, o que pode causar confusão em joins por ID numérico interno versus id_ons_conjunto alfanumérico.
+
+
+    - [ceg] O CEG identifica unicamente um empreendimento de geração, mas uma mesma usina pode aparecer
+    em múltiplos registros devido a diferentes períodos de vigência ou associação a diferentes conjuntos
+    ao longo do tempo. Verificar se há CEGs com sobreposição de períodos de vigência no mesmo conjunto.
+
+
+    - [id_ons_usina] Uma mesma usina (id_ons_usina) pode estar associada a múltiplos conjuntos ou ter
+    múltiplos períodos de vigência. Verificar sobreposição temporal de relacionamentos para o mesmo id_ons_usina,
+    o que indicaria inconsistência cadastral.
+
+
+    - [nom_tipousina] Valores com trailing spaces detectados em ''nom_tipousina''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais usinas compõem o conjunto eólico X atualmente?
+  - Quantas usinas Tipo II-C estão ativas no subsistema Nordeste?
+  - Qual é o histórico de composição do conjunto Y — quais usinas entraram e saíram?
+  - Quais conjuntos de usinas estão localizados no estado do Rio Grande do Norte?
+  - Qual o CEG ANEEL das usinas que pertencem ao conjunto Z?
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/usina_conjunto/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '1986-12-01'
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      temporal_column: dat_iniciorelacionamento
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_iniciorelacionamento
+      - id_subsistema
+      - ceg
+      - id_ons_conjunto
+      - id_ons_usina
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: nom_tipousina
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics: []
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    selection_policy:
+      covers_metrics: []
+      preferred_for:
+      - composicao conjunto usina
+      - membros conjunto tipo II-C
+      - historico relacionamento usina conjunto
+      - vigencia associacao usina conjunto
+      - id_ons_conjunto
+      - id_ons_usina por conjunto
+      - usinas ativas no conjunto
+      - conjunto por usina
+      - dat_iniciorelacionamento dat_fimrelacionamento
+      - cruzamento CEG conjunto ONS
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - geracao horaria
+      - geracao verificada
+      - geracao programada
+      - despacho energia
+      - disponibilidade uge
+      - fator capacidade
+      - restricao constrained-off
+      - reservatorio nivel
+      - carga subsistema
+      - preco energia
+      - indicador desempenho uge
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - sudeste/centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          - ne
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          - nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          - norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          - sudeste
+          - centro-oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          - sul
+          filter: nom_subsistema = 'Sul'
+      estad_id:
+        BA:
+          aliases:
+          - BA
+          - bahia
+          filter: estad_id = 'BA'
+        CE:
+          aliases:
+          - CE
+          - ceara
+          filter: estad_id = 'CE'
+        GO:
+          aliases:
+          - GO
+          - goias
+          filter: estad_id = 'GO'
+        MA:
+          aliases:
+          - MA
+          - maranhao
+          filter: estad_id = 'MA'
+        MG:
+          aliases:
+          - MG
+          - minas gerais
+          filter: estad_id = 'MG'
+        MS:
+          aliases:
+          - MS
+          - mato grosso do sul
+          filter: estad_id = 'MS'
+        MT:
+          aliases:
+          - MT
+          - mato grosso
+          filter: estad_id = 'MT'
+        PB:
+          aliases:
+          - PB
+          - paraiba
+          filter: estad_id = 'PB'
+        PE:
+          aliases:
+          - PE
+          - pernambuco
+          filter: estad_id = 'PE'
+        PI:
+          aliases:
+          - PI
+          - piaui
+          filter: estad_id = 'PI'
+        PR:
+          aliases:
+          - PR
+          - parana
+          filter: estad_id = 'PR'
+        RN:
+          aliases:
+          - RN
+          - rio grande do norte
+          filter: estad_id = 'RN'
+        RS:
+          aliases:
+          - RS
+          - rio grande do sul
+          filter: estad_id = 'RS'
+        SC:
+          aliases:
+          - SC
+          - santa catarina
+          filter: estad_id = 'SC'
+        SP:
+          aliases:
+          - SP
+          - sao paulo
+          filter: estad_id = 'SP'
+      nom_estado:
+        BAHIA:
+          aliases:
+          - BAHIA
+          - Bahia
+          - bahia
+          filter: nom_estado = 'BAHIA'
+        CEARA:
+          aliases:
+          - CEARA
+          - Ceara
+          - ceara
+          filter: nom_estado = 'CEARA'
+        GOIAS:
+          aliases:
+          - GOIAS
+          - Goias
+          - goias
+          filter: nom_estado = 'GOIAS'
+        MARANHAO:
+          aliases:
+          - MARANHAO
+          - Maranhao
+          - maranhao
+          filter: nom_estado = 'MARANHAO'
+        MATO GROSSO:
+          aliases:
+          - MATO GROSSO
+          - Mato Grosso
+          - mato grosso
+          filter: nom_estado = 'MATO GROSSO'
+        MATO GROSSO DO SUL:
+          aliases:
+          - MATO GROSSO DO SUL
+          - Mato Grosso do Sul
+          - mato grosso do sul
+          filter: nom_estado = 'MATO GROSSO DO SUL'
+        MINAS GERAIS:
+          aliases:
+          - MINAS GERAIS
+          - Minas Gerais
+          - minas gerais
+          filter: nom_estado = 'MINAS GERAIS'
+        PARAIBA:
+          aliases:
+          - PARAIBA
+          - Paraiba
+          - paraiba
+          filter: nom_estado = 'PARAIBA'
+        PARANA:
+          aliases:
+          - PARANA
+          - Parana
+          - parana
+          filter: nom_estado = 'PARANA'
+        PERNAMBUCO:
+          aliases:
+          - PERNAMBUCO
+          - Pernambuco
+          - pernambuco
+          filter: nom_estado = 'PERNAMBUCO'
+        PIAUI:
+          aliases:
+          - PIAUI
+          - Piaui
+          - piaui
+          filter: nom_estado = 'PIAUI'
+        RIO GRANDE DO NORTE:
+          aliases:
+          - RIO GRANDE DO NORTE
+          - Rio Grande do Norte
+          - rio grande do norte
+          filter: nom_estado = 'RIO GRANDE DO NORTE'
+        RIO GRANDE DO SUL:
+          aliases:
+          - RIO GRANDE DO SUL
+          - Rio Grande do Sul
+          - rio grande do sul
+          filter: nom_estado = 'RIO GRANDE DO SUL'
+        SANTA CATARINA:
+          aliases:
+          - SANTA CATARINA
+          - Santa Catarina
+          - santa catarina
+          filter: nom_estado = 'SANTA CATARINA'
+        SAO PAULO:
+          aliases:
+          - SAO PAULO
+          - Sao Paulo
+          - sao paulo
+          filter: nom_estado = 'SAO PAULO'
+      id_tipousina:
+        UEE:
+          aliases:
+          - UEE
+          - eolica
+          - eolioeletrica
+          - eolioeletrico
+          filter: id_tipousina = 'UEE'
+        UFV:
+          aliases:
+          - UFV
+          - fotovoltaica
+          - solar
+          - fotovoltaico
+          filter: id_tipousina = 'UFV'
+        UHE:
+          aliases:
+          - UHE
+          - hidreletrica
+          - hidro
+          - hidroeletrica
+          filter: id_tipousina = 'UHE'
+        UTE:
+          aliases:
+          - UTE
+          - termica
+          - termeletrica
+          filter: id_tipousina = 'UTE'
+      nom_tipousina:
+        Eolielétrica:
+          aliases:
+          - Eolielétrica
+          - eolica
+          - eolioeletrica
+          - eolica
+          - vento
+          filter: TRIM(nom_tipousina) = 'Eoliélétrica'
+        Fotovoltaica:
+          aliases:
+          - Fotovoltaica
+          - fotovoltaica
+          - solar
+          filter: TRIM(nom_tipousina) = 'Fotovoltaica'
+        Hidroelétrica:
+          aliases:
+          - Hidroelétrica
+          - hidreletrica
+          - hidro
+          - hidroeletrica
+          filter: TRIM(nom_tipousina) = 'Hidroélétrica'
+        Térmica:
+          aliases:
+          - Térmica
+          - termica
+          - termeletrica
+          filter: TRIM(nom_tipousina) = 'Térmica'
+    sql_patterns: {}
+    ambiguity_policy:
+      default_assumptions: []
+      must_clarify_when:
+      - ambiguity: ativo_vs_historico
+        question: Voce quer apenas os relacionamentos ativos hoje ou todo o historico de composicao do
+          conjunto?
+        trigger_terms:
+        - historico
+        - composicao atual
+        - atualmente
+        - hoje
+        - vigente
+        - ativo
+        - encerrado
+        - saiu
+        - entrou
+      - ambiguity: conjunto_vs_usina_individual
+        question: Voce quer informacoes sobre o conjunto (agrupamento ONS) ou sobre a usina individual?
+        trigger_terms:
+        - conjunto
+        - agrupamento
+        - grupo de usinas
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset nao contem usinas nucleares; tipos presentes sao UEE, UFV, UHE, UTE.
+        redirect: geracao-usina-2 com filtro de tipo/combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD; cobre apenas conjuntos Tipo II-C.
+        redirect: dataset com coluna val_germmgd ou val_ger_mmgd quando disponivel
+      - user_mentions:
+        - geracao horaria
+        - geracao verificada
+        - geracao real
+        - MWh gerado
+        - MWmed gerado
+        reason: Dataset e cadastral e nao contem series temporais de geracao.
+        redirect: geracao-usina-2 para geracao horaria verificada por usina
+      - user_mentions:
+        - programacao
+        - programada
+        - dessem
+        - pmo
+        reason: Dataset e cadastral e nao contem programacao de geracao.
+        redirect: programacao_diaria para geracao programada semi-horaria por usina
+      - user_mentions:
+        - constrained-off
+        - coff
+        - restricao operativa
+        - curtailment
+        reason: Dataset nao contem registros de restricoes operativas.
+        redirect: restricao_coff_eolica_detail ou restricao_coff_fotovoltaica_detail
+      - user_mentions:
+        - disponibilidade
+        - indisponibilidade
+        - TEIF
+        - TEF
+        reason: Dataset nao contem indicadores de disponibilidade de UGEs.
+        redirect: disponibilidade_usina ou ind_disponibilidade_fgeracao_uge_mensal
+      - user_mentions:
+        - fator de capacidade
+        - fator capacidade
+        reason: Dataset nao contem metricas de fator de capacidade.
+        redirect: fator-capacidade-2
+      - user_mentions:
+        - PLD
+        - CMO
+        - preco spot
+        - preco energia
+        reason: Dataset nao contem dados de preco de energia.
+        redirect: dataset de preco/CMO/PLD CCEE
+      - user_mentions:
+        - nivel reservatorio
+        - cota reservatorio
+        - vazao afluente
+        - volume util
+        reason: Dataset nao contem dados hidrologicos.
+        redirect: reservatorio
+- property: fewShotQueries
+  value:
+  - question: Quais usinas estão atualmente associadas a conjuntos em cada subsistema?
+    sql: SELECT uc.id_subsistema, uc.nom_subsistema, uc.id_ons_conjunto, uc.nom_conjunto, uc.id_ons_usina,
+      uc.nom_usina, uc.id_tipousina, uc.nom_tipousina, TRY_CAST(uc.dat_iniciorelacionamento AS DATE) AS
+      inicio_vigencia, TRY_CAST(uc.dat_fimrelacionamento AS DATE) AS fim_vigencia FROM read_parquet('s3://ons-aws-prod-opendata/dataset/usina_conjunto/*.parquet')
+      AS uc WHERE TRY_CAST(uc.dat_fimrelacionamento AS DATE) >= CURRENT_DATE AND TRY_CAST(uc.dat_iniciorelacionamento
+      AS DATE) <= CURRENT_DATE ORDER BY uc.nom_subsistema, uc.nom_conjunto, uc.nom_usina;
+  - question: Quantas usinas de cada tipo estão associadas a conjuntos em cada subsistema?
+    sql: SELECT uc.id_subsistema, uc.nom_subsistema, uc.id_tipousina, uc.nom_tipousina, COUNT(DISTINCT
+      uc.id_ons_usina) AS qtd_usinas, COUNT(DISTINCT uc.id_ons_conjunto) AS qtd_conjuntos FROM read_parquet('s3://ons-aws-prod-opendata/dataset/usina_conjunto/*.parquet')
+      AS uc WHERE TRY_CAST(uc.dat_fimrelacionamento AS DATE) >= CURRENT_DATE AND TRY_CAST(uc.dat_iniciorelacionamento
+      AS DATE) <= CURRENT_DATE GROUP BY uc.id_subsistema, uc.nom_subsistema, uc.id_tipousina, uc.nom_tipousina
+      ORDER BY uc.nom_subsistema, qtd_usinas DESC;
+  - question: Qual é o histórico de usinas que integraram o conjunto de ID 42?
+    sql: SELECT uc.id_conjuntousina, uc.id_ons_conjunto, uc.nom_conjunto, uc.id_ons_usina, uc.nom_usina,
+      uc.ceg, uc.id_tipousina, TRY_CAST(uc.dat_iniciorelacionamento AS DATE) AS inicio_vigencia, TRY_CAST(uc.dat_fimrelacionamento
+      AS DATE) AS fim_vigencia, DATEDIFF('day', TRY_CAST(uc.dat_iniciorelacionamento AS DATE), TRY_CAST(uc.dat_fimrelacionamento
+      AS DATE) ) AS dias_vigencia FROM read_parquet('s3://ons-aws-prod-opendata/dataset/usina_conjunto/*.parquet')
+      AS uc WHERE uc.id_conjuntousina = 42 ORDER BY TRY_CAST(uc.dat_iniciorelacionamento AS DATE), uc.nom_usina;
+- property: relatedDatasets
+  value:
+    usina_pqu:
+      join_keys:
+      - id_ons_usina
+      - id_subsistema
+      - estad_id
+    modalidade-usina:
+      join_keys:
+      - ceg
+      - nom_usina
+      - nom_estado
+    geracao-usina-2:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    usi_servicoancilar_sandbox:
+      join_keys:
+      - ceg
+      - nom_conjunto
+    reservatorio:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    restricao_coff_eolica_usi:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    disponibilidade_usina:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    restricao_coff_eolica_detail:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - ceg
+      - nom_usina
+    restricao_coff_fotovoltaica_detail:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    restricao_coff_fotovoltaica:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    capacidade-geracao:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - id_tipousina
+      - nom_usina
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    fator-capacidade-2:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_tipousina
+    geracao-termica-despacho-2:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+- property: license
+  value: CC-BY

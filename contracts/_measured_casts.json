@@ -1,0 +1,5 @@
+{
+  "ons/usi_servicoancilar_sandbox": {
+    "val_must": "TRY_CAST(REPLACE(REPLACE(val_must, '.', ''), ',', '.') AS DOUBLE)"
+  }
+}

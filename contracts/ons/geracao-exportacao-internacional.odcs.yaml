@@ -1,0 +1,665 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:geracao-exportacao-internacional
+name: geracao-exportacao-internacional
+tenant: ons
+tags:
+- EVT Argentina
+- EVT Uruguai
+- argentina
+- evt
+- exportacao-internacional
+- exportação internacional de energia
+- exportação internacional energia elétrica Argentina Uruguai ONS
+- geracao-termica
+- geração para exportação
+- horario
+- intercambio-energia
+- intercâmbio internacional comercial
+- mwmed
+- portaria-mme-049-2022
+- sin
+- uruguai
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/geracao_exportacao_internacional_ho/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que agentes do setor elétrico, reguladores, o ONS e a CCEE monitorem e contabilizem
+    os intercâmbios internacionais de energia elétrica exportada para Argentina e Uruguai em base horária,
+    suportando decisões de despacho térmico, contabilização comercial de contratos EVT, cumprimento de
+    obrigações contratuais de exportação conforme Portaria MME nº 049/2022, e reconciliação entre geração
+    contratada e fluxo físico realizado nas interligações internacionais do SIN.
+  limitations: 13,6% dos registros possuem valor nulo para geração EVT destinada à Argentina, indicando
+    períodos sem contrato ativo ou sem despacho EVT para esse destino. val_gerexpevt_uy apresenta valor
+    mínimo de -3,0 MWmed, fisicamente inesperado para geração destinada à exportação. 3,7% dos registros
+    possuem valor nulo para geração EVT destinada ao Uruguai.
+  usage: Recuperar este dataset quando a pergunta envolver exportação de energia elétrica do Brasil para
+    Argentina ou Uruguai, intercâmbios internacionais comerciais do SIN, geração EVT (Energia de Venda
+    a Terceiros) para destinos internacionais, ou despacho térmico específico para contratos de exportação
+    conforme Portaria MME nº 049/2022.
+domain: intercâmbio
+schema:
+- name: geracao_exportacao_internacional
+  physicalType: parquet
+  logicalType: object
+  physicalName: geracao_exportacao_internacional
+  properties:
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante de referência da medição horária de geração e exportação internacional, representando
+      o início do intervalo horário em horário de Brasília (UTC-3).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - hora
+      - data_hora
+      - timestamp
+      - din_referencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_gerexpevt_ar
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração comercial destinada à exportação para a Argentina na modalidade EVT (Energia
+      de Venda a Terceiros), em MWmed, para o intervalo horário correspondente. Apresenta 13,6% de nulos,
+      indicando que nem sempre há geração EVT contratada para esse destino.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_evt_argentina
+      - geracao_exportacao_evt_ar
+      - evt_argentina
+      - geracao_ar_evt
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: val_gerexpevt_uy
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração comercial destinada à exportação para o Uruguai na modalidade EVT (Energia de
+      Venda a Terceiros), em MWmed, para o intervalo horário correspondente. Apresenta 3,7% de nulos e
+      valor mínimo de -3,0 MWmed, sugerindo possível reversão residual de fluxo ou arredondamento numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_evt_uruguai
+      - geracao_exportacao_evt_uy
+      - evt_uruguai
+      - geracao_uy_evt
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: val_gerexptermica
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração térmica total destinada à exportação internacional (Argentina e/ou Uruguai),
+      em MWmed, para o intervalo horário correspondente. Não apresenta nulos e possui valor máximo de
+      2555,999 MWmed, representando o despacho térmico específico para atendimento de contratos de exportação
+      conforme Portaria MME nº 049/2022.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_termica_exportacao
+      - geracao_termica_exp
+      - termica_exportacao
+      - val_gertermica_exp
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: val_exportacao_ar
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Fluxo de energia efetivamente exportado para a Argentina na modalidade comercial, em
+      MWmed, para o intervalo horário correspondente. Não apresenta nulos e possui valor máximo de 2200,077
+      MWmed. Representa o intercâmbio internacional realizado conforme contabilização do ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - exportacao_argentina
+      - fluxo_exportacao_ar
+      - intercambio_ar
+      - exportacao_ar
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: val_exportacao_uy
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Fluxo de energia efetivamente exportado para o Uruguai na modalidade comercial, em MWmed,
+      para o intervalo horário correspondente. Não apresenta nulos e possui valor máximo de 503,05 MWmed.
+      Representa o intercâmbio internacional realizado conforme contabilização do ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - exportacao_uruguai
+      - fluxo_exportacao_uy
+      - intercambio_uy
+      - exportacao_uy
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for geracao_exportacao_internacional:\n  - row_count > 0:\n      name: Tabela\
+      \ não pode estar vazia\n\n  # Unicidade da chave primária (candidata LLM — confirmar com dados reais)\n\
+      \  - duplicate_count(din_instante) = 0:\n      name: din_instante não deve ter duplicatas (chave\
+      \ primária)\n\n  # Nulos em val_gerexpevt_ar — alerta de qualidade (real=0%, threshold=5.0%)\n \
+      \ - missing_percent(val_gerexpevt_ar) < 5.0:\n      name: val_gerexpevt_ar não deve ter >5.0% nulos\n\
+      \n  # Nulos em val_exportacao_ar — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(val_exportacao_ar)\
+      \ < 5.0:\n      name: val_exportacao_ar não deve ter >5.0% nulos\n\n  # Nulos em val_exportacao_uy\
+      \ — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(val_exportacao_uy) < 5.0:\n\
+      \      name: val_exportacao_uy não deve ter >5.0% nulos\n\n  # Freshness: din_instante deve ter\
+      \ dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_instante) < 3d:\n      name: din_instante\
+      \ não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/geracao-exportacao-internacional
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto foi exportado para a argentina
+  - energia vendida para o uruguai
+  - exportacao de energia
+  - geracao para exportar
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver exportação de energia elétrica do Brasil para
+    Argentina ou Uruguai, intercâmbios internacionais comerciais do SIN, geração EVT (Energia de Venda
+    a Terceiros) para destinos internacionais, ou despacho térmico específico para contratos de exportação
+    conforme Portaria MME nº 049/2022. Também relevante para perguntas sobre reconciliação entre geração
+    contratada e fluxo físico realizado nas interligações internacionais.
+- property: agentInstructions
+  value: '- [val_gerexpevt_ar] 16,1% dos registros possuem valor nulo, o maior percentual de nulos entre
+    todas as colunas do dataset. Pode refletir períodos sem despacho EVT para Argentina ou ausência de
+    contratos ativos naquele instante. Deve ser tratado como ausência de despacho (zero lógico) ou como
+    dado não disponível, dependendo do contexto analítico.
+
+
+    - [val_gerexpevt_uy] Valor mínimo de -3,0 MWmed detectado na coluna, o que é fisicamente inesperado
+    para uma grandeza de geração destinada à exportação. Pode indicar reversão de fluxo (importação pontual
+    do Uruguai), ajuste de medição retroativo ou erro de registro. Requer investigação dos registros com
+    valor negativo.
+
+
+    - [val_exportacao_ar] 0,2% dos registros possuem valor nulo para o fluxo efetivo exportado para a
+    Argentina. Embora percentualmente baixo, pode impactar cálculos de energia total exportada em séries
+    contínuas. Verificar se os nulos coincidem com manutenções de interligação ou indisponibilidades operacionais.
+
+
+    - [val_exportacao_uy] 0,2% dos registros possuem valor nulo para o fluxo efetivo exportado para o
+    Uruguai. Embora percentualmente baixo, pode impactar cálculos de energia total exportada. Verificar
+    se os nulos coincidem com os mesmos instantes de nulos em val_exportacao_ar, sugerindo problema sistêmico
+    de coleta.
+
+
+    - [din_instante] O período real dos dados (2023-01-01 a 2026-06-12) diverge significativamente da
+    última atualização registrada nos metadados CKAN (2023-10-18), confirmando que os metadados estão
+    desatualizados. Com 12.672 linhas para ~1.278 dias, a média é ~9,9 registros/dia em vez de 24 esperados
+    para granularidade horária completa, sugerindo que apenas horas com despacho ativo são registradas.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o volume total de energia exportada para Argentina e Uruguai em 2024?
+  - Em quais meses de 2023 a exportação para Argentina foi maior que 1000 MWmed médios?
+  - Qual a relação entre geração térmica para exportação e o fluxo efetivamente exportado?
+  - Houve períodos em que a geração EVT para Argentina foi zero ou nula em 2024?
+  - Qual o perfil horário típico de exportação para Uruguai em dias úteis versus fins de semana?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_exportacao_internacional_ho/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+    dimension_columns:
+      subsistema: null
+      fonte: _pivot(val_gerexptermica)
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: gerexpevt_ar
+      label: Gerexpevt Ar
+      columns:
+      - val_gerexpevt_ar
+      expression: val_gerexpevt_ar
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - gerexpevt_ar
+      - geracao_evt_argentina
+      - geracao_exportacao_evt_ar
+      - evt_argentina
+      - geracao_ar_evt
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_gerexpevt_ar) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_gerexpevt_ar)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_gerexpevt_ar)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_gerexpevt_ar)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_gerexpevt_ar) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_gerexpevt_ar)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geracao_evt_argentina
+      - geracao_exportacao_evt_ar
+      - evt_argentina
+      - geracao_ar_evt
+    - id: gerexpevt_uy
+      label: Gerexpevt Uy
+      columns:
+      - val_gerexpevt_uy
+      expression: val_gerexpevt_uy
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - gerexpevt_uy
+      - geracao_evt_uruguai
+      - geracao_exportacao_evt_uy
+      - evt_uruguai
+      - geracao_uy_evt
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_gerexpevt_uy) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_gerexpevt_uy)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_gerexpevt_uy)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_gerexpevt_uy)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_gerexpevt_uy) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_gerexpevt_uy)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geracao_evt_uruguai
+      - geracao_exportacao_evt_uy
+      - evt_uruguai
+      - geracao_uy_evt
+    - id: gerexptermica
+      label: Gerexptermica
+      columns:
+      - val_gerexptermica
+      expression: val_gerexptermica
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - gerexptermica
+      - geracao_termica_exportacao
+      - geracao_termica_exp
+      - termica_exportacao
+      - val_gertermica_exp
+      - termica
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_gerexptermica) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_gerexptermica)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_gerexptermica)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_gerexptermica)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_gerexptermica) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_gerexptermica)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geracao_termica_exportacao
+      - geracao_termica_exp
+      - termica_exportacao
+      - val_gertermica_exp
+      - termica
+      - termeletrica
+      - ute
+    - id: exportacao_ar
+      label: Exportacao Argentina
+      columns:
+      - val_exportacao_ar
+      expression: val_exportacao_ar
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - exportacao_ar
+      - exportacao_argentina
+      - fluxo_exportacao_ar
+      - intercambio_ar
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_exportacao_ar) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_exportacao_ar)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_exportacao_ar)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_exportacao_ar)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_exportacao_ar) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_exportacao_ar)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - exportacao_argentina
+      - fluxo_exportacao_ar
+      - intercambio_ar
+      - exportacao_ar
+    - id: exportacao_uy
+      label: Exportacao Uruguai
+      columns:
+      - val_exportacao_uy
+      expression: val_exportacao_uy
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - exportacao_uy
+      - exportacao_uruguai
+      - fluxo_exportacao_uy
+      - intercambio_uy
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_exportacao_uy) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_exportacao_uy)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_exportacao_uy)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_exportacao_uy)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_exportacao_uy) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_exportacao_uy)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - exportacao_uruguai
+      - fluxo_exportacao_uy
+      - intercambio_uy
+      - exportacao_uy
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - gerexpevt_ar
+      - gerexpevt_uy
+      - gerexptermica
+      - exportacao_ar
+      - exportacao_uy
+      preferred_for:
+      - exportacao internacional Brasil
+      - intercambio internacional SIN
+      - exportacao Argentina energia
+      - exportacao Uruguai energia
+      - EVT exportacao
+      - energia venda terceiros internacional
+      - despacho termico exportacao
+      - Portaria MME 049 2022
+      - fluxo interligacao internacional
+      - reconciliacao geracao contratada fluxo fisico
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - gas natural separado
+      - carvao separado
+      - biomassa separada
+      - geracao por subsistema
+      - carga eletrica
+      - fator capacidade
+      - restricao eolica
+    value_aliases:
+      fonte:
+        termica:
+          aliases:
+          - termica
+          - termeletrica
+          - ute
+          columns:
+          - val_gerexptermica
+    sql_patterns:
+      gerexpevt_ar_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM((val_gerexpevt_ar)\
+          \ * 1.0) / 1000 AS valor\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP))\
+          \ = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - gerexpevt_ar
+          grain: month
+        validated_params:
+          year: '2026'
+      exportacao_total_anual:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano,\n  SUM((val_exportacao_ar)\
+          \ * 1.0) / 1000 AS exportacao_ar_gwh,\n  SUM((val_exportacao_uy) * 1.0) / 1000 AS exportacao_uy_gwh,\n\
+          \  SUM((COALESCE(val_exportacao_ar, 0) + COALESCE(val_exportacao_uy, 0)) * 1.0) / 1000 AS exportacao_total_gwh\n\
+          FROM {source}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - exportacao_ar
+          - exportacao_uy
+          grain: year
+      reconciliacao_geracao_fluxo:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM((val_gerexptermica)\
+          \ * 1.0) / 1000 AS geracao_termica_exp_gwh,\n  SUM((COALESCE(val_exportacao_ar, 0) + COALESCE(val_exportacao_uy,\
+          \ 0)) * 1.0) / 1000 AS fluxo_total_exportado_gwh\nFROM {source}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - gerexptermica
+          - exportacao_ar
+          - exportacao_uy
+          grain: month
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre exportacao sem especificar pais
+        assume_metric: exportacao_ar
+        assume_output: total_energy
+        note: Exportacao para Argentina e o fluxo dominante (max 2200 MWmed vs 503 MWmed UY). Se usuario
+          mencionar 'total', somar exportacao_ar + exportacao_uy.
+      - when: usuario pergunta sobre geracao termica para exportacao
+        assume_metric: gerexptermica
+        assume_output: total_energy
+        note: Representa despacho termico agregado (AR+UY) conforme Portaria MME 049/2022. NAO abre por
+          combustivel.
+      - when: usuario pergunta sobre EVT sem especificar pais
+        assume_metric: gerexpevt_ar
+        assume_output: total_energy
+        note: EVT para Argentina e o contrato dominante. Perguntar se usuario quer AR, UY ou ambos quando
+          contexto for ambiguo.
+      - when: usuario pergunta sobre energia exportada em periodo
+        assume_metric: exportacao_ar
+        assume_output: total_energy
+        note: Usar SUM(val * 1.0)/1000 para GWh. Lembrar que dataset registra apenas horas com despacho
+          ativo (~9,9 registros/dia em vez de 24), o que pode subestimar totais se horas sem despacho
+          forem zero e nao estiverem registradas.
+      must_clarify_when:
+      - trigger_terms:
+        - exportacao total
+        - intercambio total
+        question: Voce quer a exportacao para Argentina, para Uruguai, ou a soma de ambos (AR + UY)?
+        reason: Dataset possui colunas separadas por pais; soma pode ser necessaria ou nao dependendo
+          da intencao.
+      - trigger_terms:
+        - geracao EVT
+        - energia venda terceiros
+        question: Voce quer a geracao EVT para Argentina, para Uruguai, ou ambos?
+        reason: Dataset possui val_gerexpevt_ar e val_gerexpevt_uy separados.
+      - trigger_terms:
+        - fluxo fisico
+        - fluxo realizado
+        - geracao contratada
+        question: Voce quer o fluxo efetivamente exportado (val_exportacao_ar/uy) ou a geracao comercialmente
+          contratada para exportacao (val_gerexpevt_ar/uy)?
+        reason: Dataset distingue geracao EVT contratada (val_gerexpevt_*) de fluxo fisico realizado (val_exportacao_*).
+          Sao grandezas diferentes.
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - gas
+        - gas natural
+        reason: Geracao termica esta agregada sem abertura por combustivel.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - carvao
+        - carvoeira
+        reason: Geracao termica esta agregada sem abertura por combustivel.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - biomassa
+        reason: Geracao termica esta agregada sem abertura por combustivel.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - importacao
+        - importar energia
+        reason: Dataset registra apenas exportacao (Brasil -> AR/UY). Fluxos de importacao nao estao presentes.
+        redirect: dataset de intercambio internacional com fluxos bidirecionais quando disponivel
+- property: fewShotQueries
+  value:
+  - question: Qual foi o volume mensal de energia exportada para Argentina e Uruguai em 2024?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, ROUND(SUM((COALESCE(val_exportacao_ar,
+      0)) * 1.0) / 1000, 2) AS energia_exportada_ar_mwmed, ROUND(SUM((COALESCE(val_exportacao_uy, 0))
+      * 1.0) / 1000, 2) AS energia_exportada_uy_mwmed, ROUND(SUM((COALESCE(val_exportacao_ar, 0)) * 1.0)
+      / 1000 + SUM((COALESCE(val_exportacao_uy, 0)) * 1.0) / 1000, 2) AS total_exportado_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_exportacao_internacional_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY DATE_TRUNC('month',
+      TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY mes
+  - question: Qual a participação percentual da geração térmica no total de energia destinada à exportação
+      internacional por mês?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, ROUND(SUM((val_gerexptermica)
+      * 1.0) / 1000, 2) AS geracao_termica_exportacao_mwmed, ROUND(SUM((COALESCE(val_gerexpevt_ar, 0))
+      * 1.0) / 1000 + SUM((COALESCE(val_gerexpevt_uy, 0)) * 1.0) / 1000, 2) AS geracao_evt_total_mwmed,
+      ROUND( 100.0 * SUM((val_gerexptermica) * 1.0) / 1000 / NULLIF(SUM((val_gerexptermica) * 1.0) / 1000
+      + SUM((COALESCE(val_gerexpevt_ar, 0)) * 1.0) / 1000 + SUM((COALESCE(val_gerexpevt_uy, 0)) * 1.0)
+      / 1000, 0), 2 ) AS pct_termica FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_exportacao_internacional_ho/*.parquet')
+      GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY mes
+  - question: Quais foram as 10 horas com maior exportação para a Argentina no histórico disponível?
+    sql: SELECT din_instante, val_exportacao_ar, val_exportacao_uy, val_gerexptermica FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_exportacao_internacional_ho/*.parquet')
+      WHERE val_exportacao_ar IS NOT NULL ORDER BY val_exportacao_ar DESC LIMIT 10
+- property: license
+  value: CC-BY

@@ -1,0 +1,530 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:intercambio-internacional
+name: intercambio-internacional
+tenant: ons
+tags:
+- Acaray
+- Argentina
+- Garabi
+- Paraguai
+- SIN
+- Uruguai
+- Uruguaiana
+- exportacao energia Brasil
+- exportacao-energia
+- importacao energia Brasil
+- importacao-energia
+- intercambio SIN
+- intercambio internacional
+- intercambio-internacional
+- intercâmbio internacional
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/intercambio_internacional_ho/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar e programar o intercâmbio internacional de energia elétrica entre o SIN e países
+    vizinhos em base horária, suportando decisões de despacho operativo, balanço energético nacional,
+    verificação de cumprimento de acordos bilaterais de fornecimento de energia e análise de fluxos de
+    importação e exportação por operadores do ONS, analistas de mercado da CCEE e planejadores do setor
+    elétrico brasileiro.
+  limitations: Coluna numérica (MWmed) armazenada como VARCHAR devido ao formato de serialização no dataset
+    intercambio-internacional. 78,7% dos registros possuem valor nulo em val_intercambioprogmwmed no dataset
+    intercambio-internacional, indicando que o intercâmbio programado não está disponível para a maior
+    parte do período histórico. Além da alta taxa de nulos, val_intercambioprogmwmed no dataset intercambio-internacional
+    também é armazenada como VARCHAR pelo formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver fluxos de energia entre o Brasil e países vizinhos
+    (Argentina, Uruguai, Paraguai), importação ou exportação de energia pelo SIN, balanço energético internacional,
+    conversoras de frequência de fronteira (Garabi, Uruguaiana, Melo, Rivera, Acaray) ou comparação entre
+    intercâmbio realizado e programado em base horária.
+domain: intercambio
+schema:
+- name: intercambio_internacional
+  physicalType: parquet
+  logicalType: object
+  physicalName: intercambio_internacional
+  properties:
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante de referência da medição horária do intercâmbio internacional, representando
+      o início do intervalo horário. Serve como eixo temporal principal da série e componente da chave
+      primária composta com nom_paisdestino.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - hora
+      - instante
+      - timestamp
+      - data_hora
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: nom_paisdestino
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do país de destino (ou origem) do intercâmbio de energia com o SIN. Representa
+      o país contraparte na troca de energia via conversoras de frequência de fronteira. Valores conhecidos:
+      Argentina (via Garabi I, Garabi II e Uruguaiana), Uruguai (via Melo e Rivera) e Paraguai (via Acaray).
+      Valores positivos indicam exportação do SIN para o país; valores negativos indicam importação pelo
+      SIN.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - pais
+      - pais_destino
+      - pais_origem
+      - contraparte
+      - nom_paisdestino
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ARGENTINA
+      - Argentina
+      - PARAGUAI
+      - URUGUAI
+      - Uruguai
+  - name: val_intercambiomwmed
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor medido do intercâmbio de energia entre o SIN e o país de destino no intervalo
+      horário, expresso em MWmed (megawatts médios). Representa a soma das medidas de fluxo de potência
+      ativa nas conversoras de frequência de fronteira. Valores positivos indicam exportação do SIN; valores
+      negativos indicam importação. ATENÇÃO: armazenado fisicamente como VARCHAR pelo formato de serialização;
+      requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio
+      - intercambio_realizado
+      - fluxo
+      - potencia_intercambio
+      - val_intercambio
+      - mwmed
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_intercambiomwmed AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_intercambioprogmwmed
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor programado do intercâmbio de energia entre o SIN e o país de destino no intervalo
+      horário, expresso em MWmed (megawatts médios). Representa o intercâmbio previsto para o instante,
+      possivelmente preenchido apenas para horizonte futuro ou datas específicas de programação operativa.
+      Possui 78,7% de nulos, indicando disponibilidade parcial. ATENÇÃO: armazenado fisicamente como VARCHAR
+      pelo formato de serialização; requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio_programado
+      - programado
+      - prog
+      - val_prog
+      - val_intercambio_programado
+      - mwmed_programado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_intercambioprogmwmed AS DOUBLE)
+    - property: unit
+      value: MWmed
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for intercambio_internacional:\n  - row_count > 0:\n      name: Tabela não\
+      \ pode estar vazia\n\n  # Referential integrity\n  - invalid_count(nom_paisdestino) = 0:\n     \
+      \ valid values:\n        - 'ARGENTINA'\n        - 'Argentina'\n        - 'PARAGUAI'\n        - 'URUGUAI'\n\
+      \        - 'Uruguai'\n      name: nom_paisdestino deve ser um dos valores válidos\n\n  # Circuit\
+      \ breaker: colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_intercambiomwmed)\
+      \ < 5:\n      name: val_intercambiomwmed não pode ter >5% nulos\n  - missing_percent(val_intercambioprogmwmed)\
+      \ < 5:\n      name: val_intercambioprogmwmed não pode ter >5% nulos\n\n  # Unicidade da chave primária\
+      \ composta ['din_instante', 'nom_paisdestino'] (candidata LLM)\n  - failed rows:\n      name: Chave\
+      \ composta (din_instante, nom_paisdestino) não deve ter duplicatas\n      fail query: |\n      \
+      \  SELECT * FROM intercambio_internacional\n        WHERE (din_instante, nom_paisdestino) IN (\n\
+      \          SELECT din_instante, nom_paisdestino FROM intercambio_internacional\n          GROUP\
+      \ BY din_instante, nom_paisdestino\n          HAVING COUNT(*) > 1\n        )\n\n  # Nulos em val_intercambioprogmwmed\
+      \ — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(val_intercambioprogmwmed)\
+      \ < 5.0:\n      name: val_intercambioprogmwmed não deve ter >5.0% nulos\n\n  # Freshness: din_instante\
+      \ deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_instante) < 3d:\n   \
+      \   name: din_instante não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/intercambio-internacional
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - energia trocada com a argentina
+  - importacao e exportacao com paises vizinhos
+  - fluxo com o uruguai
+  - intercambio com o paraguai
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver fluxos de energia entre o Brasil e países vizinhos
+    (Argentina, Uruguai, Paraguai), importação ou exportação de energia pelo SIN, balanço energético internacional,
+    conversoras de frequência de fronteira (Garabi, Uruguaiana, Melo, Rivera, Acaray) ou comparação entre
+    intercâmbio realizado e programado em base horária. Também relevante para análises de balanço energético
+    global do SIN que requerem o componente de intercâmbio externo.
+- property: agentInstructions
+  value: |
+    - [val_intercambiomwmed] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (dtype object convertido para UTF-8 em vez de DOUBLE). Contém valores numéricos de ponto flutuante representando MWmed realizados. Nenhum nulo detectado (0,0%), mas operações aritméticas diretas falharão sem cast explícito.
+
+    - [val_intercambioprogmwmed] Coluna com 77,2% de valores nulos (aproximadamente 26.291 de 34.056 registros). O valor programado do intercâmbio não está disponível para a maior parte do período histórico, sendo preenchido possivelmente apenas para o horizonte de programação futura ou para registros mais recentes.
+
+    - [val_intercambioprogmwmed] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Contém valores numéricos de ponto flutuante representando MWmed programados. Requer TRY_CAST para qualquer operação aritmética ou de agregação.
+
+    - [din_instante] Possíveis lacunas horárias na série temporal por país. Com 34.056 registros cobrindo aproximadamente 3,5 anos para até 3 países, o total esperado seria ~91.980 registros. O volume atual sugere que nem todos os países possuem dados em todos os instantes, ou há períodos sem intercâmbio registrado.
+
+    - [nom_paisdestino] Valores com trailing spaces detectados em 'nom_paisdestino'. Use TRIM() em filtros WHERE para evitar perda de registros.
+    - [val_intercambioprogmwmed] Coluna 'val_intercambioprogmwmed' ausente em arquivos históricos (ex: INTERCAMBIO_INTERNACIONAL_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_INTERNACIONAL_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [tipos] As colunas `val_intercambiomwmed` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi o intercâmbio médio de energia entre o Brasil e a Argentina em 2024?
+  - O Brasil foi importador ou exportador líquido de energia para o Uruguai no último ano?
+  - Quais foram os horários de pico de exportação de energia para o Paraguai?
+  - Qual é o desvio entre o intercâmbio programado e o realizado com a Argentina?
+  - Como evoluiu o saldo de intercâmbio internacional do SIN mês a mês em 2023?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_internacional_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+      - nom_paisdestino
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: intercambiomwmed
+      label: Intercâmbio Realizado
+      columns:
+      - val_intercambiomwmed
+      expression: TRY_CAST(val_intercambiomwmed AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - intercambiomwmed
+      - intercambio
+      - intercambio_realizado
+      - fluxo
+      - potencia_intercambio
+      - val_intercambio
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_intercambiomwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_intercambiomwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - intercambio
+      - intercambio_realizado
+      - fluxo
+      - potencia_intercambio
+      - val_intercambio
+      - mwmed
+    - id: intercambioprogmwmed
+      label: Intercâmbio Programado
+      columns:
+      - val_intercambioprogmwmed
+      expression: TRY_CAST(val_intercambioprogmwmed AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - intercambioprogmwmed
+      - intercambio_programado
+      - programado
+      - prog
+      - val_prog
+      - val_intercambio_programado
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_intercambioprogmwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_intercambioprogmwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - intercambio_programado
+      - programado
+      - prog
+      - val_prog
+      - val_intercambio_programado
+      - mwmed_programado
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - intercambiomwmed
+      - intercambioprogmwmed
+      preferred_for:
+      - intercambio internacional
+      - exportacao para Argentina
+      - importacao do Paraguai
+      - fluxo fronteira SIN
+      - conversora Garabi
+      - conversora Uruguaiana
+      - conversora Melo
+      - conversora Rivera
+      - conversora Acaray
+      - saldo exportacao importacao pais
+      - desvio programado realizado internacional
+      - balanco energetico externo SIN
+      - pais destino energia
+      not_preferred_for:
+      - intercambio entre subsistemas
+      - intercambio interregional
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao por fonte
+      - carga subsistema
+    value_aliases:
+      nom_paisdestino:
+        argentina:
+          aliases:
+          - argentina
+          - arg
+          - república argentina
+          filter: TRIM(nom_paisdestino) IN ('ARGENTINA', 'Argentina')
+        paraguai:
+          aliases:
+          - paraguai
+          - paraguay
+          - par
+          filter: TRIM(nom_paisdestino) = 'PARAGUAI'
+        uruguai:
+          aliases:
+          - uruguai
+          - uruguay
+          - uru
+          filter: TRIM(nom_paisdestino) IN ('URUGUAI', 'Uruguai')
+    sql_patterns:
+      saldo_liquido_pais:
+        template: "SELECT TRIM(nom_paisdestino) AS pais,\n  SUM(TRY_CAST(val_intercambiomwmed AS DOUBLE)\
+          \ * 1.0) / 1000 AS saldo_gwh,\n  CASE WHEN SUM(TRY_CAST(val_intercambiomwmed AS DOUBLE)) > 0\n\
+          \       THEN 'exportador' ELSE 'importador' END AS posicao\nFROM {source}\nWHERE din_instante\
+          \ BETWEEN {start} AND {end}\nGROUP BY 1\nORDER BY 2 DESC\n"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - intercambiomwmed
+          grain: periodo
+        validated_params:
+          start: '2026-01-01'
+          end: '2026-07-16'
+      desvio_programado_realizado:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  TRIM(nom_paisdestino)\
+          \ AS pais,\n  AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE)) AS realizado_mwmed,\n  AVG(TRY_CAST(val_intercambioprogmwmed\
+          \ AS DOUBLE)) AS programado_mwmed,\n  AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))\n    - AVG(TRY_CAST(val_intercambioprogmwmed\
+          \ AS DOUBLE)) AS desvio_mwmed\nFROM {source}\nWHERE val_intercambioprogmwmed IS NOT NULL\n \
+          \ AND din_instante BETWEEN {start} AND {end}\nGROUP BY 1, 2\nORDER BY 1, 2\n"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - intercambiomwmed
+          - intercambioprogmwmed
+          grain: month
+        validated_params:
+          start: '2023-01-01 00:00:00'
+          end: '2026-07-07 23:00:00'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre intercambio sem especificar pais
+        assume_metric: intercambiomwmed
+        assume_output: total_energy
+        note: 'Agregar todos os paises disponiveis (ARGENTINA, PARAGUAI, URUGUAI). Aplicar TRIM(nom_paisdestino)
+          no GROUP BY. Apresentar resultado por pais e total consolidado.
+
+          '
+      - when: usuario pergunta sobre intercambio sem especificar realizado ou programado
+        assume_metric: intercambiomwmed
+        assume_output: total_energy
+        note: 'Usar intercambio realizado (val_intercambiomwmed) como padrao. Intercambio programado tem
+          77,2% de nulos e cobertura historica limitada.
+
+          '
+      - when: usuario pergunta sobre exportacao ou importacao sem especificar direcao
+        assume_metric: intercambiomwmed
+        assume_output: total_energy
+        note: 'Calcular SUM do intercambio realizado. Valor positivo = exportacao do SIN; negativo = importacao
+          pelo SIN. Apresentar sinal e rotular posicao liquida.
+
+          '
+      - when: usuario pergunta sobre saldo ou balanco internacional
+        assume_metric: intercambiomwmed
+        assume_output: total_energy
+        note: 'Saldo = SUM(TRY_CAST(val_intercambiomwmed AS DOUBLE)) por pais e periodo. Positivo = exportador
+          liquido; negativo = importador liquido.
+
+          '
+      must_clarify_when:
+      - trigger_terms:
+        - programado
+        - desvio
+        - aderencia
+        question: 'O intercambio programado possui 77,2% de nulos e esta disponivel apenas para periodos
+          recentes (a partir de 2026). Deseja prosseguir filtrando apenas os registros com valor programado
+          disponivel, ou prefere usar apenas o intercambio realizado?
+
+          '
+        note: Nao perguntar se o usuario ja especificou claramente 'realizado'.
+      - trigger_terms:
+        - pico
+        - horario de pico
+        - hora de maior exportacao
+        question: 'Pico de exportacao ou importacao? Valores positivos representam exportacao do SIN;
+          negativos representam importacao. Qual direcao de fluxo interessa?
+
+          '
+        note: Omitir se o usuario ja especificou exportacao ou importacao.
+      redirect_when:
+      - user_mentions:
+        - interligacao
+        - intercambio SE
+        - intercambio NE
+        - intercambio N
+        - intercambio S
+        - subsistema
+        - interregional
+        reason: Intercambio entre subsistemas brasileiros nao esta neste dataset.
+        redirect: intercambio-nacional
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - geracao eolica
+        - geracao solar
+        - geracao hidraulica
+        - geracao termica
+        - mix de geracao
+        reason: Dataset registra apenas fluxo de intercambio agregado por pais, sem discriminacao de fonte
+          geradora.
+        redirect: balanco-energia-subsistema ou geracao-usina-2
+- property: fewShotQueries
+  value:
+  - question: Qual foi o saldo médio horário de intercâmbio do SIN com cada país em 2024?
+    sql: SELECT nom_paisdestino, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, ROUND(AVG(TRY_CAST(val_intercambiomwmed
+      AS DOUBLE)), 2) AS media_mwmed_hora, ROUND(SUM(TRY_CAST(val_intercambiomwmed AS DOUBLE)), 2) AS
+      total_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_internacional_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' AND TRY_CAST(val_intercambiomwmed
+      AS DOUBLE) IS NOT NULL GROUP BY nom_paisdestino, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
+      ORDER BY nom_paisdestino, mes;
+  - question: Qual foi o maior pico de exportação e de importação do SIN para cada país vizinho?
+    sql: SELECT nom_paisdestino, MAX(TRY_CAST(val_intercambiomwmed AS DOUBLE)) AS pico_exportacao_mwmed,
+      MIN(TRY_CAST(val_intercambiomwmed AS DOUBLE)) AS pico_importacao_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_internacional_ho/*.parquet')
+      WHERE TRY_CAST(val_intercambiomwmed AS DOUBLE) IS NOT NULL GROUP BY nom_paisdestino ORDER BY pico_exportacao_mwmed
+      DESC;
+  - question: Qual é o desvio médio entre o intercâmbio realizado e o programado por país?
+    sql: SELECT nom_paisdestino, COUNT(*) AS registros_com_programado, ROUND(AVG( TRY_CAST(val_intercambiomwmed
+      AS DOUBLE) - TRY_CAST(val_intercambioprogmwmed AS DOUBLE) ), 2) AS desvio_medio_mwmed, ROUND(MAX(ABS(
+      TRY_CAST(val_intercambiomwmed AS DOUBLE) - TRY_CAST(val_intercambioprogmwmed AS DOUBLE) )), 2) AS
+      desvio_maximo_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_internacional_ho/*.parquet')
+      WHERE val_intercambioprogmwmed IS NOT NULL AND TRY_CAST(val_intercambiomwmed AS DOUBLE) IS NOT NULL
+      AND TRY_CAST(val_intercambioprogmwmed AS DOUBLE) IS NOT NULL GROUP BY nom_paisdestino ORDER BY desvio_medio_mwmed
+      DESC;
+- property: license
+  value: CC-BY

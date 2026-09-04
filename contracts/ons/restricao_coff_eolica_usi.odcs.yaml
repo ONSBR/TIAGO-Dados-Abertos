@@ -1,0 +1,1365 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:restricao_coff_eolica_usi
+name: restricao_coff_eolica_usi
+tenant: ons
+tags:
+- 30min
+- coff eólico
+- compensacao-financeira
+- constrained-off
+- constrained-off eólico
+- curtailment
+- curtailment eólico
+- energia não gerada eólica
+- energia-nao-gerada
+- eolica
+- geracao-renovavel
+- restricao-operacional
+- restrição eólica
+- semi-horario
+- usina-eolica
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet
+  format: parquet
+description:
+  purpose: Suporta a apuração de compensações financeiras por energia não gerada, o monitoramento operacional
+    de curtailment eólico e a análise de causas de restrição de geração renovável no SIN. É utilizado
+    por agentes do setor elétrico, reguladores da ANEEL, o próprio ONS e pesquisadores para calcular energia
+    não gerada por usina e intervalo, auditar eventos de constrained-off, subsidiar decisões de redespacho
+    e avaliar o impacto sistêmico das restrições de rede sobre a geração eólica.
+  limitations: Coluna armazena valores numéricos de geração (MW) como VARCHAR devido ao formato de serialização
+    do ONS. 43,9% dos registros possuem val_geracaolimitada nulo, indicando intervalos sem limitação de
+    geração aplicada no dataset restricao_coff_eolica_usi. Além dos nulos frequentes, os valores não nulos
+    de val_geracaolimitada estão armazenados como VARCHAR pelo formato de serialização no dataset restricao_coff_eolica_usi.
+  usage: Recuperar este dataset quando a pergunta envolver restrições de geração eólica, curtailment de
+    usinas eólicas, energia não gerada por constrained-off, apuração de compensações financeiras por restrição
+    operacional ou análise de causas de limitação de geração renovável no SIN.
+domain: geração
+schema:
+- name: restricao_coff_eolica_usi
+  physicalType: parquet
+  logicalType: object
+  physicalName: restricao_coff_eolica_usi
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico ao qual a usina eólica pertence (ex: SE,
+      S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - cod_subsistema
+      - regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome por extenso do subsistema elétrico (ex: Sudeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - nome_sistema
+      - regiao_nome
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE/CENTRO-OESTE
+      - SUL
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado federativo onde a usina eólica está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - uf
+      - sigla_estado
+      - cod_estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - BA
+      - CE
+      - MA
+      - PB
+      - PE
+      - PI
+      - RN
+      - RS
+      - SC
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome por extenso do estado federativo onde a usina eólica está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome_estado
+      - estado_nome
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BAHIA
+      - CEARA
+      - MARANHAO
+      - PARAIBA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - SANTA CATARINA
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina eólica sujeita à restrição de constrained-off
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome_usina
+      - planta
+      - nome_planta
+      - eolica
+    - property: semanticType
+      value: DIMENSION
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código identificador da usina no sistema do ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_ons
+      - cod_ons
+      - id_usina_ons
+    - property: semanticType
+      value: IDENTIFIER
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL, identificador regulatório único da
+      usina
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_ceg
+      - ceg_aneel
+      - cod_empreendimento
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - '-'
+      - EOL.CV.CE.028631-1.01
+      - EOL.CV.CE.028699-0.01
+      - EOL.CV.CE.030841-2.01
+      - EOL.CV.CE.033756-0.01
+      - EOL.CV.RN.028443-2.01
+      - EOL.CV.RN.028444-0.01
+      - EOL.CV.RN.030339-9.01
+      - EOL.CV.RN.030416-6.01
+      - EOL.CV.RN.030417-4.01
+      - EOL.CV.RS.028712-1.01
+      - EOL.CV.RS.031302-5.01
+    primaryKey: true
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora do instante de apuração da restrição de constrained-off, com granularidade
+      de 30 minutos (48 patamares por dia)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data_hora
+      - timestamp
+      - data_instante
+      - momento
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_geracao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração efetivamente realizada pela usina eólica no intervalo de 30 minutos. Armazenada
+      como VARCHAR por formato de serialização; requer TRY_CAST para uso numérico.
+    customProperties:
+    - property: aliases
+      value:
+      - geracao
+      - geracao_realizada
+      - potencia_gerada
+      - geracao_medida
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracao AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_geracaolimitada
+    physicalType: VARCHAR
+    logicalType: string
+    description: Valor de geração limitada imposta pela restrição de constrained-off no intervalo; nulo
+      quando não há limitação aplicada (43,9% de nulos). Armazenada como VARCHAR pelo formato de serialização.
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_limitada
+      - limite_geracao
+      - curtailment
+      - corte_geracao
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaolimitada AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_disponibilidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Potência disponível da usina eólica no intervalo, representando a capacidade de geração
+      declarada antes da restrição. Armazenada como VARCHAR pelo formato de serialização.
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade
+      - potencia_disponivel
+      - capacidade_disponivel
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_disponibilidade AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_geracaoreferencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração de referência utilizada como base para cálculo da energia não gerada por constrained-off,
+      conforme metodologia ONS. Armazenada como VARCHAR pelo formato de serialização.
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_referencia
+      - referencia
+      - geracao_ref
+      - baseline
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaoreferencia AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_geracaoreferenciafinal
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração de referência final após consolidação do processo de apuração de constrained-off;
+      nulo quando o cálculo final ainda não foi realizado ou não se aplica (48,9% de nulos). Armazenada
+      como VARCHAR pelo formato de serialização.
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_referencia_final
+      - referencia_final
+      - geracao_ref_final
+      - baseline_final
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaoreferenciafinal AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: cod_razaorestricao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código que classifica a razão/motivo da restrição de constrained-off aplicada à usina
+      (ex: restrição de rede, desequilíbrio de carga)'
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - razao_restricao
+      - motivo_restricao
+      - causa_restricao
+      - cod_motivo
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - CNF
+      - ENE
+      - REL
+  - name: cod_origemrestricao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código que identifica a origem da restrição de constrained-off (ex: ONS, agente, automatismo),
+      classificando quem determinou a restrição'
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - origem_restricao
+      - cod_origem
+      - origem
+      - determinante_restricao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - LOC
+      - SIS
+  - name: dsc_restricao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Descrição textual detalhada da restrição de constrained-off aplicada; nulo em 51,7% dos
+      registros quando não há descrição detalhada disponível
+    customProperties:
+    - property: aliases
+      value:
+      - descricao_restricao
+      - descricao
+      - motivo_texto
+      - justificativa
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Controle de frequência do SIN.
+      - 'Controle de inequação: CONTROLE DE CARREGAMENTO DA LT 230 KV AÇU III / MOSSORÓ II – C1(Z7) PARA
+        CONTINGÊNCIA DA LT 500 KV AÇU III / JAGUARUANA II – C1(V7) - IO-ON.NE.2LE'
+      - 'Controle de inequação: CONTROLE DE CARREGAMENTO DA LT 230 KV IRECÊ / MORRO DO CHAPÉU II – C1(S5),
+        PREVENINDO
+
+        A PERDA DA LT 500 KV MORRO DO CHAPÉU II / OUROLÂNDIA II – C1(N4) - IO-ON.NE.2SO e MOP 442-S/2025'
+      - 'Controle de inequação: CONTROLE DE CARREGAMENTO DA LT 230 KV PAULO AFONSO / TACARATU – C1(F1)
+        - IO-ON.NE.2NO'
+      - 'Controle de inequação: LIMITAÇÃO DA TRANSMISSÃO NA LT 500 KV AÇU III / JAGUARUANA II – C1(V7)
+        - IO-ON.NE.5NE'
+      - 'Controle de inequação: LIMITAÇÃO DA TRANSMISSÃO NA LT 500 KV JAGUARUANA II / PACATUBA – C1(L1)
+        - IO-ON.NE.5NE'
+      - 'Controle de inequação: LIMITAÇÃO DA TRANSMISSÃO NAS LTS 500 KV AÇU III / QUIXADÁ – C1(V2), AÇU
+        III / MILAGRES II – C1(C2) E AÇU III / JAGUARUANA II – C1(V7) - IO-ON.NE.5NE'
+      - 'Controle de inequação: LIMITAÇÃO DO FLUXO SENHOR DO BONFIM II - IO-ON.NE.2SO'
+      - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU
+        / ESTREITO E XINGU / TERMINAL RIO - Conforme SGI 28.492-26'
+      - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU
+        / ESTREITO E XINGU / TERMINAL RIO - Conforme SGI 28492-26'
+      - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU
+        / ESTREITO E XINGU / TERMINAL RIO - Conforme SGI 31.499-26'
+      - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU
+        / ESTREITO E XINGU / TERMINAL RIO - IO-ON.SENE MOP 166-S/2026'
+      - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU
+        / ESTREITO E XINGU / TERMINAL RIO - Nº SGI 28.492-26'
+      - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU
+        / ESTREITO E XINGU / TERMINAL RIO - SGI'
+      - 'Controle de inequação: SGI 25722-26: SUB CURRAL NOVO DO PIAUI II PI - SB 500 kV CURRAL PIAUI
+        II B1 PI (05B1 - SGI'
+      - 'Controle de inequação: SGI 26566-26:  LT 500 kV CURRAL PIAUI II / MILAGRES II C C6 PI/CE (05C6)
+        - SGI'
+      - 'Controle de inequação: SGI 28896-26: LT 500 kV CURRAL PIAUI II / S.JOAO PIAUI C C1 PI (05C1)
+        - SGI'
+      - 'Controle do fluxo: FNEN # Fluxo Nordeste/Norte - Conforme SGI 24.746-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 28.492-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 29.068-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 29.613-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 30.347-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 31499-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 32.674-26'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 67.632-25'
+      - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 67632-25'
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for restricao_coff_eolica_usi:\n  - row_count > 0:\n      name: Tabela não\
+      \ pode estar vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid\
+      \ values:\n        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n\
+      \        - 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE/CENTRO-OESTE'\n        - 'SUL'\n  \
+      \    name: nom_subsistema deve ser um dos valores válidos\n  - invalid_count(id_estado) = 0:\n \
+      \     valid values:\n        - 'BA'\n        - 'CE'\n        - 'MA'\n        - 'PB'\n        - 'PE'\n\
+      \        - 'PI'\n        - 'RN'\n        - 'RS'\n        - 'SC'\n      name: id_estado deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_estado) = 0:\n      valid values:\n        - 'BAHIA'\n\
+      \        - 'CEARA'\n        - 'MARANHAO'\n        - 'PARAIBA'\n        - 'PERNAMBUCO'\n        -\
+      \ 'PIAUI'\n        - 'RIO GRANDE DO NORTE'\n        - 'RIO GRANDE DO SUL'\n        - 'SANTA CATARINA'\n\
+      \      name: nom_estado deve ser um dos valores válidos\n  - invalid_count(ceg) = 0:\n      valid\
+      \ values:\n        - '-'\n        - 'EOL.CV.CE.028631-1.01'\n        - 'EOL.CV.CE.028699-0.01'\n\
+      \        - 'EOL.CV.CE.030841-2.01'\n        - 'EOL.CV.CE.033756-0.01'\n        - 'EOL.CV.RN.028443-2.01'\n\
+      \        - 'EOL.CV.RN.028444-0.01'\n        - 'EOL.CV.RN.030339-9.01'\n        - 'EOL.CV.RN.030416-6.01'\n\
+      \        - 'EOL.CV.RN.030417-4.01'\n        - 'EOL.CV.RS.028712-1.01'\n        - 'EOL.CV.RS.031302-5.01'\n\
+      \      name: ceg deve ser um dos valores válidos\n  - invalid_count(cod_razaorestricao) = 0:\n \
+      \     valid values:\n        - 'CNF'\n        - 'ENE'\n        - 'REL'\n      name: cod_razaorestricao\
+      \ deve ser um dos valores válidos\n  - invalid_count(cod_origemrestricao) = 0:\n      valid values:\n\
+      \        - 'LOC'\n        - 'SIS'\n      name: cod_origemrestricao deve ser um dos valores válidos\n\
+      \  - invalid_count(dsc_restricao) = 0:\n      valid values:\n        - 'Controle de frequência do\
+      \ SIN.'\n        - 'Controle de inequação: CONTROLE DE CARREGAMENTO DA LT 230 KV AÇU III / MOSSORÓ\
+      \ II – C1(Z7) PARA CONTINGÊNCIA DA LT 500 KV AÇU III / JAGUARUANA II – C1(V7) - IO-ON.NE.2LE'\n\
+      \        - 'Controle de inequação: CONTROLE DE CARREGAMENTO DA LT 230 KV IRECÊ / MORRO DO CHAPÉU\
+      \ II – C1(S5), PREVENINDO\nA PERDA DA LT 500 KV MORRO DO CHAPÉU II / OUROLÂNDIA II – C1(N4) - IO-ON.NE.2SO\
+      \ e MOP 442-S/2025'\n        - 'Controle de inequação: CONTROLE DE CARREGAMENTO DA LT 230 KV PAULO\
+      \ AFONSO / TACARATU – C1(F1) - IO-ON.NE.2NO'\n        - 'Controle de inequação: LIMITAÇÃO DA TRANSMISSÃO\
+      \ NA LT 500 KV AÇU III / JAGUARUANA II – C1(V7) - IO-ON.NE.5NE'\n        - 'Controle de inequação:\
+      \ LIMITAÇÃO DA TRANSMISSÃO NA LT 500 KV JAGUARUANA II / PACATUBA – C1(L1) - IO-ON.NE.5NE'\n    \
+      \    - 'Controle de inequação: LIMITAÇÃO DA TRANSMISSÃO NAS LTS 500 KV AÇU III / QUIXADÁ – C1(V2),\
+      \ AÇU III / MILAGRES II – C1(C2) E AÇU III / JAGUARUANA II – C1(V7) - IO-ON.NE.5NE'\n        - 'Controle\
+      \ de inequação: LIMITAÇÃO DO FLUXO SENHOR DO BONFIM II - IO-ON.NE.2SO'\n        - 'Controle de inequação:\
+      \ LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU / ESTREITO E XINGU / TERMINAL\
+      \ RIO - Conforme SGI 28.492-26'\n        - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA\
+      \ POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU / ESTREITO E XINGU / TERMINAL RIO - Conforme SGI 28492-26'\n\
+      \        - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS\
+      \ XINGU / ESTREITO E XINGU / TERMINAL RIO - Conforme SGI 31.499-26'\n        - 'Controle de inequação:\
+      \ LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU / ESTREITO E XINGU / TERMINAL\
+      \ RIO - IO-ON.SENE MOP 166-S/2026'\n        - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO\
+      \ DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS XINGU / ESTREITO E XINGU / TERMINAL RIO - Nº SGI 28.492-26'\n\
+      \        - 'Controle de inequação: LIMITE DE FJUSC EM FUNÇÃO DA POTÊNCIA TRANSMITIDA PELOS BIPOLOS\
+      \ XINGU / ESTREITO E XINGU / TERMINAL RIO - SGI'\n        - 'Controle de inequação: SGI 25722-26:\
+      \ SUB CURRAL NOVO DO PIAUI II PI - SB 500 kV CURRAL PIAUI II B1 PI (05B1 - SGI'\n        - 'Controle\
+      \ de inequação: SGI 26566-26:  LT 500 kV CURRAL PIAUI II / MILAGRES II C C6 PI/CE (05C6) - SGI'\n\
+      \        - 'Controle de inequação: SGI 28896-26: LT 500 kV CURRAL PIAUI II / S.JOAO PIAUI C C1 PI\
+      \ (05C1) - SGI'\n        - 'Controle do fluxo: FNEN # Fluxo Nordeste/Norte - Conforme SGI 24.746-26'\n\
+      \        - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 28.492-26'\n      \
+      \  - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 29.068-26'\n        - 'Controle\
+      \ do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 29.613-26'\n        - 'Controle do fluxo:\
+      \ FNESE # Fluxo Nordeste/Sudeste - Conforme SGI 30.347-26'\n        - 'Controle do fluxo: FNESE\
+      \ # Fluxo Nordeste/Sudeste - Conforme SGI 31499-26'\n        - 'Controle do fluxo: FNESE # Fluxo\
+      \ Nordeste/Sudeste - Conforme SGI 32.674-26'\n        - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste\
+      \ - Conforme SGI 67.632-25'\n        - 'Controle do fluxo: FNESE # Fluxo Nordeste/Sudeste - Conforme\
+      \ SGI 67632-25'\n      name: dsc_restricao deve ser um dos valores válidos\n\n  # Circuit breaker:\
+      \ colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_geracao) < 5:\n      name:\
+      \ val_geracao não pode ter >5% nulos\n  - missing_percent(val_geracaolimitada) < 5:\n      name:\
+      \ val_geracaolimitada não pode ter >5% nulos\n  - missing_percent(val_disponibilidade) < 5:\n  \
+      \    name: val_disponibilidade não pode ter >5% nulos\n  - missing_percent(val_geracaoreferencia)\
+      \ < 5:\n      name: val_geracaoreferencia não pode ter >5% nulos\n  - missing_percent(val_geracaoreferenciafinal)\
+      \ < 5:\n      name: val_geracaoreferenciafinal não pode ter >5% nulos\n\n  # Baseline de volume\
+      \ — margem ±20% do row_count validado\n  - row_count between 258508 and 387763:\n      name: Volume\
+      \ esperado entre 258,508 e 387,763 registros\n\n  # Unicidade da chave primária composta ['id_ons',\
+      \ 'din_instante', 'cod_razaorestricao', 'cod_origemrestricao'] (candidata LLM)\n  - failed rows:\n\
+      \      name: Chave composta (id_ons, din_instante, cod_razaorestricao, cod_origemrestricao) não\
+      \ deve ter duplicatas\n      fail query: |\n        SELECT * FROM restricao_coff_eolica_usi\n  \
+      \      WHERE (id_ons, din_instante, cod_razaorestricao, cod_origemrestricao) IN (\n          SELECT\
+      \ id_ons, din_instante, cod_razaorestricao, cod_origemrestricao FROM restricao_coff_eolica_usi\n\
+      \          GROUP BY id_ons, din_instante, cod_razaorestricao, cod_origemrestricao\n          HAVING\
+      \ COUNT(*) > 1\n        )\n\n  # Nulos em val_geracaolimitada — alerta de qualidade (real=59.9%,\
+      \ threshold=119.8%)\n  - missing_percent(val_geracaolimitada) < 119.8:\n      name: val_geracaolimitada\
+      \ não deve ter >119.8% nulos\n\n  # Nulos em val_geracaoreferenciafinal — alerta de qualidade (real=66.7%,\
+      \ threshold=133.4%)\n  - missing_percent(val_geracaoreferenciafinal) < 133.4:\n      name: val_geracaoreferenciafinal\
+      \ não deve ter >133.4% nulos\n\n  # Nulos em dsc_restricao — alerta de qualidade (real=70.5%, threshold=141.0%)\n\
+      \  - missing_percent(dsc_restricao) < 141.0:\n      name: dsc_restricao não deve ter >141.0% nulos\n\
+      \n  # Freshness: din_instante deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_instante)\
+      \ < 3d:\n      name: din_instante não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/restricao_coff_eolica_usi
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - corte de geracao eolica
+  - quanto a eolica deixou de gerar
+  - razao energetica do corte
+  - energia cortada da eolica
+  - curtailment eolico por usina
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver restrições de geração eólica, curtailment de
+    usinas eólicas, energia não gerada por constrained-off, apuração de compensações financeiras por restrição
+    operacional ou análise de causas de limitação de geração renovável no SIN. Também relevante para perguntas
+    sobre geração limitada, disponibilidade declarada versus geração realizada em usinas eólicas individuais
+    em intervalos de 30 minutos.
+- property: agentInstructions
+  value: |
+    - [val_geracaolimitada] 59,9% dos registros possuem val_geracaolimitada nulo, indicando que na maioria dos instantes não há limitação de geração aplicada. Filtros sem tratamento de nulo podem subestimar o universo de restrições ativas. Ao calcular energia restringida, use COALESCE ou filtre explicitamente por NOT NULL.
+
+    - [val_geracaoreferenciafinal] 66,7% dos registros possuem val_geracaoreferenciafinal nulo, pois este campo é preenchido apenas após a conclusão do processo de consistência e apuração definitiva do ONS. Análises de compensação financeira definitiva devem filtrar apenas registros com este campo preenchido.
+
+    - [dsc_restricao] 70,5% dos registros possuem dsc_restricao nulo. A descrição textual é campo opcional e seu preenchimento não é sistemático. Análises qualitativas baseadas neste campo representam apenas 29,5% do universo de restrições.
+
+    - [val_geracao] val_geracao está armazenado como VARCHAR devido ao formato de serialização . Qualquer operação aritmética ou de agregação retornará erro ou resultado incorreto sem conversão explícita. TRY_CAST retorna NULL para valores não numéricos, permitindo identificar registros corrompidos.
+
+    - [val_geracaolimitada] val_geracaolimitada está armazenado como VARCHAR devido ao formato de serialização. Além do problema de tipo, possui 59,9% de nulos. TRY_CAST deve ser combinado com COALESCE ou filtro NOT NULL para cálculos de energia restringida.
+
+    - [val_disponibilidade] val_disponibilidade está armazenado como VARCHAR devido ao formato de serialização. Comparações entre val_disponibilidade e val_geracao para calcular energia não gerada por constrained-off requerem TRY_CAST em ambas as colunas.
+
+    - [val_geracaoreferencia] val_geracaoreferencia está armazenado como VARCHAR devido ao formato de serialização. Este campo é base para cálculo de compensação financeira; erros de conversão podem impactar diretamente apurações regulatórias. Verificar se há valores não numéricos antes de usar em produção.
+
+    - [val_geracaoreferenciafinal] val_geracaoreferenciafinal está armazenado como VARCHAR devido ao formato de serialização. Combinado com os 66,7% de nulos, requer duplo tratamento: filtro NOT NULL e TRY_CAST para qualquer análise de apuração definitiva de compensação financeira.
+
+    - [din_instante] O dataset cobre o período 2023-10-01 a 2026-06-13 com atualização diária às 12h e 19h. Por ser um processo de consistência recorrente, podem existir lacunas temporais para usinas específicas ou períodos sem restrição registrada. Verificar continuidade por usina é essencial antes de análises de séries temporais.
+
+    - [dsc_restricao] Coluna 'dsc_restricao' ausente em arquivos históricos (ex: RESTRICAO_COFF_EOLICA_2023_10.parquet). Presente apenas a partir de versões recentes (ex: RESTRICAO_COFF_EOLICA_2026_06.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [tipos] As colunas `val_disponibilidade`, `val_geracao`, `val_geracaolimitada`, `val_geracaoreferencia`, `val_geracaoreferenciafinal` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+    - [val_geracaolimitada — conversao de energia] val_geracaolimitada e MW em intervalos de 30 min; energia = SUM(val)*0.5/1000 = GWh. Coluna vem VARCHAR com string vazia + DOUBLE (schema-drift): use union_by_name=true e TRY_CAST(TRY_CAST(x AS VARCHAR) AS DOUBLE).
+- property: typicalQuestions
+  value:
+  - Qual foi a energia não gerada por constrained-off na usina EOL VENTOS DE SANTA EUGENIA em janeiro
+    de 2024?
+  - Quais usinas eólicas do Nordeste tiveram maior curtailment acumulado em 2024?
+  - Qual a razão de restrição mais frequente nas usinas eólicas do subsistema NE?
+  - Em quais intervalos de 30 minutos a geração limitada foi inferior a 50% da geração de referência?
+  - Qual o percentual de intervalos com restrição ativa (val_geracaolimitada preenchido) por usina e mês?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-10-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 30 minutos
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - ceg
+      - id_ons
+      - cod_razaorestricao
+      - cod_origemrestricao
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: geracao
+      label: Geracao
+      columns:
+      - val_geracao
+      expression: TRY_CAST(val_geracao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao
+      - geracao_realizada
+      - potencia_gerada
+      - geracao_medida
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracao AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracao AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao
+      - geracao_realizada
+      - potencia_gerada
+      - geracao_medida
+    - id: geracaolimitada
+      label: Geracaolimitada
+      columns:
+      - val_geracaolimitada
+      expression: TRY_CAST(val_geracaolimitada AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracaolimitada
+      - geracao_limitada
+      - limite_geracao
+      - curtailment
+      - corte_geracao
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaolimitada AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaolimitada AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaolimitada AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaolimitada AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaolimitada AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaolimitada AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao_limitada
+      - limite_geracao
+      - curtailment
+      - corte_geracao
+    - id: disponibilidade
+      label: Disponibilidade
+      columns:
+      - val_disponibilidade
+      expression: TRY_CAST(val_disponibilidade AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - disponibilidade
+      - potencia_disponivel
+      - capacidade_disponivel
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_disponibilidade AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_disponibilidade AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - disponibilidade
+      - potencia_disponivel
+      - capacidade_disponivel
+    - id: geracaoreferencia
+      label: Geracaoreferencia
+      columns:
+      - val_geracaoreferencia
+      expression: TRY_CAST(val_geracaoreferencia AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracaoreferencia
+      - geracao_referencia
+      - referencia
+      - geracao_ref
+      - baseline
+      - energia_nao_gerada
+      - ressarcimento
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaoreferencia AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaoreferencia AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaoreferencia AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaoreferencia AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaoreferencia AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaoreferencia AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao_referencia
+      - referencia
+      - geracao_ref
+      - baseline
+    - id: geracaoreferenciafinal
+      label: Geracaoreferenciafinal
+      columns:
+      - val_geracaoreferenciafinal
+      expression: TRY_CAST(val_geracaoreferenciafinal AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracaoreferenciafinal
+      - geracao_referencia_final
+      - referencia_final
+      - geracao_ref_final
+      - baseline_final
+      - apuracao_definitiva
+      - compensacao_financeira_definitiva
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaoreferenciafinal AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaoreferenciafinal AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaoreferenciafinal AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaoreferenciafinal AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaoreferenciafinal AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaoreferenciafinal AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao_referencia_final
+      - referencia_final
+      - geracao_ref_final
+      - baseline_final
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      preferred_for:
+      - constrained-off eolico
+      - curtailment eolico usina
+      - geracao limitada eolica
+      - razao restricao eolica
+      - origem restricao eolica
+      - energia nao gerada eolica
+      - apuracao coff eolico
+      - compensacao financeira coff
+      - geracao referencia coff
+      - disponibilidade declarada eolica
+      covers_metrics:
+      - geracao
+      - geracaolimitada
+      - disponibilidade
+      - geracaoreferencia
+      - geracaoreferenciafinal
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - solar fotovoltaica
+      - hidraulica
+      - termica
+      - vertimento
+      - carga
+      - preco energia
+      - despacho programado subsistema
+      - balanco energetico SIN
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE/CENTRO-OESTE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - sudeste/centro-oeste
+          filter: nom_subsistema = 'SUDESTE/CENTRO-OESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema = 'SUL'
+      id_estado:
+        BA:
+          aliases:
+          - bahia
+          - BA
+          filter: id_estado = 'BA'
+        CE:
+          aliases:
+          - ceara
+          - CE
+          filter: id_estado = 'CE'
+        MA:
+          aliases:
+          - maranhao
+          - MA
+          filter: id_estado = 'MA'
+        PB:
+          aliases:
+          - paraiba
+          - PB
+          filter: id_estado = 'PB'
+        PE:
+          aliases:
+          - pernambuco
+          - PE
+          filter: id_estado = 'PE'
+        PI:
+          aliases:
+          - piaui
+          - PI
+          filter: id_estado = 'PI'
+        RN:
+          aliases:
+          - rio grande do norte
+          - RN
+          filter: id_estado = 'RN'
+        RS:
+          aliases:
+          - rio grande do sul
+          - RS
+          filter: id_estado = 'RS'
+        SC:
+          aliases:
+          - santa catarina
+          - SC
+          filter: id_estado = 'SC'
+      nom_estado:
+        BAHIA:
+          aliases:
+          - bahia
+          filter: nom_estado = 'BAHIA'
+        CEARA:
+          aliases:
+          - ceara
+          filter: nom_estado = 'CEARA'
+        MARANHAO:
+          aliases:
+          - maranhao
+          filter: nom_estado = 'MARANHAO'
+        PARAIBA:
+          aliases:
+          - paraiba
+          filter: nom_estado = 'PARAIBA'
+        PERNAMBUCO:
+          aliases:
+          - pernambuco
+          filter: nom_estado = 'PERNAMBUCO'
+        PIAUI:
+          aliases:
+          - piaui
+          filter: nom_estado = 'PIAUI'
+        RIO GRANDE DO NORTE:
+          aliases:
+          - rio grande do norte
+          filter: nom_estado = 'RIO GRANDE DO NORTE'
+        RIO GRANDE DO SUL:
+          aliases:
+          - rio grande do sul
+          filter: nom_estado = 'RIO GRANDE DO SUL'
+        SANTA CATARINA:
+          aliases:
+          - santa catarina
+          filter: nom_estado = 'SANTA CATARINA'
+      ceg:
+        '-':
+          aliases:
+          - sem ceg
+          - nao informado
+          filter: ceg = '-'
+        EOL.CV.CE.028631-1.01:
+          aliases:
+          - EOL.CV.CE.028631-1.01
+          filter: ceg = 'EOL.CV.CE.028631-1.01'
+        EOL.CV.CE.028699-0.01:
+          aliases:
+          - EOL.CV.CE.028699-0.01
+          filter: ceg = 'EOL.CV.CE.028699-0.01'
+        EOL.CV.CE.030841-2.01:
+          aliases:
+          - EOL.CV.CE.030841-2.01
+          filter: ceg = 'EOL.CV.CE.030841-2.01'
+        EOL.CV.CE.033756-0.01:
+          aliases:
+          - EOL.CV.CE.033756-0.01
+          filter: ceg = 'EOL.CV.CE.033756-0.01'
+        EOL.CV.RN.028443-2.01:
+          aliases:
+          - EOL.CV.RN.028443-2.01
+          filter: ceg = 'EOL.CV.RN.028443-2.01'
+        EOL.CV.RN.028444-0.01:
+          aliases:
+          - EOL.CV.RN.028444-0.01
+          filter: ceg = 'EOL.CV.RN.028444-0.01'
+        EOL.CV.RN.030339-9.01:
+          aliases:
+          - EOL.CV.RN.030339-9.01
+          filter: ceg = 'EOL.CV.RN.030339-9.01'
+        EOL.CV.RN.030416-6.01:
+          aliases:
+          - EOL.CV.RN.030416-6.01
+          filter: ceg = 'EOL.CV.RN.030416-6.01'
+        EOL.CV.RN.030417-4.01:
+          aliases:
+          - EOL.CV.RN.030417-4.01
+          filter: ceg = 'EOL.CV.RN.030417-4.01'
+        EOL.CV.RS.028712-1.01:
+          aliases:
+          - EOL.CV.RS.028712-1.01
+          filter: ceg = 'EOL.CV.RS.028712-1.01'
+        EOL.CV.RS.031302-5.01:
+          aliases:
+          - EOL.CV.RS.031302-5.01
+          filter: ceg = 'EOL.CV.RS.031302-5.01'
+      cod_razaorestricao:
+        CNF:
+          aliases:
+          - CNF
+          - confiabilidade
+          - restricao confiabilidade
+          filter: cod_razaorestricao = 'CNF'
+        ENE:
+          aliases:
+          - ENE
+          - energetica
+          - restricao energetica
+          filter: cod_razaorestricao = 'ENE'
+        REL:
+          aliases:
+          - REL
+          - rede eletrica
+          - restricao rede
+          filter: cod_razaorestricao = 'REL'
+      cod_origemrestricao:
+        LOC:
+          aliases:
+          - LOC
+          - local
+          - origem local
+          filter: cod_origemrestricao = 'LOC'
+        SIS:
+          aliases:
+          - SIS
+          - sistema
+          - origem sistema
+          filter: cod_origemrestricao = 'SIS'
+    sql_patterns:
+      geracao_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM((TRY_CAST(val_geracao AS DOUBLE)) * 0.5) / 1000 AS valor\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao
+          grain: month
+        validated_params:
+          year: '2023'
+      curtailment_por_usina:
+        template: "SELECT nom_usina, id_subsistema,\n  SUM((TRY_CAST(val_geracaolimitada AS DOUBLE)) *\
+          \ 0.5) / 1000 AS energia_limitada_gwh,\n  COUNT(*) AS intervalos_com_restricao\nFROM {source}\n\
+          WHERE val_geracaolimitada IS NOT NULL\n  AND TRY_CAST(val_geracaolimitada AS DOUBLE) IS NOT\
+          \ NULL\n  AND EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\n\
+          ORDER BY 3 DESC"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaolimitada
+          grain: usina
+        validated_params:
+          year: '2023'
+      energia_nao_gerada_coff:
+        template: "SELECT nom_usina, id_subsistema,\n  SUM((TRY_CAST(val_geracaoreferencia AS DOUBLE)\
+          \ - TRY_CAST(val_geracao AS DOUBLE)) * 0.5) / 1000 AS energia_nao_gerada_gwh\nFROM {source}\n\
+          WHERE val_geracaolimitada IS NOT NULL\n  AND TRY_CAST(val_geracaoreferencia AS DOUBLE) IS NOT\
+          \ NULL\n  AND TRY_CAST(val_geracao AS DOUBLE) IS NOT NULL\nGROUP BY 1, 2\nORDER BY 3 DESC"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaoreferencia
+          - geracao
+          grain: usina
+      apuracao_definitiva_compensacao:
+        template: "SELECT nom_usina, id_subsistema,\n  SUM((TRY_CAST(val_geracaoreferenciafinal AS DOUBLE))\
+          \ * 0.5) / 1000 AS referencia_final_gwh\nFROM {source}\nWHERE val_geracaoreferenciafinal IS\
+          \ NOT NULL\n  AND TRY_CAST(val_geracaoreferenciafinal AS DOUBLE) IS NOT NULL\nGROUP BY 1, 2\n\
+          ORDER BY 3 DESC"
+        output_unit: GWh
+        note: Usar apenas para apuracao definitiva; 66.7% dos registros tem val_geracaoreferenciafinal
+          nulo
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaoreferenciafinal
+          grain: usina
+      curtailment_eolico_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  TRIM(CAST(id_subsistema\
+          \ AS VARCHAR)) AS id_subsistema,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaolimitada AS VARCHAR)\
+          \ AS DOUBLE)) * 0.5 / 1000, 1) AS energia_limitada_gwh\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet',\
+          \ union_by_name=true)\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\n\
+          GROUP BY 1, 2 ORDER BY 1, 2"
+        output_unit: GWh
+        note: val_geracaolimitada e MW em intervalos de 30 min; energia = SUM(MW)*0.5/1000 = GWh. Cast
+          duplo TRY_CAST(TRY_CAST(x AS VARCHAR) AS DOUBLE) obrigatorio por schema-drift (VARCHAR com string
+          vazia + DOUBLE em arquivos diferentes); union_by_name=true idem.
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaolimitada
+          grain: month
+        validated_params:
+          year: '2025'
+      restricao_coff_eolica_usi_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_disponibilidade\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_disponibilidade_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracao_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaolimitada\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracaolimitada_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoreferencia\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracaoreferencia_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoreferenciafinal\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracaoreferenciafinal_gwh\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY\
+          \ 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      restricao_coff_eolica_usi_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_disponibilidade\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_disponibilidade_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante\
+          \ AS TIMESTAMP)), 1) AS val_geracao_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaolimitada\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_geracaolimitada_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoreferencia AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_geracaoreferencia_mwmed\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+    ambiguity_policy:
+      default_assumptions:
+      - when: curtailment
+        assume_metric: geracaolimitada
+        assume_output: total_energy
+        assume_filter: val_geracaolimitada IS NOT NULL
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+        - instantaneo
+      - when: geracao limitada
+        assume_metric: geracaolimitada
+        assume_output: total_energy
+        assume_filter: val_geracaolimitada IS NOT NULL
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+      - when: energia nao gerada
+        assume_metric: geracaoreferencia
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - referencia final
+        - definitivo
+        - apuracao final
+        note: Energia nao gerada = SUM(val_geracaoreferencia - val_geracao) onde val_geracaolimitada IS
+          NOT NULL
+      - when: compensacao financeira
+        assume_metric: geracaoreferenciafinal
+        assume_output: total_energy
+        assume_filter: val_geracaoreferenciafinal IS NOT NULL
+        assume_unit: GWh
+        unless_mentions:
+        - provisorio
+        - estimativa
+        note: Compensacao financeira definitiva usa val_geracaoreferenciafinal; 66.7% de nulos; filtrar
+          NOT NULL obrigatoriamente
+      - when: geracao
+        assume_metric: geracao
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+        - instantaneo
+      - when: disponibilidade
+        assume_metric: disponibilidade
+        assume_output: average_power
+        assume_unit: MWmed
+        unless_mentions:
+        - total
+        - energia
+        - acumulado
+      must_clarify_when:
+      - ambiguity: referencia_vs_referencia_final
+        question: Voce quer a geracao de referencia provisoria (val_geracaoreferencia, usada no calculo
+          inicial de COFF) ou a referencia final consolidada (val_geracaoreferenciafinal, disponivel em
+          apenas 33.3% dos registros apos apuracao definitiva ONS)?
+        trigger_terms:
+        - referencia
+        - baseline
+        - geracao ref
+      - ambiguity: restricao_ativa_vs_todos_registros
+        question: Voce quer apenas os intervalos com restricao ativa (val_geracaolimitada preenchido,
+          ~40% dos registros) ou todos os intervalos registrados incluindo os sem limitacao?
+        trigger_terms:
+        - todos os intervalos
+        - serie completa
+        - historico completo
+      - ambiguity: energia_nao_gerada_vs_geracao_limitada
+        question: Voce quer a geracao limitada imposta pela restricao (val_geracaolimitada) ou a energia
+          nao gerada calculada como diferenca entre referencia e geracao realizada (val_geracaoreferencia
+          - val_geracao)?
+        trigger_terms:
+        - energia perdida
+        - perda de geracao
+        - quanto deixou de gerar
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset cobre exclusivamente usinas eolicas; nao ha dimensao nuclear.
+        redirect: geracao-usina-2 com filtro de tipo/combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - solar
+        - fotovoltaica
+        - coff solar
+        - curtailment solar
+        reason: Restricoes COFF de usinas fotovoltaicas estao em dataset separado.
+        redirect: restricao_coff_fotovoltaica
+      - user_mentions:
+        - vertimento
+        - energia vertida
+        reason: Dataset nao contem dados de vertimento hidraulico.
+        redirect: energia-vertida-turbinavel
+      - user_mentions:
+        - despacho programado
+        - programacao diaria
+        - dessem
+        - pmo
+        reason: Dataset contem apenas dados verificados de restricao COFF; programacao esta em outro dataset.
+        redirect: programacao_diaria
+      - user_mentions:
+        - PLD
+        - preco liquidacao
+        - CMO
+        - custo marginal
+        reason: Dataset nao contem precos ou custos marginais.
+        redirect: dataset de precos CCEE ou CMO ONS
+- property: fewShotQueries
+  value:
+  - question: Quais usinas eólicas tiveram maior energia restringida (MWh) por constrained-off no período
+      disponível?
+    sql: "-- restricao_coff_eolica_usi: ranking de energia restringida por usina\nSELECT\n  id_ons,\n\
+      \  nom_usina,\n  id_subsistema,\n  nom_subsistema,\n  id_estado,\n  COUNT(*) AS instantes_com_restricao,\n\
+      \  ROUND(SUM((TRY_CAST(val_disponibilidade AS DOUBLE) - TRY_CAST(val_geracao AS DOUBLE)) * 1.0)\
+      \ * 0.5, 2) AS energia_restringida_mwh,\n  ROUND(AVG(\n    TRY_CAST(val_disponibilidade AS DOUBLE)\
+      \ - TRY_CAST(val_geracao AS DOUBLE)\n  ), 4) AS media_restricao_mw\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet')\n\
+      WHERE val_geracaolimitada IS NOT NULL\n  AND TRY_CAST(val_disponibilidade AS DOUBLE) IS NOT NULL\n\
+      \  AND TRY_CAST(val_geracao AS DOUBLE) IS NOT NULL\nGROUP BY id_ons, nom_usina, id_subsistema, nom_subsistema,\
+      \ id_estado\nORDER BY energia_restringida_mwh DESC\nLIMIT 20"
+  - question: Como evoluiu o volume de constrained-off eólico mês a mês por subsistema?
+    sql: "-- restricao_coff_eolica_usi: evolução mensal de constrained-off por subsistema\nSELECT\n  DATE_TRUNC('month',\
+      \ TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia,\n  id_subsistema,\n  nom_subsistema,\n\
+      \  COUNT(DISTINCT id_ons) AS usinas_afetadas,\n  COUNT(*) AS total_instantes_restricao,\n  ROUND(SUM((TRY_CAST(val_disponibilidade\
+      \ AS DOUBLE) - TRY_CAST(val_geracao AS DOUBLE)) * 0.5) / 1000, 2) AS energia_restringida_gwh,\n\
+      \  ROUND(SUM((TRY_CAST(val_geracaoreferencia AS DOUBLE)) * 0.5) / 1000, 2) AS energia_referencia_gwh\n\
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet')\nWHERE\
+      \ val_geracaolimitada IS NOT NULL\n  AND TRY_CAST(val_disponibilidade AS DOUBLE) IS NOT NULL\n \
+      \ AND TRY_CAST(val_geracao AS DOUBLE) IS NOT NULL\nGROUP BY DATE_TRUNC('month', TRY_CAST(din_instante\
+      \ AS TIMESTAMP)), id_subsistema, nom_subsistema\nORDER BY mes_referencia DESC, energia_restringida_gwh\
+      \ DESC"
+  - question: Qual o volume de geração de referência final apurado por usina para cálculo de compensação?
+    sql: "-- restricao_coff_eolica_usi: geração de referência final para compensação financeira\nSELECT\n\
+      \  id_ons,\n  nom_usina,\n  id_subsistema,\n  nom_subsistema,\n  DATE_TRUNC('month', TRY_CAST(din_instante\
+      \ AS TIMESTAMP)) AS mes_referencia,\n  COUNT(*) AS instantes_apurados,\n  ROUND(SUM((TRY_CAST(val_geracaoreferenciafinal\
+      \ AS DOUBLE)) * 0.5) / 1000 * 0.5, 2) AS energia_ref_final_gwh,\n  ROUND(SUM((TRY_CAST(val_geracaoreferencia\
+      \ AS DOUBLE)) * 0.5) / 1000, 2) AS energia_ref_preliminar_gwh,\n  ROUND(SUM((TRY_CAST(val_geracaoreferenciafinal\
+      \ AS DOUBLE)) * 0.5) / 1000\n    - SUM((TRY_CAST(val_geracaoreferencia AS DOUBLE)) * 0.5) / 1000,\
+      \ 2) AS diferenca_revisao_gwh\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet')\n\
+      WHERE val_geracaoreferenciafinal IS NOT NULL\n  AND TRY_CAST(val_geracaoreferenciafinal AS DOUBLE)\
+      \ IS NOT NULL\n  AND TRY_CAST(val_geracaoreferencia AS DOUBLE) IS NOT NULL\nGROUP BY id_ons, nom_usina,\
+      \ id_subsistema, nom_subsistema, DATE_TRUNC('month', din_instante)\nORDER BY mes_referencia DESC,\
+      \ energia_ref_final_gwh DESC\nLIMIT 50"
+- property: relatedDatasets
+  value:
+    restricao_coff_eolica_detail:
+      join_keys:
+      - id_ons
+      - ceg
+      - id_subsistema
+      - id_estado
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - id_estado
+    modalidade-usina:
+      join_keys:
+      - ceg
+      - id_ons
+      - nom_usina
+    disponibilidade_usina:
+      join_keys:
+      - din_instante
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    geracao-usina-2:
+      join_keys:
+      - id_ons
+      - ceg
+      - id_subsistema
+    interrupcao_carga:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    fator-capacidade-2:
+      join_keys:
+      - id_ons
+      - ceg
+      - id_subsistema
+      - id_estado
+    usina_pqu:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    usina_conjunto:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - ceg
+      - nom_usina
+      - nom_subsistema
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - id_estado
+      - nom_usina
+    energia-vertida-turbinavel:
+      join_keys:
+      - din_instante
+      - id_subsistema
+      - nom_subsistema
+    geracao-termica-despacho-2:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    capacidade-geracao:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_usina
+    restricao_coff_fotovoltaica:
+      join_keys:
+      - id_ons
+      - din_instante
+    restricao_coff_fotovoltaica_detail:
+      join_keys:
+      - id_ons
+      - din_instante
+- property: license
+  value: CC-BY

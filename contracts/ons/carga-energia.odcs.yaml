@@ -1,0 +1,531 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:carga-energia
+name: carga-energia
+tenant: ons
+tags:
+- MWmed
+- ONS
+- SIN
+- carga SIN
+- carga elétrica diária
+- carga energia diária
+- carga energia subsistema
+- carga-energia
+- consumo energia SIN
+- demanda energia subsistema
+- demanda-energia
+- diario
+- operacao-sistema
+- planejamento-energetico
+- serie-temporal
+- subsistema-eletrico
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet
+  format: parquet
+description:
+  purpose: Prover série temporal de demanda diária de energia por subsistema elétrico para operadores
+    do ONS, planejadores energéticos e agentes do setor elétrico, permitindo monitorar a evolução da carga,
+    subsidiar o despacho de usinas, apoiar decisões de planejamento operacional e expansão do sistema,
+    e avaliar tendências sazonais e estruturais de consumo no SIN ao longo de mais de duas décadas.
+  limitations: A coluna val_cargaenergiamwmed apresenta 0. O dataset carga-energia é publicado duas vezes
+    ao dia (12h e 19h), podendo gerar múltiplos registros para a mesma data e subsistema. Possíveis lacunas
+    temporais na série diária por subsistema ao longo de ~26 anos de dados do dataset carga-energia.
+  usage: Recuperar este dataset quando a pergunta envolver demanda, consumo ou carga de energia elétrica
+    agregada por subsistema (SE/CO, Sul, Nordeste, Norte ou SIN) em granularidade diária.
+domain: carga
+schema:
+- name: carga_energia
+  physicalType: parquet
+  logicalType: object
+  physicalName: carga_energia
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador alfanumérico do subsistema elétrico do SIN. Valores típicos: SE (Sudeste/Centro-Oeste),
+      S (Sul), NE (Nordeste), N (Norte) e SIN (Sistema Interligado Nacional — agregado total).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema
+      - código subsistema
+      - sigla subsistema
+      - região elétrica
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico correspondente ao id_subsistema. Exemplos: "Sudeste
+      / Centro-Oeste", "Sul", "Nordeste", "Norte", "Sistema Interligado Nacional".
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - subsistema nome
+      - região
+      - nome região elétrica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora de referência do registro de carga de energia. Representa o instante de
+      apuração diária. Publicado duas vezes ao dia (12h e 19h), podendo gerar registros duplicados intradiários
+      para a mesma data e subsistema. Para análises diárias, recomenda-se agregar por DATE(din_instante).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - instante
+      - data referência
+      - din instante
+      - data carga
+      - timestamp
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_cargaenergiamwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Valor da carga de energia do subsistema no instante de referência, expresso em MWmed
+      (megawatts médios). Representa a demanda média de energia elétrica atendida no período diário. A
+      metodologia de cálculo evoluiu ao longo do tempo: até fev/2021 considera apenas usinas despachadas/programadas
+      pelo ONS; entre mar/2021 e abr/2023 inclui previsão de geração de usinas não despachadas; a partir
+      de 29/04/2023 incorpora também estimativa de micro e minigeração distribuída (MMGD). Apresenta 0.2%
+      de valores nulos — aceitável operacionalmente.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - carga
+      - carga energia
+      - carga MWmed
+      - demanda
+      - demanda energia
+      - consumo energia
+      - val carga energia mwmed
+      - carga subsistema
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cargaenergiamwmed AS DOUBLE)
+    - property: unit
+      value: MWmed
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for carga_energia:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'Nordeste'\n        - 'Norte'\n        - 'Sudeste/Centro-Oeste'\n        - 'Sul'\n      name:\
+      \ nom_subsistema deve ser um dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR\
+      \ (formato origem ONS)\n  - missing_percent(val_cargaenergiamwmed) < 5:\n      name: val_cargaenergiamwmed\
+      \ não pode ter >5% nulos\n\n  # Unicidade da chave primária composta ['id_subsistema', 'din_instante']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (id_subsistema, din_instante) não\
+      \ deve ter duplicatas\n      fail query: |\n        SELECT * FROM carga_energia\n        WHERE (id_subsistema,\
+      \ din_instante) IN (\n          SELECT id_subsistema, din_instante FROM carga_energia\n        \
+      \  GROUP BY id_subsistema, din_instante\n          HAVING COUNT(*) > 1\n        )\n\n  # Nulos em\
+      \ val_cargaenergiamwmed — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(val_cargaenergiamwmed)\
+      \ < 5.0:\n      name: val_cargaenergiamwmed não deve ter >5.0% nulos\n\n  # Freshness: din_instante\
+      \ deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_instante) < 3d:\n   \
+      \   name: din_instante não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/carga-energia
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver demanda, consumo ou carga de energia elétrica
+    agregada por subsistema (SE/CO, Sul, Nordeste, Norte ou SIN) em granularidade diária. Também relevante
+    para análises de tendência histórica de consumo, sazonalidade da demanda, picos de carga e balanço
+    energético regional no horizonte de 2000 a 2026.
+- property: agentInstructions
+  value: |
+    - [val_cargaenergiamwmed] Aproximadamente 0,2% dos registros possuem valor nulo em val_cargaenergiamwmed. Para uma série histórica de 26 anos com 2.120 linhas, isso representa cerca de 4 registros sem valor de carga. Pode indicar falhas de telemetria, dias sem apuração ou períodos de transição metodológica. Verificar se os nulos se concentram em datas específicas ou subsistemas específicos.
+
+    - [din_instante] Com apenas 2.120 linhas para um período de ~26 anos (2000–2026) e 4 subsistemas, o volume esperado seria ~38.000 registros (4 × 365 × 26). O volume real é drasticamente inferior, sugerindo que parte do período histórico pode ter granularidade mensal ou anual, ou que há lacunas temporais significativas na série. Recomenda-se verificar a distribuição temporal dos registros para identificar descontinuidades ou mudanças de granularidade ao longo do período.
+
+    - [id_subsistema] Verificar se existem registros duplicados para a mesma combinação de din_instante e id_subsistema, o que violaria a chave primária natural do dataset. Duplicatas podem ocorrer por reprocessamento ou publicação dupla nos snapshots de 12h e 19h declarados na frequência de atualização.
+
+    - [nom_subsistema] Verificar se o nome do subsistema apresenta variações de grafia ao longo do histórico (ex: "Sudeste" vs "Sudeste/Centro-Oeste", maiúsculas/minúsculas, acentuação), especialmente em períodos de transição metodológica ou reestruturação do SIN. Inconsistências podem causar erros em agrupamentos por nome.
+
+    - [tipos] As colunas `val_cargaenergiamwmed` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi a carga de energia do subsistema Sudeste em janeiro de 2024?
+  - Como evoluiu a demanda de energia no subsistema Nordeste nos últimos 5 anos?
+  - Qual subsistema apresentou maior crescimento de carga entre 2015 e 2025?
+  - Qual foi o pico de carga do SIN em 2023 e em qual data ocorreu?
+  - Como a carga do subsistema Sul varia sazonalmente ao longo do ano?
+- property: vectorTags
+  value:
+  - consumo de energia
+  - consumo eletrico
+  - consumo de eletricidade
+  - consumo residencial
+  - consumo industrial
+  - demanda de energia
+  - quanto o brasil consumiu por dia
+  - consumo diario por subsistema
+  - carga diaria do sin
+  - quanta energia foi consumida no dia
+  - demanda diaria por regiao
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: din_instante
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - din_instante
+      - id_subsistema
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: cargaenergiamwmed
+      label: Carga Verificada
+      columns:
+      - val_cargaenergiamwmed
+      expression: TRY_CAST(val_cargaenergiamwmed AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - cargaenergiamwmed
+      - carga
+      - carga energia
+      - carga MWmed
+      - demanda
+      - demanda energia
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_cargaenergiamwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_cargaenergiamwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_cargaenergiamwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_cargaenergiamwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_cargaenergiamwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cargaenergiamwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - carga
+      - carga energia
+      - carga MWmed
+      - demanda
+      - demanda energia
+      - consumo energia
+      - val carga energia mwmed
+      - carga subsistema
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - cargaenergiamwmed
+      preferred_for:
+      - carga diaria subsistema
+      - demanda diaria SIN
+      - consumo eletrico regional diario
+      - serie historica carga subsistema
+      - sazonalidade demanda subsistema
+      - pico carga diario SIN
+      - tendencia consumo regional
+      - balanco carga subsistema diario
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+      - carga horaria
+      - carga mensal agregada
+      - geracao termica
+      - fator capacidade
+      - despacho
+    exclude_in_aggregation:
+      id_subsistema: []
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - sudeste co
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          - ne
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          filter: nom_subsistema = 'Sul'
+    sql_patterns:
+      cargaenergiamwmed_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM((TRY_CAST(val_cargaenergiamwmed AS DOUBLE)) * 24.0) / 1000 AS valor\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER\
+          \ BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - cargaenergiamwmed
+          grain: month
+        validated_params:
+          year: '2026'
+      cargaenergiamwmed_diaria_subsistema:
+        template: "SELECT DATE(din_instante) AS dia, id_subsistema,\n  AVG(TRY_CAST(val_cargaenergiamwmed\
+          \ AS DOUBLE)) AS valor\nFROM {source}\nWHERE id_subsistema = '{subsistema}'\n  AND din_instante\
+          \ BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1, 2\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          - time_series
+          metrics:
+          - cargaenergiamwmed
+          grain: day
+        validated_params:
+          subsistema: N
+          data_inicio: '2026-01-01'
+          data_fim: '2026-07-17'
+      carga_energia_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_cargaenergiamwmed\
+          \ AS VARCHAR) AS DOUBLE)) * 24.0 / 1000, 1) AS val_cargaenergiamwmed_gwh\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      carga_energia_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_cargaenergiamwmed\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_cargaenergiamwmed_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta carga sem especificar subsistema
+        assume_metric: cargaenergiamwmed
+        assume_output: average_power
+        assume_filter: todos os subsistemas (sem filtro)
+        note: Retornar serie por subsistema ou agregar SIN se disponivel
+      - when: usuario pergunta consumo total do Brasil ou SIN
+        assume_metric: cargaenergiamwmed
+        assume_output: total_energy
+        assume_filter: id_subsistema IN ('N','NE','S','SE')
+        note: Somar os quatro subsistemas pois SIN nao consta no enum fisico validado
+      - when: usuario pergunta pico de carga sem especificar periodo
+        assume_metric: cargaenergiamwmed
+        assume_output: peak_power
+        assume_filter: ultimo ano disponivel
+      - when: usuario pergunta tendencia ou evolucao de carga
+        assume_metric: cargaenergiamwmed
+        assume_output: time_series
+        note: Agrupar por mes ou ano conforme horizonte solicitado
+      must_clarify_when:
+      - ambiguity: granularidade_temporal
+        question: Voce quer a carga agregada por dia, mes ou ano?
+        trigger_terms:
+        - periodo
+        - historico
+        - evolucao
+        - tendencia
+        - serie
+      - ambiguity: unidade_saida
+        question: Voce quer o resultado em MWmed (potencia media) ou GWh (energia total do periodo)?
+        trigger_terms:
+        - energia total
+        - consumo total
+        - quanto consumiu
+        - total de energia
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - curva de carga
+        - perfil horario
+        - carga horaria
+        - intradiario
+        reason: Granularidade deste dataset e diaria. Para perfil intradiario use curva-carga.
+        redirect: curva-carga
+      - user_mentions:
+        - carga mensal
+        - consumo mensal
+        - serie mensal
+        reason: Para serie mensal pre-agregada use carga-mensal com granularidade nativa mensal.
+        redirect: carga-mensal
+      - user_mentions:
+        - despacho
+        - geracao termica
+        - termeletrica
+        reason: Schema nao contem informacao de despacho ou geracao termica.
+        redirect: geracao-termica-despacho-2
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu a carga média anual de energia em cada subsistema do SIN ao longo dos anos?
+    sql: SELECT id_subsistema, nom_subsistema, YEAR(din_instante) AS ano, AVG(TRY_CAST(val_cargaenergiamwmed AS DOUBLE)) AS
+      carga_media_mwmed, MIN(val_cargaenergiamwmed) AS carga_minima_mwmed, MAX(val_cargaenergiamwmed)
+      AS carga_maxima_mwmed, COUNT(*) AS qtd_dias FROM read_parquet('s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet')
+      WHERE val_cargaenergiamwmed IS NOT NULL GROUP BY id_subsistema, nom_subsistema, YEAR(din_instante)
+      ORDER BY id_subsistema, ano;
+  - question: Qual subsistema teve maior carga média de energia nos últimos 12 meses disponíveis?
+    sql: SELECT id_subsistema, nom_subsistema, AVG(TRY_CAST(val_cargaenergiamwmed AS DOUBLE)) AS carga_media_mwmed, SUM((TRY_CAST(val_cargaenergiamwmed AS DOUBLE))
+      * 24.0) / 1000 AS carga_total_mwmed, COUNT(*) AS qtd_dias_apurados FROM read_parquet('s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet')
+      WHERE val_cargaenergiamwmed IS NOT NULL AND din_instante >= ( SELECT MAX(din_instante) - INTERVAL
+      365 DAY FROM read_parquet('s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet') ) GROUP
+      BY id_subsistema, nom_subsistema ORDER BY carga_media_mwmed DESC;
+  - question: Como a carga apurada no subsistema SE mudou antes e depois da inclusão da MMGD em abril/2023?
+    sql: SELECT id_subsistema, CASE WHEN din_instante < '2021-03-01' THEN '1_ate_fev2021_scada' WHEN din_instante
+      < '2023-04-29' THEN '2_mar2021_abr2023_nao_despachadas' ELSE '3_apos_abr2023_com_mmgd' END AS fase_metodologica,
+      AVG(val_cargaenergiamwmed) AS carga_media_mwmed, COUNT(*) AS qtd_dias FROM read_parquet('s3://ons-aws-prod-opendata/dataset/carga_energia_di/*.parquet')
+      WHERE val_cargaenergiamwmed IS NOT NULL AND id_subsistema = 'SE' GROUP BY id_subsistema, CASE WHEN
+      din_instante < '2021-03-01' THEN '1_ate_fev2021_scada' WHEN din_instante < '2023-04-29' THEN '2_mar2021_abr2023_nao_despachadas'
+      ELSE '3_apos_abr2023_com_mmgd' END ORDER BY fase_metodologica;
+- property: relatedDatasets
+  value:
+    curva-carga:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    ear-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    cmo-semi-horario:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    ena-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    carga-mensal:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+- property: license
+  value: CC-BY

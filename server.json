@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ONSBR/tiago-dados-abertos",
+  "description": "MCP dos dados abertos do ONS: consulta SQL aos Parquet publicos com unidade, fatos e fonte provados pelo contrato de dados",
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "mcp-tiago-dados-abertos",
+      "version": "1.0.0",
+      "runtimeHint": "uvx",
+      "transport": {"type": "stdio"},
+      "packageArguments": [
+        {"type": "positional", "value": "--stdio", "description": "modo stdio, para IDEs e Claude Desktop"}
+      ],
+      "environmentVariables": [
+        {"name": "MCP_DATA_TZ", "description": "fuso em que 'hoje' e 'ontem' sao resolvidos; padrao America/Sao_Paulo", "isRequired": false},
+        {"name": "MCP_QUERY_TIMEOUT_S", "description": "segundos ate interromper uma consulta; padrao 30", "isRequired": false},
+        {"name": "MCP_HTTP_UA", "description": "User-Agent das leituras HTTPS; troque o contato antes de expor", "isRequired": false}
+      ]
+    }
+  ]
+}

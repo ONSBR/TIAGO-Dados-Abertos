@@ -1,0 +1,958 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:equipamento-controle-reativo
+name: equipamento-controle-reativo
+tenant: ons
+tags:
+- ONS
+- SIN
+- capacitor shunt
+- capacitor-shunt
+- compensador estático de reativos
+- compensador síncrono
+- compensador-estatico
+- compensador-sincrono
+- controle de reativos
+- controle-de-reativos
+- equipamento controle reativo
+- potencia-reativa
+- reator shunt
+- reator-shunt
+- subestacao
+- transmissao
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/equipamento_controle_reativo/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar operadores do sistema elétrico, planejadores e analistas de transmissão no inventário
+    e caracterização dos ativos de controle de tensão e potência reativa do SIN, suportando decisões de
+    despacho de reativos, controle de tensão em subestações, planejamento da expansão da rede e análises
+    regulatórias de adequação do parque de equipamentos por subsistema e agente proprietário.
+  limitations: 93. 93. Valor mínimo de -9999.
+  usage: Recuperar este dataset quando a pergunta envolver inventário, cadastro ou caracterização de equipamentos
+    de suporte de tensão e controle de potência reativa (reatores shunt, capacitores shunt, compensadores
+    síncronos ou estáticos) nas subestações do SIN.
+domain: transmissao
+schema:
+- name: equipamento_controle_reativo
+  physicalType: parquet
+  logicalType: object
+  physicalName: equipamento_controle_reativo
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a subestação pertence (ex: SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema
+      - código subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome por extenso do subsistema elétrico (ex: Sudeste/Centro-Oeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - subsistema elétrico
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado da federação onde a subestação está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - sigla estado
+      - unidade federativa
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado da federação onde a subestação está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome estado
+      - estado completo
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+  - name: nom_subestacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da subestação da Rede de Operação onde o equipamento de controle de reativos está
+      instalado
+    customProperties:
+    - property: aliases
+      value:
+      - subestação
+      - nome subestação
+      - SE
+      - barra
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_agente_proprietario
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente proprietário do equipamento de controle de reativos (concessionária ou
+      transmissora responsável)
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - proprietário
+      - empresa proprietária
+      - concessionária
+      - transmissora
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_tipoderede
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo de rede elétrica à qual o equipamento pertence (ex: Rede Básica, Rede de Distribuição)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de rede
+      - classificação da rede
+      - rede básica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BASICA
+      - COMPLEMENTAR
+  - name: nom_tipoequipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo do equipamento de controle de reativos: Reator Shunt, Capacitor Shunt, Compensador
+      Síncrono ou Compensador Estático de Reativos'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo equipamento
+      - tipo de equipamento
+      - categoria equipamento
+      - reator
+      - capacitor
+      - compensador
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Banco de Capacitores
+      - Compensador Reativo Estático Controlável
+      - Compensador Síncrono
+      - Reator
+  - name: nom_equipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome ou designação do equipamento de controle de reativos conforme cadastro do ONS
+    customProperties:
+    - property: aliases
+      value:
+      - nome equipamento
+      - equipamento
+      - designação equipamento
+    - property: semanticType
+      value: DIMENSION
+  - name: val_potreativanominal_mvar
+    physicalType: DOUBLE
+    logicalType: number
+    description: Potência reativa nominal do equipamento em Mvar, conforme placa do fabricante ou especificação
+      técnica
+    customProperties:
+    - property: aliases
+      value:
+      - potência reativa nominal
+      - potência nominal
+      - Mvar nominal
+      - capacidade reativa
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: Mvar
+  - name: val_limiteinferior_mvar
+    physicalType: DOUBLE
+    logicalType: number
+    description: Limite operativo inferior de potência reativa do equipamento em Mvar. Preenchido principalmente
+      para compensadores estáticos e síncronos. Valor -9999.9 indica ausência de limite definido (sentinel
+      value).
+    customProperties:
+    - property: aliases
+      value:
+      - limite inferior
+      - limite mínimo reativo
+      - Qmin
+      - limite inferior Mvar
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: Mvar
+    - property: enum
+      value:
+      - -9999.9
+      - -300.0
+      - -250.0
+      - -220.0
+      - -200.0
+      - -199.0
+      - -180.0
+      - -175.0
+      - -150.0
+      - -125.0
+      - -120.0
+      - -105.0
+      - -100.0
+      - -90.0
+      - -84.0
+      - -80.0
+      - -75.0
+      - -70.0
+      - -60.0
+      - -55.0
+      - -50.0
+      - -45.0
+      - -42.0
+      - -35.0
+      - -30.0
+      - -22.0
+      - -20.0
+      - -15.0
+      - -10.0
+      - -9.0
+      - -8.0
+      - 0.0
+  - name: val_limitesuperior_mvar
+    physicalType: DOUBLE
+    logicalType: number
+    description: Limite operativo superior de potência reativa do equipamento em Mvar. Preenchido principalmente
+      para compensadores estáticos e síncronos. Valor 9999.9 indica ausência de limite definido (sentinel
+      value).
+    customProperties:
+    - property: aliases
+      value:
+      - limite superior
+      - limite máximo reativo
+      - Qmax
+      - limite superior Mvar
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: Mvar
+    - property: enum
+      value:
+      - 19.0
+      - 20.0
+      - 30.0
+      - 33.0
+      - 48.0
+      - 50.0
+      - 50.5
+      - 55.0
+      - 58.0
+      - 60.0
+      - 70.0
+      - 90.0
+      - 100.0
+      - 110.0
+      - 150.0
+      - 160.0
+      - 170.0
+      - 200.0
+      - 250.0
+      - 300.0
+      - 330.0
+      - 332.0
+      - 9999.9
+  - name: dat_entradaoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de entrada em operação do equipamento na Rede de Operação. Atributo cadastral do
+      ciclo de vida do equipamento, não dimensão temporal de série. Armazenado como VARCHAR — pode conter
+      formatos inconsistentes.
+    customProperties:
+    - property: aliases
+      value:
+      - data entrada operação
+      - data comissionamento
+      - data início operação
+      - entrada em operação
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_desativacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de desativação do equipamento na Rede de Operação. Atributo cadastral do ciclo de
+      vida. Equipamentos ativos podem conter sentinel '9999-12-31'. Armazenado como VARCHAR.
+    customProperties:
+    - property: aliases
+      value:
+      - data desativação
+      - data retirada
+      - data descomissionamento
+      - desativação
+    - property: semanticType
+      value: TIMESTAMP
+  - name: cod_equipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código único identificador do equipamento de controle de reativos no cadastro do ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código equipamento
+      - ID equipamento
+      - identificador equipamento
+      - código do equipamento
+    - property: semanticType
+      value: IDENTIFIER
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for equipamento_controle_reativo:\n  - row_count > 0:\n      name: Tabela\
+      \ não pode estar vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n   \
+      \   valid values:\n        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n\
+      \        - 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE'\n        - 'SUL'\n      name: nom_subsistema\
+      \ deve ser um dos valores válidos\n  - invalid_count(id_estado) = 0:\n      valid values:\n    \
+      \    - 'AC'\n        - 'AL'\n        - 'AM'\n        - 'AP'\n        - 'BA'\n        - 'CE'\n  \
+      \      - 'DF'\n        - 'ES'\n        - 'GO'\n        - 'MA'\n        - 'MG'\n        - 'MS'\n\
+      \        - 'MT'\n        - 'PA'\n        - 'PB'\n        - 'PE'\n        - 'PI'\n        - 'PR'\n\
+      \        - 'RJ'\n        - 'RN'\n        - 'RO'\n        - 'RR'\n        - 'RS'\n        - 'SC'\n\
+      \        - 'SE'\n        - 'SP'\n        - 'TO'\n      name: id_estado deve ser um dos valores válidos\n\
+      \  - invalid_count(nom_estado) = 0:\n      valid values:\n        - 'ACRE'\n        - 'ALAGOAS'\n\
+      \        - 'AMAPA'\n        - 'AMAZONAS'\n        - 'BAHIA'\n        - 'CEARA'\n        - 'DISTRITO\
+      \ FEDERAL'\n        - 'ESPIRITO SANTO'\n        - 'GOIAS'\n        - 'MARANHAO'\n        - 'MATO\
+      \ GROSSO'\n        - 'MATO GROSSO DO SUL'\n        - 'MINAS GERAIS'\n        - 'PARA'\n        -\
+      \ 'PARAIBA'\n        - 'PARANA'\n        - 'PERNAMBUCO'\n        - 'PIAUI'\n        - 'RIO DE JANEIRO'\n\
+      \        - 'RIO GRANDE DO NORTE'\n        - 'RIO GRANDE DO SUL'\n        - 'RONDONIA'\n        -\
+      \ 'RORAIMA'\n        - 'SANTA CATARINA'\n        - 'SAO PAULO'\n        - 'SERGIPE'\n        - 'TOCANTINS'\n\
+      \      name: nom_estado deve ser um dos valores válidos\n  - invalid_count(nom_tipoderede) = 0:\n\
+      \      valid values:\n        - 'BASICA'\n        - 'COMPLEMENTAR'\n      name: nom_tipoderede deve\
+      \ ser um dos valores válidos\n  - invalid_count(nom_tipoequipamento) = 0:\n      valid values:\n\
+      \        - 'Banco de Capacitores'\n        - 'Compensador Reativo Estático Controlável'\n      \
+      \  - 'Compensador Síncrono'\n        - 'Reator'\n      name: nom_tipoequipamento deve ser um dos\
+      \ valores válidos\n\n  # Unicidade da chave primária (candidata LLM — confirmar com dados reais)\n\
+      \  - duplicate_count(cod_equipamento) = 0:\n      name: cod_equipamento não deve ter duplicatas\
+      \ (chave primária)\n\n  # Nulos em val_limiteinferior_mvar — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(val_limiteinferior_mvar) < 5.0:\n      name: val_limiteinferior_mvar não deve\
+      \ ter >5.0% nulos\n\n  # Nulos em val_limitesuperior_mvar — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(val_limitesuperior_mvar) < 5.0:\n      name: val_limitesuperior_mvar não deve\
+      \ ter >5.0% nulos\n\n  # Nulos em val_potreativanominal_mvar — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(val_potreativanominal_mvar) < 5.0:\n      name: val_potreativanominal_mvar\
+      \ não deve ter >5.0% nulos\n\n  # Nulos em nom_agente_proprietario — alerta de qualidade (real=0%,\
+      \ threshold=5.0%)\n  - missing_percent(nom_agente_proprietario) < 5.0:\n      name: nom_agente_proprietario\
+      \ não deve ter >5.0% nulos\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/equipamento-controle-reativo
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quantos capacitores existem
+  - compensadores sincronos instalados
+  - equipamentos de controle de tensao
+  - reatores das subestacoes
+  - lista de compensadores
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver inventário, cadastro ou caracterização de equipamentos
+    de suporte de tensão e controle de potência reativa (reatores shunt, capacitores shunt, compensadores
+    síncronos ou estáticos) nas subestações do SIN. Também relevante para perguntas sobre capacidade instalada
+    de reativos por subestação, subsistema, estado ou agente proprietário, e para análises de adequação
+    do parque de equipamentos de controle de tensão da rede de transmissão.
+- property: agentInstructions
+  value: '- [val_limiteinferior_mvar] 93,4% dos registros possuem val_limiteinferior_mvar nulo no dataset
+    equipamento-controle-reativo, indicando que limites operativos inferiores não estão preenchidos para
+    a grande maioria dos equipamentos cadastrados. Isso limita o uso desta coluna em análises de capacidade
+    operativa.
+
+
+    - [val_limitesuperior_mvar] 93,4% dos registros possuem val_limitesuperior_mvar nulo no dataset equipamento-controle-reativo,
+    indicando que limites operativos superiores não estão preenchidos para a grande maioria dos equipamentos
+    cadastrados. Isso limita o uso desta coluna em análises de capacidade operativa.
+
+
+    - [val_limiteinferior_mvar] val_limiteinferior_mvar no dataset equipamento-controle-reativo apresenta
+    valor mínimo de -9999,9, possivelmente sentinela para "sem limite inferior definido". Deve ser filtrado
+    antes de qualquer análise quantitativa de limites operativos.
+
+
+    - [val_limitesuperior_mvar] val_limitesuperior_mvar no dataset equipamento-controle-reativo apresenta
+    valor máximo de 9999,9, possivelmente sentinela para "sem limite superior definido". Deve ser filtrado
+    antes de qualquer análise quantitativa de limites operativos.
+
+
+    - [val_potreativanominal_mvar] 6,8% dos registros possuem val_potreativanominal_mvar nulo no dataset
+    equipamento-controle-reativo. Para um campo que representa a capacidade nominal do equipamento, a
+    ausência compromete análises de capacidade instalada de compensação reativa por subestação ou subsistema.
+
+
+    - [nom_agente_proprietario] 0,1% dos registros possuem nom_agente_proprietario nulo no dataset equipamento-controle-reativo.
+    Embora residual, equipamentos sem agente proprietário identificado podem gerar inconsistências em
+    relatórios de responsabilidade operativa e manutenção.
+
+
+    - [dat_entradaoperacao] dat_entradaoperacao é armazenado como VARCHAR no dataset equipamento-controle-reativo,
+    exigindo conversão explícita para DATE em análises temporais. Podem existir formatos inconsistentes
+    que causariam falha no TRY_CAST.
+
+
+    - [dat_desativacao] dat_desativacao é armazenado como VARCHAR no dataset equipamento-controle-reativo,
+    exigindo conversão explícita para DATE em análises temporais. Podem existir valores padrão (ex: "9999-12-31")
+    para equipamentos ainda ativos que devem ser tratados antes de filtros de vigência.
+
+
+    - [cod_equipamento] cod_equipamento é a chave primária natural do dataset equipamento-controle-reativo.
+    Duplicatas indicariam inconsistência cadastral grave, como equipamentos com múltiplos registros ativos
+    simultaneamente.
+
+
+    - [id_subsistema] Valores com trailing spaces detectados em ''id_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_subsistema] Valores com trailing spaces detectados em ''nom_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_estado] Valores com trailing spaces detectados em ''nom_estado''. Use TRIM() em filtros WHERE
+    para evitar perda de registros.
+
+    - [nom_tipoderede] Valores com trailing spaces detectados em ''nom_tipoderede''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_tipoequipamento] Valores com trailing spaces detectados em ''nom_tipoequipamento''. Use TRIM()
+    em filtros WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais subestações possuem compensadores estáticos de reativos cadastrados no SIN?
+  - Qual é a capacidade total de reativos instalada por subsistema elétrico?
+  - Quais equipamentos de controle de reativos pertencem à FURNAS e estão ativos?
+  - Qual a distribuição de tipos de equipamentos de controle de reativos por estado?
+  - Quais subestações têm limites operativos de Qmin e Qmax definidos para seus compensadores?
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_subestacao
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/equipamento_controle_reativo/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '1988-12-31'
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      temporal_column: dat_entradaoperacao
+      spatial: subestacao
+      entity: subestacao
+      one_row_per:
+      - dat_entradaoperacao
+      - id_subsistema
+      - cod_equipamento
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: nom_subestacao
+      patamar: null
+    metrics:
+    - id: potreativanominal_mvar
+      label: Potencia Reativa Nominal (Mvar)
+      columns:
+      - val_potreativanominal_mvar
+      expression: val_potreativanominal_mvar
+      quantity_kind: capacity
+      unit_native: Mvar
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - potreativanominal_mvar
+      - potencia reativa nominal
+      - potencia nominal
+      - Mvar nominal
+      - capacidade reativa
+      - capacidade instalada reativa
+      aggregation_modes:
+        total:
+          sql: SUM(val_potreativanominal_mvar)
+          unit: Mvar
+        average:
+          sql: AVG(val_potreativanominal_mvar)
+          unit: Mvar
+        maximum:
+          sql: MAX(val_potreativanominal_mvar)
+          unit: Mvar
+        time_series:
+          sql: SUM(val_potreativanominal_mvar)
+          unit: Mvar
+        ranking:
+          sql: SUM(val_potreativanominal_mvar)
+          unit: Mvar
+        comparison:
+          sql: SUM(val_potreativanominal_mvar)
+          unit: Mvar
+      aliases:
+      - potencia reativa nominal
+      - potencia nominal
+      - Mvar nominal
+      - capacidade reativa
+      - capacidade instalada reativa
+    - id: limiteinferior_mvar
+      label: Limite Inferior Reativo (Qmin, Mvar)
+      columns:
+      - val_limiteinferior_mvar
+      expression: val_limiteinferior_mvar
+      quantity_kind: capacity
+      unit_native: Mvar
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - limiteinferior_mvar
+      - limite inferior
+      - limite minimo reativo
+      - Qmin
+      - limite inferior Mvar
+      aggregation_modes:
+        total:
+          sql: SUM(val_limiteinferior_mvar)
+          unit: Mvar
+        average:
+          sql: AVG(val_limiteinferior_mvar)
+          unit: Mvar
+        maximum:
+          sql: MAX(val_limiteinferior_mvar)
+          unit: Mvar
+        time_series:
+          sql: SUM(val_limiteinferior_mvar)
+          unit: Mvar
+        ranking:
+          sql: SUM(val_limiteinferior_mvar)
+          unit: Mvar
+        comparison:
+          sql: AVG(val_limiteinferior_mvar)
+          unit: Mvar
+      aliases:
+      - limite inferior
+      - limite minimo reativo
+      - Qmin
+      - limite inferior Mvar
+    - id: limitesuperior_mvar
+      label: Limite Superior Reativo (Qmax, Mvar)
+      columns:
+      - val_limitesuperior_mvar
+      expression: val_limitesuperior_mvar
+      quantity_kind: capacity
+      unit_native: Mvar
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - limitesuperior_mvar
+      - limite superior
+      - limite maximo reativo
+      - Qmax
+      - limite superior Mvar
+      aggregation_modes:
+        total:
+          sql: SUM(val_limitesuperior_mvar)
+          unit: Mvar
+        average:
+          sql: AVG(val_limitesuperior_mvar)
+          unit: Mvar
+        maximum:
+          sql: MAX(val_limitesuperior_mvar)
+          unit: Mvar
+        time_series:
+          sql: SUM(val_limitesuperior_mvar)
+          unit: Mvar
+        ranking:
+          sql: SUM(val_limitesuperior_mvar)
+          unit: Mvar
+        comparison:
+          sql: AVG(val_limitesuperior_mvar)
+          unit: Mvar
+      aliases:
+      - limite superior
+      - limite maximo reativo
+      - Qmax
+      - limite superior Mvar
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    selection_policy:
+      covers_metrics:
+      - potreativanominal_mvar
+      - limiteinferior_mvar
+      - limitesuperior_mvar
+      preferred_for:
+      - equipamento controle reativo
+      - reator shunt cadastro
+      - capacitor shunt SIN
+      - compensador sincrono subestacao
+      - compensador estatico controlavel
+      - Qmin Qmax equipamento
+      - limite operativo reativo
+      - inventario reativos subestacao
+      - agente proprietario reativo
+      - parque equipamentos reativos
+      not_preferred_for:
+      - usina_individual
+      - nuclear
+      - MMGD
+      - transformador
+      - capacidade transformacao
+      - geracao por fonte
+      - fator de capacidade
+      - carga eletrica
+      - preco energia
+      - despacho
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: TRIM(id_subsistema) = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: TRIM(id_subsistema) = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: TRIM(id_subsistema) = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: TRIM(id_subsistema) = 'N'
+      nom_tipoderede:
+        BASICA:
+          aliases:
+          - rede basica
+          - basica
+          - RB
+          filter: TRIM(nom_tipoderede) = 'BASICA'
+        COMPLEMENTAR:
+          aliases:
+          - rede complementar
+          - complementar
+          filter: TRIM(nom_tipoderede) = 'COMPLEMENTAR'
+      nom_tipoequipamento:
+        Banco de Capacitores:
+          aliases:
+          - banco de capacitores
+          - capacitor shunt
+          - capacitor
+          - banco capacitor
+          filter: TRIM(nom_tipoequipamento) = 'Banco de Capacitores'
+        Compensador Reativo Estatico Controlavel:
+          aliases:
+          - compensador estatico
+          - SVC
+          - CEREC
+          - compensador reativo estatico
+          - compensador estatico controlavel
+          filter: TRIM(nom_tipoequipamento) = 'Compensador Reativo Estático Controlável'
+        Compensador Sincrono:
+          aliases:
+          - compensador sincrono
+          - CS
+          - compensador sincronico
+          filter: TRIM(nom_tipoequipamento) = 'Compensador Síncrono'
+        Reator:
+          aliases:
+          - reator
+          - reator shunt
+          - reator derivacao
+          filter: TRIM(nom_tipoequipamento) = 'Reator'
+      dat_desativacao:
+        ativo:
+          aliases:
+          - ativo
+          - em operacao
+          - vigente
+          - nao desativado
+          filter: dat_desativacao = '9999-12-31' OR dat_desativacao IS NULL
+    sql_patterns:
+      contagem_por_tipo_equipamento:
+        template: "SELECT TRIM(nom_tipoequipamento) AS tipo_equipamento,\n  COUNT(*) AS quantidade,\n\
+          \  SUM(val_potreativanominal_mvar) AS capacidade_total_mvar\nFROM {source}\nWHERE val_potreativanominal_mvar\
+          \ IS NOT NULL\nGROUP BY 1\nORDER BY 3 DESC"
+        output_unit: Mvar
+        matches:
+          output_modes:
+          - total
+          - ranking
+          metrics:
+          - potreativanominal_mvar
+          grain: static
+      capacidade_por_subsistema:
+        template: "SELECT TRIM(id_subsistema) AS subsistema,\n  TRIM(nom_tipoequipamento) AS tipo_equipamento,\n\
+          \  COUNT(*) AS quantidade,\n  SUM(val_potreativanominal_mvar) AS capacidade_total_mvar\nFROM\
+          \ {source}\nWHERE val_potreativanominal_mvar IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 4 DESC"
+        output_unit: Mvar
+        matches:
+          output_modes:
+          - total
+          - comparison
+          metrics:
+          - potreativanominal_mvar
+          grain: static
+      equipamentos_com_limites_operativos:
+        template: "SELECT nom_subestacao, nom_equipamento, TRIM(nom_tipoequipamento) AS tipo,\n  val_limiteinferior_mvar\
+          \ AS Qmin,\n  val_limitesuperior_mvar AS Qmax\nFROM {source}\nWHERE val_limiteinferior_mvar\
+          \ IS NOT NULL\n  AND val_limiteinferior_mvar != -9999.9\n  AND val_limitesuperior_mvar IS NOT\
+          \ NULL\n  AND val_limitesuperior_mvar != 9999.9\nORDER BY nom_subestacao"
+        output_unit: Mvar
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - limiteinferior_mvar
+          - limitesuperior_mvar
+          grain: static
+      equipamentos_ativos_por_agente:
+        template: "SELECT nom_agente_proprietario,\n  TRIM(nom_tipoequipamento) AS tipo_equipamento,\n\
+          \  COUNT(*) AS quantidade,\n  SUM(val_potreativanominal_mvar) AS capacidade_total_mvar\nFROM\
+          \ {source}\nWHERE (dat_desativacao = '9999-12-31' OR dat_desativacao IS NULL)\n  AND nom_agente_proprietario\
+          \ IS NOT NULL\nGROUP BY 1, 2\nORDER BY 3 DESC"
+        output_unit: Mvar
+        matches:
+          output_modes:
+          - ranking
+          - comparison
+          metrics:
+          - potreativanominal_mvar
+          grain: static
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta capacidade reativa sem especificar metrica
+        assume_metric: potreativanominal_mvar
+        assume_output: total
+        note: Potencia reativa nominal e a metrica principal de capacidade instalada neste dataset
+      - when: usuario pergunta sobre equipamentos ativos sem filtro de data
+        assume_filter: dat_desativacao = '9999-12-31' OR dat_desativacao IS NULL
+        note: Sentinel 9999-12-31 indica equipamento ainda em operacao
+      - when: usuario pergunta limite reativo sem especificar inferior ou superior
+        assume_metric: limitesuperior_mvar
+        assume_output: maximum
+        note: Qmax e o limite mais consultado para analise de capacidade de injecao de reativo
+      must_clarify_when:
+      - trigger_terms:
+        - limite operativo
+        - Qmin e Qmax
+        question: Voce quer o limite inferior (Qmin), o limite superior (Qmax) ou ambos?
+        reason: Dataset possui duas metricas distintas de limite e a pergunta e ambigua
+      - trigger_terms:
+        - todos os equipamentos
+        - inventario completo
+        question: Voce quer incluir equipamentos desativados ou apenas os ativos (dat_desativacao = 9999-12-31)?
+        reason: Dataset contem equipamentos historicos e ativos sem filtro temporal automatico
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - geradora
+        reason: Schema nao contem identificador de usina geradora (CEG ou nom_usina).
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem dimensao de fonte nuclear.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - transformador
+        - autotransformador
+        - capacidade de transformacao
+        reason: Transformadores sao cadastrados em dataset especifico de capacidade-transformacao.
+        redirect: capacidade-transformacao
+- property: fewShotQueries
+  value:
+  - question: Qual é a capacidade total instalada de compensação reativa (em Mvar) por subsistema e tipo
+      de equipamento no SIN?
+    sql: SELECT id_subsistema, nom_subsistema, nom_tipoequipamento, COUNT(*) AS qtd_equipamentos, ROUND(SUM(val_potreativanominal_mvar),
+      1) AS total_mvar_nominal, ROUND(AVG(val_potreativanominal_mvar), 1) AS media_mvar_nominal FROM read_parquet('s3://ons-aws-prod-opendata/dataset/equipamento_controle_reativo/*.parquet')
+      WHERE val_potreativanominal_mvar IS NOT NULL GROUP BY id_subsistema, nom_subsistema, nom_tipoequipamento
+      ORDER BY id_subsistema, total_mvar_nominal DESC
+  - question: Quais são as 20 subestações com maior capacidade instalada de equipamentos de controle de
+      reativos?
+    sql: SELECT nom_subestacao, id_subsistema, nom_estado, COUNT(*) AS qtd_equipamentos, ROUND(SUM(val_potreativanominal_mvar),
+      1) AS total_mvar_nominal FROM read_parquet('s3://ons-aws-prod-opendata/dataset/equipamento_controle_reativo/*.parquet')
+      WHERE val_potreativanominal_mvar IS NOT NULL GROUP BY nom_subestacao, id_subsistema, nom_estado
+      ORDER BY total_mvar_nominal DESC LIMIT 20
+  - question: Qual é o inventário de equipamentos de controle de reativos da Rede Básica por agente proprietário,
+      com total de Mvar instalado?
+    sql: SELECT nom_agente_proprietario, nom_tipoequipamento, COUNT(*) AS qtd_equipamentos, ROUND(SUM(val_potreativanominal_mvar),
+      1) AS total_mvar_nominal FROM read_parquet('s3://ons-aws-prod-opendata/dataset/equipamento_controle_reativo/*.parquet')
+      WHERE TRIM(nom_tipoderede) = 'Rede Básica' AND val_potreativanominal_mvar IS NOT NULL AND nom_agente_proprietario
+      IS NOT NULL GROUP BY nom_agente_proprietario, nom_tipoequipamento ORDER BY nom_agente_proprietario,
+      total_mvar_nominal DESC
+- property: relatedDatasets
+  value:
+    subestacao:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_subestacao
+    linha-transmissao:
+      join_keys:
+      - cod_equipamento
+      - nom_tipoderede
+    capacidade-transformacao:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_subestacao
+      - cod_equipamento
+    geracao-usina-2:
+      join_keys:
+      - id_subsistema
+      - id_estado
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - id_estado
+    interrupcao_carga:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+    usina_pqu:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    capacidade-geracao:
+      join_keys:
+      - cod_equipamento
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - cod_equipamento
+    fator-capacidade-2:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - cod_equipamento
+    disponibilidade_usina:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+- property: license
+  value: CC-BY

@@ -1,0 +1,1055 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:capacidade-geracao
+name: capacidade-geracao
+tenant: ons
+tags:
+- ONS
+- SIN
+- UHE
+- cadastro de usinas ONS
+- capacidade instalada
+- capacidade instalada geração
+- capacidade-instalada
+- despacho-centralizado
+- geracao
+- matriz-eletrica
+- parque gerador
+- potencia-efetiva
+- potência efetiva
+- potência instalada
+- unidade-geradora
+- usina
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/capacidade-geracao/*.parquet
+  format: parquet
+description:
+  purpose: Prover o cadastro de referência de capacidade instalada por unidade geradora para analistas
+    de planejamento energético, operadores do sistema elétrico e agentes do setor (geradoras, comercializadoras,
+    reguladores), suportando decisões de despacho centralizado, planejamento da expansão da oferta, cálculo
+    de fator de capacidade, análise de balanço oferta-demanda por subsistema e monitoramento da composição
+    da matriz elétrica brasileira por fonte e região.
+  limitations: Coluna armazenada como VARCHAR no schema físico em vez de DATE. Coluna armazenada como
+    VARCHAR no schema físico em vez de DATE. Coluna armazenada como VARCHAR no schema físico em vez de
+    DATE.
+  usage: Recuperar este dataset quando a pergunta envolver capacidade instalada, potência efetiva, potência
+    nominal ou potência cadastrada de usinas ou unidades geradoras despachadas pelo ONS.
+domain: geracao
+schema:
+- name: capacidade_geracao
+  physicalType: parquet
+  logicalType: object
+  physicalName: capacidade_geracao
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico ao qual a unidade geradora pertence (ex:
+      SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - codigo_subsistema
+      - sigla_subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - PY
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico (ex: Sudeste/Centro-Oeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - regiao_subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - PARAGUAI
+      - SUDESTE
+      - SUL
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Sigla do estado brasileiro onde a usina está localizada (ex: SP, MG, BA)'
+    customProperties:
+    - property: aliases
+      value:
+      - sigla_estado
+      - uf
+      - estado_sigla
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - PY
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado brasileiro onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome_estado
+      - estado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DADOS REF. PARAGUAI
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+  - name: nom_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Modalidade de operação da usina conforme classificação ONS (Tipo I, Tipo II-A, Tipo II-B,
+      Tipo II-C) — define o nível de despacho centralizado pelo ONS
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade_operacao
+      - tipo_despacho
+      - modalidade
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - TIPO I
+      - TIPO II-A
+      - TIPO II-B
+      - TIPO II-C
+  - name: nom_agenteproprietario
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente proprietário da usina, conforme cadastro ANEEL/ONS
+    customProperties:
+    - property: aliases
+      value:
+      - proprietario
+      - agente_proprietario
+      - empresa_proprietaria
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_agenteoperador
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente operador responsável pela operação da usina
+    customProperties:
+    - property: aliases
+      value:
+      - operador
+      - agente_operador
+      - empresa_operadora
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo de usina conforme fonte de geração (ex: UHE, UTE, EOL, UFV, PCH, CGH)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo_usina
+      - fonte_geracao
+      - tipo_geracao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - EOLIELÉTRICA
+      - FOTOVOLTAICA
+      - HIDROELÉTRICA
+      - NUCLEAR
+      - TÉRMICA
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina geradora conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome_usina
+      - planta
+    - property: semanticType
+      value: DIMENSION
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração — identificador único da usina no cadastro ANEEL,
+      utilizado como chave de join entre datasets do setor elétrico
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_empreendimento
+      - codigo_ceg
+      - id_usina_aneel
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_unidadegeradora
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da unidade geradora individual dentro da usina (ex: UG1, UG2)'
+    customProperties:
+    - property: aliases
+      value:
+      - unidade_geradora
+      - nome_ug
+      - ug
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_equipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código único do equipamento (unidade geradora) no sistema ONS, utilizado como identificador
+      técnico para despacho e monitoramento
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_equipamento
+      - id_equipamento
+      - cod_ug
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_unidadegeradora
+    physicalType: VARCHAR
+    logicalType: string
+    description: Número sequencial da unidade geradora dentro da usina (armazenado como VARCHAR no schema
+      físico)
+    customProperties:
+    - property: aliases
+      value:
+      - numero_ug
+      - numero_unidade_geradora
+    - property: semanticType
+      value: IDENTIFIER
+    - property: castExpression
+      value: TRY_CAST(num_unidadegeradora AS INTEGER)
+  - name: nom_combustivel
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo de combustível ou fonte energética utilizada pela unidade geradora (ex: Hídrica,
+      Gás Natural, Eólica, Solar, Biomassa)'
+    customProperties:
+    - property: aliases
+      value:
+      - combustivel
+      - fonte_primaria
+      - tipo_combustivel
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BIOMASSA
+      - CARVÃO
+      - EÓLICA
+      - FOTOVOLTAICA
+      - GÁS
+      - HIDRÁULICA
+      - MULTI-COMBUSTÍVEL DIESEL/ÓLEO
+      - MULTI-COMBUSTÍVEL GÁS/DIESEL
+      - NUCLEAR
+      - RESÍDUO CICLO COMBINADO
+      - RESÍDUOS INDUSTRIAIS
+      - ÓLEO COMBUSTÍVEL
+      - ÓLEO DIESEL
+  - name: dat_entradateste
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de entrada em operação de teste da unidade geradora — atributo cadastral descritivo,
+      não dimensão temporal de série. Armazenado como VARCHAR; pode conter datas no formato YYYY-MM-DD
+      ou valores sentinela como '0001-01-01'
+    customProperties:
+    - property: aliases
+      value:
+      - data_entrada_teste
+      - inicio_teste
+      - dat_teste
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_entradaoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de entrada em operação comercial da unidade geradora — atributo cadastral descritivo,
+      não dimensão temporal de série. Armazenado como VARCHAR
+    customProperties:
+    - property: aliases
+      value:
+      - data_entrada_operacao
+      - data_operacao_comercial
+      - dat_operacao
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_desativacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de desativação da unidade geradora — atributo cadastral descritivo. Registros ativos
+      tipicamente contêm valor sentinela ('9999-12-31' ou '0001-01-01') indicando ausência de desativação
+      prevista
+    customProperties:
+    - property: aliases
+      value:
+      - data_desativacao
+      - data_descomissionamento
+      - dat_fim
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_potenciaefetiva
+    physicalType: DOUBLE
+    logicalType: number
+    description: Potência efetiva (nominal) da unidade geradora em megawatts (MW), conforme cadastro ONS.
+      Representa a capacidade instalada disponível para despacho
+    customProperties:
+    - property: aliases
+      value:
+      - potencia_efetiva
+      - potencia_instalada
+      - capacidade_instalada
+      - potencia_nominal
+      - potencia_mw
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for capacidade_geracao:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'PY'\n        - 'S'\n        - 'SE'\n      name: id_subsistema\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n\
+      \        - 'NORDESTE'\n        - 'NORTE'\n        - 'PARAGUAI'\n        - 'SUDESTE'\n        - 'SUL'\n\
+      \      name: nom_subsistema deve ser um dos valores válidos\n  - invalid_count(id_estado) = 0:\n\
+      \      valid values:\n        - 'AC'\n        - 'AL'\n        - 'AM'\n        - 'AP'\n        -\
+      \ 'BA'\n        - 'CE'\n        - 'DF'\n        - 'ES'\n        - 'GO'\n        - 'MA'\n       \
+      \ - 'MG'\n        - 'MS'\n        - 'MT'\n        - 'PA'\n        - 'PB'\n        - 'PE'\n     \
+      \   - 'PI'\n        - 'PR'\n        - 'PY'\n        - 'RJ'\n        - 'RN'\n        - 'RO'\n   \
+      \     - 'RR'\n        - 'RS'\n        - 'SC'\n        - 'SE'\n        - 'SP'\n        - 'TO'\n \
+      \     name: id_estado deve ser um dos valores válidos\n  - invalid_count(nom_estado) = 0:\n    \
+      \  valid values:\n        - 'ACRE'\n        - 'ALAGOAS'\n        - 'AMAPA'\n        - 'AMAZONAS'\n\
+      \        - 'BAHIA'\n        - 'CEARA'\n        - 'DADOS REF. PARAGUAI'\n        - 'DISTRITO FEDERAL'\n\
+      \        - 'ESPIRITO SANTO'\n        - 'GOIAS'\n        - 'MARANHAO'\n        - 'MATO GROSSO'\n\
+      \        - 'MATO GROSSO DO SUL'\n        - 'MINAS GERAIS'\n        - 'PARA'\n        - 'PARAIBA'\n\
+      \        - 'PARANA'\n        - 'PERNAMBUCO'\n        - 'PIAUI'\n        - 'RIO DE JANEIRO'\n   \
+      \     - 'RIO GRANDE DO NORTE'\n        - 'RIO GRANDE DO SUL'\n        - 'RONDONIA'\n        - 'RORAIMA'\n\
+      \        - 'SANTA CATARINA'\n        - 'SAO PAULO'\n        - 'SERGIPE'\n        - 'TOCANTINS'\n\
+      \      name: nom_estado deve ser um dos valores válidos\n  - invalid_count(nom_modalidadeoperacao)\
+      \ = 0:\n      valid values:\n        - 'TIPO I'\n        - 'TIPO II-A'\n        - 'TIPO II-B'\n\
+      \        - 'TIPO II-C'\n      name: nom_modalidadeoperacao deve ser um dos valores válidos\n  -\
+      \ invalid_count(nom_tipousina) = 0:\n      valid values:\n        - 'EOLIELÉTRICA'\n        - 'FOTOVOLTAICA'\n\
+      \        - 'HIDROELÉTRICA'\n        - 'NUCLEAR'\n        - 'TÉRMICA'\n      name: nom_tipousina\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_combustivel) = 0:\n      valid values:\n\
+      \        - 'BIOMASSA'\n        - 'CARVÃO'\n        - 'EÓLICA'\n        - 'FOTOVOLTAICA'\n      \
+      \  - 'GÁS'\n        - 'HIDRÁULICA'\n        - 'MULTI-COMBUSTÍVEL DIESEL/ÓLEO'\n        - 'MULTI-COMBUSTÍVEL\
+      \ GÁS/DIESEL'\n        - 'NUCLEAR'\n        - 'RESÍDUO CICLO COMBINADO'\n        - 'RESÍDUOS INDUSTRIAIS'\n\
+      \        - 'ÓLEO COMBUSTÍVEL'\n        - 'ÓLEO DIESEL'\n      name: nom_combustivel deve ser um\
+      \ dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato origem ONS)\n \
+      \ - missing_percent(num_unidadegeradora) < 5:\n      name: num_unidadegeradora não pode ter >5%\
+      \ nulos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count between 4480\
+      \ and 6721:\n      name: Volume esperado entre 4,480 e 6,721 registros\n\n  # Unicidade da chave\
+      \ primária composta ['ceg', 'cod_equipamento'] (candidata LLM)\n  - failed rows:\n      name: Chave\
+      \ composta (ceg, cod_equipamento) não deve ter duplicatas\n      fail query: |\n        SELECT *\
+      \ FROM capacidade_geracao\n        WHERE (ceg, cod_equipamento) IN (\n          SELECT ceg, cod_equipamento\
+      \ FROM capacidade_geracao\n          GROUP BY ceg, cod_equipamento\n          HAVING COUNT(*) >\
+      \ 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/capacidade-geracao
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver capacidade instalada, potência efetiva, potência
+    nominal ou potência cadastrada de usinas ou unidades geradoras despachadas pelo ONS. Também recuperar
+    quando a análise exigir o denominador para cálculo de fator de capacidade (geração real dividida pela
+    potência instalada) ou quando for necessário identificar o parque gerador disponível por subsistema,
+    estado, tipo de usina ou fonte de energia.
+- property: agentInstructions
+  value: '- [dat_entradateste] Campo de data armazenado como VARCHAR no Parquet. Pode conter formatos
+    variados (YYYY-MM-DD, DD/MM/YYYY) ou valores sentinela para UGs sem data de teste registrada. Requer
+    TRY_CAST para operações temporais.
+
+
+    - [dat_entradaoperacao] Campo de data de entrada em operação comercial armazenado como VARCHAR no
+    Parquet. Pode conter formatos variados ou valores sentinela. Requer TRY_CAST para operações temporais.
+
+
+    - [dat_desativacao] Campo de data de desativação armazenado como VARCHAR no Parquet. UGs ativas provavelmente
+    contêm valor sentinela (ex: "9999-12-31", "31/12/9999") ou string vazia/nula mascarada. Verificar
+    distribuição de valores para identificar convenção adotada.
+
+
+    - [val_potenciaefetiva] Potência efetiva varia de 0,325 MW a 1.350 MW — amplitude de ~4.000x. Valores
+    muito baixos (< 1 MW) podem representar pequenas CGHs legítimas ou erros de cadastro. Valores próximos
+    a 1.350 MW correspondem às unidades de Itaipu. Verificar distribuição para identificar outliers reais.
+
+
+    - [num_unidadegeradora] Número da unidade geradora armazenado como VARCHAR apesar de representar valor
+    numérico sequencial. Pode conter zeros à esquerda, sufixos alfanuméricos ou formatos não padronizados.
+    Usar CAST(num_unidadegeradora AS INTEGER) com cautela.
+
+
+    - [cod_equipamento] cod_equipamento é a chave primária natural esperada do dataset. Verificar se existem
+    duplicatas que possam indicar registros redundantes ou erro de carga do snapshot diário.
+
+
+    - [ceg] O CEG (Código de Empreendimento de Geração) da ANEEL segue formato padronizado (ex: UHE.PH.RS.030040-0.01).
+    Verificar se todos os registros seguem o padrão esperado, pois inconsistências dificultam joins com
+    bases regulatórias da ANEEL.
+
+
+    - [nom_subsistema] Valores com trailing spaces detectados em ''nom_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Qual é a capacidade instalada total de geração hidrelétrica no subsistema Sudeste/Centro-Oeste?
+  - Quais usinas eólicas têm maior potência efetiva cadastrada no Nordeste?
+  - Qual a potência efetiva total por tipo de usina (UHE, UTE, EOL, UFV) no SIN?
+  - Quais unidades geradoras estão cadastradas para a usina de Itaipu e qual a potência de cada uma?
+  - Qual a distribuição de capacidade instalada por modalidade de operação (Tipo I, Tipo II-A, II-B, II-C)?
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-geracao/*.parquet', union_by_name=true)
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      temporal_column: dat_entradateste
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_entradateste
+      - id_subsistema
+      - ceg
+      - cod_equipamento
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: nom_tipousina
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: potenciaefetiva
+      label: Potencia Efetiva Instalada
+      columns:
+      - val_potenciaefetiva
+      expression: val_potenciaefetiva
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - potenciaefetiva
+      - potencia_efetiva
+      - potencia_instalada
+      - capacidade_instalada
+      - potencia_nominal
+      - potencia_mw
+      aggregation_modes:
+        total:
+          sql: SUM(val_potenciaefetiva)
+          unit: MW
+        maximum:
+          sql: MAX(val_potenciaefetiva)
+          unit: MW
+        time_series:
+          sql: SUM(val_potenciaefetiva)
+          unit: MW
+        ranking:
+          sql: SUM(val_potenciaefetiva)
+          unit: MW
+        comparison:
+          sql: SUM(val_potenciaefetiva)
+          unit: MW
+      aliases:
+      - potencia_efetiva
+      - potencia_instalada
+      - capacidade_instalada
+      - potencia_nominal
+      - potencia_mw
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    selection_policy:
+      preferred_for:
+      - potencia efetiva cadastrada
+      - capacidade instalada por unidade geradora
+      - potencia nominal por CEG
+      - parque gerador ONS
+      - denominador fator de capacidade
+      - dat_entradateste usina
+      - dat_entradaoperacao unidade geradora
+      - dat_desativacao UG
+      - combustivel por unidade geradora
+      - agente operador usina
+      - num_unidadegeradora cadastro
+      - cod_equipamento ONS
+      - modalidade despacho por UG
+      - usinas ativas SIN cadastro
+      - potencia por combustivel
+      covers_metrics:
+      - potenciaefetiva
+      not_preferred_for:
+      - geracao verificada
+      - geracao programada
+      - geracao prevista
+      - fator de capacidade calculado
+      - disponibilidade operacional
+      - constrained-off
+      - curtailment
+      - MMGD
+      - microgeracao
+      - minigeracao
+      - geracao distribuida
+      - balanco carga-geracao
+      - carga do sistema
+      - preco energia
+      - CMO
+      - PLD
+      - reservatorio nivel
+      - afluencia
+      - transformadores
+      - subestacoes
+    value_aliases:
+      id_subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: TRIM(nom_subsistema) = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: TRIM(nom_subsistema) = 'NORTE'
+        PARAGUAI:
+          aliases:
+          - paraguai
+          filter: TRIM(nom_subsistema) = 'PARAGUAI'
+        SUDESTE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          filter: TRIM(nom_subsistema) = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: TRIM(nom_subsistema) = 'SUL'
+      nom_modalidadeoperacao:
+        TIPO I:
+          aliases:
+          - tipo i
+          - tipo 1
+          - despacho centralizado
+          filter: nom_modalidadeoperacao = 'TIPO I'
+        TIPO II-A:
+          aliases:
+          - tipo ii-a
+          - tipo 2a
+          filter: nom_modalidadeoperacao = 'TIPO II-A'
+        TIPO II-B:
+          aliases:
+          - tipo ii-b
+          - tipo 2b
+          filter: nom_modalidadeoperacao = 'TIPO II-B'
+        TIPO II-C:
+          aliases:
+          - tipo ii-c
+          - tipo 2c
+          filter: nom_modalidadeoperacao = 'TIPO II-C'
+      nom_tipousina:
+        EOLIELÉTRICA:
+          aliases:
+          - eolica
+          - eoleletrica
+          - eol
+          - vento
+          filter: nom_tipousina = 'EOLIELÉTRICA'
+        FOTOVOLTAICA:
+          aliases:
+          - solar
+          - fotovoltaica
+          - ufv
+          filter: nom_tipousina = 'FOTOVOLTAICA'
+        HIDROELÉTRICA:
+          aliases:
+          - hidro
+          - hidreletrica
+          - uhe
+          - pch
+          - cgh
+          filter: nom_tipousina = 'HIDROELÉTRICA'
+        NUCLEAR:
+          aliases:
+          - nuclear
+          - ute nuclear
+          filter: nom_tipousina = 'NUCLEAR'
+        TÉRMICA:
+          aliases:
+          - termica
+          - ute
+          - termeletrica
+          filter: nom_tipousina = 'TÉRMICA'
+      nom_combustivel:
+        BIOMASSA:
+          aliases:
+          - biomassa
+          - bagaco
+          - cana
+          filter: nom_combustivel = 'BIOMASSA'
+        CARVÃO:
+          aliases:
+          - carvao
+          - carvao mineral
+          filter: nom_combustivel = 'CARVÃO'
+        EÓLICA:
+          aliases:
+          - eolica
+          - vento
+          filter: nom_combustivel = 'EÓLICA'
+        FOTOVOLTAICA:
+          aliases:
+          - solar
+          - fotovoltaica
+          filter: nom_combustivel = 'FOTOVOLTAICA'
+        GÁS:
+          aliases:
+          - gas
+          - gas natural
+          filter: nom_combustivel = 'GÁS'
+        HIDRÁULICA:
+          aliases:
+          - hidraulica
+          - agua
+          filter: nom_combustivel = 'HIDRÁULICA'
+        MULTI-COMBUSTÍVEL DIESEL/ÓLEO:
+          aliases:
+          - multi diesel oleo
+          - diesel oleo
+          filter: nom_combustivel = 'MULTI-COMBUSTÍVEL DIESEL/ÓLEO'
+        MULTI-COMBUSTÍVEL GÁS/DIESEL:
+          aliases:
+          - multi gas diesel
+          - gas diesel
+          filter: nom_combustivel = 'MULTI-COMBUSTÍVEL GÁS/DIESEL'
+        NUCLEAR:
+          aliases:
+          - nuclear
+          - uranio
+          filter: nom_combustivel = 'NUCLEAR'
+        RESÍDUO CICLO COMBINADO:
+          aliases:
+          - residuo ciclo combinado
+          - ciclo combinado residuo
+          filter: nom_combustivel = 'RESÍDUO CICLO COMBINADO'
+        RESÍDUOS INDUSTRIAIS:
+          aliases:
+          - residuos industriais
+          - residuo industrial
+          filter: nom_combustivel = 'RESÍDUOS INDUSTRIAIS'
+        ÓLEO COMBUSTÍVEL:
+          aliases:
+          - oleo combustivel
+          - oleo
+          filter: nom_combustivel = 'ÓLEO COMBUSTÍVEL'
+        ÓLEO DIESEL:
+          aliases:
+          - oleo diesel
+          - diesel
+          filter: nom_combustivel = 'ÓLEO DIESEL'
+    sql_patterns:
+      capacidade_total_por_tipo:
+        template: "SELECT nom_tipousina,\n  SUM(val_potenciaefetiva) AS potencia_total_mw\nFROM {source}\n\
+          GROUP BY nom_tipousina\nORDER BY potencia_total_mw DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - potenciaefetiva
+          grain: static
+      capacidade_por_subsistema_tipo:
+        template: "SELECT id_subsistema, nom_tipousina,\n  SUM(val_potenciaefetiva) AS potencia_total_mw\n\
+          FROM {source}\nGROUP BY id_subsistema, nom_tipousina\nORDER BY id_subsistema, potencia_total_mw\
+          \ DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - potenciaefetiva
+          grain: static
+      ranking_usinas_por_potencia:
+        template: "SELECT nom_usina, nom_tipousina, id_subsistema,\n  SUM(val_potenciaefetiva) AS potencia_total_mw\n\
+          FROM {source}\nGROUP BY nom_usina, nom_tipousina, id_subsistema\nORDER BY potencia_total_mw\
+          \ DESC\nLIMIT {limit}"
+        output_unit: MW
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - potenciaefetiva
+          grain: static
+      usinas_ativas:
+        template: "SELECT nom_usina, ceg, nom_tipousina, nom_combustivel, id_subsistema,\n  SUM(val_potenciaefetiva)\
+          \ AS potencia_total_mw\nFROM {source}\nWHERE (dat_desativacao IS NULL\n  OR TRY_CAST(dat_desativacao\
+          \ AS DATE) > CURRENT_DATE\n  OR dat_desativacao = '9999-12-31')\nGROUP BY nom_usina, ceg, nom_tipousina,\
+          \ nom_combustivel, id_subsistema\nORDER BY potencia_total_mw DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - potenciaefetiva
+          grain: static
+      capacidade_por_combustivel:
+        template: "SELECT nom_combustivel,\n  SUM(val_potenciaefetiva) AS potencia_total_mw\nFROM {source}\n\
+          GROUP BY nom_combustivel\nORDER BY potencia_total_mw DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - potenciaefetiva
+          grain: static
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta capacidade total sem filtro de fonte
+        assume_metric: potenciaefetiva
+        assume_output: total
+        note: Somar val_potenciaefetiva de todas as UGs. Se usuario nao especificar usinas ativas, incluir
+          todas as linhas do dataset.
+      - when: usuario pergunta potencia de uma usina especifica
+        assume_metric: potenciaefetiva
+        assume_output: total
+        note: Agrupar por nom_usina ou ceg e somar val_potenciaefetiva das UGs da usina.
+      - when: usuario pergunta maior usina ou ranking de usinas
+        assume_metric: potenciaefetiva
+        assume_output: ranking
+        note: Agrupar por nom_usina, somar val_potenciaefetiva, ordenar DESC.
+      must_clarify_when:
+      - ambiguity: usinas_ativas_vs_todas
+        question: Voce quer considerar apenas unidades geradoras ativas (sem data de desativacao) ou todas
+          as unidades cadastradas, incluindo desativadas?
+        trigger_terms:
+        - ativas
+        - em operacao
+        - operando
+        - desativadas
+        - historico
+        note: dat_desativacao usa valores sentinela (9999-12-31, 0001-01-01). Verificar convencao antes
+          de filtrar.
+      - ambiguity: potencia_por_usina_vs_por_ug
+        question: Voce quer a potencia total da usina (soma de todas as unidades geradoras) ou a potencia
+          de cada unidade geradora individualmente?
+        trigger_terms:
+        - unidade geradora
+        - UG
+        - turbina
+        - gerador individual
+      redirect_when:
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset cobre apenas usinas despachadas pelo ONS. MMGD nao consta no schema.
+        redirect: dataset com coluna val_germmgd ou val_ger_mmgd
+      - user_mentions:
+        - geracao verificada
+        - geracao real
+        - geracao historica
+        - MWmed gerado
+        - MWh gerado
+        reason: Dataset e cadastral estatico. Nao contem series temporais de geracao.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - geracao programada
+        - programacao diaria
+        - despacho programado
+        reason: Dataset nao contem programacao de despacho.
+        redirect: programacao_diaria
+      - user_mentions:
+        - fator de capacidade
+        - capacity factor
+        reason: Este dataset fornece apenas o denominador (val_potenciaefetiva). O calculo requer join
+          com geracao real em fator-capacidade-2.
+        redirect: fator-capacidade-2
+      - user_mentions:
+        - disponibilidade
+        - TEIFa
+        - TEIP
+        - indisponibilidade
+        reason: Dataset nao contem indicadores de disponibilidade operacional.
+        redirect: ind_disponibilidade_fgeracao_uge_mensal ou disponibilidade_usina
+      - user_mentions:
+        - constrained-off
+        - curtailment
+        - corte de geracao
+        - restricao operativa
+        reason: Dataset nao contem eventos de restricao operativa.
+        redirect: restricao_coff_eolica_detail ou restricao_coff_fotovoltaica_detail
+- property: fewShotQueries
+  value:
+  - question: Qual é a capacidade total instalada em MW por subsistema e tipo de usina?
+    sql: SELECT id_subsistema, nom_subsistema, nom_tipousina, COUNT(DISTINCT nom_usina) AS qtd_usinas,
+      COUNT(cod_equipamento) AS qtd_ugs, SUM(val_potenciaefetiva) AS potencia_total_mw, ROUND(AVG(val_potenciaefetiva),
+      2) AS potencia_media_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-geracao/*.parquet')
+      GROUP BY id_subsistema, nom_subsistema, nom_tipousina ORDER BY id_subsistema, potencia_total_mw
+      DESC;
+  - question: Quais são as 20 maiores usinas em termos de potência efetiva total instalada?
+    sql: SELECT nom_usina, nom_tipousina, nom_combustivel, id_subsistema, nom_estado, nom_agenteproprietario,
+      COUNT(cod_equipamento) AS qtd_ugs, SUM(val_potenciaefetiva) AS potencia_total_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-geracao/*.parquet')
+      GROUP BY nom_usina, nom_tipousina, nom_combustivel, id_subsistema, nom_estado, nom_agenteproprietario
+      ORDER BY potencia_total_mw DESC LIMIT 20;
+  - question: Qual a capacidade instalada de geração eólica e solar por estado?
+    sql: SELECT nom_combustivel, id_estado, nom_estado, id_subsistema, COUNT(DISTINCT nom_usina) AS qtd_usinas,
+      COUNT(cod_equipamento) AS qtd_ugs, ROUND(SUM(val_potenciaefetiva), 2) AS potencia_total_mw FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-geracao/*.parquet') WHERE nom_combustivel
+      IN ('VENTO', 'SOLAR') GROUP BY nom_combustivel, id_estado, nom_estado, id_subsistema ORDER BY nom_combustivel,
+      potencia_total_mw DESC;
+- property: relatedDatasets
+  value:
+    capacidade-transformacao:
+      join_keys:
+      - id_subsistema
+      - id_estado
+      - nom_agenteproprietario
+    fator-capacidade-2:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_estado
+      - nom_modalidadeoperacao
+      - nom_subsistema
+      - nom_tipousina
+    geracao-usina-2:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - ceg
+      - cod_equipamento
+      - id_estado
+      - id_subsistema
+      - nom_agenteproprietario
+      - nom_estado
+      - nom_modalidadeoperacao
+      - nom_subsistema
+      - nom_unidadegeradora
+      - num_unidadegeradora
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - ceg
+      - cod_equipamento
+      - id_estado
+      - id_subsistema
+      - nom_agenteproprietario
+      - nom_estado
+      - nom_modalidadeoperacao
+      - nom_subsistema
+      - nom_unidadegeradora
+      - num_unidadegeradora
+    uge_opera_csi:
+      join_keys:
+      - nom_unidadegeradora
+      - nom_usina
+    disponibilidade_usina:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - id_estado
+    modalidade-usina:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_estado
+    geracao-termica-despacho-2:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    restricao_coff_fotovoltaica_detail:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_modalidadeoperacao
+      - nom_usina
+    taxa_teif_teip_parametro:
+      join_keys:
+      - nom_unidadegeradora
+      - nom_usina
+    subestacao:
+      join_keys:
+      - id_subsistema
+      - id_estado
+    usina_pqu:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    programacao_diaria:
+      join_keys:
+      - id_estado
+      - id_subsistema
+      - nom_estado
+      - nom_modalidadeoperacao
+      - nom_subsistema
+      - nom_usina
+    restricao_coff_eolica_usi:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - id_estado
+      - nom_usina
+    restricao_coff_eolica_detail:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_modalidadeoperacao
+      - nom_usina
+    restricao_coff_fotovoltaica:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_modalidadeoperacao
+      - nom_usina
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - ceg
+      - nom_subsistema
+      - nom_usina
+    reservatorio:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+- property: license
+  value: CC-BY
+- property: vectorTags
+  value:
+  - potencia instalada das usinas
+  - quantas usinas existem
+  - lista de usinas do sin
+  - maiores usinas do brasil
+  - parque gerador brasileiro
+  - quantos megawatts instalados
+  - usinas por estado
+  - tamanho das usinas
+  - quanta energia o brasil pode gerar
+  - potencia das usinas
+  - usinas cadastradas

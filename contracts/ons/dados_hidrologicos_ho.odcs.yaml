@@ -1,0 +1,1556 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:dados_hidrologicos_ho
+name: dados_hidrologicos_ho
+tenant: ons
+tags:
+- ONS
+- SIN
+- afluencia
+- dados hidrológicos horários
+- dados hidráulicos
+- hidraulica
+- hidrologia
+- horario
+- nivel
+- níveis de reservatório
+- reservatorios
+- reservatórios ONS
+- vazao
+- vazão reservatório horário
+- vazões horárias
+- volume-util
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet
+  format: parquet
+description:
+  purpose: Prover condições hidráulicas horárias dos reservatórios do SIN para operadores do ONS, agentes
+    de geração e analistas de planejamento energético, suportando monitoramento em tempo real do estado
+    dos reservatórios, despacho hidrotérmico, verificação de conformidade dos dados reportados pelos agentes
+    geradores, cálculo de produtibilidade específica e análise de balanço hídrico por bacia hidrográfica.
+  limitations: val_volumeutil apresenta valores negativos (mín = -276,75%), fisicamente impossível para
+    volume útil percentual. val_vazaoafluente apresenta valores extremos (máx = 840. val_vazaodefluente
+    apresenta valores extremos (máx = 840.
+  usage: Recuperar este dataset quando a pergunta envolver condições hidráulicas horárias de reservatórios
+    do SIN, incluindo níveis de montante/jusante, volume útil percentual, vazões afluente/defluente/turbinada/vertida
+    ou balanço hídrico horário por usina ou bacia.
+domain: hidrologia
+schema:
+- name: dados_hidrologicos_ho
+  physicalType: parquet
+  logicalType: object
+  physicalName: dados_hidrologicos_ho
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador do subsistema elétrico ao qual o reservatório pertence (ex. SE, S, NE,
+      N)
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+      - submercado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome por extenso do subsistema elétrico (ex. Sudeste/Centro-Oeste, Sul, Nordeste, Norte)
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: tip_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Tipo do reservatório quanto à sua capacidade de regularização (ex. Reservatório, Fio
+      d'Água)
+    customProperties:
+    - property: aliases
+      value:
+      - tipo reservatório
+      - tipo do reservatório
+      - classificação reservatório
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Fio dagua
+      - Reservatório Com Usina de Bombeamento
+      - Reservatório com Usina
+      - Reservatório sem usina
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da bacia hidrográfica à qual o reservatório pertence (ex. Paraná, São Francisco,
+      Tocantins)
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrográfica
+      - bacia hidrológica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - ARAGUARI
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - ITABAPOANA
+      - ITAJAI
+      - JACUI
+      - JEQUITINHONHA
+      - MUCURI
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SANTA MARIA VIT
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: id_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código identificador único do reservatório no sistema ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código reservatório
+      - id do reservatório
+      - identificador reservatório
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do reservatório/usina hidrelétrica associada
+    customProperties:
+    - property: aliases
+      value:
+      - nome reservatório
+      - nome da usina
+      - usina
+      - reservatório
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_usina
+    physicalType: DOUBLE
+    logicalType: integer
+    description: Código numérico da usina hidrelétrica no cadastro ONS; 1,4% de nulos indica registros
+      sem usina associada diretamente
+    customProperties:
+    - property: aliases
+      value:
+      - código usina
+      - código da usina
+      - id usina
+      - cód usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora de referência do registro hidráulico, com granularidade horária. Convenção
+      ONS de hora-fim: o instante 01:00 representa o intervalo 00:00–00:59. Período coberto: 2010-01-01
+      a 2026-05-31.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data hora
+      - timestamp
+      - hora
+      - data
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_nivelmontante
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Nível d''água de montante do reservatório (cota), medido na entrada do reservatório.
+      Representa a altura da lâmina d''água acima de um datum de referência. Nulos em 0,4% dos registros.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nível montante
+      - cota montante
+      - nível do reservatório
+      - cota do reservatório
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m
+  - name: val_niveljusante
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Nível d''água de jusante do reservatório (cota), medido na saída/canal de fuga. Nulos
+      em 8,3% dos registros — percentual mais elevado entre os níveis, comum em usinas fio d''água.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nível jusante
+      - cota jusante
+      - nível canal de fuga
+      - cota de jusante
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m
+  - name: val_volumeutil
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Volume útil armazenado no reservatório, expresso em percentual do volume útil total
+      (%). Valores negativos (mín = -276,75) indicam inconsistências nos dados reportados pelos agentes.
+      Nulos em 4,2% dos registros.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - volume útil
+      - volume armazenado
+      - armazenamento
+      - nível do reservatório percentual
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_vazaoafluente
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão afluente ao reservatório, representando o total de água que entra no reservatório
+      por unidade de tempo. Inclui contribuições naturais e transferências de outras bacias. Valores extremos
+      (até 840.452 m³/s) e negativos (mín = -74.007 m³/s) podem indicar erros de reporte ou outliers.
+      Nulos em 2,1% dos registros.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão afluente
+      - afluência
+      - vazão de entrada
+      - inflow
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaodefluente
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão defluente total do reservatório, representando o total de água que sai do reservatório
+      por unidade de tempo (turbinada + vertida + outras estruturas). Valores extremos (até 840.453 m³/s)
+      e valor mínimo negativo (-1,0 m³/s) podem indicar erros de reporte. Nulos em 1,7% dos registros.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão defluente
+      - defluência
+      - vazão de saída
+      - outflow
+      - vazão total
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaoturbinada
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão turbinada pelas unidades geradoras da usina hidrelétrica, diretamente relacionada
+      à geração de energia elétrica. Mínimo = 0,0 (sem geração). Nulos em 6,1% dos registros.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão turbinada
+      - turbinamento
+      - vazão nas turbinas
+      - geração hidráulica vazão
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaovertida
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão vertida pelo vertedouro do reservatório, representando o excesso de água não turbinada
+      que é descarregado para o canal de fuga. Mínimo = 0,0. Nulos em 2,8% dos registros.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão vertida
+      - vertimento
+      - spill
+      - vazão do vertedouro
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaooutrasestruturas
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão descarregada por outras estruturas hidráulicas do reservatório (ex. eclusas, tomadas
+      d''água para irrigação, descargas de fundo). Alto percentual de nulos (~60,9%) indica que a maioria
+      dos reservatórios não possui essas estruturas ou não reporta esse dado.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - outras estruturas
+      - vazão outras estruturas
+      - descarga outras estruturas
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+    - property: enum
+      value:
+      - 0.0
+      - 0.5
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 9.0
+      - 10.0
+      - 11.0
+      - 12.0
+      - 13.0
+      - 14.0
+      - 15.0
+      - 16.0
+      - 17.0
+      - 18.0
+      - 19.0
+      - 20.0
+      - 21.0
+      - 22.0
+      - 23.0
+      - 24.0
+      - 25.0
+      - 26.0
+      - 27.0
+      - 28.0
+      - 40.0
+      - 43.0
+      - 45.0
+      - 89.0
+      - 170.0
+      - 173.0
+      - 385.0
+      - 607.0
+      - 608.0
+  - name: val_vazaotransferida
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão transferida entre reservatórios ou bacias hidrográficas (transposição de bacias).
+      Alto percentual de nulos (~60,9%) indica que a maioria dos reservatórios não realiza transferências.
+      Valores negativos (mín = -371,0 m³/s) indicam transferência no sentido inverso.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão transferida
+      - transferência
+      - transposição
+      - bombeamento
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaovertidanaoturbinavel
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Parcela da vazão vertida que não pode ser turbinada, representando perda de potencial
+      de geração. Presente apenas em usinas com vertedouros específicos. Alto percentual de nulos (~48,6%)
+      indica que nem todos os reservatórios reportam essa decomposição. Mínimo = 0,0.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vertimento não turbinável
+      - vazão vertida não turbinável
+      - perda por vertimento
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 5.0
+      - 13.0
+      - 16.0
+      - 17.0
+      - 19.0
+      - 20.0
+      - 21.0
+      - 25.0
+      - 26.0
+      - 27.0
+      - 28.0
+      - 42.0
+      - 47.0
+      - 61.0
+      - 63.0
+      - 71.0
+      - 75.0
+      - 76.0
+      - 80.0
+      - 81.0
+      - 86.0
+      - 93.0
+      - 101.0
+      - 105.0
+      - 150.0
+      - 155.0
+      - 156.0
+      - 157.0
+      - 167.0
+      - 172.0
+      - 174.0
+      - 175.0
+      - 176.0
+      - 177.0
+      - 183.0
+      - 190.0
+      - 200.0
+      - 239.0
+      - 242.0
+      - 278.0
+      - 332.0
+      - 350.0
+      - 506.0
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for dados_hidrologicos_ho:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'Nordeste'\n        - 'Norte'\n        - 'Sudeste/Centro-Oeste'\n        - 'Sul'\n      name:\
+      \ nom_subsistema deve ser um dos valores válidos\n  - invalid_count(tip_reservatorio) = 0:\n   \
+      \   valid values:\n        - 'Fio dagua'\n        - 'Reservatório Com Usina de Bombeamento'\n  \
+      \      - 'Reservatório com Usina'\n        - 'Reservatório sem usina'\n      name: tip_reservatorio\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_bacia) = 0:\n      valid values:\n    \
+      \    - 'AMAZONAS'\n        - 'ARAGUARI'\n        - 'CAPIVARI'\n        - 'DOCE'\n        - 'GRANDE'\n\
+      \        - 'IGUACU'\n        - 'ITABAPOANA'\n        - 'ITAJAI'\n        - 'JACUI'\n        - 'JEQUITINHONHA'\n\
+      \        - 'MUCURI'\n        - 'PARAGUACU'\n        - 'PARAGUAI'\n        - 'PARAIBA DO SUL'\n \
+      \       - 'PARANA'\n        - 'PARANAIBA'\n        - 'PARANAPANEMA'\n        - 'PARNAIBA'\n    \
+      \    - 'SANTA MARIA VIT'\n        - 'SAO FRANCISCO'\n        - 'TIETE'\n        - 'TOCANTINS'\n\
+      \        - 'URUGUAI'\n      name: nom_bacia deve ser um dos valores válidos\n\n  # Baseline de volume\
+      \ — margem ±20% do row_count validado\n  - row_count between 105859 and 158788:\n      name: Volume\
+      \ esperado entre 105,859 e 158,788 registros\n\n  # Unicidade da chave primária composta ['id_reservatorio',\
+      \ 'din_instante'] (candidata LLM)\n  - failed rows:\n      name: Chave composta (id_reservatorio,\
+      \ din_instante) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM dados_hidrologicos_ho\n\
+      \        WHERE (id_reservatorio, din_instante) IN (\n          SELECT id_reservatorio, din_instante\
+      \ FROM dados_hidrologicos_ho\n          GROUP BY id_reservatorio, din_instante\n          HAVING\
+      \ COUNT(*) > 1\n        )\n\n  # Nulos em val_niveljusante — alerta de qualidade (real=10.0%, threshold=20.0%)\n\
+      \  - missing_percent(val_niveljusante) < 20.0:\n      name: val_niveljusante não deve ter >20.0%\
+      \ nulos\n\n  # Nulos em val_vazaooutrasestruturas — alerta de qualidade (real=70.9%, threshold=141.8%)\n\
+      \  - missing_percent(val_vazaooutrasestruturas) < 141.8:\n      name: val_vazaooutrasestruturas\
+      \ não deve ter >141.8% nulos\n\n  # Nulos em val_vazaovertidanaoturbinavel — alerta de qualidade\
+      \ (real=64.6%, threshold=129.2%)\n  - missing_percent(val_vazaovertidanaoturbinavel) < 129.2:\n\
+      \      name: val_vazaovertidanaoturbinavel não deve ter >129.2% nulos\n\n  # Nulos em cod_usina\
+      \ — alerta de qualidade (real=1.0%, threshold=6.0%)\n  - missing_percent(cod_usina) < 6.0:\n   \
+      \   name: cod_usina não deve ter >6.0% nulos\n\n  # Range físico de val_nivelmontante — baseado\
+      \ em dados reais (min=0.0, max=912.97)\n  - failed rows:\n      name: val_nivelmontante fora do\
+      \ intervalo histórico observado\n      fail condition: val_nivelmontante IS NOT NULL AND (val_nivelmontante\
+      \ < 0.0 OR val_nivelmontante > 1095.564)\n\n  # Range físico de val_niveljusante — baseado em dados\
+      \ reais (min=0.0, max=957.94)\n  - failed rows:\n      name: val_niveljusante fora do intervalo\
+      \ histórico observado\n      fail condition: val_niveljusante IS NOT NULL AND (val_niveljusante\
+      \ < 0.0 OR val_niveljusante > 1149.528)\n\n  # Range físico de val_volumeutil — baseado em dados\
+      \ reais (min=-199.71, max=820.88)\n  - failed rows:\n      name: val_volumeutil fora do intervalo\
+      \ histórico observado\n      fail condition: val_volumeutil IS NOT NULL AND (val_volumeutil < -239.652\
+      \ OR val_volumeutil > 985.056)\n\n  # Range físico de val_vazaoafluente — baseado em dados reais\
+      \ (min=-312167.0, max=840452.0)\n  - failed rows:\n      name: val_vazaoafluente fora do intervalo\
+      \ histórico observado\n      fail condition: val_vazaoafluente IS NOT NULL AND (val_vazaoafluente\
+      \ < -374600.4 OR val_vazaoafluente > 1008542.4)\n\n  # Range físico de val_vazaodefluente — baseado\
+      \ em dados reais (min=-1.0, max=840453.0)\n  - failed rows:\n      name: val_vazaodefluente fora\
+      \ do intervalo histórico observado\n      fail condition: val_vazaodefluente IS NOT NULL AND (val_vazaodefluente\
+      \ < -1.2 OR val_vazaodefluente > 1008543.6)\n\n  # Range físico de val_vazaoturbinada — baseado\
+      \ em dados reais (min=0.0, max=21872.0)\n  - failed rows:\n      name: val_vazaoturbinada fora do\
+      \ intervalo histórico observado\n      fail condition: val_vazaoturbinada IS NOT NULL AND (val_vazaoturbinada\
+      \ < 0.0 OR val_vazaoturbinada > 26246.4)\n\n  # Range físico de val_vazaovertida — baseado em dados\
+      \ reais (min=0.0, max=16129.0)\n  - failed rows:\n      name: val_vazaovertida fora do intervalo\
+      \ histórico observado\n      fail condition: val_vazaovertida IS NOT NULL AND (val_vazaovertida\
+      \ < 0.0 OR val_vazaovertida > 19354.8)\n\n  # Range físico de val_vazaooutrasestruturas — baseado\
+      \ em dados reais (min=0.0, max=610.0)\n  - failed rows:\n      name: val_vazaooutrasestruturas fora\
+      \ do intervalo histórico observado\n      fail condition: val_vazaooutrasestruturas IS NOT NULL\
+      \ AND (val_vazaooutrasestruturas < 0.0 OR val_vazaooutrasestruturas > 732.0)\n\n  # Range físico\
+      \ de val_vazaotransferida — baseado em dados reais (min=-383.0, max=4633.0)\n  - failed rows:\n\
+      \      name: val_vazaotransferida fora do intervalo histórico observado\n      fail condition: val_vazaotransferida\
+      \ IS NOT NULL AND (val_vazaotransferida < -459.6 OR val_vazaotransferida > 5559.6)\n\n  # Range\
+      \ físico de val_vazaovertidanaoturbinavel — baseado em dados reais (min=0.0, max=1506.0)\n  - failed\
+      \ rows:\n      name: val_vazaovertidanaoturbinavel fora do intervalo histórico observado\n     \
+      \ fail condition: val_vazaovertidanaoturbinavel IS NOT NULL AND (val_vazaovertidanaoturbinavel <\
+      \ 0.0 OR val_vazaovertidanaoturbinavel > 1807.2)\n\n  # Freshness: din_instante deve ter dados recentes\
+      \ (SLA: Atualizado diariamente)\n  - freshness(din_instante) < 3d:\n      name: din_instante não\
+      \ pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/dados_hidrologicos_ho
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - nivel do reservatorio hora a hora
+  - vazao horaria da usina
+  - volume util por hora
+  - condicao hidraulica intradiaria
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver condições hidráulicas horárias de reservatórios
+    do SIN, incluindo níveis de montante/jusante, volume útil percentual, vazões afluente/defluente/turbinada/vertida
+    ou balanço hídrico horário por usina ou bacia. Também relevante para perguntas sobre vertimento, produtibilidade
+    específica, eficiência hidráulica horária ou monitoramento em tempo real do estado dos reservatórios
+    hidrelétricos brasileiros.
+- property: agentInstructions
+  value: '- [val_volumeutil] Campo apresenta valores negativos (mín=-199,71%), fisicamente impossível
+    para percentual de volume útil. Indica dados brutos inconsistentes reportados pelos agentes de geração,
+    não consistidos pelo ONS. Requer filtragem antes de análises quantitativas.
+
+
+    - [val_vazaoafluente] Valores extremos negativos (mín=-312167,0 m³/s) e máximos muito elevados (840452,0
+    m³/s) são fisicamente implausíveis para vazões de reservatórios brasileiros. Dados brutos não validados
+    reportados pelos agentes. Valores negativos de vazão afluente não têm significado físico convencional.
+
+
+    - [val_vazaodefluente] Valor mínimo de -1,0 m³/s para vazão defluente é fisicamente inconsistente
+    (vazão não pode ser negativa). Provavelmente arredondamento ou erro de reporte do agente. Filtrar
+    valores negativos antes de somar componentes de defluência.
+
+
+    - [val_vazaotransferida] Valores negativos (mín=-383,0 m³/s) em val_vazaotransferida indicam transferência
+    no sentido inverso ao convencionado positivo. Embora possa ser intencional (reversão de fluxo), requer
+    atenção em agregações — somar sem tratamento pode subestimar ou superestimar a defluência total.
+
+
+    - [val_niveljusante] Taxa de nulos de 10% — a mais alta entre as colunas de nível/volume. Pode indicar
+    usinas fio d''água sem medição de jusante, falhas de telemetria ou dados não reportados pelos agentes.
+    Verificar se a ausência é sistemática por usina ou aleatória.
+
+
+    - [val_vazaooutrasestruturas] Taxa de nulos de 70,9% — uso esparso esperado, pois a maioria das usinas
+    não possui outras estruturas hidráulicas além de turbinas e vertedouros. Não deve ser incluída em
+    somas de defluência sem verificar se NULL significa zero ou dado ausente para cada usina.
+
+
+    - [val_vazaovertidanaoturbinavel] Taxa de nulos de 64,6% — uso esparso, aplicável apenas a usinas
+    com medição específica de vertimento não turbinável. Tratar NULL como zero apenas após confirmar que
+    a usina reporta este campo; caso contrário, pode mascarar vertimentos reais não registrados.
+
+
+    - [cod_usina] Apresenta 1% de nulos (aproximadamente 1.323 registros). Como cod_usina é a chave de
+    join com o cadastro de usinas, registros sem este código ficam órfãos em joins e não podem ser enriquecidos
+    com dados cadastrais. Verificar se id_reservatorio pode suprir o join nesses casos.
+
+
+    - [din_instante] Possíveis lacunas temporais na série horária por reservatório. Dados não consistidos
+    pelo ONS — falhas de telemetria ou não envio pelos agentes podem criar buracos na série temporal que
+    afetam análises de continuidade e médias horárias.
+
+
+    - [id_subsistema] Valores com trailing spaces detectados em ''id_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [tip_reservatorio] Valores com trailing spaces detectados em ''tip_reservatorio''. Use TRIM() em
+    filtros WHERE para evitar perda de registros.
+
+    - [nom_bacia] Valores com trailing spaces detectados em ''nom_bacia''. Use TRIM() em filtros WHERE
+    para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Qual foi o volume útil médio dos reservatórios do subsistema Sudeste/Centro-Oeste na última semana?
+  - Quais reservatórios apresentaram vertimento nas últimas 24 horas?
+  - Qual a vazão afluente horária de Itaipu no mês de janeiro de 2024?
+  - Quais usinas da bacia do Paraná estão com nível de montante abaixo da média histórica?
+  - Qual a relação entre vazão turbinada e geração de energia em Tucuruí nas últimas 48 horas?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2010-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: reservatorio
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - id_reservatorio
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: nom_reservatorio
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: nivelmontante
+      label: Nivelmontante
+      columns:
+      - val_nivelmontante
+      expression: val_nivelmontante
+      quantity_kind: level
+      unit_native: m
+      default_aggregation: max
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - nivelmontante
+      - nível montante
+      - cota montante
+      - nível do reservatório
+      - cota do reservatório
+      aggregation_modes:
+        maximum:
+          sql: MAX(val_nivelmontante)
+          unit: m
+        minimum:
+          sql: MIN(val_nivelmontante)
+          unit: m
+        average:
+          sql: AVG(val_nivelmontante)
+          unit: m
+        time_series:
+          sql: AVG(val_nivelmontante)
+          unit: m
+        ranking:
+          sql: AVG(val_nivelmontante)
+          unit: m
+        comparison:
+          sql: AVG(val_nivelmontante)
+          unit: m
+      interval_hours: 1.0
+      aliases:
+      - nível montante
+      - cota montante
+      - nível do reservatório
+      - cota do reservatório
+    - id: niveljusante
+      label: Niveljusante
+      columns:
+      - val_niveljusante
+      expression: val_niveljusante
+      quantity_kind: level
+      unit_native: m
+      default_aggregation: max
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - niveljusante
+      - nível jusante
+      - cota jusante
+      - nível canal de fuga
+      - cota de jusante
+      aggregation_modes:
+        maximum:
+          sql: MAX(val_niveljusante)
+          unit: m
+        minimum:
+          sql: MIN(val_niveljusante)
+          unit: m
+        average:
+          sql: AVG(val_niveljusante)
+          unit: m
+        time_series:
+          sql: AVG(val_niveljusante)
+          unit: m
+        ranking:
+          sql: AVG(val_niveljusante)
+          unit: m
+        comparison:
+          sql: AVG(val_niveljusante)
+          unit: m
+      interval_hours: 1.0
+      aliases:
+      - nível jusante
+      - cota jusante
+      - nível canal de fuga
+      - cota de jusante
+    - id: volumeutil
+      label: Volumeutil
+      columns:
+      - val_volumeutil
+      expression: val_volumeutil
+      quantity_kind: volume
+      unit_native: '%'
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      valid_intents:
+      - volumeutil
+      - volume útil
+      - volume armazenado
+      - armazenamento
+      - nível do reservatório percentual
+      aggregation_modes:
+        maximum:
+          sql: MAX(val_volumeutil)
+          unit: '%'
+        minimum:
+          sql: MIN(val_volumeutil)
+          unit: '%'
+        average:
+          sql: AVG(val_volumeutil)
+          unit: '%'
+        time_series:
+          sql: AVG(val_volumeutil)
+          unit: '%'
+        ranking:
+          sql: AVG(val_volumeutil)
+          unit: '%'
+        comparison:
+          sql: AVG(val_volumeutil)
+          unit: '%'
+      interval_hours: 1.0
+      aliases:
+      - volume útil
+      - volume armazenado
+      - armazenamento
+      - nível do reservatório percentual
+      - armazenamento percentual
+    - id: vazaoafluente
+      label: Vazaoafluente
+      columns:
+      - val_vazaoafluente
+      expression: val_vazaoafluente
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaoafluente
+      - vazão afluente
+      - afluência
+      - vazão de entrada
+      - inflow
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaoafluente)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaoafluente)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaoafluente)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaoafluente)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaoafluente)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaoafluente)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão afluente
+      - afluência
+      - vazão de entrada
+      - inflow
+    - id: vazaodefluente
+      label: Vazaodefluente
+      columns:
+      - val_vazaodefluente
+      expression: val_vazaodefluente
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaodefluente
+      - vazão defluente
+      - defluência
+      - vazão de saída
+      - outflow
+      - vazão total
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaodefluente)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaodefluente)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaodefluente)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaodefluente)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaodefluente)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaodefluente)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão defluente
+      - defluência
+      - vazão de saída
+      - outflow
+      - vazão total
+    - id: vazaoturbinada
+      label: Vazaoturbinada
+      columns:
+      - val_vazaoturbinada
+      expression: val_vazaoturbinada
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaoturbinada
+      - vazão turbinada
+      - turbinamento
+      - vazão nas turbinas
+      - geração hidráulica vazão
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaoturbinada)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaoturbinada)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão turbinada
+      - turbinamento
+      - vazão nas turbinas
+      - geração hidráulica vazão
+    - id: vazaovertida
+      label: Vazaovertida
+      columns:
+      - val_vazaovertida
+      expression: val_vazaovertida
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaovertida
+      - vazão vertida
+      - vertimento
+      - spill
+      - vazão do vertedouro
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaovertida)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaovertida)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão vertida
+      - vertimento
+      - spill
+      - vazão do vertedouro
+    - id: vazaooutrasestruturas
+      label: Vazaooutrasestruturas
+      columns:
+      - val_vazaooutrasestruturas
+      expression: val_vazaooutrasestruturas
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaooutrasestruturas
+      - outras estruturas
+      - vazão outras estruturas
+      - descarga outras estruturas
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaooutrasestruturas)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaooutrasestruturas)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaooutrasestruturas)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaooutrasestruturas)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaooutrasestruturas)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaooutrasestruturas)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - outras estruturas
+      - vazão outras estruturas
+      - descarga outras estruturas
+      - eclusas
+      - descarga de fundo
+    - id: vazaotransferida
+      label: Vazaotransferida
+      columns:
+      - val_vazaotransferida
+      expression: val_vazaotransferida
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaotransferida
+      - vazão transferida
+      - transferência
+      - transposição
+      - bombeamento
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaotransferida)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaotransferida)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaotransferida)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaotransferida)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaotransferida)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaotransferida)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão transferida
+      - transferência hídrica
+      - transposição de bacia
+      - bombeamento reversível
+    - id: vazaovertidanaoturbinavel
+      label: Vazaovertidanaoturbinavel
+      columns:
+      - val_vazaovertidanaoturbinavel
+      expression: val_vazaovertidanaoturbinavel
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      valid_intents:
+      - vazaovertidanaoturbinavel
+      - vertimento não turbinável
+      - vazão vertida não turbinável
+      - perda por vertimento
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vertimento não turbinável
+      - vazão vertida não turbinável
+      - perda por vertimento
+      - spill não turbinável
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - nivelmontante
+      - niveljusante
+      - volumeutil
+      - vazaoafluente
+      - vazaodefluente
+      - vazaoturbinada
+      - vazaovertida
+      - vazaooutrasestruturas
+      - vazaotransferida
+      - vazaovertidanaoturbinavel
+      preferred_for:
+      - balanço hídrico horário
+      - nível montante horário
+      - nível jusante horário
+      - cota montante reservatório
+      - cota jusante canal fuga
+      - volume útil percentual horário
+      - afluência horária reservatório
+      - defluência horária reservatório
+      - vertimento horário usina
+      - turbinamento horário reservatório
+      - transposição bacia horária
+      - vertimento não turbinável horário
+      - monitoramento hidráulico tempo real
+      - eficiência hidráulica horária
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - energia armazenada MWmes
+      - EAR subsistema
+      - ENA diária
+      - geração elétrica MWmed
+      - carga elétrica
+      - preço spot
+      - CMO
+      - dados diários reservatório
+      - volume espera recomendado
+      - energia vertida turbinável calculada
+      - geracao termica
+      - geracao eolica
+      - geracao solar
+    value_aliases:
+      id_subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - SE
+          filter: TRIM(id_subsistema) = 'SE'
+        S:
+          aliases:
+          - sul
+          - S
+          filter: TRIM(id_subsistema) = 'S'
+        NE:
+          aliases:
+          - nordeste
+          - NE
+          filter: TRIM(id_subsistema) = 'NE'
+        N:
+          aliases:
+          - norte
+          - N
+          filter: TRIM(id_subsistema) = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          - nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          - norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          - sudeste centro-oeste
+          - SE/CO
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          - sul
+          filter: nom_subsistema = 'Sul'
+      tip_reservatorio:
+        Fio dagua:
+          aliases:
+          - fio dagua
+          - fio d'agua
+          - fio de agua
+          - run of river
+          filter: TRIM(tip_reservatorio) = 'Fio dagua'
+        Reservatorio Com Usina de Bombeamento:
+          aliases:
+          - usina de bombeamento
+          - bombeamento
+          - reversível
+          filter: TRIM(tip_reservatorio) = 'Reservatório Com Usina de Bombeamento'
+        Reservatorio com Usina:
+          aliases:
+          - reservatório com usina
+          - reservatorio com usina
+          filter: TRIM(tip_reservatorio) = 'Reservatório com Usina'
+        Reservatorio sem usina:
+          aliases:
+          - reservatório sem usina
+          - reservatorio sem usina
+          - sem usina
+          filter: TRIM(tip_reservatorio) = 'Reservatório sem usina'
+      nom_bacia:
+        AMAZONAS:
+          aliases:
+          - amazonas
+          - bacia amazonica
+          filter: TRIM(nom_bacia) = 'AMAZONAS'
+        ARAGUARI:
+          aliases:
+          - araguari
+          filter: TRIM(nom_bacia) = 'ARAGUARI'
+        CAPIVARI:
+          aliases:
+          - capivari
+          filter: TRIM(nom_bacia) = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - doce
+          - rio doce
+          filter: TRIM(nom_bacia) = 'DOCE'
+        GRANDE:
+          aliases:
+          - grande
+          - rio grande
+          filter: TRIM(nom_bacia) = 'GRANDE'
+        IGUACU:
+          aliases:
+          - iguacu
+          - iguaçu
+          filter: TRIM(nom_bacia) = 'IGUACU'
+        ITABAPOANA:
+          aliases:
+          - itabapoana
+          filter: TRIM(nom_bacia) = 'ITABAPOANA'
+        ITAJAI:
+          aliases:
+          - itajai
+          - itajaí
+          filter: TRIM(nom_bacia) = 'ITAJAI'
+        JACUI:
+          aliases:
+          - jacui
+          - jacuí
+          filter: TRIM(nom_bacia) = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - jequitinhonha
+          filter: TRIM(nom_bacia) = 'JEQUITINHONHA'
+        MUCURI:
+          aliases:
+          - mucuri
+          filter: TRIM(nom_bacia) = 'MUCURI'
+        PARAGUACU:
+          aliases:
+          - paraguacu
+          - paraguaçu
+          filter: TRIM(nom_bacia) = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - paraguai
+          filter: TRIM(nom_bacia) = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - paraiba do sul
+          - paraíba do sul
+          filter: TRIM(nom_bacia) = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - parana
+          - paraná
+          - rio parana
+          filter: TRIM(nom_bacia) = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - paranaiba
+          - paranaíba
+          filter: TRIM(nom_bacia) = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: TRIM(nom_bacia) = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - parnaiba
+          - parnaíba
+          filter: TRIM(nom_bacia) = 'PARNAIBA'
+        SANTA MARIA VIT:
+          aliases:
+          - santa maria vitoria
+          - santa maria vit
+          filter: TRIM(nom_bacia) = 'SANTA MARIA VIT'
+        SAO FRANCISCO:
+          aliases:
+          - sao francisco
+          - são francisco
+          - rio sao francisco
+          filter: TRIM(nom_bacia) = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - tiete
+          - tietê
+          filter: TRIM(nom_bacia) = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - tocantins
+          filter: TRIM(nom_bacia) = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - uruguai
+          - rio uruguai
+          filter: TRIM(nom_bacia) = 'URUGUAI'
+    ambiguity_policy:
+      default_assumptions: []
+      must_clarify_when:
+      - ambiguity: nivel_montante_vs_jusante
+        question: 'Voce quer o nivel de montante (cota do reservatorio) ou o nivel de jusante (canal de
+          fuga)?
+
+          '
+        trigger_terms:
+        - nível
+        - cota
+        - lâmina d'água
+        note: 'Clarificar apenas quando o contexto nao indica montante nem jusante. Se usuario mencionar
+          "reservatorio" ou "armazenamento", assumir montante. Se mencionar "canal de fuga" ou "saida",
+          assumir jusante.
+
+          '
+      - ambiguity: vazao_componente
+        question: 'Voce quer a vazao afluente (entrada), defluente (saida total), turbinada (geracao)
+          ou vertida (vertedouro)?
+
+          '
+        trigger_terms:
+        - vazão
+        - fluxo hidrico
+        note: 'Clarificar apenas quando nenhum qualificador (afluente/defluente/ turbinada/vertida/transferida)
+          estiver presente e o contexto nao permitir inferencia.
+
+          '
+      - ambiguity: granularidade_horaria_vs_diaria
+        question: 'Este dataset tem granularidade horaria. Voce quer dados hora a hora ou agregados por
+          dia/mes?
+
+          '
+        trigger_terms:
+        - historico
+        - serie
+        - evolucao
+        note: 'Clarificar apenas quando o usuario pede serie longa (anos) sem especificar agregacao —
+          scan_cost=high justifica confirmacao.
+
+          '
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        - angra 1
+        - angra 2
+        reason: 'Dataset nao contem dados de usinas nucleares. Dados hidrologicos aplicam-se apenas a
+          reservatorios hidrelétricos do SIN.
+
+          '
+        redirect: geracao-usina-2 com filtro de tipo de combustivel nuclear
+      - user_mentions:
+        - MMGD
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD ou geracao distribuida.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - EAR
+        - energia armazenada MWmes
+        - energia armazenada subsistema
+        reason: 'EAR em MWmes nao esta neste dataset. Este dataset tem volume util percentual por reservatorio
+          individual.
+
+          '
+        redirect: ear-diario-por-subsistema ou ear-diario-por-reservatorio
+      - user_mentions:
+        - ENA
+        - energia natural afluente
+        reason: 'ENA calculada nao esta neste dataset. Este dataset tem vazao afluente bruta em m3/s por
+          reservatorio.
+
+          '
+        redirect: ena-diario-por-reservatorio
+      - user_mentions:
+        - PLD
+        - CMO
+        - preco spot
+        - preco energia
+        reason: Dataset nao contem dados de preco ou custo marginal.
+        redirect: dataset de CMO ou PLD da CCEE/ONS
+      - user_mentions:
+        - carga eletrica
+        - demanda eletrica
+        reason: Dataset nao contem dados de carga ou demanda eletrica.
+        redirect: dataset de carga do ONS
+      - user_mentions:
+        - geracao MWmed
+        - geracao eletrica
+        - potencia gerada
+        reason: 'Este dataset contem vazao turbinada em m3/s, nao geracao em MWmed. Para geracao eletrica
+          por usina, usar dataset de despacho ou geracao.
+
+          '
+        redirect: descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024
+      - user_mentions:
+        - volume espera
+        - volume de espera
+        - restricao armazenamento
+        reason: 'Volume de espera recomendado nao esta neste dataset. Este dataset tem volume util observado.
+
+          '
+        redirect: res_volumeespera
+      - user_mentions:
+        - dados diarios reservatorio
+        - granularidade diaria reservatorio
+        reason: 'Para dados diarios do mesmo reservatorio, usar dados-hidrologicos-res que tem menor scan_cost.
+
+          '
+        redirect: dados-hidrologicos-res
+    sql_patterns:
+      nivelmontante_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n       TRIM(id_subsistema)\
+          \ AS id_subsistema,\n       MAX(val_nivelmontante) AS nivel_max_m,\n       MIN(val_nivelmontante)\
+          \ AS nivel_min_m,\n       AVG(val_nivelmontante) AS nivel_medio_m\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2\n"
+        output_unit: m
+        matches:
+          output_modes:
+          - maximum
+          - minimum
+          - average
+          metrics:
+          - nivelmontante
+          grain: month
+        validated_params:
+          year: '2010'
+      volumeutil_medio_subsistema:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n       TRIM(id_subsistema)\
+          \ AS id_subsistema,\n       AVG(val_volumeutil) AS volume_util_medio_pct\nFROM {source}\nWHERE\
+          \ val_volumeutil >= 0\n  AND val_volumeutil <= 150\nGROUP BY 1, 2\nORDER BY 1, 2\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - volumeutil
+          grain: month
+        note: 'Filtro val_volumeutil BETWEEN 0 AND 150 remove valores fisicamente impossiveis (negativos
+          e acima de 100% com margem para dados brutos).
+
+          '
+      vertimento_horario_reservatorio:
+        template: "SELECT din_instante,\n       nom_reservatorio,\n       TRIM(id_subsistema) AS id_subsistema,\n\
+          \       val_vazaovertida,\n       val_vazaovertidanaoturbinavel\nFROM {source}\nWHERE nom_reservatorio\
+          \ = '{nom_reservatorio}'\n  AND din_instante BETWEEN '{data_inicio}' AND '{data_fim}'\n  AND\
+          \ val_vazaovertida > 0\nORDER BY din_instante\n"
+        output_unit: m³/s
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - vazaovertida
+          - vazaovertidanaoturbinavel
+          grain: hour
+        validated_params:
+          nom_reservatorio: CACONDE
+          data_inicio: '2010-01-01 01:00:00'
+          data_fim: '2010-02-28 23:59:00'
+      balanco_hidrico_horario:
+        template: "SELECT din_instante,\n       nom_reservatorio,\n       val_vazaoafluente,\n       val_vazaodefluente,\n\
+          \       val_vazaoturbinada,\n       val_vazaovertida,\n       val_volumeutil\nFROM {source}\n\
+          WHERE nom_reservatorio = '{nom_reservatorio}'\n  AND din_instante BETWEEN '{data_inicio}' AND\
+          \ '{data_fim}'\n  AND val_vazaoafluente >= 0\n  AND val_vazaodefluente >= 0\nORDER BY din_instante\n"
+        output_unit: m³/s
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - vazaoafluente
+          - vazaodefluente
+          - vazaoturbinada
+          - vazaovertida
+          - volumeutil
+          grain: hour
+        note: 'Filtros de nao-negatividade aplicados a afluente e defluente para remover erros de reporte.
+          val_vazaotransferida pode ser negativa (fluxo reverso) e nao deve ser filtrada por sinal.
+
+          '
+        validated_params:
+          nom_reservatorio: E. DA CUNHA
+          data_inicio: '2010-01-01 01:00:00'
+          data_fim: '2010-02-28 23:59:00'
+- property: fewShotQueries
+  value:
+  - question: Qual foi a evolução do volume útil médio dos reservatórios por subsistema nas últimas 72
+      horas?
+    sql: SELECT id_subsistema, nom_subsistema, din_instante, ROUND(AVG(CASE WHEN val_volumeutil >= 0 THEN
+      val_volumeutil END), 2) AS vol_util_medio_pct, COUNT(DISTINCT id_reservatorio) AS qtd_reservatorios
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet') WHERE din_instante
+      >= ( SELECT MAX(din_instante) - INTERVAL '72 hours' FROM read_parquet('s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet')
+      ) GROUP BY id_subsistema, nom_subsistema, din_instante ORDER BY id_subsistema, din_instante
+  - question: Quais foram as 20 usinas com maior vazão afluente média no dia anterior, excluindo outliers?
+    sql: SELECT id_reservatorio, nom_reservatorio, nom_bacia, id_subsistema, ROUND(AVG(val_vazaoafluente),
+      2) AS vazao_afluente_media_m3s, MIN(val_vazaoafluente) AS vazao_min, MAX(val_vazaoafluente) AS vazao_max,
+      COUNT(*) AS horas_com_dado FROM read_parquet('s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet')
+      WHERE CAST(din_instante AS DATE) = CURRENT_DATE - INTERVAL '1 day' AND val_vazaoafluente >= 0 AND
+      val_vazaoafluente <= 100000 GROUP BY id_reservatorio, nom_reservatorio, nom_bacia, id_subsistema
+      ORDER BY vazao_afluente_media_m3s DESC LIMIT 20
+  - question: Quais bacias hidrográficas tiveram maior volume de vertimento não turbinável no último mês?
+    sql: SELECT nom_bacia, id_subsistema, COUNT(DISTINCT id_reservatorio) AS usinas_com_vertimento, ROUND(SUM(COALESCE(val_vazaovertidanaoturbinavel,
+      0)), 2) AS soma_vertimento_nturb_m3s, ROUND(AVG(CASE WHEN val_vazaovertidanaoturbinavel > 0 THEN
+      val_vazaovertidanaoturbinavel END), 2) AS media_quando_positivo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet')
+      WHERE din_instante >= ( SELECT MAX(din_instante) - INTERVAL '30 days' FROM read_parquet('s3://ons-aws-prod-opendata/dataset/dados_hidrologicos_ho/*.parquet')
+      ) AND val_vazaovertidanaoturbinavel IS NOT NULL AND val_vazaovertidanaoturbinavel >= 0 GROUP BY
+      nom_bacia, id_subsistema ORDER BY soma_vertimento_nturb_m3s DESC
+- property: relatedDatasets
+  value:
+    dados-hidrologicos-res:
+      join_keys:
+      - cod_usina
+      - id_reservatorio
+      - id_subsistema
+    reservatorio:
+      join_keys:
+      - nom_reservatorio
+      - tip_reservatorio
+      - id_subsistema
+      - nom_subsistema
+      - nom_bacia
+    ear-diario-por-reservatorio:
+      join_keys:
+      - id_subsistema
+      - nom_bacia
+      - nom_reservatorio
+      - nom_subsistema
+      - tip_reservatorio
+    ena-diario-por-reservatorio:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_reservatorio
+      - tip_reservatorio
+      - nom_bacia
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - cod_usina
+      - nom_subsistema
+    res_volumeespera:
+      join_keys:
+      - cod_usina
+      - id_reservatorio
+      - id_subsistema
+    energia-vertida-turbinavel:
+      join_keys:
+      - cod_usina
+      - din_instante
+      - id_subsistema
+      - nom_subsistema
+    ear-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+- property: license
+  value: CC-BY
