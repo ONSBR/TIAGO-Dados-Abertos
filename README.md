@@ -239,7 +239,7 @@ rede, ponha um limite por cliente no proxy ou gateway à frente.
 ## Estrutura do repositório
 
 ```
-mcp-tiago-dadosabertos/
+TIAGO-Dados-Abertos/
 ├── src/mcp_tiago_dados_abertos/
 │   ├── tools/           # 4 tools MCP (buscar, listar, descrever, executar_sql)
 │   ├── catalogo/        # carrega contratos, TF-IDF, ranking
