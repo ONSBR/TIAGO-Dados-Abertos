@@ -193,7 +193,7 @@ async def executar_sql(sql_query: str, limit: int = 100, offset: int = 0) -> str
         evento(evt="sql_route", rota=rota, pattern=pat)
     except Exception:
         pass
-    resultado = await _executar_sql(sql_exec, limit, offset)
+    resultado = await _executar_sql(sql_exec, limit, offset, catalog=CATALOG)
     # Proveniencia SSOT: datasets REAIS do SQL (URI de read_parquet -> contrato).
     # SEM period aqui: em SQL manual um alias pode fabricar a coluna temporal
     # ('2099-01-01' AS din_instante) e o carimbo mentiria. Falha/indisponivel =>

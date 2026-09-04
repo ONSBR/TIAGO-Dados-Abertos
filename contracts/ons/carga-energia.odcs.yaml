@@ -34,7 +34,7 @@ description:
     do ONS, planejadores energéticos e agentes do setor elétrico, permitindo monitorar a evolução da carga,
     subsidiar o despacho de usinas, apoiar decisões de planejamento operacional e expansão do sistema,
     e avaliar tendências sazonais e estruturais de consumo no SIN ao longo de mais de duas décadas.
-  limitations: A coluna val_cargaenergiamwmed apresenta 0. O dataset carga-energia é publicado duas vezes
+  limitations: A coluna val_cargaenergiamwmed tem valores nulos raros (13 em cerca de 39 mil linhas, 0,03%, em 09/2026). O dataset carga-energia é publicado duas vezes
     ao dia (12h e 19h), podendo gerar múltiplos registros para a mesma data e subsistema. Possíveis lacunas
     temporais na série diária por subsistema ao longo de ~26 anos de dados do dataset carga-energia.
   usage: Recuperar este dataset quando a pergunta envolver demanda, consumo ou carga de energia elétrica
@@ -182,9 +182,7 @@ customProperties:
     energético regional no horizonte de 2000 a 2026.
 - property: agentInstructions
   value: |
-    - [val_cargaenergiamwmed] Aproximadamente 0,2% dos registros possuem valor nulo em val_cargaenergiamwmed. Para uma série histórica de 26 anos com 2.120 linhas, isso representa cerca de 4 registros sem valor de carga. Pode indicar falhas de telemetria, dias sem apuração ou períodos de transição metodológica. Verificar se os nulos se concentram em datas específicas ou subsistemas específicos.
-
-    - [din_instante] Com apenas 2.120 linhas para um período de ~26 anos (2000–2026) e 4 subsistemas, o volume esperado seria ~38.000 registros (4 × 365 × 26). O volume real é drasticamente inferior, sugerindo que parte do período histórico pode ter granularidade mensal ou anual, ou que há lacunas temporais significativas na série. Recomenda-se verificar a distribuição temporal dos registros para identificar descontinuidades ou mudanças de granularidade ao longo do período.
+    - [val_cargaenergiamwmed] Valores nulos sao raros (13 em cerca de 39 mil linhas em 09/2026). Podem indicar falhas de telemetria, dias sem apuração ou períodos de transição metodológica. Verificar se os nulos se concentram em datas específicas ou subsistemas específicos.
 
     - [id_subsistema] Verificar se existem registros duplicados para a mesma combinação de din_instante e id_subsistema, o que violaria a chave primária natural do dataset. Duplicatas podem ocorrer por reprocessamento ou publicação dupla nos snapshots de 12h e 19h declarados na frequência de atualização.
 

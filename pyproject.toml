@@ -88,7 +88,5 @@ select = ["E", "F", "I", "W"]
 [tool.ruff.lint.per-file-ignores]
 # server.py: imports apos o setup de logging sao intencionais (E402)
 "src/mcp_tiago_dados_abertos/server.py" = ["E402"]
-# result_validator: strings de mensagens de alerta densas (E501)
-"src/mcp_tiago_dados_abertos/resposta/result_validator.py" = ["E501"]
 # tests: linhas de dados/SQL longas (E501) e imports apos ajuste de sys.path (E402)
 "tests/**" = ["E501", "E402"]
