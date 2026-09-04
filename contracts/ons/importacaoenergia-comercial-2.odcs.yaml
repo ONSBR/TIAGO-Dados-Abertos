@@ -1,0 +1,904 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:importacaoenergia-comercial-2
+name: importacaoenergia-comercial-2
+tenant: ons
+tags:
+- Argentina
+- MWmed
+- PMO
+- Portaria MME 339/2018
+- Uruguai
+- Venezuela
+- despacho horário
+- energia importada Argentina
+- energia importada Uruguai
+- importação comercial de energia
+- importação de energia
+- importação energia ONS
+- importação energia comercial internacional
+- intercâmbio comercial importação
+- intercâmbio internacional
+- modalidade comercial
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/importacaoenergia-comercial-2-ho/*.parquet
+  format: parquet
+description:
+  purpose: Prover base de dados horária para acompanhamento, auditoria e análise das transações de importação
+    comercial de energia elétrica com países vizinhos (Argentina, Uruguai, Venezuela e outros), suportando
+    decisões de despacho econômico, liquidação financeira no mercado de curto prazo, planejamento da operação
+    do sistema interligado e fiscalização regulatória pela ANEEL e CCEE. Utilizado por operadores do ONS,
+    agentes comercializadores, reguladores e analistas do setor elétrico para comparar volumes programados
+    versus despachados versus verificados e avaliar o custo de importação por bloco horário e por país
+    exportador.
+  limitations: 75. 42. O valor mínimo de val_importacaoverificada é -0.
+  usage: Recuperar este dataset quando a pergunta envolver volumes ou preços de importação de energia
+    elétrica na modalidade comercial internacional (Argentina, Uruguai, Venezuela), discriminados por
+    país exportador, agente comercializador ou bloco horário do PMO.
+domain: intercâmbio
+schema:
+- name: importacaoenergia_comercial_2
+  physicalType: parquet
+  logicalType: object
+  physicalName: importacaoenergia_comercial_2
+  properties:
+  - name: nom_pais
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do país exportador de energia elétrica na modalidade comercial internacional (país
+      de origem da importação pelo Brasil)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - país exportador
+      - país de origem
+      - país importador
+      - pais
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ARGENTINA
+      - URUGUAI
+  - name: nom_agente
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente comercializador responsável pela oferta de importação de energia no PMO
+      (Programa Mensal de Operação)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - comercializador
+      - agente comercializador
+      - empresa
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AXIA ENERGIA
+      - BANCO BTG
+      - BOLT
+      - ELETROBRAS
+      - ENEL
+      - TRADENER
+  - name: nom_bloco
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificação do bloco horário de importação conforme estrutura do PMO, representando
+      o intervalo temporal de despacho programado
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - bloco
+      - bloco horário
+      - bloco de importação
+      - bloco PMO
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BLOCO 1
+      - BLOCO 10
+      - BLOCO 2
+      - BLOCO 3
+      - BLOCO 4
+      - BLOCO 5
+      - BLOCO 6
+      - BLOCO 7
+      - BLOCO 8
+      - BLOCO 9
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora do instante de referência do registro de importação, com granularidade horária,
+      cobrindo o período de 2019-01-01 a 2026-05-29
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data e hora
+      - hora
+      - timestamp
+      - data
+      - período
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_importacaoprogramada
+    physicalType: DOUBLE
+    logicalType: number
+    description: Volume de energia de importação programada para o bloco horário, em MWmed, conforme programação
+      do PMO. Sem valores nulos; varia de 0 a 600 MWmed.
+    customProperties:
+    - property: aliases
+      value:
+      - importação programada
+      - energia programada
+      - programada
+      - val programada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+    - property: enum
+      value:
+      - 0.0
+      - 4.0
+      - 10.0
+      - 14.0
+      - 20.0
+      - 50.0
+      - 52.0
+      - 60.0
+      - 70.0
+      - 80.0
+      - 82.0
+      - 90.0
+      - 100.0
+      - 120.0
+      - 126.0
+      - 134.0
+      - 135.0
+      - 140.0
+      - 144.0
+      - 150.0
+      - 160.0
+      - 170.0
+      - 171.0
+      - 200.0
+      - 225.0
+      - 230.0
+      - 245.0
+      - 250.0
+      - 260.0
+      - 278.0
+      - 300.0
+      - 320.0
+      - 350.0
+      - 400.0
+      - 500.0
+      - 600.0
+  - name: val_importacaodespachada
+    physicalType: DOUBLE
+    logicalType: number
+    description: Volume de energia de importação efetivamente despachada no bloco horário, em MWmed, conforme
+      despacho operacional. Sem valores nulos; varia de 0 a 600.621 MWmed.
+    customProperties:
+    - property: aliases
+      value:
+      - importação despachada
+      - energia despachada
+      - despachada
+      - val despachada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: val_importacaoverificada
+    physicalType: DOUBLE
+    logicalType: number
+    description: Volume de energia de importação verificada (medida/consolidada) no bloco horário, em
+      MWmed. Possui 75.6% de nulos, pois só é preenchida após consolidação operacional; pode apresentar
+      valor -0.0 por arredondamento.
+    customProperties:
+    - property: aliases
+      value:
+      - importação verificada
+      - energia verificada
+      - verificada
+      - medida
+      - val verificada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: val_preco
+    physicalType: DOUBLE
+    logicalType: number
+    description: Preço ofertado pelo agente comercializador no PMO para o bloco horário de importação,
+      em R$/MWh. Possui 42.6% de nulos, possivelmente para blocos sem oferta de preço registrada; varia
+      de 23.61 a 2282.36 R$/MWh.
+    customProperties:
+    - property: aliases
+      value:
+      - preço
+      - preço ofertado
+      - preço PMO
+      - custo de importação
+      - val preço
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: R$/MWh
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for importacaoenergia_comercial_2:\n  - row_count > 0:\n      name: Tabela\
+      \ não pode estar vazia\n\n  # Referential integrity\n  - invalid_count(nom_pais) = 0:\n      valid\
+      \ values:\n        - 'ARGENTINA'\n        - 'URUGUAI'\n      name: nom_pais deve ser um dos valores\
+      \ válidos\n  - invalid_count(nom_agente) = 0:\n      valid values:\n        - 'AXIA ENERGIA'\n \
+      \       - 'BANCO BTG'\n        - 'BOLT'\n        - 'ELETROBRAS'\n        - 'ENEL'\n        - 'TRADENER'\n\
+      \      name: nom_agente deve ser um dos valores válidos\n  - invalid_count(nom_bloco) = 0:\n   \
+      \   valid values:\n        - 'BLOCO 1'\n        - 'BLOCO 10'\n        - 'BLOCO 2'\n        - 'BLOCO\
+      \ 3'\n        - 'BLOCO 4'\n        - 'BLOCO 5'\n        - 'BLOCO 6'\n        - 'BLOCO 7'\n     \
+      \   - 'BLOCO 8'\n        - 'BLOCO 9'\n      name: nom_bloco deve ser um dos valores válidos\n\n\
+      \  # Unicidade da chave primária composta ['nom_pais', 'nom_agente', 'nom_bloco', 'din_instante']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (nom_pais, nom_agente, nom_bloco,\
+      \ din_instante) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM importacaoenergia_comercial_2\n\
+      \        WHERE (nom_pais, nom_agente, nom_bloco, din_instante) IN (\n          SELECT nom_pais,\
+      \ nom_agente, nom_bloco, din_instante FROM importacaoenergia_comercial_2\n          GROUP BY nom_pais,\
+      \ nom_agente, nom_bloco, din_instante\n          HAVING COUNT(*) > 1\n        )\n\n  # Nulos em\
+      \ val_importacaoverificada — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(val_importacaoverificada)\
+      \ < 5.0:\n      name: val_importacaoverificada não deve ter >5.0% nulos\n\n  # Nulos em val_preco\
+      \ — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(val_preco) < 5.0:\n     \
+      \ name: val_preco não deve ter >5.0% nulos\n\n  # Freshness: din_instante deve ter dados recentes\
+      \ (SLA: Atualizado diariamente)\n  - freshness(din_instante) < 3d:\n      name: din_instante não\
+      \ pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/importacaoenergia-comercial-2
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto foi importado da argentina
+  - energia comprada do uruguai
+  - importacao de energia
+  - preco da energia importada
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver volumes ou preços de importação de energia
+    elétrica na modalidade comercial internacional (Argentina, Uruguai, Venezuela), discriminados por
+    país exportador, agente comercializador ou bloco horário do PMO. Também relevante para análises de
+    balanço de intercâmbio comercial, auditoria de despacho programado versus verificado, e avaliação
+    de custo de importação em R$/MWh por período horário.
+- property: agentInstructions
+  value: '- [val_importacaoverificada] 77,1% dos registros possuem valor nulo em val_importacaoverificada
+    (aproximadamente 286.804 linhas). A verificação só é preenchida após consolidação dos dados reais
+    de operação, gerando defasagem significativa entre o instante do registro e a disponibilidade do dado
+    verificado. Filtros que excluam nulos nesta coluna reduzem drasticamente o conjunto de dados disponível.
+
+
+    - [val_preco] 45,1% dos registros possuem valor nulo em val_preco (aproximadamente 167.726 linhas).
+    Blocos sem oferta de preço definida no PMO ou períodos sem contrato ativo resultam em ausência do
+    valor. Análises financeiras devem tratar esses nulos explicitamente para evitar subestimação do custo
+    total de importação.
+
+
+    - [val_importacaoverificada] O valor mínimo de val_importacaoverificada é -0.0 (zero negativo), indicando
+    possível artefato de arredondamento ou representação de fluxo reverso em situações de exportação líquida.
+    Embora numericamente zero, a presença de sinal negativo pode causar inconsistências em comparações
+    e filtros de validação.
+
+
+    - [val_preco] val_preco apresenta amplitude extrema: mínimo de R$ 23,61/MWh e máximo de R$ 2.282,36/MWh.
+    O valor máximo é aproximadamente 97 vezes o mínimo, sugerindo possíveis outliers em períodos de escassez
+    hídrica ou eventos de mercado atípicos. Recomenda-se análise de distribuição antes de usar a média
+    simples como referência de preço.
+
+
+    - [din_instante] Dado que o dataset cobre o período 2019-01-01 a 2026-06-13 com granularidade horária
+    e múltiplas combinações de país/agente/bloco, descontinuidades temporais podem existir para combinações
+    específicas. Recomenda-se verificar gaps horários por país e agente para garantir integridade das
+    séries temporais em análises de despacho e liquidação.
+
+
+    - [val_importacaodespachada] val_importacaodespachada apresenta valor máximo de 600,621 MWmed, ligeiramente
+    superior ao máximo de val_importacaoprogramada (600,0 MWmed). Valores despachados acima do programado
+    podem indicar redespacho emergencial ou inconsistência de dados. Recomenda-se validar registros onde
+    val_importacaodespachada supera val_importacaoprogramada.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o volume total de energia importada da Argentina em 2023, por mês?
+  - Quais agentes comercializadores tiveram maior volume de importação despachada no último ano?
+  - Qual é a diferença média entre importação programada e despachada por país exportador?
+  - Quais blocos horários concentram maior volume de importação comercial?
+  - Qual foi o preço médio de importação por país e por ano desde 2019?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/importacaoenergia-comercial-2-ho/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2019-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+      - nom_pais
+      - nom_agente
+      - nom_bloco
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: importacaoprogramada
+      label: Importacao Programada
+      columns:
+      - val_importacaoprogramada
+      expression: val_importacaoprogramada
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - importacaoprogramada
+      - importacao programada
+      - importação programada
+      - energia programada
+      - programada
+      - val programada
+      aggregation_modes:
+        total:
+          sql: SUM(val_importacaoprogramada)
+          unit: MWmed
+        average:
+          sql: AVG(val_importacaoprogramada)
+          unit: MWmed
+        maximum:
+          sql: MAX(val_importacaoprogramada)
+          unit: MWmed
+        time_series:
+          sql: SUM(val_importacaoprogramada)
+          unit: MWmed
+        ranking:
+          sql: SUM(val_importacaoprogramada)
+          unit: MWmed
+        comparison:
+          sql: SUM(val_importacaoprogramada)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - importacao programada
+      - importação programada
+      - energia programada
+      - programada
+      - val programada
+      - importacao pmo
+      - despacho programado importacao
+    - id: importacaodespachada
+      label: Importacao Despachada
+      columns:
+      - val_importacaodespachada
+      expression: val_importacaodespachada
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - importacaodespachada
+      - importacao despachada
+      - importação despachada
+      - energia despachada
+      - despachada
+      - val despachada
+      aggregation_modes:
+        total:
+          sql: SUM(val_importacaodespachada)
+          unit: MWmed
+        average:
+          sql: AVG(val_importacaodespachada)
+          unit: MWmed
+        maximum:
+          sql: MAX(val_importacaodespachada)
+          unit: MWmed
+        time_series:
+          sql: SUM(val_importacaodespachada)
+          unit: MWmed
+        ranking:
+          sql: SUM(val_importacaodespachada)
+          unit: MWmed
+        comparison:
+          sql: SUM(val_importacaodespachada)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - importacao despachada
+      - importação despachada
+      - energia despachada
+      - despachada
+      - val despachada
+      - despacho importacao
+      - importacao efetiva
+    - id: importacaoverificada
+      label: Importacao Verificada
+      columns:
+      - val_importacaoverificada
+      expression: val_importacaoverificada
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - importacaoverificada
+      - importacao verificada
+      - importação verificada
+      - energia verificada
+      - verificada
+      - medida
+      - val verificada
+      - importacao consolidada
+      - importacao medida
+      aggregation_modes:
+        total:
+          sql: SUM(val_importacaoverificada)
+          unit: MWmed
+        average:
+          sql: AVG(val_importacaoverificada)
+          unit: MWmed
+        maximum:
+          sql: MAX(val_importacaoverificada)
+          unit: MWmed
+        time_series:
+          sql: SUM(val_importacaoverificada)
+          unit: MWmed
+        ranking:
+          sql: SUM(val_importacaoverificada)
+          unit: MWmed
+        comparison:
+          sql: SUM(val_importacaoverificada)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - importacao verificada
+      - importação verificada
+      - energia verificada
+      - verificada
+      - medida
+      - val verificada
+      - importacao consolidada
+      - importacao medida
+    - id: preco
+      label: Preco de Importacao
+      columns:
+      - val_preco
+      expression: val_preco
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - preco
+      - preço
+      - preco ofertado
+      - preço ofertado
+      - preco pmo
+      - preço PMO
+      - custo de importacao
+      - custo de importação
+      - val preco
+      - tarifa importacao
+      aggregation_modes:
+        average:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+        maximum:
+          sql: MAX(val_preco)
+          unit: R$/MWh
+        minimum:
+          sql: MIN(val_preco)
+          unit: R$/MWh
+        time_series:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+        ranking:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+        comparison:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+      interval_hours: 1.0
+      aliases:
+      - preço
+      - preco
+      - preco ofertado
+      - preço ofertado
+      - preco pmo
+      - custo de importacao
+      - custo de importação
+      - val preco
+      - tarifa importacao
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - importacaoprogramada
+      - importacaodespachada
+      - importacaoverificada
+      - preco
+      preferred_for:
+      - importacao comercial internacional
+      - importacao Argentina Uruguai
+      - bloco horario importacao
+      - agente comercializador importacao
+      - preco oferta importacao PMO
+      - despacho programado vs verificado importacao
+      - auditoria conformidade importacao
+      - custo importacao R$/MWh
+      - intercambio comercial bilateral
+      - oferta importacao por bloco
+      not_preferred_for:
+      - exportacao energia
+      - geracao interna
+      - carga consumo
+      - intercambio entre subsistemas
+      - usina individual
+      - nuclear
+      - MMGD
+      - ranking usinas
+      - geracao por fonte
+      - balanco subsistema
+    value_aliases:
+      nom_pais:
+        ARGENTINA:
+          aliases:
+          - ARGENTINA
+          - argentina
+          - arg
+          filter: nom_pais = 'ARGENTINA'
+        URUGUAI:
+          aliases:
+          - URUGUAI
+          - uruguai
+          - uru
+          - uruguay
+          filter: nom_pais = 'URUGUAI'
+      nom_agente:
+        AXIA ENERGIA:
+          aliases:
+          - AXIA ENERGIA
+          - axia
+          filter: nom_agente = 'AXIA ENERGIA'
+        BANCO BTG:
+          aliases:
+          - BANCO BTG
+          - BTG
+          - btg pactual
+          filter: nom_agente = 'BANCO BTG'
+        BOLT:
+          aliases:
+          - BOLT
+          - bolt energia
+          filter: nom_agente = 'BOLT'
+        ELETROBRAS:
+          aliases:
+          - ELETROBRAS
+          - eletrobras
+          filter: nom_agente = 'ELETROBRAS'
+        ENEL:
+          aliases:
+          - ENEL
+          - enel
+          filter: nom_agente = 'ENEL'
+        TRADENER:
+          aliases:
+          - TRADENER
+          - tradener
+          filter: nom_agente = 'TRADENER'
+      nom_bloco:
+        BLOCO 1:
+          aliases:
+          - BLOCO 1
+          - bloco 1
+          - bloco1
+          filter: nom_bloco = 'BLOCO 1'
+        BLOCO 2:
+          aliases:
+          - BLOCO 2
+          - bloco 2
+          - bloco2
+          filter: nom_bloco = 'BLOCO 2'
+        BLOCO 3:
+          aliases:
+          - BLOCO 3
+          - bloco 3
+          - bloco3
+          filter: nom_bloco = 'BLOCO 3'
+        BLOCO 4:
+          aliases:
+          - BLOCO 4
+          - bloco 4
+          - bloco4
+          filter: nom_bloco = 'BLOCO 4'
+        BLOCO 5:
+          aliases:
+          - BLOCO 5
+          - bloco 5
+          - bloco5
+          filter: nom_bloco = 'BLOCO 5'
+        BLOCO 6:
+          aliases:
+          - BLOCO 6
+          - bloco 6
+          - bloco6
+          filter: nom_bloco = 'BLOCO 6'
+        BLOCO 7:
+          aliases:
+          - BLOCO 7
+          - bloco 7
+          - bloco7
+          filter: nom_bloco = 'BLOCO 7'
+        BLOCO 8:
+          aliases:
+          - BLOCO 8
+          - bloco 8
+          - bloco8
+          filter: nom_bloco = 'BLOCO 8'
+        BLOCO 9:
+          aliases:
+          - BLOCO 9
+          - bloco 9
+          - bloco9
+          filter: nom_bloco = 'BLOCO 9'
+        BLOCO 10:
+          aliases:
+          - BLOCO 10
+          - bloco 10
+          - bloco10
+          filter: nom_bloco = 'BLOCO 10'
+    sql_patterns:
+      importacaoprogramada_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM(val_importacaoprogramada)\
+          \ AS total_mwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP))\
+          \ = {year}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - importacaoprogramada
+          grain: month
+        validated_params:
+          year: '2020'
+      importacao_por_pais_ano:
+        template: "SELECT nom_pais,\n  EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano,\n\
+          \  SUM(val_importacaodespachada) AS total_despachada_mwh,\n  SUM(val_importacaoprogramada) AS\
+          \ total_programada_mwh\nFROM {source}\nGROUP BY 1, 2\nORDER BY 2, 3 DESC\n"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - total
+          - comparison
+          metrics:
+          - importacaodespachada
+          - importacaoprogramada
+          grain: year
+      preco_medio_por_pais_ano:
+        template: "SELECT nom_pais,\n  EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS ano,\n\
+          \  AVG(val_preco) AS preco_medio_rs_mwh,\n  MIN(val_preco) AS preco_min_rs_mwh,\n  MAX(val_preco)\
+          \ AS preco_max_rs_mwh\nFROM {source}\nWHERE val_preco IS NOT NULL\nGROUP BY 1, 2\nORDER BY 2,\
+          \ 1\n"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          - comparison
+          metrics:
+          - preco
+          grain: year
+      diferenca_programada_despachada:
+        template: "SELECT nom_pais,\n  AVG(val_importacaodespachada - val_importacaoprogramada) AS diferenca_media_mwmed,\n\
+          \  SUM(val_importacaodespachada - val_importacaoprogramada) AS diferenca_total_mwh\nFROM {source}\n\
+          GROUP BY 1\nORDER BY 2 DESC\n"
+        output_unit: MWmed / MWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - importacaodespachada
+          - importacaoprogramada
+          grain: all
+      importacao_verificada_com_nulos:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM(val_importacaoverificada)\
+          \ AS total_verificada_mwh,\n  COUNT(*) AS total_registros,\n  COUNT(val_importacaoverificada)\
+          \ AS registros_com_valor\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP))\
+          \ = {year}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: MWh
+        note: 'Inclui contagem de nulos para transparencia. val_importacaoverificada tem ~75.6% de nulos;
+          total_verificada_mwh reflete apenas registros consolidados.
+
+          '
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - importacaoverificada
+          grain: month
+        validated_params:
+          year: '2020'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario menciona "importacao" sem especificar tipo
+        assume_metric: importacaodespachada
+        assume_output: total
+        note: 'Importacao despachada representa o volume efetivamente operacionalizado, sendo a metrica
+          mais relevante para analises operacionais. Se o contexto for financeiro/PMO, preferir importacaoprogramada.
+
+          '
+      - when: usuario menciona "energia importada" sem qualificador
+        assume_metric: importacaodespachada
+        assume_output: total
+        note: Padrao operacional; despachada e o dado mais completo (sem nulos).
+      - when: usuario menciona "preco" ou "custo" sem especificar metrica
+        assume_metric: preco
+        assume_output: average
+        note: Preco e intensivo (R$/MWh); media e a agregacao correta. Alertar sobre 42.6% de nulos.
+      - when: usuario pede "total de importacao" sem especificar unidade
+        assume_metric: importacaodespachada
+        assume_output: total
+        note: 'unit_note: SUM(val_importacaodespachada) retorna MWh quando interval_hours=1.0. Para GWh
+          dividir por 1000; para TWh dividir por 1.000.000.
+
+          '
+      must_clarify_when:
+      - trigger_terms:
+        - programada
+        - despachada
+        - verificada
+        - medida
+        - consolidada
+        question: 'Qual tipo de importacao deseja analisar? (1) Programada — conforme PMO, sem nulos,
+          serie completa desde 2019; (2) Despachada — volume efetivamente operacionalizado, sem nulos;
+          (3) Verificada — dado consolidado pos-operacao, ~75.6% de nulos (disponivel apenas para periodos
+          ja consolidados).
+
+          '
+        reason: 'Os tres tipos de importacao tem semanticas distintas e coberturas de nulos muito diferentes.
+          A escolha errada pode resultar em analise com dados incompletos (verificada) ou comparacao inadequada
+          entre planejamento e execucao.
+
+          '
+      - trigger_terms:
+        - comparar
+        - diferenca
+        - desvio
+        - aderencia
+        question: 'Deseja comparar: (1) programada vs despachada (aderencia ao PMO), (2) despachada vs
+          verificada (conformidade operacional), ou (3) entre paises/agentes para a mesma metrica?
+
+          '
+        reason: 'Comparacoes entre tipos de importacao tem interpretacoes operacionais distintas e requerem
+          tratamento diferente de nulos em val_importacaoverificada.
+
+          '
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - ranking de usinas
+        - usina especifica
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao de geracao nuclear.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD ou dimensao de microgeracao distribuida.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - exportacao
+        - exportar energia
+        reason: Dataset registra apenas importacao comercial pelo Brasil; exportacao nao esta presente.
+        redirect: verificar dataset de intercambio ou exportacao quando disponivel
+      - user_mentions:
+        - venezuela
+        reason: Venezuela nao consta no enum fisico de nom_pais (apenas ARGENTINA e URUGUAI).
+      - user_mentions:
+        - subsistema
+        - sudeste
+        - nordeste
+        - sul
+        - norte
+        - sin
+        reason: Dataset nao tem dimensao de subsistema; cobre intercambio internacional por pais.
+        redirect: balanco-energia-subsistema ou intercambio-energia-subsistema
+      - user_mentions:
+        - gas natural
+        - biomassa
+        - carvao
+        - combustivel
+        - fonte geradora
+        reason: Schema nao discrimina combustivel ou fonte; val_importacaodespachada agrega toda importacao.
+        redirect: geracao-usina-2 para analise por combustivel
+- property: fewShotQueries
+  value:
+  - question: Qual foi o volume total de energia importada programada e despachada por país em cada mês?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, nom_pais, SUM(val_importacaoprogramada)
+      AS total_programado_mwmed, SUM(val_importacaodespachada) AS total_despachado_mwmed, ROUND(100.0
+      * SUM(val_importacaodespachada) / NULLIF(SUM(val_importacaoprogramada), 0), 2) AS pct_despacho_vs_programado
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/importacaoenergia-comercial-2-ho/*.parquet')
+      WHERE val_importacaoprogramada IS NOT NULL GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS
+      TIMESTAMP)), nom_pais ORDER BY mes DESC, total_despachado_mwmed DESC
+  - question: Quais agentes comercializadores mais importaram energia no período e qual o preço médio
+      ofertado?
+    sql: SELECT nom_agente, nom_pais, COUNT(DISTINCT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)))
+      AS meses_ativos, SUM(val_importacaodespachada) AS total_despachado_mwmed, ROUND(AVG(val_preco),
+      2) AS preco_medio_rs_mwh, MIN(val_preco) AS preco_min_rs_mwh, MAX(val_preco) AS preco_max_rs_mwh
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/importacaoenergia-comercial-2-ho/*.parquet')
+      WHERE val_importacaodespachada > 0 GROUP BY nom_agente, nom_pais ORDER BY total_despachado_mwmed
+      DESC LIMIT 20
+  - question: Em quais blocos horários do PMO ocorrem os maiores desvios entre energia programada e despachada?
+    sql: SELECT nom_bloco, nom_pais, COUNT(*) AS total_registros, ROUND(AVG(val_importacaodespachada -
+      val_importacaoprogramada), 4) AS desvio_medio_mwmed, ROUND(SUM(ABS(val_importacaodespachada - val_importacaoprogramada)),
+      2) AS desvio_absoluto_total, COUNT(*) FILTER (WHERE val_importacaodespachada > val_importacaoprogramada)
+      AS registros_acima_programado, COUNT(*) FILTER (WHERE val_importacaodespachada < val_importacaoprogramada)
+      AS registros_abaixo_programado FROM read_parquet('s3://ons-aws-prod-opendata/dataset/importacaoenergia-comercial-2-ho/*.parquet')
+      WHERE val_importacaoprogramada IS NOT NULL AND val_importacaodespachada IS NOT NULL GROUP BY nom_bloco,
+      nom_pais ORDER BY desvio_absoluto_total DESC
+- property: relatedDatasets
+  value:
+    ofertapreco-importacao:
+      join_keys:
+      - nom_pais
+      - nom_agente
+      - nom_bloco
+      - val_preco
+- property: license
+  value: CC-BY

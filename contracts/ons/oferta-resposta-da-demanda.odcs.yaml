@@ -1,0 +1,260 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:oferta_respostademanda
+name: oferta-resposta-da-demanda
+tenant: ons
+status: active
+tags:
+- resposta da demanda
+- demand response
+- oferta
+- reducao de carga
+- subsistema
+- ONS
+- setor eletrico
+- dados abertos
+servers:
+- server: production
+  type: custom
+  location: s3://ons-aws-prod-opendata/dataset/oferta_respostademanda/
+  format: parquet
+description:
+  purpose: 'Ofertas de Resposta da Demanda: reducoes de carga ofertadas por agentes consumidores (montante
+    em MW, preco, duracao, janela horaria e data de reducao), por subsistema. Usar para perguntas sobre
+    programa de resposta da demanda, montante ofertado, precos e agentes participantes.'
+  usage: Consulta via DuckDB read_parquet sobre o bucket publico de dados abertos do ONS.
+  limitations: Valores numericos (preco/montante/duracao) armazenados como VARCHAR com ponto decimal —
+    usar TRY_CAST.
+domain: resposta_demanda
+schema:
+- name: oferta-resposta-da-demanda
+  physicalType: parquet
+  logicalType: object
+  physicalName: oferta-resposta-da-demanda
+  properties:
+  - name: nom_agente
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do agente que fez a oferta de reducao (ex.: CB ALUMINIO)'
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - consumidor
+      - empresa
+  - name: tip_oferta
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo/modalidade da oferta (ex.: Potencia d-1)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de oferta
+      - modalidade
+  - name: val_preco
+    physicalType: VARCHAR
+    logicalType: number
+    description: Preco ofertado (R$/MWh), VARCHAR com ponto decimal.
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_preco AS DOUBLE)
+    - property: aliases
+      value:
+      - preco
+      - valor
+  - name: dat_reducao
+    physicalType: VARCHAR
+    logicalType: date
+    description: 'Data da reducao de carga ofertada (ex.: 2023-11-28)'
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data reducao
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Sigla do subsistema (ex.: SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sigla subsistema
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do subsistema (ex.: SUDESTE/CENTRO-OESTE)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - regiao
+  - name: hor_inicial
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Hora inicial da janela de reducao (ex.: 15:00:00)'
+  - name: hor_final
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Hora final da janela de reducao (ex.: 21:00:00)'
+  - name: val_duracao
+    physicalType: VARCHAR
+    logicalType: number
+    description: Duracao da reducao em horas, VARCHAR com ponto decimal.
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_duracao AS DOUBLE)
+  - name: val_montante
+    physicalType: VARCHAR
+    logicalType: number
+    description: Montante de reducao ofertado (MW), VARCHAR com ponto decimal. Metrica principal.
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_montante AS DOUBLE)
+    - property: aliases
+      value:
+      - montante
+      - potencia ofertada
+      - reducao ofertada
+      - MW
+customProperties:
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/oferta_respostademanda/*.parquet', union_by_name=true)
+- property: agentInstructions
+  value: 'Ofertas de Resposta da Demanda do ONS. Uma linha por oferta (agente/data/janela horaria). val_montante
+    e o montante ofertado em MW (metrica principal, SUM). val_preco em R$/MWh, val_duracao em horas. Dimensoes:
+    agente, tipo de oferta, subsistema, data. Valores VARCHAR com ponto decimal — usar TRY_CAST.'
+- property: granularity
+  value: oferta
+- property: spatialGranularity
+  value: subsistema
+- property: aiContext
+  value: Ofertas de Resposta da Demanda (demand response) no setor eletrico. Reducoes de carga ofertadas
+    por agentes consumidores, com montante em MW, preco, duracao e janela horaria, por subsistema e data.
+- property: vectorTags
+  value:
+  - reducao de demanda
+  - oferta de reducao
+  - montante ofertado
+  - potencia ofertada
+  - preco da oferta
+  - flexibilidade de carga
+  - oferta de reducao de carga
+  - quem ofertou reduzir consumo
+- property: typicalQuestions
+  value:
+  - montante ofertado de resposta da demanda por subsistema
+  - agentes participantes da resposta da demanda
+  - preco medio das ofertas de reducao de carga
+  - ofertas de resposta da demanda por data
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: temporalCoverageEnd
+  value: '2026-08-01'
+- property: license
+  value: CC-BY-4.0 (ONS Dados Abertos)
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: oferta
+      temporal_column: dat_reducao
+      spatial: subsistema
+      entity: oferta_resposta_demanda
+      one_row_per:
+      - nom_agente
+      - dat_reducao
+      - hor_inicial
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      agente: nom_agente
+      tipo: tip_oferta
+    metrics:
+    - id: montante_ofertado
+      columns:
+      - val_montante
+      label: Montante ofertado (MW)
+      description: Montante de reducao de carga ofertado (coluna val_montante). Somar para total ofertado
+        por subsistema/agente/periodo.
+      expression: TRY_CAST(val_montante AS DOUBLE)
+      unit_native: MW
+      quantity_kind: power
+      default_aggregation: sum
+      forbidden_aggregations: []
+    - id: preco_oferta
+      columns:
+      - val_preco
+      label: Preco da oferta (R$/MWh)
+      description: Preco ofertado pela reducao (coluna val_preco). Media entre ofertas.
+      expression: TRY_CAST(val_preco AS DOUBLE)
+      unit_native: R$/MWh
+      quantity_kind: price
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+    - id: duracao_oferta
+      columns:
+      - val_duracao
+      label: Duracao da oferta (horas)
+      description: Duracao da janela de reducao (coluna val_duracao).
+      expression: TRY_CAST(val_duracao AS DOUBLE)
+      unit_native: h
+      quantity_kind: duration
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+    query_routing:
+      supports_listing: true
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: agregacao_oferta
+    selection_policy:
+      preferred_for:
+      - oferta de resposta da demanda
+      - demand response montante
+      - reducao de carga ofertada
+      - agentes participantes da resposta da demanda
+      - preco das ofertas de reducao
+      - resposta da demanda por subsistema
+      covers_metrics:
+      - montante_ofertado
+      - preco_oferta
+      - duracao_oferta
+      not_preferred_for:
+      - carga de energia
+      - geracao
+      - cmo pld
+      - reservatorio
+      - intercambio
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta montante de resposta da demanda
+        assume_metric: montante_ofertado
+        assume_output: total
+        note: SUM(val_montante) em MW. Agrupar por subsistema/agente conforme pedido.
+    sql_patterns:
+      montante_por_subsistema:
+        description: Montante total ofertado (MW) e numero de ofertas por subsistema.
+        template: SELECT nom_subsistema, COUNT(*) AS qtd_ofertas, SUM(TRY_CAST(val_montante AS DOUBLE))
+          AS montante_total_mw FROM {source} GROUP BY nom_subsistema ORDER BY montante_total_mw DESC
+      montante_por_agente:
+        description: Montante total ofertado por agente participante.
+        template: SELECT nom_agente, SUM(TRY_CAST(val_montante AS DOUBLE)) AS montante_total_mw FROM {source}
+          GROUP BY nom_agente ORDER BY montante_total_mw DESC
+      ofertas_por_ano:
+        description: Numero de ofertas e montante total por ano da data de reducao.
+        template: SELECT SUBSTR(dat_reducao, 1, 4) AS ano, COUNT(*) AS qtd_ofertas, SUM(TRY_CAST(val_montante
+          AS DOUBLE)) AS montante_total_mw FROM {source} GROUP BY SUBSTR(dat_reducao, 1, 4) ORDER BY ano
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/oferta_respostademanda
+  type: businessDefinition
+  description: Portal de Dados Abertos do ONS - Oferta de Resposta da Demanda
+slaProperties:
+- property: freshness
+  value: P1M
+  description: Atualizacao eventual conforme ofertas
+team:
+  name: ONS

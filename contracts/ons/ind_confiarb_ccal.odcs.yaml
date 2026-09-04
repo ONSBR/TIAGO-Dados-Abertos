@@ -1,0 +1,714 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_ccal
+name: ind_confiarb_ccal
+tenant: ons
+tags:
+- CCAL
+- ONS
+- Submódulo 9.1
+- carregamento
+- confiabilidade
+- controle de carregamento de linhas
+- indicador de carregamento
+- linhas de transmissão
+- rede básica
+- sobrecarga
+- sobrecarga de linhas de transmissão
+- transmissão
+- violação
+- violação de carregamento
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccal/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar a qualidade operativa da rede básica de transmissão por meio do indicador CCAL, permitindo
+    que agentes de transmissão, ONS e ANEEL avaliem a proporção de linhas com violação de carregamento
+    em relação ao total em operação. Suporta decisões de planejamento da expansão da transmissão, avaliação
+    de conformidade regulatória perante ANEEL conforme Submódulo 9.1, identificação de pontos críticos
+    de sobrecarga na malha de transmissão e comparação de desempenho entre agentes e áreas de controle
+    ao longo do tempo.
+  limitations: 'Registros com num_linhasoperacao igual a 0 podem ocorrer para agregações de agentes sem
+    linhas em operação no período, tornando o cálculo de val_ccal indeterminado (divisão por zero). Verificar
+    consistência aritmética entre val_ccal e as contagens absolutas: val_ccal deve ser aproximadamente
+    igual a num_linhasvioladas / num_linhasoperacao. O dataset mistura registros mensais e anuais (id_periodicidade
+    M e A).'
+  usage: Recuperar este dataset quando a pergunta envolver carregamento, sobrecarga ou violação de linhas
+    de transmissão da rede básica, indicador CCAL, proporção de linhas violadas por agente ou área de
+    controle, ou conformidade regulatória de transmissão conforme Submódulo 9.
+domain: transmissão
+schema:
+- name: ind_confiarb_ccal
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_ccal
+  properties:
+  - name: cod_tipoagregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código que identifica o tipo de agregação espacial do indicador CCAL. Indica se o registro
+      representa o Sistema Interligado Nacional (SIN), uma Área de Controle (ARE) ou um Agente de transmissão
+      específico (AGE).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de agregação
+      - nível de agregação
+      - tipo agregação
+      - cod_tipo_agregacao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - Agente
+      - COSR
+      - SIN
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro. Indica se o valor do indicador CCAL corresponde
+      a uma apuração mensal (M) ou anual (A), conforme Submódulo 9.1 dos Procedimentos de Rede do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - frequência
+      - tipo de período
+      - mensal
+      - anual
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: nom_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome descritivo da entidade de agregação correspondente ao cod_tipoagregacao. Para SIN,
+      contém "SIN"; para Área de Controle, contém o nome da área; para Agente, contém o nome do agente
+      de transmissão.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - nome da agregação
+      - nome do agente
+      - nome da área de controle
+      - agente
+      - área de controle
+      - nom_agente
+    - property: semanticType
+      value: DIMENSION
+  - name: din_referencia
+    physicalType: VARCHAR
+    logicalType: timestamp
+    description: 'Data de referência do indicador CCAL. Para registros mensais, corresponde ao primeiro
+      dia do mês de apuração. Para registros anuais, corresponde ao primeiro dia do ano de apuração. Cobre
+      o período de 2016-01-01 a 2026-03-01.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(din_referencia AS TIMESTAMP)
+    - property: aliases
+      value:
+      - data de referência
+      - data
+      - mês
+      - ano
+      - período
+      - competência
+      - din_ref
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_linhasoperacao
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número total de linhas de transmissão da rede básica em operação no período de referência,
+      dentro do escopo da agregação (SIN, Área de Controle ou Agente). Utilizado como denominador no cálculo
+      do indicador CCAL. Máximo observado: 1604.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - linhas em operação
+      - total de linhas
+      - linhas operando
+      - número de linhas
+      - num_linhas_operacao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: linhas
+  - name: num_linhasvioladas
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número de linhas de transmissão da rede básica que apresentaram violação de carregamento
+      (sobrecarga) no período de referência, dentro do escopo da agregação. Utilizado como numerador no
+      cálculo do indicador CCAL. Máximo observado: 30 linhas violadas.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - linhas violadas
+      - linhas com violação
+      - linhas sobrecarregadas
+      - violações
+      - num_linhas_violadas
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: linhas
+    - property: enum
+      value:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 20
+      - 21
+      - 23
+      - 24
+      - 27
+      - 28
+      - 30
+  - name: val_ccal
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Controle de Carregamento de Linhas de Transmissão (CCAL), expresso
+      como proporção entre o número de linhas violadas e o número de linhas em operação (num_linhasvioladas
+      / num_linhasoperacao). Varia entre 0.0 (nenhuma violação) e 1.0 (todas as linhas violadas). Conforme
+      Submódulo 9.1 dos Procedimentos de Rede do ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - CCAL
+      - indicador CCAL
+      - controle de carregamento
+      - índice de carregamento
+      - valor CCAL
+      - ccal
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: proporção (0 a 1)
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_confiarb_ccal:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(cod_tipoagregacao) = 0:\n      valid values:\n\
+      \        - 'Agente'\n        - 'COSR'\n        - 'SIN'\n      name: cod_tipoagregacao deve ser um\
+      \ dos valores válidos\n  - invalid_count(id_periodicidade) = 0:\n      valid values:\n        -\
+      \ 'AN'\n        - 'ME'\n      name: id_periodicidade deve ser um dos valores válidos\n\n  # Baseline\
+      \ de volume — margem ±20% do row_count validado\n  - row_count between 29064 and 43596:\n      name:\
+      \ Volume esperado entre 29,064 e 43,596 registros\n\n  # Unicidade da chave primária composta ['cod_tipoagregacao',\
+      \ 'id_periodicidade', 'nom_agregacao', 'din_referencia'] (candidata LLM)\n  - failed rows:\n   \
+      \   name: Chave composta (cod_tipoagregacao, id_periodicidade, nom_agregacao, din_referencia) não\
+      \ deve ter duplicatas\n      fail query: |\n        SELECT * FROM ind_confiarb_ccal\n        WHERE\
+      \ (cod_tipoagregacao, id_periodicidade, nom_agregacao, din_referencia) IN (\n          SELECT cod_tipoagregacao,\
+      \ id_periodicidade, nom_agregacao, din_referencia FROM ind_confiarb_ccal\n          GROUP BY cod_tipoagregacao,\
+      \ id_periodicidade, nom_agregacao, din_referencia\n          HAVING COUNT(*) > 1\n        )\n\n\
+      \  # Freshness: din_referencia deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_referencia)\
+      \ < 3d:\n      name: din_referencia não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_ccal
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - linhas sobrecarregadas
+  - carregamento das linhas de transmissao
+  - linhas acima do limite
+  - quantas linhas violaram carregamento
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver carregamento, sobrecarga ou violação de linhas
+    de transmissão da rede básica, indicador CCAL, proporção de linhas violadas por agente ou área de
+    controle, ou conformidade regulatória de transmissão conforme Submódulo 9.1 do ONS. Também relevante
+    para análises comparativas de confiabilidade entre agentes de transmissão ou períodos históricos a
+    partir de 2016.
+- property: agentInstructions
+  value: '- [num_linhasoperacao] O valor mínimo de num_linhasoperacao é 0, o que pode indicar registros
+    de entidades sem linhas em operação no período (ex: agentes com concessão inativa ou recém-constituídos).
+    Quando num_linhasoperacao = 0, o cálculo de val_ccal resultaria em divisão por zero; verificar se
+    val_ccal = 0.0 nesses casos ou se há tratamento especial pelo ONS.
+
+
+    - [num_linhasvioladas] Verificar consistência entre num_linhasvioladas e num_linhasoperacao: num_linhasvioladas
+    nunca deve ser maior que num_linhasoperacao. O máximo observado de num_linhasvioladas é 30 e de num_linhasoperacao
+    é 1604, mas registros com num_linhasoperacao = 0 e num_linhasvioladas > 0 representariam inconsistência
+    lógica grave.
+
+
+    - [val_ccal] Verificar coerência entre val_ccal e a razão calculada diretamente (num_linhasvioladas
+    / num_linhasoperacao). Divergências podem indicar metodologia de cálculo diferente do ONS (ex: ponderação
+    por extensão de linha) ou arredondamentos. Casos com num_linhasoperacao = 0 e val_ccal = 0 devem ser
+    tratados como casos especiais na análise.
+
+
+    - [din_referencia] Verificar se há lacunas mensais na série temporal para cada combinação de entidade
+    agregada e periodicidade. O período cobre 2016-01-01 a 2026-04-01 (124 meses esperados para registros
+    mensais). Ausências podem indicar períodos sem apuração ou entidades que entraram/saíram da rede básica.
+
+
+    - [cod_tipoagregacao] Verificar se os valores de cod_tipoagregacao estão padronizados sem variações
+    de caixa, espaços extras ou valores inesperados além dos três tipos documentados: SIN, AREA_CONTROLE
+    e AGENTE. Inconsistências de nomenclatura podem causar falhas em joins e filtros.
+
+
+    - [id_periodicidade] Verificar se existem registros duplicados na chave primária natural (cod_tipoagregacao,
+    nom_agregacao, id_periodicidade, din_referencia). Duplicatas podem ocorrer em reprocessamentos do
+    ONS e distorcer agregações e médias do indicador CCAL.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o valor do indicador CCAL do SIN nos últimos 12 meses?
+  - Quais agentes de transmissão apresentaram maior proporção de linhas violadas em 2024?
+  - Como evoluiu o número de linhas sobrecarregadas na rede básica entre 2016 e 2025?
+  - Qual área de controle teve o pior desempenho de carregamento de linhas no ano de 2023?
+  - Quantas linhas de transmissão estavam em operação no SIN em março de 2026?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccal/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2016-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - cod_tipoagregacao
+      - id_periodicidade
+      - nom_agregacao
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ccal
+      label: Indicador CCAL
+      columns:
+      - val_ccal
+      expression: val_ccal
+      quantity_kind: ratio
+      unit_native: proporcao_0_1
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ccal
+      - CCAL
+      - indicador CCAL
+      - controle de carregamento
+      - indice de carregamento
+      - valor CCAL
+      - proporcao linhas violadas
+      - taxa de violacao
+      aggregation_modes:
+        average:
+          sql: AVG(val_ccal)
+          unit: proporcao_0_1
+        maximum:
+          sql: MAX(val_ccal)
+          unit: proporcao_0_1
+        minimum:
+          sql: MIN(val_ccal)
+          unit: proporcao_0_1
+        time_series:
+          sql: AVG(val_ccal)
+          unit: proporcao_0_1
+        ranking:
+          sql: AVG(val_ccal)
+          unit: proporcao_0_1
+        comparison:
+          sql: AVG(val_ccal)
+          unit: proporcao_0_1
+      interval_hours: 8760.0
+      aliases:
+      - CCAL
+      - indicador CCAL
+      - controle de carregamento
+      - indice de carregamento
+      - valor CCAL
+      - proporcao linhas violadas
+    - id: num_linhasoperacao
+      label: Linhas em Operacao
+      columns:
+      - num_linhasoperacao
+      expression: num_linhasoperacao
+      quantity_kind: count
+      unit_native: linhas
+      default_aggregation: maximum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - linhas em operacao
+      - total de linhas
+      - linhas operando
+      - numero de linhas
+      aggregation_modes:
+        maximum:
+          sql: MAX(num_linhasoperacao)
+          unit: linhas
+        average:
+          sql: AVG(num_linhasoperacao)
+          unit: linhas
+        time_series:
+          sql: MAX(num_linhasoperacao)
+          unit: linhas
+        comparison:
+          sql: MAX(num_linhasoperacao)
+          unit: linhas
+      interval_hours: 8760.0
+      aliases:
+      - linhas em operacao
+      - total de linhas
+      - linhas operando
+      - numero de linhas
+    - id: num_linhasvioladas
+      label: Linhas Violadas
+      columns:
+      - num_linhasvioladas
+      expression: num_linhasvioladas
+      quantity_kind: count
+      unit_native: linhas
+      default_aggregation: maximum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - linhas violadas
+      - linhas com violacao
+      - linhas sobrecarregadas
+      - violacoes de carregamento
+      - sobrecarga de linhas
+      aggregation_modes:
+        maximum:
+          sql: MAX(num_linhasvioladas)
+          unit: linhas
+        average:
+          sql: AVG(num_linhasvioladas)
+          unit: linhas
+        time_series:
+          sql: MAX(num_linhasvioladas)
+          unit: linhas
+        ranking:
+          sql: MAX(num_linhasvioladas)
+          unit: linhas
+        comparison:
+          sql: MAX(num_linhasvioladas)
+          unit: linhas
+      interval_hours: 8760.0
+      aliases:
+      - linhas violadas
+      - linhas com violacao
+      - linhas sobrecarregadas
+      - violacoes
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      preferred_for:
+      - CCAL
+      - indicador CCAL
+      - controle de carregamento de linhas
+      - proporcao linhas violadas
+      - linhas sobrecarregadas rede basica
+      - violacao de carregamento por agente
+      - CCAL por agente de transmissao
+      - CCAL por area de controle
+      - submodulo 9.1 linhas
+      - taxa de violacao de linhas
+      covers_metrics:
+      - ccal
+      - num_linhasoperacao
+      - num_linhasvioladas
+      not_preferred_for:
+      - transformadores
+      - CCAT
+      - fluxo sistemico
+      - ATLS
+      - desvio de frequencia
+      - DFP
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao de energia
+      - carga
+      - reservatorio
+    exclude_in_aggregation:
+      cod_tipoagregacao:
+      - SIN
+    value_aliases:
+      cod_tipoagregacao:
+        Agente:
+          aliases:
+          - agente
+          - agente de transmissao
+          - transmissora
+          filter: cod_tipoagregacao = 'Agente'
+        COSR:
+          aliases:
+          - COSR
+          - area de controle
+          - coordenadoria
+          filter: cod_tipoagregacao = 'COSR'
+        SIN:
+          aliases:
+          - SIN
+          - sistema interligado
+          - nacional
+          - brasil
+          filter: cod_tipoagregacao = 'SIN'
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          - anual
+          - ano
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          filter: id_periodicidade = 'ME'
+    sql_patterns:
+      ccal_sin_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  AVG(val_ccal)\
+          \ AS ccal_medio\nFROM {source}\nWHERE cod_tipoagregacao = 'SIN'\n  AND id_periodicidade = 'ME'\n\
+          \  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER\
+          \ BY 1"
+        output_unit: proporcao_0_1
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ccal
+          grain: month
+        validated_params:
+          year: '2026'
+      ccal_por_agente_anual:
+        template: "SELECT nom_agregacao,\n  AVG(val_ccal) AS ccal_medio,\n  MAX(num_linhasvioladas) AS\
+          \ max_linhas_violadas,\n  MAX(num_linhasoperacao) AS linhas_operacao\nFROM {source}\nWHERE cod_tipoagregacao\
+          \ = 'Agente'\n  AND id_periodicidade = 'AN'\n  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia\
+          \ AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 2 DESC"
+        output_unit: proporcao_0_1
+        matches:
+          output_modes:
+          - ranking
+          - comparison
+          metrics:
+          - ccal
+          grain: year
+        validated_params:
+          year: '2026'
+      linhas_violadas_serie:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  MAX(num_linhasvioladas)\
+          \ AS linhas_violadas,\n  MAX(num_linhasoperacao) AS linhas_operacao\nFROM {source}\nWHERE cod_tipoagregacao\
+          \ = 'SIN'\n  AND id_periodicidade = 'ME'\nGROUP BY 1\nORDER BY 1"
+        output_unit: linhas
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - num_linhasvioladas
+          - num_linhasoperacao
+          grain: month
+      ccal_calculado_verificacao:
+        template: "SELECT din_referencia,\n  nom_agregacao,\n  num_linhasvioladas,\n  num_linhasoperacao,\n\
+          \  val_ccal,\n  CASE WHEN num_linhasoperacao > 0\n    THEN ROUND(CAST(num_linhasvioladas AS\
+          \ DOUBLE) / num_linhasoperacao, 6)\n    ELSE NULL END AS ccal_calculado\nFROM {source}\nWHERE\
+          \ num_linhasoperacao > 0\nORDER BY din_referencia DESC"
+        output_unit: proporcao_0_1
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ccal
+          grain: month
+    ambiguity_policy:
+      default_assumptions:
+      - when: CCAL
+        assume_metric: ccal
+        assume_output: average
+        assume_filter: null
+        note: CCAL e uma proporcao (ratio); usar AVG, nao SUM
+      - when: linhas violadas
+        assume_metric: num_linhasvioladas
+        assume_output: maximum
+        assume_filter: null
+        note: Numero de linhas violadas; usar MAX por periodo
+      - when: linhas em operacao
+        assume_metric: num_linhasoperacao
+        assume_output: maximum
+        assume_filter: null
+        note: Total de linhas em operacao; usar MAX por periodo
+      - when: SIN
+        assume_metric: ccal
+        assume_output: average
+        assume_filter: cod_tipoagregacao = 'SIN'
+        note: Quando usuario menciona SIN sem especificar agente, filtrar por SIN
+      - when: mensal
+        assume_metric: ccal
+        assume_output: time_series
+        assume_filter: id_periodicidade = 'ME'
+        note: Periodicidade mensal requer filtro id_periodicidade = 'ME'
+      - when: anual
+        assume_metric: ccal
+        assume_output: time_series
+        assume_filter: id_periodicidade = 'AN'
+        note: Periodicidade anual requer filtro id_periodicidade = 'AN'
+      must_clarify_when:
+      - ambiguity: agente_vs_sin_vs_cosr
+        question: Voce quer o indicador CCAL para o SIN (total nacional), por agente de transmissao ou
+          por area de controle (COSR)?
+        trigger_terms:
+        - agente
+        - area de controle
+        - COSR
+        - transmissora
+        note: Apenas quando o usuario nao especifica o nivel de agregacao e a pergunta implica comparacao
+          entre entidades
+      - ambiguity: periodicidade_nao_especificada
+        question: Voce quer dados mensais ou anuais do indicador CCAL?
+        trigger_terms:
+        - historico
+        - evolucao
+        - serie
+        note: Apenas quando o usuario nao especifica mensal/anual e o contexto nao deixa claro
+      redirect_when:
+      - user_mentions:
+        - CCAT
+        - carregamento de transformadores
+        - transformador
+        reason: Indicador CCAT (transformadores) esta em dataset separado, nao neste.
+        redirect: ind_confiarb_ccat
+      - user_mentions:
+        - ATLS
+        - limite sistemico
+        - fluxo sistemico
+        reason: Indicador ATLS esta em dataset separado.
+        redirect: ind_confiarb_atls
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem dimensao nuclear separada.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - desvio de frequencia
+        - DFP
+        - qualidade de frequencia
+        reason: Indicador DFP esta em dataset separado.
+        redirect: ind_qualid_dfp_regime
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o indicador CCAL do Sistema Interligado Nacional mês a mês desde 2020?
+    sql: SELECT din_referencia, val_ccal, num_linhasoperacao, num_linhasvioladas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccal/*.parquet')
+      WHERE cod_tipoagregacao = 'SIN' AND nom_agregacao = 'SIN' AND id_periodicidade = 'ME' AND din_referencia
+      >= TIMESTAMP '2020-01-01' ORDER BY din_referencia;
+  - question: Quais agentes de transmissão tiveram o maior indicador CCAL médio em 2024?
+    sql: SELECT nom_agregacao, AVG(val_ccal) AS ccal_medio_2024, SUM(num_linhasvioladas) AS total_linhas_violadas,
+      SUM(num_linhasoperacao) AS total_linhas_operacao, COUNT(*) AS meses_apurados FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccal/*.parquet')
+      WHERE cod_tipoagregacao = 'Agente' AND id_periodicidade = 'ME' AND din_referencia >= TIMESTAMP '2024-01-01'
+      AND din_referencia < TIMESTAMP '2025-01-01' GROUP BY nom_agregacao ORDER BY ccal_medio_2024 DESC
+      LIMIT 20;
+  - question: Como o CCAL de cada área de controle se compara com o indicador do SIN no mesmo período?
+    sql: WITH sin_ref AS ( SELECT din_referencia, val_ccal AS ccal_sin FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccal/*.parquet')
+      WHERE cod_tipoagregacao = 'SIN' AND nom_agregacao = 'SIN' AND id_periodicidade = 'ME' ), areas AS
+      ( SELECT din_referencia, nom_agregacao, val_ccal AS ccal_area FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccal/*.parquet')
+      WHERE cod_tipoagregacao = 'AREA_CONTROLE' AND id_periodicidade = 'ME' ) SELECT a.din_referencia,
+      a.nom_agregacao, a.ccal_area, s.ccal_sin, a.ccal_area - s.ccal_sin AS desvio_do_sin FROM areas AS
+      a LEFT JOIN sin_ref AS s ON a.din_referencia = s.din_referencia ORDER BY a.din_referencia DESC,
+      desvio_do_sin DESC LIMIT 100;
+- property: relatedDatasets
+  value:
+    ind_confiarb_ccat:
+      join_keys:
+      - cod_tipoagregacao
+      - din_referencia
+      - id_periodicidade
+      - nom_agregacao
+    ind_confiarb_atls:
+      join_keys:
+      - din_referencia
+      - id_periodicidade
+    ind_qualid_dfp_regime:
+      join_keys:
+      - din_referencia
+      - id_periodicidade
+- property: license
+  value: CC-BY

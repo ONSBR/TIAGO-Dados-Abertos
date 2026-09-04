@@ -1,0 +1,16 @@
+# O build so precisa de pyproject/README, src/, contracts/ e scripts/.
+.git
+.github
+.venv
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+tests
+docs
+examples
+*.md
+!README.md
+.env
+# O cache e regerado dentro da imagem (RUN build_contracts_cache.py).
+contracts/**/contracts_cache.json

@@ -1,0 +1,1031 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:geracao-usina-2
+name: geracao-usina-2
+tenant: ons
+tags:
+- ONS
+- SIN
+- eólica
+- geração
+- geração ONS
+- geração SIN
+- geração horária
+- geração por usina
+- geração verificada
+- geração verificada por usina
+- hidráulica
+- horário
+- nuclear
+- solar
+- termelétrica
+- usina
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/geracao_usina_2_ho/*.parquet
+  format: parquet
+description:
+  purpose: Prover a série histórica horária de geração verificada por usina para analistas do ONS, agentes
+    do setor elétrico (geradoras, distribuidoras, comercializadoras) e pesquisadores acadêmicos, suportando
+    decisões de despacho operativo, consistência operativa, balanço de geração por subsistema, análises
+    de matriz energética por fonte, planejamento energético de médio e longo prazo, e monitoramento da
+    produção de usinas individuais no Sistema Interligado Nacional.
+  limitations: Coluna val_geracao armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Usinas reversíveis (hidrelétricas com bombeamento) podem registrar val_geracao negativo durante operação
+    em modo bomba, consumindo energia do sistema. Usinas com cod_modalidadeoperacao = 'III' (Tipo III)
+    têm val_geracao representando previsões de geração e NÃO medições verificadas, conforme descrição
+    CKAN.
+  usage: Recuperar este dataset quando a pergunta envolver geração de energia elétrica por usina individual,
+    por tipo de fonte (hidráulica, eólica, solar, termelétrica, nuclear) ou por subsistema em base horária.
+domain: geração
+schema:
+- name: geracao_usina_2
+  physicalType: parquet
+  logicalType: object
+  physicalName: geracao_usina_2
+  properties:
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante de referência da medição horária de geração. Representa o início da hora (ex:
+      2024-01-01 00:00:00 = hora 0 do dia). Eixo temporal primário da série histórica cobrindo 2000 a
+      2026.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - hora
+      - data_hora
+      - timestamp
+      - data_geracao
+      - horario
+    - property: semanticType
+      value: TIMESTAMP
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico ao qual a usina pertence. Valores típicos:
+      SE (Sudeste/Centro-Oeste), S (Sul), NE (Nordeste), N (Norte). Usado para agregações por subsistema
+      e joins com datasets de carga e intercâmbio.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - cod_subsistema
+      - sigla_subsistema
+      - regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico. Complementa id_subsistema com descrição legível.
+      Exemplos: "Sudeste/Centro-Oeste", "Sul", "Nordeste", "Norte".
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - descricao_subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - PARAGUAI
+      - SUDESTE
+      - SUL
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Sigla do estado brasileiro onde a usina está localizada (padrão IBGE/UF de 2 letras).
+      Permite análises geográficas e filtros por unidade federativa.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - uf
+      - sigla_estado
+      - cod_estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - I
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do estado brasileiro onde a usina está localizada. Complementa id_estado
+      com descrição legível para relatórios e visualizações.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_estado
+      - descricao_estado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+      - z - INTERNACIONAL
+  - name: cod_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código da modalidade de operação da usina conforme classificação ONS. Distingue usinas
+      Tipo I (relacionamento direto com ONS), Tipo II-C (conjuntos de usinas em Ajustamentos Operativos
+      conforme Submódulo 7.2) e Tipo III (pequenas usinas sem relacionamento com ONS — dados são previsões,
+      não medições).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade_operacao
+      - tipo_operacao
+      - modalidade
+      - cod_modalidade
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - Conjunto de Usinas
+      - Pequenas Usinas (MMGD)
+      - Pequenas Usinas (Tipo III)
+      - TIPO I
+      - TIPO II-A
+      - TIPO II-B
+      - TIPO II-C
+      - TIPO III
+  - name: nom_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do tipo/fonte primária de geração da usina. Classifica a tecnologia geradora (ex:
+      Hidráulica, Eólica, Solar, Termelétrica, Nuclear). Fundamental para análises de matriz energética
+      e geração por fonte.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - tipo_usina
+      - fonte
+      - tecnologia
+      - tipo_geracao
+      - fonte_geracao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - EOLIELÉTRICA
+      - FOTOVOLTAICA
+      - HIDROELÉTRICA
+      - NUCLEAR
+      - TÉRMICA
+  - name: nom_tipocombustivel
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do tipo de combustível ou recurso energético utilizado pela usina. Para hidráulicas:
+      "Água"; para termelétricas: "Gás Natural", "Carvão Mineral", "Óleo Combustível", etc.; para renováveis:
+      "Vento", "Solar", "Biomassa". Complementa nom_tipousina com granularidade adicional sobre o insumo
+      energético.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - combustivel
+      - tipo_combustivel
+      - insumo
+      - recurso_energetico
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Biomassa
+      - Carvão
+      - Eólica
+      - Fotovoltaica
+      - Gás
+      - Hidráulica
+      - Multi-Combustível Diesel/Óleo
+      - Nuclear
+      - Outras Multi-Combustível
+      - Resíduos Industriais
+      - Óleo Combustível
+      - Óleo Diesel
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome oficial da usina geradora conforme cadastro ONS. Para usinas Tipo II-C, representa
+      o nome do conjunto de usinas. Para Tipo III, representa o grupo de pequenas usinas. Identificador
+      textual primário da unidade geradora.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome_usina
+      - planta
+      - unidade_geradora
+    - property: semanticType
+      value: DIMENSION
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador único da usina no sistema ONS. Chave de relacionamento com o cadastro
+      oficial de usinas do ONS. Para conjuntos Tipo II-C e grupos Tipo III, identifica o conjunto/grupo
+      como entidade única.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_ons
+      - id_usina_ons
+      - cod_usina
+      - identificador_ons
+    - property: semanticType
+      value: IDENTIFIER
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código de Empreendimento Gerador (CEG) da ANEEL. Identificador regulatório único da
+      usina no cadastro da Agência Nacional de Energia Elétrica. Permite cruzamento com dados regulatórios
+      e de outorga da ANEEL. Pode conter valor vazio ou placeholder para conjuntos Tipo II-C e grupos
+      Tipo III sem CEG individual.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_aneel
+      - ceg_aneel
+      - cod_empreendimento
+      - codigo_empreendimento_gerador
+    - property: semanticType
+      value: IDENTIFIER
+  - name: val_geracao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração verificada (medida) da usina no instante horário, em Megawatts (MW).
+      Armazenado como VARCHAR no Parquet devido ao formato de serialização. Para uso numérico em agregações,
+      aplicar TRY_CAST(val_geracao AS DOUBLE). Para usinas Tipo III, representa previsão de geração e
+      não medição verificada. Valores negativos podem ocorrer em usinas reversíveis (bombeamento).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geracao
+      - potencia_gerada
+      - geracao_verificada
+      - geracao_mw
+      - potencia_mw
+      - medicao
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracao AS DOUBLE)
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for geracao_usina_2:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'NORDESTE'\n        - 'NORTE'\n        - 'PARAGUAI'\n        - 'SUDESTE'\n        - 'SUL'\n  \
+      \    name: nom_subsistema deve ser um dos valores válidos\n  - invalid_count(id_estado) = 0:\n \
+      \     valid values:\n        - 'AC'\n        - 'AL'\n        - 'AM'\n        - 'AP'\n        - 'BA'\n\
+      \        - 'CE'\n        - 'DF'\n        - 'ES'\n        - 'GO'\n        - 'I'\n        - 'MA'\n\
+      \        - 'MG'\n        - 'MS'\n        - 'MT'\n        - 'PA'\n        - 'PB'\n        - 'PE'\n\
+      \        - 'PI'\n        - 'PR'\n        - 'RJ'\n        - 'RN'\n        - 'RO'\n        - 'RR'\n\
+      \        - 'RS'\n        - 'SC'\n        - 'SE'\n        - 'SP'\n        - 'TO'\n      name: id_estado\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_estado) = 0:\n      valid values:\n   \
+      \     - 'ACRE'\n        - 'ALAGOAS'\n        - 'AMAPA'\n        - 'AMAZONAS'\n        - 'BAHIA'\n\
+      \        - 'CEARA'\n        - 'DISTRITO FEDERAL'\n        - 'ESPIRITO SANTO'\n        - 'GOIAS'\n\
+      \        - 'MARANHAO'\n        - 'MATO GROSSO'\n        - 'MATO GROSSO DO SUL'\n        - 'MINAS\
+      \ GERAIS'\n        - 'PARA'\n        - 'PARAIBA'\n        - 'PARANA'\n        - 'PERNAMBUCO'\n \
+      \       - 'PIAUI'\n        - 'RIO DE JANEIRO'\n        - 'RIO GRANDE DO NORTE'\n        - 'RIO GRANDE\
+      \ DO SUL'\n        - 'RONDONIA'\n        - 'RORAIMA'\n        - 'SANTA CATARINA'\n        - 'SAO\
+      \ PAULO'\n        - 'SERGIPE'\n        - 'TOCANTINS'\n        - 'z - INTERNACIONAL'\n      name:\
+      \ nom_estado deve ser um dos valores válidos\n  - invalid_count(cod_modalidadeoperacao) = 0:\n \
+      \     valid values:\n        - 'Conjunto de Usinas'\n        - 'Pequenas Usinas (MMGD)'\n      \
+      \  - 'Pequenas Usinas (Tipo III)'\n        - 'TIPO I'\n        - 'TIPO II-A'\n        - 'TIPO II-B'\n\
+      \        - 'TIPO II-C'\n        - 'TIPO III'\n      name: cod_modalidadeoperacao deve ser um dos\
+      \ valores válidos\n  - invalid_count(nom_tipousina) = 0:\n      valid values:\n        - 'EOLIELÉTRICA'\n\
+      \        - 'FOTOVOLTAICA'\n        - 'HIDROELÉTRICA'\n        - 'NUCLEAR'\n        - 'TÉRMICA'\n\
+      \      name: nom_tipousina deve ser um dos valores válidos\n  - invalid_count(nom_tipocombustivel)\
+      \ = 0:\n      valid values:\n        - 'Biomassa'\n        - 'Carvão'\n        - 'Eólica'\n    \
+      \    - 'Fotovoltaica'\n        - 'Gás'\n        - 'Hidráulica'\n        - 'Multi-Combustível Diesel/Óleo'\n\
+      \        - 'Nuclear'\n        - 'Outras Multi-Combustível'\n        - 'Resíduos Industriais'\n \
+      \       - 'Óleo Combustível'\n        - 'Óleo Diesel'\n      name: nom_tipocombustivel deve ser\
+      \ um dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de origem)\n\
+      \  - missing_percent(val_geracao) < 5:\n      name: val_geracao não pode ter >5% nulos\n\n  # Unicidade\
+      \ da chave primária composta ['din_instante', 'id_ons'] (candidata LLM)\n  - failed rows:\n    \
+      \  name: Chave composta (din_instante, id_ons) não deve ter duplicatas\n      fail query: |\n  \
+      \      SELECT * FROM geracao_usina_2\n        WHERE (din_instante, id_ons) IN (\n          SELECT\
+      \ din_instante, id_ons FROM geracao_usina_2\n          GROUP BY din_instante, id_ons\n         \
+      \ HAVING COUNT(*) > 1\n        )\n\n  # Freshness: din_instante deve ter dados recentes (SLA: Atualizado\
+      \ diariamente)\n  - freshness(din_instante) < 3d:\n      name: din_instante não pode ter dados com\
+      \ mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/geracao-usina-2
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto foi gerado
+  - quanto geramos
+  - energia gerada por usina
+  - producao de cada usina
+  - geracao da usina
+  - quanto a usina produziu
+  - geracao por fonte
+  - geracao eolica verificada
+  - geracao solar verificada
+  - geracao hidraulica verificada
+  - quanto o sin gerou
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver geração de energia elétrica por usina individual,
+    por tipo de fonte (hidráulica, eólica, solar, termelétrica, nuclear) ou por subsistema em base horária.
+    Também recuperar quando a análise requerer série histórica de produção energética de plantas geradoras
+    específicas, fator de capacidade, participação de fontes renováveis ou balanço de geração do SIN.
+    Priorizar este dataset sobre agregações por subsistema quando a granularidade por usina for necessária.
+- property: agentInstructions
+  value: '- [val_geracao] Coluna armazena valores numéricos de geração (MWmed) como VARCHAR devido ao
+    formato de serialização. Todas as 1.097.212 linhas possuem valor não nulo, mas operações aritméticas
+    diretas falharão sem conversão explícita de tipo. Pode conter strings não conversíveis em casos excepcionais
+    de dados inconsistentes no processo de consistência recorrente do ONS.
+
+
+    - [val_geracao] Valores negativos de geração são possíveis para usinas reversíveis (hidrelétricas
+    com bombeamento) operando em modo de consumo. Devem ser tratados como consumo líquido, não como erro
+    de dados. Recomenda-se verificar a magnitude e frequência para distinguir operação normal de possíveis
+    inconsistências de medição.
+
+
+    - [din_instante] Dataset cobre 26 anos (2000-2026) com processo de consistência recorrente que permite
+    atualizações retroativas. Podem existir lacunas horárias para usinas específicas em períodos de indisponibilidade
+    de medição, manutenção ou entrada/saída de operação. Arquivos organizados anualmente (2000-2021) e
+    mensalmente (2022+) podem apresentar inconsistências nas bordas de período.
+
+
+    - [ceg] O CEG ANEEL segue formato padronizado (ex: UHE.PH.SP.000001-0.01), mas usinas do tipo Tipo
+    II-C (conjuntos) e Tipo III (grupos de pequenas usinas) podem não possuir CEG individual válido, podendo
+    conter valores placeholder, CEG do conjunto ou string vazia mascarada como não-nulo. Verificar consistência
+    do formato antes de joins com cadastro ANEEL.
+
+
+    - [id_ons] A chave primária natural esperada é (din_instante, id_ons). Duplicatas podem ocorrer em
+    períodos de transição de modalidade operativa, renomeação de usinas ou erros no processo de consistência
+    recorrente. Verificar unicidade antes de joins que assumam cardinalidade 1:1 por instante/usina.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a geração total de energia hidráulica no subsistema Sudeste em janeiro de 2024?
+  - Quais usinas eólicas geraram mais energia no Nordeste no último trimestre?
+  - Como evoluiu a participação de energia solar na matriz de geração do SIN entre 2020 e 2024?
+  - Qual é o fator de capacidade médio de Itaipu nos últimos 12 meses?
+  - Quais usinas registraram geração negativa (bombeamento) e em quais períodos?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_usina_2_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - ceg
+      - id_ons
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: nom_tipocombustivel
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: geracao
+      label: Geracao
+      columns:
+      - val_geracao
+      expression: TRY_CAST(val_geracao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao
+      - potencia_gerada
+      - geracao_verificada
+      - geracao_mw
+      - potencia_mw
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracao AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracao AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracao AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geracao
+      - potencia_gerada
+      - geracao_verificada
+      - geracao_mw
+      - potencia_mw
+      - medicao
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - geracao
+      preferred_for:
+      - geracao por usina individual
+      - geracao por combustivel
+      - tipo combustivel geracao
+      - modalidade operacao usina
+      - geracao Tipo I Tipo II Tipo III
+      - geracao MMGD pequenas usinas
+      - geracao verificada por CEG
+      - fator capacidade usina especifica
+      - geracao negativa bombeamento
+      - ranking usinas por fonte
+      - geracao horaria por planta
+      - mix geracao por combustivel
+      not_preferred_for:
+      - balanco carga geracao subsistema
+      - intercambio entre subsistemas
+      - carga verificada subsistema
+      - energia vertida turbinavel
+      - restricao constrained-off agregada
+      - despacho programado termeletrica
+      - preco liquidacao diferenca
+      - CMO custo marginal operacao
+      - disponibilidade operacional usina
+      - capacidade instalada cadastro
+      - reservatorio nivel cota
+      - afluencia vazao natural
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_tipousina:
+        EOLIELÉTRICA:
+          aliases:
+          - eolica
+          - eoleletrica
+          - eolioeletrica
+          - vento
+          - aerogeradores
+          filter: nom_tipousina = 'EOLIELÉTRICA'
+        FOTOVOLTAICA:
+          aliases:
+          - solar
+          - fotovoltaica
+          - solar fotovoltaica
+          - paineis solares
+          filter: nom_tipousina = 'FOTOVOLTAICA'
+        HIDROELÉTRICA:
+          aliases:
+          - hidraulica
+          - hidreletrica
+          - hidro
+          - agua
+          - uhe
+          - pch
+          filter: nom_tipousina = 'HIDROELÉTRICA'
+        NUCLEAR:
+          aliases:
+          - nuclear
+          - ute nuclear
+          - angra
+          filter: nom_tipousina = 'NUCLEAR'
+        TÉRMICA:
+          aliases:
+          - termica
+          - termeletrica
+          - ute
+          - termoeletrica
+          filter: nom_tipousina = 'TÉRMICA'
+      nom_tipocombustivel:
+        Biomassa:
+          aliases:
+          - biomassa
+          - bagaco
+          - cana
+          - residuos vegetais
+          filter: nom_tipocombustivel = 'Biomassa'
+        Carvão:
+          aliases:
+          - carvao
+          - carvao mineral
+          filter: nom_tipocombustivel = 'Carvão'
+        Eólica:
+          aliases:
+          - eolica
+          - vento
+          filter: nom_tipocombustivel = 'Eólica'
+        Fotovoltaica:
+          aliases:
+          - fotovoltaica
+          - solar
+          filter: nom_tipocombustivel = 'Fotovoltaica'
+        Gás:
+          aliases:
+          - gas
+          - gas natural
+          - gnl
+          filter: nom_tipocombustivel = 'Gás'
+        Hidráulica:
+          aliases:
+          - hidraulica
+          - agua
+          filter: nom_tipocombustivel = 'Hidráulica'
+        Multi-Combustível Diesel/Óleo:
+          aliases:
+          - multi combustivel diesel oleo
+          - diesel oleo
+          filter: nom_tipocombustivel = 'Multi-Combustível Diesel/Óleo'
+        Nuclear:
+          aliases:
+          - nuclear
+          filter: nom_tipocombustivel = 'Nuclear'
+        Outras Multi-Combustível:
+          aliases:
+          - outras multi combustivel
+          - multi combustivel
+          filter: nom_tipocombustivel = 'Outras Multi-Combustível'
+        Resíduos Industriais:
+          aliases:
+          - residuos industriais
+          - residuos
+          filter: nom_tipocombustivel = 'Resíduos Industriais'
+        Óleo Combustível:
+          aliases:
+          - oleo combustivel
+          - oleo
+          filter: nom_tipocombustivel = 'Óleo Combustível'
+        Óleo Diesel:
+          aliases:
+          - oleo diesel
+          - diesel
+          filter: nom_tipocombustivel = 'Óleo Diesel'
+      cod_modalidadeoperacao:
+        TIPO I:
+          aliases:
+          - tipo i
+          - tipo 1
+          - relacionamento direto ONS
+          filter: cod_modalidadeoperacao = 'TIPO I'
+        TIPO II-A:
+          aliases:
+          - tipo ii-a
+          - tipo 2a
+          filter: cod_modalidadeoperacao = 'TIPO II-A'
+        TIPO II-B:
+          aliases:
+          - tipo ii-b
+          - tipo 2b
+          filter: cod_modalidadeoperacao = 'TIPO II-B'
+        TIPO II-C:
+          aliases:
+          - tipo ii-c
+          - tipo 2c
+          - conjunto usinas ajustamento operativo
+          - submodulo 7.2
+          filter: cod_modalidadeoperacao = 'TIPO II-C'
+        TIPO III:
+          aliases:
+          - tipo iii
+          - tipo 3
+          - pequenas usinas sem relacionamento ONS
+          filter: cod_modalidadeoperacao = 'TIPO III'
+        Conjunto de Usinas:
+          aliases:
+          - conjunto de usinas
+          - conjunto usinas
+          filter: cod_modalidadeoperacao = 'Conjunto de Usinas'
+        Pequenas Usinas (MMGD):
+          aliases:
+          - mmgd
+          - micro minigeracao distribuida
+          - geracao distribuida
+          filter: cod_modalidadeoperacao = 'Pequenas Usinas (MMGD)'
+        Pequenas Usinas (Tipo III):
+          aliases:
+          - pequenas usinas tipo iii
+          - pequenas usinas tipo 3
+          filter: cod_modalidadeoperacao = 'Pequenas Usinas (Tipo III)'
+    sql_patterns:
+      geracao_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM((TRY_CAST(val_geracao AS DOUBLE)) * 1.0) / 1000 AS valor\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao
+          grain: month
+        validated_params:
+          year: '2000'
+      geracao_por_combustivel:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  nom_tipocombustivel,\n\
+          \  SUM((TRY_CAST(val_geracao AS DOUBLE)) * 1.0) / 1000 AS valor_gwh\nFROM {source}\nWHERE din_instante\
+          \ BETWEEN '{start_date}' AND '{end_date}'\n  AND nom_tipocombustivel IS NOT NULL\nGROUP BY 1,\
+          \ 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao
+          grain: month
+        validated_params:
+          start_date: '2000-01-01 00:00:00'
+          end_date: '2000-02-07 12:00:00'
+      ranking_usinas:
+        template: "SELECT nom_usina, nom_tipousina, nom_tipocombustivel, id_subsistema,\n  SUM((TRY_CAST(val_geracao\
+          \ AS DOUBLE)) * 1.0) / 1000 AS total_gwh\nFROM {source}\nWHERE din_instante BETWEEN '{start_date}'\
+          \ AND '{end_date}'\n  AND TRY_CAST(val_geracao AS DOUBLE) > 0\nGROUP BY 1, 2, 3, 4\nORDER BY\
+          \ total_gwh DESC\nLIMIT {top_n}"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - geracao
+          grain: period
+        validated_params:
+          start_date: '2000-01-01 00:00:00'
+          end_date: '2000-02-07 12:00:00'
+      geracao_negativa_bombeamento:
+        template: "SELECT nom_usina, din_instante,\n  TRY_CAST(val_geracao AS DOUBLE) AS geracao_mw\n\
+          FROM {source}\nWHERE TRY_CAST(val_geracao AS DOUBLE) < 0\nORDER BY geracao_mw ASC"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - geracao
+          grain: hour
+      geracao_usina_2_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_geracao_gwh\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      geracao_usina_2_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_geracao_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+    ambiguity_policy:
+      default_assumptions:
+      - when: geracao
+        assume_metric: geracao
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+        - instantaneo
+        - MW medio
+      - when: potencia gerada
+        assume_metric: geracao
+        assume_output: average_power
+        assume_unit: MWmed
+        unless_mentions:
+        - total
+        - energia
+        - GWh
+        - TWh
+      - when: pico de geracao
+        assume_metric: geracao
+        assume_output: peak_power
+        assume_unit: MWmed
+        unless_mentions:
+        - total
+        - energia
+      must_clarify_when:
+      - ambiguity: energia_total_vs_potencia_media
+        question: Voce quer energia total no periodo (GWh) ou potencia media (MWmed)?
+        trigger_terms:
+        - quanto gerou
+        - geracao total
+        - energia gerada
+        - producao
+      - ambiguity: usina_individual_vs_tipo_fonte
+        question: 'Voce quer dados de uma usina especifica (ex: Itaipu) ou agregado por tipo de fonte
+          (ex: todas as hidreletricas)?'
+        trigger_terms:
+        - itaipu
+        - angra
+        - belo monte
+        - tucurui
+      - ambiguity: tipo_iii_previsao_vs_medicao
+        question: Usinas Tipo III contem previsao de geracao, nao medicao verificada. Deseja incluir Tipo
+          III na analise?
+        trigger_terms:
+        - pequenas usinas
+        - MMGD
+        - tipo iii
+        - tipo 3
+      redirect_when:
+      - user_mentions: carga
+        redirect_to: balanco-energia-subsistema
+        reason: Dados de carga nao estao neste dataset
+      - user_mentions: intercambio
+        redirect_to: balanco-energia-subsistema
+        reason: Intercambio entre subsistemas nao esta neste dataset
+      - user_mentions: energia vertida
+        redirect_to: energia-vertida-turbinavel
+        reason: Energia vertida turbinavel esta em dataset especifico
+      - user_mentions: constrained-off
+        redirect_to: restricao_coff_eolica_usi
+        reason: Restricoes COFF estao em datasets especificos de restricao
+      - user_mentions: despacho programado
+        redirect_to: geracao-termica-despacho-2
+        reason: Despacho programado de termeletricas esta em geracao-termica-despacho-2
+- property: fewShotQueries
+  value:
+  - question: Qual foi a geração total por tipo de usina no subsistema Sudeste em janeiro de 2024, hora
+      a hora?
+    sql: SELECT din_instante, nom_tipousina, SUM((TRY_CAST(val_geracao AS DOUBLE)) * 1.0) / 1000 AS geracao_total_mwmed
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_usina_2_ho/*.parquet') WHERE id_subsistema
+      = 'SE' AND din_instante >= TIMESTAMP '2024-01-01 00:00:00' AND din_instante < TIMESTAMP '2024-02-01
+      00:00:00' GROUP BY din_instante, nom_tipousina ORDER BY din_instante, nom_tipousina LIMIT 1000;
+  - question: Quais foram as 20 usinas com maior geração média horária em 2023?
+    sql: SELECT id_ons, nom_usina, nom_tipousina, id_subsistema, AVG(TRY_CAST(val_geracao AS DOUBLE))
+      AS geracao_media_mwmed, SUM(TRY_CAST(val_geracao AS DOUBLE)) AS geracao_total_mwmed, COUNT(*) AS
+      horas_operacao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_usina_2_ho/*.parquet')
+      WHERE din_instante >= TIMESTAMP '2023-01-01 00:00:00' AND din_instante < TIMESTAMP '2024-01-01 00:00:00'
+      AND TRY_CAST(val_geracao AS DOUBLE) > 0 GROUP BY id_ons, nom_usina, nom_tipousina, id_subsistema
+      ORDER BY geracao_media_mwmed DESC LIMIT 20;
+  - question: Como evoluiu a participação percentual da geração eólica no total gerado pelo subsistema
+      Nordeste entre 2020 e 2024?
+    sql: WITH geracao_mensal AS ( SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,
+      nom_tipousina, SUM((TRY_CAST(val_geracao AS DOUBLE)) * 1.0) / 1000 AS geracao_total FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_usina_2_ho/*.parquet')
+      WHERE id_subsistema = 'NE' AND din_instante >= TIMESTAMP '2020-01-01 00:00:00' AND din_instante
+      < TIMESTAMP '2025-01-01 00:00:00' AND TRY_CAST(val_geracao AS DOUBLE) > 0 GROUP BY DATE_TRUNC('month',
+      TRY_CAST(din_instante AS TIMESTAMP)), nom_tipousina ), total_mensal AS ( SELECT mes, SUM(geracao_total)
+      AS total_subsistema FROM geracao_mensal GROUP BY mes ) SELECT g.mes, g.nom_tipousina, g.geracao_total,
+      t.total_subsistema, ROUND(100.0 * g.geracao_total / t.total_subsistema, 2) AS participacao_pct FROM
+      geracao_mensal AS g JOIN total_mensal AS t ON g.mes = t.mes WHERE g.nom_tipousina = 'Eólica' ORDER
+      BY g.mes;
+- property: relatedDatasets
+  value:
+    geracao-termica-despacho-2:
+      join_keys:
+      - ceg
+      - din_instante
+      - nom_usina
+      - id_subsistema
+    modalidade-usina:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_estado
+    disponibilidade_usina:
+      join_keys:
+      - ceg
+      - id_ons
+      - id_subsistema
+      - nom_usina
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - ceg
+      - nom_usina
+      - nom_subsistema
+      - din_instante
+    capacidade-geracao:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    restricao_coff_fotovoltaica_detail:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_subsistema
+      - id_estado
+      - din_instante
+    fator-capacidade-2:
+      join_keys:
+      - ceg
+      - din_instante
+      - id_ons
+    usina_pqu:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_subsistema
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_usina
+    restricao_coff_eolica_detail:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_subsistema
+      - id_estado
+      - din_instante
+    usina_conjunto:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - id_estado
+      - nom_estado
+      - nom_usina
+      - ceg
+    reservatorio:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_subsistema
+    restricao_coff_eolica_usi:
+      join_keys:
+      - id_ons
+      - ceg
+      - id_subsistema
+    energia-vertida-turbinavel:
+      join_keys:
+      - din_instante
+      - id_subsistema
+    uge_opera_csi:
+      join_keys:
+      - nom_usina
+- property: license
+  value: CC-BY

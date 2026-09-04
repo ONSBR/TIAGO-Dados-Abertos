@@ -1,0 +1,586 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_qualid_dfd_meano
+name: ind_qualid_dfd_meano
+tenant: ons
+tags:
+- ANEEL
+- DFD
+- Desempenho da Frequência em Distúrbios
+- Procedimentos de Rede ONS
+- SIN
+- Submódulo 9.7
+- distúrbios elétricos
+- frequência do sistema
+- ind_qualid_dfd
+- indicador DFD
+- indicador regulatório
+- qualidade de frequência
+- qualidade de frequência distúrbios
+- rede básica
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_meano/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar o comportamento da frequência elétrica durante eventos de distúrbio no Sistema Interligado
+    Nacional, permitindo que operadores do ONS, reguladores da ANEEL e analistas de qualidade de energia
+    avaliem a conformidade regulatória do sistema, identifiquem desvios de frequência que comprometam
+    a estabilidade da rede elétrica nacional e suportem decisões de desempenho operacional e planejamento
+    de ações corretivas conforme o Submódulo 9.7.
+  limitations: O valor máximo de val_dfd é 608,0 minutos, que pode representar um mês inteiro com frequência
+    fora da faixa em distúrbios prolongados ou um erro de apuração. O dataset cobre o período de 2016-01-01
+    a 2026-03-01 com registros mensais e anuais combinados. A coluna id_periodicidade mistura registros
+    mensais ('M') e anuais ('A') no mesmo arquivo.
+  usage: Recuperar este dataset quando a pergunta envolver qualidade de frequência elétrica durante distúrbios
+    no sistema elétrico nacional, indicadores regulatórios do Submódulo 9.
+domain: qualidade
+schema:
+- name: ind_qualid_dfd_meano
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_qualid_dfd_meano
+  properties:
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro, indicando se o valor corresponde a uma apuração
+      mensal (''M'') ou anual (''A'') do indicador DFD. Mistura ambas as granularidades no mesmo arquivo;
+      filtrar explicitamente para evitar dupla contagem.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - tipo_periodo
+      - frequencia_apuracao
+      - mensal_anual
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - '12'
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora de referência do registro, representando o mês ou ano de apuração do indicador
+      DFD. Para registros mensais corresponde ao primeiro dia do mês; para registros anuais corresponde
+      ao primeiro dia do ano.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_referencia
+      - data
+      - mes_referencia
+      - ano_referencia
+      - periodo
+      - competencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: id_faixafrequencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da faixa de frequência monitorada durante os distúrbios, conforme
+      definição do Submódulo 9.7 dos Procedimentos de Rede do ONS. Segmenta o indicador DFD por intervalo
+      de desvio de frequência.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_faixa
+      - faixa_frequencia
+      - id_faixa
+      - cod_faixa_frequencia
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - FI1
+      - FI2
+      - FI3
+      - FI4
+      - FS1
+      - FS2
+      - FS3
+      - FS4
+  - name: nom_faixafrequencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome descritivo da faixa de frequência monitorada, correspondente ao código id_faixafrequencia.
+      Descreve o intervalo de frequência (em Hz) avaliado no cálculo do indicador DFD conforme Submódulo
+      9.7.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_faixa
+      - descricao_faixa
+      - faixa
+      - intervalo_frequencia
+      - nom_faixa
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - 56,5Hz <= f < 57,5Hz
+      - 57,5Hz <= f < 58,5Hz
+      - 58,5Hz <= f < 59,5Hz
+      - 60,5Hz < f <= 62,0Hz
+      - 62,0Hz < f <= 63,5Hz
+      - 63,5Hz < f <= 66,0Hz
+      - 66,0Hz < f
+      - f < 56,5Hz
+  - name: val_dfd
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Desempenho da Frequência em Distúrbios (DFD) para a faixa de frequência
+      e período de referência indicados. Representa a duração acumulada (em minutos) em que a frequência
+      do sistema permaneceu na faixa especificada durante eventos de distúrbio. Valor mínimo observado:
+      0,0; máximo observado: 608,0.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - dfd
+      - indicador_dfd
+      - desempenho_frequencia
+      - valor_dfd
+      - val_indicador
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: min
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_qualid_dfd_meano:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Referential integrity\n  - invalid_count(id_periodicidade) = 0:\n      valid\
+      \ values:\n        - '12'\n        - 'ME'\n      name: id_periodicidade deve ser um dos valores\
+      \ válidos\n  - invalid_count(id_faixafrequencia) = 0:\n      valid values:\n        - 'FI1'\n  \
+      \      - 'FI2'\n        - 'FI3'\n        - 'FI4'\n        - 'FS1'\n        - 'FS2'\n        - 'FS3'\n\
+      \        - 'FS4'\n      name: id_faixafrequencia deve ser um dos valores válidos\n  - invalid_count(nom_faixafrequencia)\
+      \ = 0:\n      valid values:\n        - '56,5Hz <= f < 57,5Hz'\n        - '57,5Hz <= f < 58,5Hz'\n\
+      \        - '58,5Hz <= f < 59,5Hz'\n        - '60,5Hz < f <= 62,0Hz'\n        - '62,0Hz < f <= 63,5Hz'\n\
+      \        - '63,5Hz < f <= 66,0Hz'\n        - '66,0Hz < f'\n        - 'f < 56,5Hz'\n      name: nom_faixafrequencia\
+      \ deve ser um dos valores válidos\n\n  # Baseline de volume — margem ±20% do row_count validado\n\
+      \  - row_count between 1587 and 2380:\n      name: Volume esperado entre 1,587 e 2,380 registros\n\
+      \n  # Unicidade da chave primária composta ['id_periodicidade', 'din_referencia', 'id_faixafrequencia']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (id_periodicidade, din_referencia,\
+      \ id_faixafrequencia) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM ind_qualid_dfd_meano\n\
+      \        WHERE (id_periodicidade, din_referencia, id_faixafrequencia) IN (\n          SELECT id_periodicidade,\
+      \ din_referencia, id_faixafrequencia FROM ind_qualid_dfd_meano\n          GROUP BY id_periodicidade,\
+      \ din_referencia, id_faixafrequencia\n          HAVING COUNT(*) > 1\n        )\n\n  # Freshness:\
+      \ din_referencia deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_referencia)\
+      \ < 3d:\n      name: din_referencia não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_qualid_dfd_meano
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - qualidade da frequencia em disturbios
+  - indicador de frequencia em disturbio
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver qualidade de frequência elétrica durante distúrbios
+    no sistema elétrico nacional, indicadores regulatórios do Submódulo 9.7 dos Procedimentos de Rede
+    ONS, ou análise de desvios de frequência por faixa em periodicidade mensal ou anual. Também relevante
+    para comparações de conformidade regulatória ANEEL relacionadas ao desempenho da frequência em eventos
+    de perturbação da rede básica.
+- property: agentInstructions
+  value: '- [val_dfd] O valor máximo observado de 608,0 minutos representa aproximadamente 10 horas de
+    permanência em uma faixa de frequência de distúrbio em um único mês, o que pode indicar eventos extremos
+    ou períodos de crise no sistema elétrico. Recomenda-se verificar se registros com val_dfd > 300 correspondem
+    a eventos documentados de distúrbio severo ou a possíveis inconsistências de dados.
+
+
+    - [din_referencia] O dataset cobre o período de 2016-01-01 a 2026-04-01 com 1.984 linhas totais (mensais
+    + anuais + múltiplas faixas de frequência). Possíveis lacunas temporais podem existir para determinadas
+    faixas de frequência em meses específicos. Recomenda-se verificar a completude da série temporal por
+    faixa de frequência para a periodicidade mensal.
+
+
+    - [id_periodicidade] A coluna id_periodicidade deve conter apenas os valores ''Mensal'' e ''Anual''.
+    Variações de capitalização, espaços extras ou valores inesperados podem causar erros em filtros e
+    agrupamentos. Recomenda-se validar os valores distintos presentes no dataset ind_qualid_dfd_meano.
+
+
+    - [id_faixafrequencia] A coluna id_faixafrequencia deve conter identificadores padronizados de faixas
+    de frequência conforme Submódulo 9.7 dos Procedimentos de Rede do ONS. Recomenda-se verificar os valores
+    distintos para garantir consistência entre id_faixafrequencia e nom_faixafrequencia e identificar
+    possíveis variações de codificação ao longo do período histórico do dataset ind_qualid_dfd_meano.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o valor do indicador DFD para cada faixa de frequência no último mês disponível?
+  - Como evoluiu o DFD anual ao longo dos anos para a faixa de frequência mais crítica?
+  - Quais meses apresentaram os maiores valores de DFD acima de 100 minutos?
+  - Qual a distribuição do indicador DFD por faixa de frequência no ano de 2023?
+  - O sistema elétrico nacional está dentro dos limites regulatórios do Submódulo 9.7 para o DFD?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_meano/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2016-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 mes
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - id_periodicidade
+      - id_faixafrequencia
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dfd
+      label: Dfd
+      columns:
+      - val_dfd
+      expression: val_dfd
+      quantity_kind: duration_minutes
+      unit_native: min
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - dfd
+      - indicador_dfd
+      - desempenho_frequencia
+      - valor_dfd
+      - val_indicador
+      aggregation_modes:
+        total:
+          sql: SUM(val_dfd)
+          unit: min
+        average:
+          sql: AVG(val_dfd)
+          unit: min
+        maximum:
+          sql: MAX(val_dfd)
+          unit: min
+        time_series:
+          sql: SUM(val_dfd)
+          unit: min
+        ranking:
+          sql: SUM(val_dfd)
+          unit: min
+        comparison:
+          sql: SUM(val_dfd)
+          unit: min
+      interval_hours: 730.0
+      aliases:
+      - dfd
+      - indicador_dfd
+      - desempenho_frequencia
+      - valor_dfd
+      - val_indicador
+      - duracao disturbio frequencia
+      - minutos fora da faixa
+      - tempo em disturbio
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - dfd
+      preferred_for:
+      - DFD mensal por faixa
+      - DFD anual por faixa
+      - indicador DFD submodulo 9.7
+      - duracao disturbio frequencia por faixa
+      - faixa FI1 FI2 FI3 FI4 FS1 FS2 FS3 FS4
+      - desvio frequencia acumulado mensal
+      - conformidade frequencia disturbio
+      - tempo em faixa de frequencia disturbio
+      - serie historica DFD nacional
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+      - evento individual disturbio
+      - DFP regime permanente
+      - CIPER
+      - geracao por fonte
+      - carga eletrica
+    value_aliases:
+      id_periodicidade:
+        '12':
+          aliases:
+          - '12'
+          - anual
+          - ano
+          - periodicidade anual
+          filter: id_periodicidade = '12'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          - periodicidade mensal
+          filter: id_periodicidade = 'ME'
+      id_faixafrequencia:
+        FI1:
+          aliases:
+          - FI1
+          - faixa inferior 1
+          - abaixo 56.5 Hz
+          - f menor 56.5
+          filter: id_faixafrequencia = 'FI1'
+        FI2:
+          aliases:
+          - FI2
+          - faixa inferior 2
+          - 56.5 a 57.5 Hz
+          filter: id_faixafrequencia = 'FI2'
+        FI3:
+          aliases:
+          - FI3
+          - faixa inferior 3
+          - 57.5 a 58.5 Hz
+          filter: id_faixafrequencia = 'FI3'
+        FI4:
+          aliases:
+          - FI4
+          - faixa inferior 4
+          - 58.5 a 59.5 Hz
+          filter: id_faixafrequencia = 'FI4'
+        FS1:
+          aliases:
+          - FS1
+          - faixa superior 1
+          - 60.5 a 62 Hz
+          filter: id_faixafrequencia = 'FS1'
+        FS2:
+          aliases:
+          - FS2
+          - faixa superior 2
+          - 62 a 63.5 Hz
+          filter: id_faixafrequencia = 'FS2'
+        FS3:
+          aliases:
+          - FS3
+          - faixa superior 3
+          - 63.5 a 66 Hz
+          filter: id_faixafrequencia = 'FS3'
+        FS4:
+          aliases:
+          - FS4
+          - faixa superior 4
+          - acima 66 Hz
+          - f maior 66
+          filter: id_faixafrequencia = 'FS4'
+      nom_faixafrequencia:
+        56,5Hz <= f < 57,5Hz:
+          aliases:
+          - 56,5Hz <= f < 57,5Hz
+          - 56.5 a 57.5
+          filter: nom_faixafrequencia = '56,5Hz <= f < 57,5Hz'
+        57,5Hz <= f < 58,5Hz:
+          aliases:
+          - 57,5Hz <= f < 58,5Hz
+          - 57.5 a 58.5
+          filter: nom_faixafrequencia = '57,5Hz <= f < 58,5Hz'
+        58,5Hz <= f < 59,5Hz:
+          aliases:
+          - 58,5Hz <= f < 59,5Hz
+          - 58.5 a 59.5
+          filter: nom_faixafrequencia = '58,5Hz <= f < 59,5Hz'
+        60,5Hz < f <= 62,0Hz:
+          aliases:
+          - 60,5Hz < f <= 62,0Hz
+          - 60.5 a 62
+          filter: nom_faixafrequencia = '60,5Hz < f <= 62,0Hz'
+        62,0Hz < f <= 63,5Hz:
+          aliases:
+          - 62,0Hz < f <= 63,5Hz
+          - 62 a 63.5
+          filter: nom_faixafrequencia = '62,0Hz < f <= 63,5Hz'
+        63,5Hz < f <= 66,0Hz:
+          aliases:
+          - 63,5Hz < f <= 66,0Hz
+          - 63.5 a 66
+          filter: nom_faixafrequencia = '63,5Hz < f <= 66,0Hz'
+        66,0Hz < f:
+          aliases:
+          - 66,0Hz < f
+          - acima de 66 Hz
+          filter: nom_faixafrequencia = '66,0Hz < f'
+        f < 56,5Hz:
+          aliases:
+          - f < 56,5Hz
+          - abaixo de 56.5 Hz
+          filter: nom_faixafrequencia = 'f < 56,5Hz'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre DFD sem especificar periodicidade
+        assume_filter: id_periodicidade = 'ME'
+        note: 'Periodicidade mensal e a granularidade mais detalhada e comum para analise de series temporais;
+          anual deve ser solicitado explicitamente. — assume_periodicidade: ME'
+      - when: usuario pergunta sobre DFD sem especificar faixa de frequencia
+        assume_metric: dfd
+        assume_output: total
+        note: 'Retornar todas as faixas agrupadas evita perda de informacao; usuario pode filtrar depois.
+          — assume_group_by: id_faixafrequencia'
+      - when: usuario pergunta sobre valor maximo ou pico de DFD
+        assume_metric: dfd
+        assume_output: maximum
+        note: Pico de duracao em disturbio e interpretado como MAX(val_dfd) por faixa.
+      must_clarify_when:
+      - trigger_terms:
+        - total do sistema
+        - soma de todas as faixas
+        question: Deseja somar o DFD de todas as faixas de frequencia ou ver cada faixa separadamente?
+          Somar faixas distintas pode nao ter interpretacao regulatoria direta.
+        rationale: Faixas FI e FS sao categorias distintas de desvio; soma entre elas pode ser enganosa.
+      - trigger_terms:
+        - comparar com limite
+        - limite regulatorio
+        - dentro do limite
+        question: O dataset contem apenas os valores observados de DFD. Os limites regulatorios do Submodulo
+          9.7 nao estao armazenados neste dataset. Deseja apenas os valores observados para comparacao
+          manual?
+        rationale: Limites normativos nao existem como coluna no schema fisico.
+      redirect_when:
+      - user_mentions:
+        - evento
+        - evento individual
+        - disturbio especifico
+        - data do evento
+        - hora do evento
+        reason: Eventos individuais de disturbio de frequencia estao em dataset separado com granularidade
+          por evento.
+        redirect: ind_qualid_dfd_evento
+      - user_mentions:
+        - DFP
+        - regime permanente
+        - frequencia em regime
+        reason: DFP (Desempenho da Frequencia em regime Permanente) e um indicador distinto do DFD, coberto
+          por outro dataset.
+        redirect: ind_qualid_dfp_regime
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd
+    sql_patterns:
+      dfd_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  id_faixafrequencia,\n\
+          \  nom_faixafrequencia,\n  SUM(val_dfd) AS dfd_minutos\nFROM {source}\nWHERE id_periodicidade\
+          \ = 'ME'\n  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\nGROUP BY\
+          \ 1, 2, 3\nORDER BY 1, 2"
+        output_unit: min
+        matches:
+          output_modes:
+          - total
+          - time_series
+          metrics:
+          - dfd
+          grain: month
+        validated_params:
+          year: '2026'
+      dfd_anual_por_faixa:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  id_faixafrequencia,\n\
+          \  nom_faixafrequencia,\n  SUM(val_dfd) AS dfd_minutos\nFROM {source}\nWHERE id_periodicidade\
+          \ = '12'\nGROUP BY 1, 2, 3\nORDER BY 1, 2"
+        output_unit: min
+        matches:
+          output_modes:
+          - total
+          - time_series
+          metrics:
+          - dfd
+          grain: year
+      dfd_faixa_critica:
+        template: "SELECT id_faixafrequencia,\n  nom_faixafrequencia,\n  MAX(val_dfd) AS pico_dfd_minutos\n\
+          FROM {source}\nWHERE id_periodicidade = 'ME'\nGROUP BY 1, 2\nORDER BY 3 DESC\nLIMIT 5"
+        output_unit: min
+        matches:
+          output_modes:
+          - maximum
+          - ranking
+          metrics:
+          - dfd
+          grain: all_time
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o indicador DFD mês a mês por faixa de frequência nos últimos 3 anos?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes_referencia, id_faixafrequencia,
+      nom_faixafrequencia, val_dfd FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_meano/*.parquet')
+      WHERE id_periodicidade = 'ME' AND din_referencia >= CURRENT_DATE - INTERVAL '3 years' ORDER BY mes_referencia,
+      id_faixafrequencia;
+  - question: Quais foram os 10 meses com maior tempo de permanência na faixa de frequência mais crítica?
+    sql: SELECT din_referencia, id_faixafrequencia, nom_faixafrequencia, val_dfd FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_meano/*.parquet')
+      WHERE id_periodicidade = 'ME' ORDER BY val_dfd DESC LIMIT 10;
+  - question: O valor anual do DFD é consistente com a soma dos valores mensais para o mesmo ano?
+    sql: WITH mensal AS ( SELECT YEAR(din_referencia) AS ano, id_faixafrequencia, SUM(val_dfd) AS soma_mensal
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_meano/*.parquet') WHERE id_periodicidade
+      = 'ME' GROUP BY YEAR(din_referencia), id_faixafrequencia ), anual AS ( SELECT YEAR(din_referencia)
+      AS ano, id_faixafrequencia, val_dfd AS valor_anual FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_meano/*.parquet')
+      WHERE id_periodicidade = 'Anual' ) SELECT m.ano, m.id_faixafrequencia, m.soma_mensal, a.valor_anual,
+      (m.soma_mensal - a.valor_anual) AS diferenca FROM mensal m LEFT JOIN anual a ON m.ano = a.ano AND
+      m.id_faixafrequencia = a.id_faixafrequencia ORDER BY m.ano, m.id_faixafrequencia;
+- property: relatedDatasets
+  value:
+    ind_qualid_dfd_evento:
+      join_keys:
+      - id_faixafrequencia
+      - nom_faixafrequencia
+- property: license
+  value: CC-BY

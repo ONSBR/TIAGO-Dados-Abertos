@@ -1,0 +1,481 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_atls
+name: ind_confiarb_atls
+tenant: ons
+tags:
+- ATLS
+- Indicador de Atendimento aos Limites Sistêmicos
+- ONS
+- Procedimentos de Rede
+- Submódulo 9.1
+- confiabilidade
+- confiabilidade da rede básica
+- fluxo
+- indicador operativo
+- limites sistêmicos
+- rede básica
+- transmissão
+- violação de fluxo
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_atls/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que analistas de confiabilidade, planejadores do sistema elétrico e reguladores monitorem
+    o cumprimento dos limites operativos sistêmicos em cada fluxo da rede básica, suportando decisões
+    de reforço de rede, avaliação de desempenho operativo, relatórios regulatórios de qualidade da transmissão
+    e identificação de fluxos críticos com violações recorrentes conforme exigências do Submódulo 9.1
+    dos Procedimentos de Rede do ONS.
+  limitations: O dataset mistura registros mensais e anuais na mesma tabela sem separação física. O valor
+    mínimo observado de val_atls é 0. O valor máximo de num_horasviolacao é 230.
+  usage: Recuperar este dataset quando o usuário perguntar sobre atendimento a limites sistêmicos, violações
+    operativas em fluxos da rede básica de transmissão, desempenho de confiabilidade por linha de transmissão
+    ou interligação, ou indicadores do Submódulo 9.
+domain: transmissão
+schema:
+- name: ind_confiarb_atls
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_atls
+  properties:
+  - name: nom_fluxo
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do fluxo monitorado da rede básica (linha de transmissão ou interligação) para
+      o qual o indicador ATLS é calculado. Funciona como dimensão espacial do dataset, identificando o
+      elemento de rede avaliado conforme Submódulo 9.1 dos Procedimentos de Rede do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - fluxo
+      - linha de transmissão
+      - elemento de rede
+      - fluxo monitorado
+      - nome do fluxo
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - EXP_NE
+      - FBA-IN
+      - FBTA
+      - FIN-BA
+      - FIZ-PD
+      - FJUSC
+      - FNEN
+      - FNESE
+      - FNS
+      - FNS+NESE
+      - FSECO
+      - GIPU
+      - RNE
+      - RSE
+      - RSECO
+      - RSUL
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro. Indica se o valor de ATLS corresponde a
+      uma apuração mensal ou anual. A mesma tabela armazena registros de ambas as periodicidades, sendo
+      necessário filtrar por este campo para análises consistentes.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - frequência de apuração
+      - tipo de período
+      - granularidade temporal
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do registro, representando o mês ou ano de apuração do indicador
+      ATLS. Para registros mensais, corresponde ao primeiro dia do mês de referência (ex: 2024-01-01 para
+      janeiro de 2024). Para registros anuais, corresponde ao primeiro dia do ano. Cobre o período de
+      2017-01-01 a 2026-03-01.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - mês de referência
+      - ano de referência
+      - período
+      - competência
+      - data
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_atls
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Atendimento aos Limites Sistêmicos (ATLS) para o fluxo e período
+      de referência. Índice normalizado entre 0 e 1, onde 1.0 representa pleno atendimento aos limites
+      sistêmicos (sem violações) e valores menores indicam proporção de horas com atendimento. Calculado
+      conforme Submódulo 9.1 dos Procedimentos de Rede do ONS. Valores observados: mínimo 0.8288, máximo
+      1.0.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ATLS
+      - indicador ATLS
+      - atendimento aos limites sistêmicos
+      - índice de atendimento
+      - valor do indicador
+      - desempenho do fluxo
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: índice (adimensional, 0–1)
+  - name: num_horasviolacao
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de horas no período de referência em que o limite sistêmico do fluxo foi violado
+      (operação fora dos limites estabelecidos). Valor zero indica pleno atendimento sem violações no
+      período. Valores observados: mínimo 0.0 horas, máximo 230.17 horas. Complementa o val_atls fornecendo
+      a magnitude absoluta das violações.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - horas de violação
+      - horas violadas
+      - horas fora do limite
+      - violação sistêmica
+      - número de horas de violação
+      - horas com violação
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: horas (h)
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_confiarb_atls:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(nom_fluxo) = 0:\n      valid values:\n \
+      \       - 'EXP_NE'\n        - 'FBA-IN'\n        - 'FBTA'\n        - 'FIN-BA'\n        - 'FIZ-PD'\n\
+      \        - 'FJUSC'\n        - 'FNEN'\n        - 'FNESE'\n        - 'FNS'\n        - 'FNS+NESE'\n\
+      \        - 'FSECO'\n        - 'GIPU'\n        - 'RNE'\n        - 'RSE'\n        - 'RSECO'\n    \
+      \    - 'RSUL'\n      name: nom_fluxo deve ser um dos valores válidos\n  - invalid_count(id_periodicidade)\
+      \ = 0:\n      valid values:\n        - 'AN'\n        - 'ME'\n      name: id_periodicidade deve ser\
+      \ um dos valores válidos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count\
+      \ between 1355 and 2032:\n      name: Volume esperado entre 1,355 e 2,032 registros\n\n  # Unicidade\
+      \ da chave primária composta ['nom_fluxo', 'id_periodicidade', 'din_referencia'] (candidata LLM)\n\
+      \  - failed rows:\n      name: Chave composta (nom_fluxo, id_periodicidade, din_referencia) não\
+      \ deve ter duplicatas\n      fail query: |\n        SELECT * FROM ind_confiarb_atls\n        WHERE\
+      \ (nom_fluxo, id_periodicidade, din_referencia) IN (\n          SELECT nom_fluxo, id_periodicidade,\
+      \ din_referencia FROM ind_confiarb_atls\n          GROUP BY nom_fluxo, id_periodicidade, din_referencia\n\
+      \          HAVING COUNT(*) > 1\n        )\n\n  # Freshness: din_referencia deve ter dados recentes\
+      \ (SLA: Atualizado diariamente)\n  - freshness(din_referencia) < 3d:\n      name: din_referencia\
+      \ não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_atls
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - violacao de limite operativo
+  - atendimento aos limites do sistema
+  - limites sistemicos violados
+- property: aiContext
+  value: Recuperar este dataset quando o usuário perguntar sobre atendimento a limites sistêmicos, violações
+    operativas em fluxos da rede básica de transmissão, desempenho de confiabilidade por linha de transmissão
+    ou interligação, ou indicadores do Submódulo 9.1 dos Procedimentos de Rede do ONS. Também relevante
+    para perguntas sobre horas de violação, índice ATLS, ranking de fluxos críticos e relatórios regulatórios
+    de qualidade da transmissão.
+- property: agentInstructions
+  value: '- [id_periodicidade] O dataset mistura registros de periodicidade mensal e anual na mesma tabela.
+    Análises de séries temporais ou agregações sem filtro por id_periodicidade resultarão em dupla contagem,
+    pois os valores anuais são derivados dos mensais. É obrigatório filtrar por id_periodicidade = ''Mensal''
+    ou ''Anual'' conforme o objetivo analítico.
+
+
+    - [val_atls] O valor mínimo de val_atls é 0.8288, indicando que alguns fluxos apresentaram atendimento
+    inferior a 83% no período de referência. Esses registros representam situações críticas de violação
+    sistêmica e devem ser investigados separadamente. Verificar se correspondem a períodos de obras, contingências
+    ou eventos extremos.
+
+
+    - [num_horasviolacao] O valor máximo de num_horasviolacao é 230.17 horas, o que representa aproximadamente
+    31% de um mês de 744 horas (31 dias). Registros com valores elevados de horas de violação merecem
+    atenção especial na análise de conformidade regulatória. Verificar consistência com val_atls correspondente.
+
+
+    - [din_referencia] Verificar se há lacunas temporais na série mensal por fluxo. Com 1.694 registros
+    totais para ~9 anos e múltiplos fluxos com duas periodicidades, é possível que alguns fluxos não possuam
+    cobertura completa para todo o período 2017–2026, indicando início tardio de monitoramento ou descontinuação
+    de fluxos.
+
+
+    - [nom_fluxo] Verificar existência de registros duplicados para a chave primária natural (nom_fluxo,
+    id_periodicidade, din_referencia). Duplicatas podem ocorrer em função do processo de consistência
+    recorrente mencionado no CKAN, onde dados são atualizados após publicação inicial.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais fluxos da rede básica apresentaram maior número de horas de violação de limites sistêmicos em
+    2023?
+  - Qual foi a evolução mensal do ATLS para o fluxo Itaipu 500 kV nos últimos 3 anos?
+  - Quais fluxos tiveram val_atls abaixo de 0.95 em mais de 3 meses consecutivos?
+  - Qual é o ranking dos fluxos com pior desempenho de atendimento aos limites sistêmicos no período anual
+    de 2024?
+  - Quantas horas totais de violação sistêmica foram registradas por mês em toda a rede básica em 2022?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_atls/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2017-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - nom_fluxo
+      - id_periodicidade
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: atls
+      label: Atls
+      columns:
+      - val_atls
+      expression: val_atls
+      quantity_kind: percent
+      unit_native: adimensional
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - atls
+      - ATLS
+      - indicador ATLS
+      - atendimento aos limites sistêmicos
+      - índice de atendimento
+      - valor do indicador
+      aggregation_modes:
+        total:
+          sql: SUM(val_atls)
+          unit: ''
+        average:
+          sql: AVG(val_atls)
+          unit: ''
+        maximum:
+          sql: MAX(val_atls)
+          unit: ''
+        time_series:
+          sql: SUM(val_atls)
+          unit: ''
+        ranking:
+          sql: SUM(val_atls)
+          unit: ''
+        comparison:
+          sql: SUM(val_atls)
+          unit: ''
+      interval_hours: 8760.0
+      aliases:
+      - ATLS
+      - indicador ATLS
+      - atendimento aos limites sistêmicos
+      - índice de atendimento
+      - valor do indicador
+      - desempenho do fluxo
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - atls
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+    value_aliases:
+      nom_fluxo:
+        EXP_NE:
+          aliases:
+          - EXP_NE
+          filter: nom_fluxo = 'EXP_NE'
+        FBA-IN:
+          aliases:
+          - FBA-IN
+          filter: nom_fluxo = 'FBA-IN'
+        FBTA:
+          aliases:
+          - FBTA
+          filter: nom_fluxo = 'FBTA'
+        FIN-BA:
+          aliases:
+          - FIN-BA
+          filter: nom_fluxo = 'FIN-BA'
+        FIZ-PD:
+          aliases:
+          - FIZ-PD
+          filter: nom_fluxo = 'FIZ-PD'
+        FJUSC:
+          aliases:
+          - FJUSC
+          filter: nom_fluxo = 'FJUSC'
+        FNEN:
+          aliases:
+          - FNEN
+          filter: nom_fluxo = 'FNEN'
+        FNESE:
+          aliases:
+          - FNESE
+          filter: nom_fluxo = 'FNESE'
+        FNS:
+          aliases:
+          - FNS
+          filter: nom_fluxo = 'FNS'
+        FNS+NESE:
+          aliases:
+          - FNS+NESE
+          filter: nom_fluxo = 'FNS+NESE'
+        FSECO:
+          aliases:
+          - FSECO
+          filter: nom_fluxo = 'FSECO'
+        GIPU:
+          aliases:
+          - GIPU
+          filter: nom_fluxo = 'GIPU'
+        RNE:
+          aliases:
+          - RNE
+          filter: nom_fluxo = 'RNE'
+        RSE:
+          aliases:
+          - RSE
+          filter: nom_fluxo = 'RSE'
+        RSECO:
+          aliases:
+          - RSECO
+          filter: nom_fluxo = 'RSECO'
+        RSUL:
+          aliases:
+          - RSUL
+          filter: nom_fluxo = 'RSUL'
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - ME
+          filter: id_periodicidade = 'ME'
+    sql_patterns:
+      atls_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  SUM(val_atls)\
+          \ AS valor\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) =\
+          \ {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: ''
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - atls
+          grain: month
+        validated_params:
+          year: '2026'
+    ambiguity_policy:
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+- property: fewShotQueries
+  value:
+  - question: Quais são os 10 fluxos com menor índice de atendimento aos limites sistêmicos em registros
+      mensais?
+    sql: SELECT nom_fluxo, CAST(din_referencia AS DATE) AS mes_referencia, val_atls, num_horasviolacao
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_atls/*.parquet') WHERE id_periodicidade
+      = 'ME' ORDER BY val_atls ASC LIMIT 10;
+  - question: Como evoluiu o indicador ATLS mensal para cada fluxo entre 2020 e 2024?
+    sql: SELECT nom_fluxo, DATE_TRUNC('year', TRY_CAST(din_referencia AS TIMESTAMP)) AS ano, AVG(val_atls)
+      AS media_atls_anual, SUM(num_horasviolacao) AS total_horas_violacao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_atls/*.parquet')
+      WHERE id_periodicidade = 'ME' AND din_referencia >= TIMESTAMP '2020-01-01' AND din_referencia <=
+      TIMESTAMP '2024-12-31' GROUP BY nom_fluxo, DATE_TRUNC('year', TRY_CAST(din_referencia AS TIMESTAMP))
+      ORDER BY nom_fluxo, ano;
+  - question: Quais fluxos apresentaram mais de 100 horas de violação em algum mês e qual foi o ATLS correspondente?
+    sql: SELECT nom_fluxo, CAST(din_referencia AS DATE) AS mes_referencia, val_atls, num_horasviolacao,
+      ROUND((1.0 - val_atls) * 100, 2) AS percentual_violacao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_atls/*.parquet')
+      WHERE id_periodicidade = 'ME' AND num_horasviolacao > 100.0 ORDER BY num_horasviolacao DESC LIMIT
+      50;
+- property: relatedDatasets
+  value:
+    ind_confiarb_ccal:
+      join_keys:
+      - din_referencia
+      - id_periodicidade
+    ind_confiarb_ccat:
+      join_keys:
+      - din_referencia
+      - id_periodicidade
+- property: license
+  value: CC-BY

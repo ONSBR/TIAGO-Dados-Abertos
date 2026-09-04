@@ -1,0 +1,762 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:cvu-usitermica
+name: cvu-usitermica
+tenant: ons
+tags:
+- CVU
+- DECOMP
+- DESSEM
+- NEWAVE
+- PMO
+- custo de despacho térmico
+- custo térmico
+- custo variavel unitario
+- custo variável unitário
+- custo-geracao
+- custo-variavel-unitario
+- despacho-economico
+- planejamento-operacao
+- usinas-termicas
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer o Custo Variável Unitário das usinas térmicas para planejadores e operadores do ONS,
+    agentes do setor elétrico (geradoras, comercializadoras, distribuidoras) e pesquisadores, subsidiando
+    decisões de despacho econômico, programação da operação, acompanhamento de custos do sistema elétrico
+    brasileiro e calibração dos modelos NEWAVE, DECOMP e DESSEM no âmbito do Programa Mensal da Operação.
+  limitations: val_cvu apresenta valor máximo de 3998. Embora o mínimo registrado seja 0. A combinação
+    (dat_iniciosemana, cod_usinaplanejamento, ano_referencia, mes_referencia, num_revisao) deve ser única.
+  usage: Recuperar este dataset quando a pergunta envolver custo variável unitário de usinas térmicas,
+    despacho econômico de térmicas, insumos do Programa Mensal da Operação (PMO), calibração dos modelos
+    NEWAVE/DECOMP/DESSEM ou comparação de custos de geração térmica por usina, subsistema ou período de
+    revisão.
+domain: planejamento
+schema:
+- name: cvu_usitermica
+  physicalType: parquet
+  logicalType: object
+  physicalName: cvu_usitermica
+  properties:
+  - name: dat_iniciosemana
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data de início da semana operativa de referência para o CVU
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - inicio da semana
+      - data inicio semana
+      - semana inicio
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_fimsemana
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data de fim da semana operativa de referência para o CVU
+    customProperties:
+    - property: aliases
+      value:
+      - fim da semana
+      - data fim semana
+      - semana fim
+    - property: semanticType
+      value: TIMESTAMP
+  - name: ano_referencia
+    physicalType: BIGINT
+    logicalType: integer
+    description: Ano de referência do Programa Mensal da Operação ao qual o CVU pertence
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - ano
+      - ano referencia
+      - ano do programa
+    - property: enum
+      value:
+      - 2005
+      - 2026
+  - name: mes_referencia
+    physicalType: BIGINT
+    logicalType: integer
+    description: Mês de referência (1 a 12) do Programa Mensal da Operação ao qual o CVU pertence
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - mes
+      - mês referencia
+      - mês do programa
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+  - name: num_revisao
+    physicalType: BIGINT
+    logicalType: integer
+    description: Número da revisão do Programa Mensal da Operação, variando de 0 (versão inicial) a 4
+      (última revisão do mês)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - revisao
+      - revisão
+      - numero revisao
+      - versão
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+  - name: nom_semanaoperativa
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome textual da semana operativa, identificando o período semanal dentro do programa
+      mensal (ex. 'Semana 1', 'Semana 2')
+    customProperties:
+    - property: aliases
+      value:
+      - semana operativa
+      - nome semana
+      - semana
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_usinaplanejamento
+    physicalType: BIGINT
+    logicalType: integer
+    description: Código numérico da usina térmica no sistema de planejamento do ONS, utilizado como identificador
+      nos modelos NEWAVE, DECOMP e DESSEM
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo usina
+      - cod usina
+      - id usina planejamento
+      - código da usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador do subsistema elétrico ao qual a usina térmica pertence (SE, S, NE, N)
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema
+      - sigla subsistema
+      - região
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual a usina térmica pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - subsistema nome
+      - região nome
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina térmica conforme cadastro do planejamento do ONS
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome usina
+      - termica
+      - nome da usina
+    - property: semanticType
+      value: DIMENSION
+  - name: val_cvu
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Custo Variável Unitário (CVU) da usina térmica utilizado no Programa Mensal da Operação,
+      expresso em R$/MWh. Valor zero indica usinas com custo variável nulo (ex. nucleares em determinados
+      contextos ou usinas com combustível subsidiado). Máximo histórico de 3998.43 R$/MWh corresponde
+      a usinas de emergência ou óleo diesel.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - cvu
+      - custo variavel unitario
+      - custo variável unitário
+      - custo variavel
+      - custo marginal
+      - valor cvu
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: R$/MWh
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for cvu_usitermica:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'Nordeste'\n        - 'Norte'\n        - 'Sudeste/Centro-Oeste'\n        - 'Sul'\n      name:\
+      \ nom_subsistema deve ser um dos valores válidos\n\n  # Unicidade da chave primária composta ['dat_iniciosemana',\
+      \ 'ano_referencia', 'mes_referencia', 'num_revisao', 'cod_usinaplanejamento'] (candidata LLM)\n\
+      \  - failed rows:\n      name: Chave composta (dat_iniciosemana, ano_referencia, mes_referencia,\
+      \ num_revisao, cod_usinaplanejamento) não deve ter duplicatas\n      fail query: |\n        SELECT\
+      \ * FROM cvu_usitermica\n        WHERE (dat_iniciosemana, ano_referencia, mes_referencia, num_revisao,\
+      \ cod_usinaplanejamento) IN (\n          SELECT dat_iniciosemana, ano_referencia, mes_referencia,\
+      \ num_revisao, cod_usinaplanejamento FROM cvu_usitermica\n          GROUP BY dat_iniciosemana, ano_referencia,\
+      \ mes_referencia, num_revisao, cod_usinaplanejamento\n          HAVING COUNT(*) > 1\n        )\n\
+      \n  # Freshness: dat_iniciosemana deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(dat_iniciosemana)\
+      \ < 3d:\n      name: dat_iniciosemana não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/cvu-usitermica
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto custa ligar uma termica
+  - preco de despacho das termicas
+  - cvu das usinas
+  - custo das termeletricas
+  - ordem de custo das termicas
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver custo variável unitário de usinas térmicas,
+    despacho econômico de térmicas, insumos do Programa Mensal da Operação (PMO), calibração dos modelos
+    NEWAVE/DECOMP/DESSEM ou comparação de custos de geração térmica por usina, subsistema ou período de
+    revisão. Também relevante para perguntas sobre Custo Marginal de Operação (CMO) que requerem os custos
+    individuais das usinas como insumo.
+- property: agentInstructions
+  value: '- [val_cvu] Valores de CVU igual a 0.0 R$/MWh podem representar usinas nucleares, usinas com
+    custo subsidiado ou registros com ausência de custo variável real. Requer validação de negócio para
+    distinguir zeros legítimos de erros de preenchimento. Máximo de 3998.43 R$/MWh também merece atenção
+    como possível outlier extremo.
+
+
+    - [num_revisao] A presença de múltiplas revisões (0 a 4) para o mesmo par (semana operativa, usina)
+    é esperada pelo processo de consistência recorrente do ONS, mas pode gerar duplicatas em análises
+    que não filtram pela revisão mais recente. Consultas sem filtro de revisão retornarão múltiplas linhas
+    por usina/semana.
+
+
+    - [dat_iniciosemana] Dado o longo histórico de 20+ anos (2005-2026) e apenas 5.611 linhas totais,
+    podem existir semanas operativas sem registros para determinadas usinas, indicando possíveis lacunas
+    históricas ou usinas que entraram/saíram de operação ao longo do período.
+
+
+    - [cod_usinaplanejamento] O código de planejamento varia de 1 a 653, mas não há garantia de sequência
+    contínua. Usinas desativadas ou renomeadas podem ter códigos descontinuados, dificultando joins históricos
+    com outros datasets que referenciem o mesmo código em períodos distintos.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual o CVU médio das usinas térmicas do subsistema Nordeste na última revisão do PMO?
+  - Quais usinas térmicas têm CVU acima de 1000 R$/MWh no programa mensal vigente?
+  - Como evoluiu o CVU médio das térmicas a gás natural ao longo dos anos?
+  - Qual a diferença de CVU entre a revisão 0 e a revisão 4 do PMO para as usinas do Sudeste?
+  - Quais usinas apresentaram CVU igual a zero no último programa mensal?
+- property: granularity
+  value: semanal
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2005-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 semana
+      temporal_column: dat_iniciosemana
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_iniciosemana
+      - id_subsistema
+      - ano_referencia
+      - mes_referencia
+      - num_revisao
+      - cod_usinaplanejamento
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: nom_usina
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: cvu
+      label: CVU
+      columns:
+      - val_cvu
+      expression: val_cvu
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - cvu
+      - custo variavel unitario
+      - custo variável unitário
+      - custo variavel
+      - custo marginal
+      aggregation_modes:
+        average:
+          sql: AVG(val_cvu)
+          unit: R$/MWh
+        maximum:
+          sql: MAX(val_cvu)
+          unit: R$/MWh
+        minimum:
+          sql: MIN(val_cvu)
+          unit: R$/MWh
+        time_series:
+          sql: AVG(val_cvu)
+          unit: R$/MWh
+        ranking:
+          sql: AVG(val_cvu)
+          unit: R$/MWh
+        comparison:
+          sql: AVG(val_cvu)
+          unit: R$/MWh
+      interval_hours: 168.0
+      aliases:
+      - cvu
+      - custo variavel unitario
+      - custo variável unitário
+      - custo variavel
+      - custo marginal
+      - valor cvu
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - cvu
+      preferred_for:
+      - CVU por usina termica
+      - custo variavel unitario PMO
+      - insumo NEWAVE DECOMP DESSEM
+      - revisao programa mensal operacao
+      - semana operativa termica
+      - ordem de merito economica
+      - calibracao modelos hidrotermicos
+      - custo despacho termico semanal
+      - comparacao revisoes PMO
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - geracao verificada
+      - despacho horario
+      - disponibilidade usina
+      - carga subsistema
+      - intercambio energia
+      - geracao hidraulica
+      - preco spot PLD
+      - capacidade instalada
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          filter: nom_subsistema = 'Sul'
+      num_revisao:
+        revisao_inicial:
+          aliases:
+          - revisao 0
+          - versao inicial
+          - primeira versao
+          - revisao inicial
+          filter: num_revisao = 0
+        revisao_final:
+          aliases:
+          - revisao 4
+          - ultima revisao
+          - versao final
+          - revisao mais recente
+          filter: num_revisao = 4
+        '1':
+          aliases:
+          - revisao 1
+          filter: num_revisao = 1
+        '2':
+          aliases:
+          - revisao 2
+          filter: num_revisao = 2
+        '3':
+          aliases:
+          - revisao 3
+          filter: num_revisao = 3
+      mes_referencia:
+        '1':
+          aliases:
+          - janeiro
+          - jan
+          filter: mes_referencia = 1
+        '2':
+          aliases:
+          - fevereiro
+          - fev
+          filter: mes_referencia = 2
+        '3':
+          aliases:
+          - marco
+          - mar
+          filter: mes_referencia = 3
+        '4':
+          aliases:
+          - abril
+          - abr
+          filter: mes_referencia = 4
+        '5':
+          aliases:
+          - maio
+          - mai
+          filter: mes_referencia = 5
+        '6':
+          aliases:
+          - junho
+          - jun
+          filter: mes_referencia = 6
+        '7':
+          aliases:
+          - julho
+          - jul
+          filter: mes_referencia = 7
+        '8':
+          aliases:
+          - agosto
+          - ago
+          filter: mes_referencia = 8
+        '9':
+          aliases:
+          - setembro
+          - set
+          filter: mes_referencia = 9
+        '10':
+          aliases:
+          - outubro
+          - out
+          filter: mes_referencia = 10
+        '11':
+          aliases:
+          - novembro
+          - nov
+          filter: mes_referencia = 11
+        '12':
+          aliases:
+          - dezembro
+          - dez
+          filter: mes_referencia = 12
+    sql_patterns:
+      cvu_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(dat_iniciosemana AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  AVG(val_cvu) AS valor\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(dat_iniciosemana AS\
+          \ TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - cvu
+          grain: month
+        validated_params:
+          year: '2026'
+      cvu_ultima_revisao:
+        template: "SELECT nom_usina, id_subsistema, AVG(val_cvu) AS cvu_medio\nFROM {source}\nWHERE ano_referencia\
+          \ = {year}\n  AND mes_referencia = {month}\n  AND num_revisao = (\n    SELECT MAX(num_revisao)\
+          \ FROM {source}\n    WHERE ano_referencia = {year} AND mes_referencia = {month}\n  )\nGROUP\
+          \ BY nom_usina, id_subsistema\nORDER BY cvu_medio DESC"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - cvu
+          grain: month
+        validated_params:
+          year: '2026'
+          month: '7'
+      cvu_comparacao_revisoes:
+        template: "SELECT num_revisao, AVG(val_cvu) AS cvu_medio\nFROM {source}\nWHERE ano_referencia\
+          \ = {year}\n  AND mes_referencia = {month}\n  AND id_subsistema = '{subsistema}'\nGROUP BY num_revisao\n\
+          ORDER BY num_revisao"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - cvu
+          grain: revision
+        validated_params:
+          year: '2026'
+          month: '7'
+          subsistema: N
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta CVU sem especificar revisao
+        assume_metric: cvu
+        assume_output: average
+        assume_filter: num_revisao = 4
+        note: 'Revisao 4 e a mais recente e representa o PMO consolidado. Consultas sem filtro de revisao
+          retornam multiplas linhas por usina/semana. — warn_user: True — warning_message: Usando revisao
+          mais recente disponivel (num_revisao = 4). Se desejar outra revisao, especifique (0 a 4).'
+      - when: usuario pergunta CVU medio sem especificar agregacao
+        assume_metric: cvu
+        assume_output: average
+        note: CVU e preco (R$/MWh) — media e a agregacao correta. SUM de CVU nao tem significado economico.
+      - when: usuario menciona custo marginal sem contexto de CMO
+        assume_metric: cvu
+        assume_output: average
+        note: No contexto de usinas termicas individuais, custo marginal refere-se ao CVU. CMO e conceito
+          de subsistema/sistema.
+      must_clarify_when:
+      - trigger_terms:
+        - ultima semana
+        - semana atual
+        - semana vigente
+        question: Voce quer a semana operativa mais recente disponivel no dataset (ate 2026-06-13) ou
+          uma semana especifica?
+        reason: Semana operativa e diferente de semana calendario. Requer identificacao do nom_semanaoperativa
+          ou dat_iniciosemana correto.
+      - trigger_terms:
+        - mais caro
+        - mais barato
+        - ranking
+        - top
+        question: Voce quer o ranking por CVU medio da ultima revisao do PMO ou de um periodo especifico?
+        reason: Sem filtro de revisao, a mesma usina aparece multiplas vezes (revisoes 0 a 4), distorcendo
+          rankings.
+      - trigger_terms:
+        - evolucao
+        - historico
+        - serie historica
+        question: Voce quer a serie historica por semana operativa, por mes de referencia ou por ano?
+        reason: Dataset tem granularidade semanal mas tambem possui mes_referencia e ano_referencia como
+          dimensoes do PMO.
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada. CVU zero pode indicar nuclear mas
+          nao e discriminado.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada. Dataset cobre apenas termicas despachadas centralizadamente.
+        redirect: dataset com coluna val_germmgd ou val_ger_mmgd quando disponivel
+      - user_mentions:
+        - gas natural
+        - carvao
+        - biomassa
+        - oleo diesel
+        - combustivel
+        reason: val_cvu nao discrimina por tipo de combustivel. Nao ha coluna de combustivel no schema
+          fisico deste dataset.
+        redirect: geracao-termica-despacho-2 ou dataset com coluna de tipo de combustivel
+      - user_mentions:
+        - PLD
+        - preco spot
+        - CMO
+        - custo marginal operacao
+        reason: Dataset contem CVU de usinas individuais, nao PLD ou CMO de subsistema.
+        redirect: dataset de PLD/CMO quando disponivel
+      - user_mentions:
+        - despacho horario
+        - geracao horaria
+        - MWmed
+        - MWh gerado
+        reason: Granularidade e semanal (CVU do PMO). Para geracao ou despacho horario use geracao-termica-despacho-2.
+        redirect: geracao-termica-despacho-2
+- property: fewShotQueries
+  value:
+  - question: Qual o CVU médio das usinas térmicas por subsistema na semana operativa mais recente disponível?
+    sql: WITH ultima_semana AS ( SELECT MAX(dat_iniciosemana) AS max_semana FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet')
+      ), revisao_maxima AS ( SELECT dat_iniciosemana, cod_usinaplanejamento, MAX(num_revisao) AS max_revisao
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet') WHERE dat_iniciosemana
+      = (SELECT max_semana FROM ultima_semana) GROUP BY dat_iniciosemana, cod_usinaplanejamento ) SELECT
+      c.id_subsistema, c.nom_subsistema, c.nom_semanaoperativa, COUNT(DISTINCT c.cod_usinaplanejamento)
+      AS qtd_usinas, ROUND(AVG(c.val_cvu), 2) AS cvu_medio, ROUND(MIN(c.val_cvu), 2) AS cvu_minimo, ROUND(MAX(c.val_cvu),
+      2) AS cvu_maximo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet')
+      AS c INNER JOIN revisao_maxima AS r ON c.dat_iniciosemana = r.dat_iniciosemana AND c.cod_usinaplanejamento
+      = r.cod_usinaplanejamento AND c.num_revisao = r.max_revisao WHERE c.id_subsistema != 'SIN' GROUP
+      BY c.id_subsistema, c.nom_subsistema, c.nom_semanaoperativa ORDER BY cvu_medio DESC
+  - question: Como evoluiu o CVU médio das usinas térmicas por subsistema ao longo dos anos?
+    sql: WITH revisao_maxima AS ( SELECT dat_iniciosemana, cod_usinaplanejamento, MAX(num_revisao) AS
+      max_revisao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet')
+      GROUP BY dat_iniciosemana, cod_usinaplanejamento ) SELECT c.ano_referencia, c.id_subsistema, c.nom_subsistema,
+      COUNT(DISTINCT c.cod_usinaplanejamento) AS qtd_usinas, ROUND(AVG(c.val_cvu), 2) AS cvu_medio_anual,
+      ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY c.val_cvu), 2) AS cvu_mediana_anual, ROUND(MAX(c.val_cvu),
+      2) AS cvu_maximo_anual FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet')
+      AS c INNER JOIN revisao_maxima AS r ON c.dat_iniciosemana = r.dat_iniciosemana AND c.cod_usinaplanejamento
+      = r.cod_usinaplanejamento AND c.num_revisao = r.max_revisao WHERE c.id_subsistema != 'SIN' AND c.val_cvu
+      > 0 GROUP BY c.ano_referencia, c.id_subsistema, c.nom_subsistema ORDER BY c.ano_referencia, c.id_subsistema
+  - question: Quais são as 20 usinas térmicas com maior CVU na programação mais recente?
+    sql: WITH ultima_semana AS ( SELECT MAX(dat_iniciosemana) AS max_semana FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet')
+      ), revisao_maxima AS ( SELECT dat_iniciosemana, cod_usinaplanejamento, MAX(num_revisao) AS max_revisao
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet') WHERE dat_iniciosemana
+      = (SELECT max_semana FROM ultima_semana) GROUP BY dat_iniciosemana, cod_usinaplanejamento ) SELECT
+      c.cod_usinaplanejamento, c.nom_usina, c.id_subsistema, c.nom_semanaoperativa, c.num_revisao, ROUND(c.val_cvu,
+      2) AS val_cvu FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cvu_usitermica_se/*.parquet')
+      AS c INNER JOIN revisao_maxima AS r ON c.dat_iniciosemana = r.dat_iniciosemana AND c.cod_usinaplanejamento
+      = r.cod_usinaplanejamento AND c.num_revisao = r.max_revisao ORDER BY c.val_cvu DESC LIMIT 20
+- property: relatedDatasets
+  value:
+    geracao-termica-despacho-2:
+      join_keys:
+      - cod_usinaplanejamento
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    restricao_coff_eolica_usi:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    geracao-usina-2:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    disponibilidade_usina:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    usina_pqu:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    reservatorio:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    capacidade-geracao:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    usina_conjunto:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    modalidade-usina:
+      join_keys:
+      - nom_usina
+    interrupcao_carga:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+- property: license
+  value: CC-BY

@@ -1,0 +1,889 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_qualid_dfp_regime
+name: ind_qualid_dfp_regime
+tenant: ons
+tags:
+- DFP
+- Desempenho da Frequência em Regime Permanente
+- ONS
+- SIN
+- Submódulo 9.7
+- frequência elétrica
+- ind_qualid_dfp
+- indicador de desempenho
+- indicador de frequência ONS
+- qualidade de energia
+- qualidade de frequência SIN
+- regime permanente
+- sistema interligado nacional
+- sobrefrequência
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_qualid_dfp_regime/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar a qualidade da frequência elétrica do Sistema Interligado Nacional, permitindo que
+    operadores do ONS, reguladores da ANEEL e analistas de desempenho avaliem a conformidade regulatória
+    da frequência, identifiquem períodos de degradação de qualidade, suportem relatórios de desempenho
+    operacional e subsidiem decisões de controle do sistema elétrico brasileiro conforme os Procedimentos
+    de Rede do ONS (Submódulo 9.7).
+  limitations: A coluna id_periodicidade mistura registros de três granularidades temporais distintas
+    (diário, mensal, anual) em uma única tabela. O valor mínimo de num_minutos é 1. Valor máximo de num_desvio_dist_sobre
+    é 2 minutos, indicando que eventos de sobrefrequência severa (distúrbio) são extremamente raros.
+  usage: Recuperar este dataset quando a pergunta envolver qualidade de frequência elétrica do sistema
+    interligado nacional, indicador DFP, desvios de frequência em regime permanente ou distúrbio, conformidade
+    regulatória de frequência conforme Submódulo 9.
+domain: qualidade
+schema:
+- name: ind_qualid_dfp_regime
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_qualid_dfp_regime
+  properties:
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro. Indica se o registro representa um agregado
+      diário, mensal ou anual do indicador DFP. Permite filtrar a granularidade temporal desejada na tabela
+      unificada. Valores possíveis: ''diario'', ''mensal'', ''anual''.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - granularidade
+      - frequência de agregação
+      - tipo de período
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - DI
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora de referência do registro. Para registros diários representa o dia de apuração;
+      para mensais, o primeiro dia do mês; para anuais, o primeiro dia do ano. Coluna temporal principal
+      para filtragem e ordenação cronológica da série.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - data
+      - data do indicador
+      - período de referência
+      - din_referencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_desvio_perm_sobre
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número de minutos em que a frequência do sistema ficou acima do limite superior da faixa
+      de regime permanente, conforme definido no Submódulo 9.7 dos Procedimentos de Rede do ONS. Representa
+      desvios positivos (sobrefrequência) em regime permanente no período de referência.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - desvio permanente acima
+      - sobrefrequência permanente
+      - minutos acima do limite superior
+      - desvio perm sobre
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: minutos
+  - name: num_desvio_perm_sub
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número de minutos em que a frequência do sistema ficou abaixo do limite inferior da
+      faixa de regime permanente, conforme definido no Submódulo 9.7 dos Procedimentos de Rede do ONS.
+      Representa desvios negativos (subfrequência) em regime permanente no período de referência.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - desvio permanente abaixo
+      - subfrequência permanente
+      - minutos abaixo do limite inferior
+      - desvio perm sub
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: minutos
+  - name: num_desvio_dist_sobre
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número de minutos em que a frequência do sistema ficou acima do limite superior da faixa
+      de distúrbio (banda mais larga), conforme Submódulo 9.7 dos Procedimentos de Rede do ONS. Representa
+      eventos de sobrefrequência severa (distúrbio) no período de referência. Valores tipicamente muito
+      baixos (máximo histórico: 2 minutos), indicando raridade desses eventos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - desvio distúrbio acima
+      - sobrefrequência distúrbio
+      - minutos acima do limite de distúrbio superior
+      - desvio dist sobre
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: minutos
+    - property: enum
+      value:
+      - 0
+      - 1
+      - 2
+  - name: num_desvio_dist_sub
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número de minutos em que a frequência do sistema ficou abaixo do limite inferior da
+      faixa de distúrbio (banda mais larga), conforme Submódulo 9.7 dos Procedimentos de Rede do ONS.
+      Representa eventos de subfrequência severa (distúrbio) no período de referência. Valores tipicamente
+      baixos (máximo histórico: 14 minutos), mais frequentes que sobrefrequência de distúrbio.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - desvio distúrbio abaixo
+      - subfrequência distúrbio
+      - minutos abaixo do limite de distúrbio inferior
+      - desvio dist sub
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: minutos
+    - property: enum
+      value:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+  - name: num_minutos
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Total de minutos no período de referência considerado no cálculo do indicador DFP. Para
+      registros diários: ~1.440 minutos (1 dia); para mensais: ~43.200 a ~44.640 minutos; para anuais:
+      ~525.600 a ~527.040 minutos. Permite identificar a periodicidade do registro e é o denominador implícito
+      no cálculo do DFP.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - total de minutos
+      - minutos do período
+      - duração do período
+      - minutos totais
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: minutos
+  - name: val_dfp
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Desempenho da Frequência em Regime Permanente (DFP), calculado
+      conforme Submódulo 9.7 dos Procedimentos de Rede do ONS. Índice normalizado entre 0 e 1, onde 1,0
+      representa desempenho perfeito (sem desvios) e valores menores indicam piora na qualidade de frequência.
+      No dataset, varia entre 0,975 e 1,0, indicando alto desempenho geral do sistema interligado nacional.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - DFP
+      - indicador DFP
+      - desempenho da frequência
+      - índice de frequência
+      - qualidade de frequência
+      - val DFP
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: adimensional (índice 0-1)
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_qualid_dfp_regime:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Referential integrity\n  - invalid_count(id_periodicidade) = 0:\n      valid\
+      \ values:\n        - 'AN'\n        - 'DI'\n        - 'ME'\n      name: id_periodicidade deve ser\
+      \ um dos valores válidos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count\
+      \ between 3216 and 4825:\n      name: Volume esperado entre 3,216 e 4,825 registros\n\n  # Unicidade\
+      \ da chave primária composta ['id_periodicidade', 'din_referencia'] (candidata LLM)\n  - failed\
+      \ rows:\n      name: Chave composta (id_periodicidade, din_referencia) não deve ter duplicatas\n\
+      \      fail query: |\n        SELECT * FROM ind_qualid_dfp_regime\n        WHERE (id_periodicidade,\
+      \ din_referencia) IN (\n          SELECT id_periodicidade, din_referencia FROM ind_qualid_dfp_regime\n\
+      \          GROUP BY id_periodicidade, din_referencia\n          HAVING COUNT(*) > 1\n        )\n\
+      \n  # Freshness: din_referencia deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_referencia)\
+      \ < 3d:\n      name: din_referencia não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_qualid_dfp_regime
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - frequencia do sistema no dia a dia
+  - desvio de frequencia em regime normal
+  - qualidade da frequencia eletrica
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver qualidade de frequência elétrica do sistema
+    interligado nacional, indicador DFP, desvios de frequência em regime permanente ou distúrbio, conformidade
+    regulatória de frequência conforme Submódulo 9.7 do ONS, ou análise de desempenho operacional da frequência
+    do SIN em periodicidades diária, mensal ou anual.
+- property: agentInstructions
+  value: '- [num_minutos] O valor mínimo de 1380 minutos para registros diários é inferior ao esperado
+    de 1440 minutos (24h × 60min). Pode indicar dias com dados incompletos, transição de horário de verão
+    ou registros com período de apuração truncado. Requer verificação antes de normalizar o DFP por minutos.
+
+
+    - [val_dfp] O valor mínimo de 0,975 representa o pior desempenho registrado no período. Registros
+    com val_dfp abaixo de 0,99 indicam degradação significativa da qualidade de frequência do SIN e devem
+    ser correlacionados com eventos operativos relevantes.
+
+
+    - [din_referencia] O dataset agrega três periodicidades (D, M, A) em um único arquivo. Para a série
+    diária, podem existir lacunas temporais não evidentes quando o dataset é consultado sem filtro de
+    id_periodicidade. Recomenda-se sempre filtrar por id_periodicidade antes de análises de continuidade
+    temporal.
+
+
+    - [num_desvio_perm_sub] O valor máximo de 913 ocorrências de desvio permanente de subfrequência é
+    consideravelmente superior ao máximo de sobrefrequência (456), e pode corresponder a períodos mensais
+    ou anuais agregados. Verificar se valores extremos estão associados exclusivamente a periodicidades
+    de agregação maior (M ou A).
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o valor médio do DFP no ano de 2023?
+  - Em quais dias o indicador DFP ficou abaixo de 0,990?
+  - Qual a tendência anual do DFP entre 2016 e 2025?
+  - Quantos minutos de desvio de distúrbio ocorreram em cada mês de 2022?
+  - Qual foi o pior mês em termos de qualidade de frequência (menor DFP mensal) desde 2016?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfp_regime/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2016-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - id_periodicidade
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dfp
+      label: Indicador DFP
+      columns:
+      - val_dfp
+      expression: val_dfp
+      quantity_kind: ratio
+      unit_native: adimensional (indice 0-1)
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - dfp
+      - DFP
+      - indicador DFP
+      - desempenho da frequencia
+      - indice de frequencia
+      - qualidade de frequencia
+      - conformidade de frequencia
+      aggregation_modes:
+        average:
+          sql: AVG(val_dfp)
+          unit: adimensional (indice 0-1)
+        maximum:
+          sql: MAX(val_dfp)
+          unit: adimensional (indice 0-1)
+        minimum:
+          sql: MIN(val_dfp)
+          unit: adimensional (indice 0-1)
+        time_series:
+          sql: AVG(val_dfp)
+          unit: adimensional (indice 0-1)
+        ranking:
+          sql: AVG(val_dfp)
+          unit: adimensional (indice 0-1)
+        comparison:
+          sql: AVG(val_dfp)
+          unit: adimensional (indice 0-1)
+      interval_hours: 24.0
+      aliases:
+      - DFP
+      - indicador DFP
+      - desempenho da frequencia
+      - indice de frequencia
+      - qualidade de frequencia
+      - val DFP
+    - id: desvio_perm_sobre
+      label: Minutos de Desvio Permanente de Sobrefrequencia
+      columns:
+      - num_desvio_perm_sobre
+      expression: num_desvio_perm_sobre
+      quantity_kind: duration_minutes
+      unit_native: minutos
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - desvio permanente acima
+      - sobrefrequencia permanente
+      - minutos acima do limite superior
+      - desvio perm sobre
+      - regime permanente sobrefrequencia
+      aggregation_modes:
+        total:
+          sql: SUM(num_desvio_perm_sobre)
+          unit: minutos
+        average:
+          sql: AVG(num_desvio_perm_sobre)
+          unit: minutos
+        maximum:
+          sql: MAX(num_desvio_perm_sobre)
+          unit: minutos
+        minimum:
+          sql: MIN(num_desvio_perm_sobre)
+          unit: minutos
+        time_series:
+          sql: SUM(num_desvio_perm_sobre)
+          unit: minutos
+        ranking:
+          sql: SUM(num_desvio_perm_sobre)
+          unit: minutos
+      interval_hours: 24.0
+      aliases:
+      - desvio permanente acima
+      - sobrefrequencia permanente
+      - minutos acima limite superior
+      - desvio perm sobre
+    - id: desvio_perm_sub
+      label: Minutos de Desvio Permanente de Subfrequencia
+      columns:
+      - num_desvio_perm_sub
+      expression: num_desvio_perm_sub
+      quantity_kind: duration_minutes
+      unit_native: minutos
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - desvio permanente abaixo
+      - subfrequencia permanente
+      - minutos abaixo do limite inferior
+      - desvio perm sub
+      - regime permanente subfrequencia
+      aggregation_modes:
+        total:
+          sql: SUM(num_desvio_perm_sub)
+          unit: minutos
+        average:
+          sql: AVG(num_desvio_perm_sub)
+          unit: minutos
+        maximum:
+          sql: MAX(num_desvio_perm_sub)
+          unit: minutos
+        minimum:
+          sql: MIN(num_desvio_perm_sub)
+          unit: minutos
+        time_series:
+          sql: SUM(num_desvio_perm_sub)
+          unit: minutos
+        ranking:
+          sql: SUM(num_desvio_perm_sub)
+          unit: minutos
+      interval_hours: 24.0
+      aliases:
+      - desvio permanente abaixo
+      - subfrequencia permanente
+      - minutos abaixo limite inferior
+      - desvio perm sub
+    - id: desvio_dist_sobre
+      label: Minutos de Desvio de Disturbio de Sobrefrequencia
+      columns:
+      - num_desvio_dist_sobre
+      expression: num_desvio_dist_sobre
+      quantity_kind: duration_minutes
+      unit_native: minutos
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - desvio disturbio acima
+      - sobrefrequencia disturbio
+      - minutos acima limite de disturbio superior
+      - desvio dist sobre
+      - disturbio sobrefrequencia severa
+      aggregation_modes:
+        total:
+          sql: SUM(num_desvio_dist_sobre)
+          unit: minutos
+        average:
+          sql: AVG(num_desvio_dist_sobre)
+          unit: minutos
+        maximum:
+          sql: MAX(num_desvio_dist_sobre)
+          unit: minutos
+        minimum:
+          sql: MIN(num_desvio_dist_sobre)
+          unit: minutos
+        time_series:
+          sql: SUM(num_desvio_dist_sobre)
+          unit: minutos
+        ranking:
+          sql: SUM(num_desvio_dist_sobre)
+          unit: minutos
+      interval_hours: 24.0
+      aliases:
+      - desvio disturbio acima
+      - sobrefrequencia disturbio
+      - minutos acima limite disturbio
+      - desvio dist sobre
+    - id: desvio_dist_sub
+      label: Minutos de Desvio de Disturbio de Subfrequencia
+      columns:
+      - num_desvio_dist_sub
+      expression: num_desvio_dist_sub
+      quantity_kind: duration_minutes
+      unit_native: minutos
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - desvio disturbio abaixo
+      - subfrequencia disturbio
+      - minutos abaixo limite de disturbio inferior
+      - desvio dist sub
+      - disturbio subfrequencia severa
+      aggregation_modes:
+        total:
+          sql: SUM(num_desvio_dist_sub)
+          unit: minutos
+        average:
+          sql: AVG(num_desvio_dist_sub)
+          unit: minutos
+        maximum:
+          sql: MAX(num_desvio_dist_sub)
+          unit: minutos
+        minimum:
+          sql: MIN(num_desvio_dist_sub)
+          unit: minutos
+        time_series:
+          sql: SUM(num_desvio_dist_sub)
+          unit: minutos
+        ranking:
+          sql: SUM(num_desvio_dist_sub)
+          unit: minutos
+      interval_hours: 24.0
+      aliases:
+      - desvio disturbio abaixo
+      - subfrequencia disturbio
+      - minutos abaixo limite disturbio
+      - desvio dist sub
+    - id: minutos_periodo
+      label: Total de Minutos do Periodo
+      columns:
+      - num_minutos
+      expression: num_minutos
+      quantity_kind: duration_minutes
+      unit_native: minutos
+      default_aggregation: average
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - total de minutos
+      - minutos do periodo
+      - duracao do periodo
+      - minutos totais
+      - denominador DFP
+      aggregation_modes:
+        average:
+          sql: AVG(num_minutos)
+          unit: minutos
+        maximum:
+          sql: MAX(num_minutos)
+          unit: minutos
+        minimum:
+          sql: MIN(num_minutos)
+          unit: minutos
+        time_series:
+          sql: AVG(num_minutos)
+          unit: minutos
+      interval_hours: 24.0
+      aliases:
+      - total de minutos
+      - minutos do periodo
+      - duracao do periodo
+      - minutos totais
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - dfp
+      - desvio_perm_sobre
+      - desvio_perm_sub
+      - desvio_dist_sobre
+      - desvio_dist_sub
+      - minutos_periodo
+      preferred_for:
+      - indicador DFP
+      - DFP regime permanente
+      - desvio frequencia permanente
+      - sobrefrequencia permanente SIN
+      - subfrequencia permanente SIN
+      - disturbio frequencia SIN
+      - sobrefrequencia disturbio
+      - subfrequencia disturbio
+      - Submodulo 9.7 frequencia
+      - conformidade frequencia ONS
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+      - DFD
+      - desligamento forcado
+      - CIPER
+      - severidade contingencia
+      - carregamento linhas
+      - CCAL
+    value_aliases:
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          - anual
+          - ano
+          - agregado anual
+          filter: id_periodicidade = 'AN'
+        DI:
+          aliases:
+          - DI
+          - diario
+          - dia
+          - diaria
+          - agregado diario
+          filter: id_periodicidade = 'DI'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          - agregado mensal
+          filter: id_periodicidade = 'ME'
+      num_desvio_dist_sobre:
+        '0':
+          aliases:
+          - '0'
+          filter: num_desvio_dist_sobre = 0
+        '1':
+          aliases:
+          - '1'
+          filter: num_desvio_dist_sobre = 1
+        '2':
+          aliases:
+          - '2'
+          filter: num_desvio_dist_sobre = 2
+      num_desvio_dist_sub:
+        '0':
+          aliases:
+          - '0'
+          filter: num_desvio_dist_sub = 0
+        '1':
+          aliases:
+          - '1'
+          filter: num_desvio_dist_sub = 1
+        '2':
+          aliases:
+          - '2'
+          filter: num_desvio_dist_sub = 2
+        '3':
+          aliases:
+          - '3'
+          filter: num_desvio_dist_sub = 3
+        '4':
+          aliases:
+          - '4'
+          filter: num_desvio_dist_sub = 4
+        '5':
+          aliases:
+          - '5'
+          filter: num_desvio_dist_sub = 5
+        '6':
+          aliases:
+          - '6'
+          filter: num_desvio_dist_sub = 6
+        '7':
+          aliases:
+          - '7'
+          filter: num_desvio_dist_sub = 7
+        '8':
+          aliases:
+          - '8'
+          filter: num_desvio_dist_sub = 8
+        '9':
+          aliases:
+          - '9'
+          filter: num_desvio_dist_sub = 9
+        '10':
+          aliases:
+          - '10'
+          filter: num_desvio_dist_sub = 10
+        '11':
+          aliases:
+          - '11'
+          filter: num_desvio_dist_sub = 11
+        '12':
+          aliases:
+          - '12'
+          filter: num_desvio_dist_sub = 12
+        '13':
+          aliases:
+          - '13'
+          filter: num_desvio_dist_sub = 13
+        '14':
+          aliases:
+          - '14'
+          filter: num_desvio_dist_sub = 14
+    sql_patterns:
+      dfp_medio_anual:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  AVG(val_dfp)\
+          \ AS dfp_medio\nFROM {source}\nWHERE id_periodicidade = 'AN'\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: adimensional (indice 0-1)
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - dfp
+          grain: year
+      dfp_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  AVG(val_dfp)\
+          \ AS dfp_medio\nFROM {source}\nWHERE id_periodicidade = 'ME'\n  AND EXTRACT(YEAR FROM din_referencia)\
+          \ = {year}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: adimensional (indice 0-1)
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - dfp
+          grain: month
+        validated_params:
+          year: '2026'
+      pior_mes_dfp:
+        template: "SELECT nom_agente,\n  DATE_TRUNC('month', TRY_CAST(din_referencia AS DATE)) AS mes,\n\
+          \  MAX(TRY_CAST(val_dfp_real AS DOUBLE)) AS pior_dfp\nFROM {source}\nGROUP BY nom_agente, DATE_TRUNC('month',\
+          \ TRY_CAST(din_referencia AS DATE))\nORDER BY pior_dfp DESC\nLIMIT 10"
+        output_unit: adimensional (indice 0-1)
+        matches:
+          output_modes:
+          - minimum
+          metrics:
+          - dfp
+          grain: month
+      desvios_disturbio_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  SUM(num_desvio_dist_sobre)\
+          \ AS minutos_dist_sobre,\n  SUM(num_desvio_dist_sub) AS minutos_dist_sub,\n  SUM(num_desvio_dist_sobre)\
+          \ + SUM(num_desvio_dist_sub) AS total_disturbio\nFROM {source}\nWHERE id_periodicidade = 'ME'\n\
+          \  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER\
+          \ BY 1\n"
+        output_unit: minutos
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - desvio_dist_sobre
+          - desvio_dist_sub
+          grain: month
+        validated_params:
+          year: '2026'
+      dias_dfp_abaixo_limiar:
+        template: "SELECT\n  din_referencia AS dia,\n  val_dfp\nFROM {source}\nWHERE id_periodicidade\
+          \ = 'DI'\n  AND val_dfp < {limiar}\nORDER BY val_dfp ASC\n"
+        output_unit: adimensional (indice 0-1)
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - dfp
+          grain: day
+        validated_params:
+          limiar: '1.0'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre DFP sem especificar periodicidade
+        assume_metric: dfp
+        assume_output: average
+        assume_filter: id_periodicidade = 'ME'
+        note: 'Periodicidade mensal e a mais util para analise de tendencia e conformidade regulatoria.
+          Sempre informar ao usuario qual periodicidade foi assumida.
+
+          '
+      - when: usuario pergunta sobre pior periodo de frequencia
+        assume_metric: dfp
+        assume_output: minimum
+        assume_filter: id_periodicidade = 'ME'
+        note: Menor val_dfp indica pior desempenho. Periodicidade mensal por padrao.
+      - when: usuario pergunta sobre desvios de frequencia sem especificar tipo
+        assume_metric: desvio_perm_sub
+        assume_output: total
+        note: 'Desvio permanente de subfrequencia e o mais frequente historicamente (max 913 min). Informar
+          usuario que existem 4 tipos: perm_sobre, perm_sub, dist_sobre, dist_sub.
+
+          '
+      - when: usuario pergunta sobre disturbio de frequencia sem especificar direcao
+        assume_metric: desvio_dist_sub
+        assume_output: total
+        note: 'Disturbio de subfrequencia e mais frequente que sobrefrequencia de disturbio. Sugerir consulta
+          conjunta de dist_sobre e dist_sub.
+
+          '
+      must_clarify_when:
+      - trigger_terms:
+        - desvio
+        - fora da faixa
+        question: 'Voce quer analisar desvios de regime permanente (banda estreita, Submodulo 9.7) ou
+          desvios de disturbio (banda larga, eventos severos)?
+
+          '
+        options:
+        - regime permanente sobrefrequencia (num_desvio_perm_sobre)
+        - regime permanente subfrequencia (num_desvio_perm_sub)
+        - disturbio sobrefrequencia (num_desvio_dist_sobre)
+        - disturbio subfrequencia (num_desvio_dist_sub)
+      - trigger_terms:
+        - tendencia
+        - evolucao
+        - historico
+        question: 'Qual periodicidade deseja para a serie historica: diaria (DI), mensal (ME) ou anual
+          (AN)?
+
+          '
+        options:
+        - diaria (DI) - granularidade maxima, pode ter lacunas
+        - mensal (ME) - recomendada para tendencias
+        - anual (AN) - visao de longo prazo
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - ranking de usinas
+        - geracao
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina. Dataset e nacional agregado.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - DFD
+        - desempenho disturbio
+        - frequencia em disturbio
+        reason: DFD e indicador distinto do DFP. Este dataset cobre apenas regime permanente.
+        redirect: ind_qualid_dfd_meano
+      - user_mentions:
+        - desligamento forcado
+        - CIPER
+        - indisponibilidade
+        reason: Indicadores de desligamento forcado pertencem a datasets de confiabilidade.
+        redirect: ind_confiarb_ciper
+      - user_mentions:
+        - severidade
+        - contingencia
+        reason: Indicadores de severidade de contingencia pertencem a dataset especifico.
+        redirect: ind_confiarb_severidade
+      - user_mentions:
+        - carregamento
+        - linha de transmissao
+        - CCAL
+        reason: Violacoes de carregamento de linhas pertencem ao dataset CCAL.
+        redirect: ind_confiarb_ccal
+- property: fewShotQueries
+  value:
+  - question: Qual foi a evolução do indicador DFP médio ao longo dos anos?
+    sql: SELECT YEAR(din_referencia) AS ano, ROUND(AVG(val_dfp), 6) AS dfp_medio, ROUND(MIN(val_dfp),
+      6) AS dfp_minimo, ROUND(MAX(val_dfp), 6) AS dfp_maximo, COUNT(*) AS qtd_dias FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfp_regime/*.parquet')
+      WHERE id_periodicidade = 'D' GROUP BY YEAR(din_referencia) ORDER BY ano;
+  - question: Quais foram os dias com maior degradação do DFP no histórico?
+    sql: SELECT CAST(din_referencia AS DATE) AS data, val_dfp, num_desvio_perm_sobre, num_desvio_perm_sub,
+      num_desvio_dist_sobre, num_desvio_dist_sub, num_minutos FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfp_regime/*.parquet')
+      WHERE id_periodicidade = 'D' AND val_dfp < 0.99 ORDER BY val_dfp ASC LIMIT 20;
+  - question: Como variam os desvios permanentes de subfrequência mês a mês?
+    sql: SELECT YEAR(din_referencia) AS ano, MONTH(din_referencia) AS mes, SUM(num_desvio_perm_sub) AS
+      total_desvios_sub, SUM(num_desvio_perm_sobre) AS total_desvios_sobre, ROUND(AVG(val_dfp), 6) AS
+      dfp_medio FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfp_regime/*.parquet')
+      WHERE id_periodicidade = 'D' GROUP BY YEAR(din_referencia), MONTH(din_referencia) ORDER BY ano,
+      mes;
+- property: relatedDatasets
+  value:
+    ind_confiarb_ccal:
+      join_keys:
+      - din_referencia
+      - id_periodicidade
+- property: license
+  value: CC-BY

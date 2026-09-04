@@ -1,0 +1,2561 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:geracao-termica-despacho-2
+name: geracao-termica-despacho-2
+tenant: ons
+tags:
+- constrained-off ONS
+- despacho térmico
+- despacho térmico motivo
+- geração termelétrica por motivo
+- inflexibilidade térmica
+- motivo de despacho ONS
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/geracao_termica_despacho_2_ho/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar analistas de operação, planejamento e regulação do setor elétrico brasileiro no acompanhamento
+    da conformidade do despacho térmico horário, auditoria de acionamentos fora da ordem de mérito, quantificação
+    de custos de inflexibilidade, análise de constrained-off e avaliação de eficiência do despacho centralizado
+    pelo ONS. Suporta decisões de regulação tarifária, análise de custo marginal de operação e monitoramento
+    de restrições elétricas que motivam despachos não econômicos.
+  limitations: A coluna val_fdexp apresenta 8,6% de nulos (aproximadamente 79. Aproximadamente 0,2% dos
+    registros (~1. Coluna armazenada como VARCHAR no dataset geracao-termica-despacho-2 devido ao formato
+    de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver geração de usinas termelétricas despachadas
+    pelo ONS com desagregação por motivo de despacho (ordem de mérito, inflexibilidade, razão elétrica,
+    GFOM, constrained-off, unit commitment, garantia energética, exportação ou reserva de potência) em
+    base horária para o período 2022–2024.
+domain: geração
+schema:
+- name: geracao_termica_despacho_2
+  physicalType: parquet
+  logicalType: object
+  physicalName: geracao_termica_despacho_2
+  properties:
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Instante de referência da medição horária de geração térmica por motivo de despacho
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - hora
+      - data_hora
+      - timestamp
+      - data_referencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: nom_tipopatamar
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do patamar de carga associado ao instante horário (Leve, Médio ou Pesado), conforme
+      classificação ONS
+    customProperties:
+    - property: aliases
+      value:
+      - patamar
+      - tipo_patamar
+      - patamar_carga
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - LEVE
+      - MÉDIA
+      - PESADA
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador/sigla do subsistema elétrico ao qual a usina pertence (SE, S, NE, N, SIN)
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sigla_subsistema
+      - cod_subsistema
+      - regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+    primaryKey: true
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual a usina pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - subsistema_nome
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina termelétrica despachada pelo ONS
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome_usina
+      - termica
+      - planta
+    - property: semanticType
+      value: DIMENSION
+    primaryKey: true
+  - name: cod_usinaplanejamento
+    physicalType: DOUBLE
+    logicalType: integer
+    description: Código numérico de planejamento da usina no sistema ONS; pode ser nulo em 0,2% dos registros
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_usina
+      - cod_usina
+      - id_usina_planejamento
+    - property: semanticType
+      value: IDENTIFIER
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL, identificador único da usina no cadastro
+      regulatório
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_empreendimento
+      - codigo_aneel
+      - id_empreendimento
+    - property: semanticType
+      value: IDENTIFIER
+  - name: val_proggeracao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração total programada da usina no instante horário (soma de todos os motivos de despacho
+      programados). Armazenado como VARCHAR pelo formato de serialização; converter com TRY_CAST para
+      uso analítico
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_programada
+      - prog_geracao
+      - geracao_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proggeracao AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_progordemmerito
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por ordem de mérito (despacho econômico na ordem de custo crescente).
+      Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_ordem_merito
+      - ordem_merito_programado
+      - despacho_merito
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progordemmerito AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_progordemdemeritoref
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por ordem de demérito de referência (despacho fora da ordem de mérito
+      por referência regulatória). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_ordem_demerito_ref
+      - demerito_referencia_programado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progordemdemeritoref AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_progordemdemeritoacimadainflex
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por ordem de demérito acima da inflexibilidade (despacho fora da ordem
+      de mérito acima do patamar inflexível). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_demerito_acima_inflex
+      - demerito_acima_inflexibilidade
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_proginflexibilidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por inflexibilidade total (soma de inflexibilidade embutida no mérito
+      e inflexibilidade pura). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_inflexibilidade
+      - inflexibilidade_programada
+      - inflex_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proginflexibilidade AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_proginflexembutmerito
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por inflexibilidade embutida no mérito (parcela inflexível que coincide
+      com despacho por ordem de mérito). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_inflex_embutida_merito
+      - inflexibilidade_embutida_merito
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proginflexembutmerito AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_proginflexpura
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por inflexibilidade pura (parcela inflexível fora da ordem de mérito,
+      sem justificativa econômica). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_inflex_pura
+      - inflexibilidade_pura_programada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proginflexpura AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_prograzaoeletrica
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por razão elétrica (despacho motivado por restrições de rede elétrica,
+      tensão ou estabilidade). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_razao_eletrica
+      - razao_eletrica_programada
+      - restricao_eletrica_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_prograzaoeletrica AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_proggarantiaenergetica
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por garantia energética (despacho para assegurar suprimento de energia
+      em condições críticas de armazenamento). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_garantia_energetica
+      - garantia_energetica_programada
+      - GE_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proggarantiaenergetica AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_proggfom
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por GFOM — Geração Fora da Ordem de Mérito (motivo genérico para despachos
+      não enquadrados nas demais categorias). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_gfom
+      - GFOM_programado
+      - fora_ordem_merito_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proggfom AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0E-8
+      - '139.00000000'
+      - '204.00000000'
+      - '350.00000000'
+      - '41.00000000'
+      - '500.00000000'
+      - '520.00000000'
+      - '989.00000000'
+      - '999.00000000'
+  - name: val_progreposicaoperdas
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada para reposição de perdas elétricas na transmissão. Armazenado como
+      VARCHAR pelo formato de serialização.0
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_progreposicaoperdas AS DOUBLE)
+    - property: enum
+      value:
+      - 0E-8
+  - name: val_progexportacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada destinada à exportação de energia para países vizinhos (Argentina,
+      Uruguai, Paraguai). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_exportacao
+      - exportacao_programada
+      - intercambio_exportacao_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progexportacao AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_progreservapotencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada para reserva de potência (despacho para garantir margem de reserva
+      operativa do sistema). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_reserva_potencia
+      - reserva_potencia_programada
+      - RPO_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progreservapotencia AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0E-8
+  - name: val_proggsub
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por GSUB — Geração de Substituição (despacho para substituir geração
+      de outra fonte indisponível). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_gsub
+      - geracao_substituicao_prog
+      - GSUB_programado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proggsub AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_progunitcommitment
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por unit commitment (despacho mínimo para manter unidade geradora
+      comprometida em operação). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_unit_commitment
+      - unit_commitment_programado
+      - UC_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progunitcommitment AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_progconstrainedoff
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada com constrained-off (usina despachada abaixo do mínimo técnico por
+      restrição de rede, com compensação financeira). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_constrained_off
+      - constrained_off_programado
+      - CO_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progconstrainedoff AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_proginflexibilidadedessem
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração programada por inflexibilidade de dessemelhança (inflexibilidade decorrente de
+      diferenças entre o despacho programado e o verificado em semanas anteriores). Armazenado como VARCHAR
+      pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - prog_inflex_dessem
+      - inflexibilidade_dessem_programada
+      - dessem_inflex_prog
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_proginflexibilidadedessem AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifgeracao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração total verificada (medida) da usina no instante horário (soma de todos os motivos
+      de despacho verificados). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_verificada
+      - verif_geracao
+      - geracao_medida
+      - geracao_real
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifgeracao AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifordemmerito
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por ordem de mérito. Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_ordem_merito
+      - ordem_merito_verificado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifordemmerito AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifordemdemeritoacimadainflex
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por ordem de demérito acima da inflexibilidade. Armazenado como VARCHAR
+      pelo formato de serialização.4
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE)
+  - name: val_verifinflexibilidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por inflexibilidade total. Armazenado como VARCHAR pelo formato de
+      serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_inflexibilidade
+      - inflexibilidade_verificada
+      - inflex_verif
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifinflexibilidade AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifinflexembutmerito
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por inflexibilidade embutida no mérito. Armazenado como VARCHAR pelo
+      formato de serialização.4
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_verifinflexembutmerito AS DOUBLE)
+  - name: val_verifinflexpura
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por inflexibilidade pura. Armazenado como VARCHAR pelo formato de
+      serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_inflex_pura
+      - inflexibilidade_pura_verificada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifinflexpura AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifrazaoeletrica
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por razão elétrica (restrições de rede). Armazenado como VARCHAR pelo
+      formato de serialização.4
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_verifrazaoeletrica AS DOUBLE)
+  - name: val_verifgarantiaenergetica
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por garantia energética. Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_garantia_energetica
+      - garantia_energetica_verificada
+      - GE_verif
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifgarantiaenergetica AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifgfom
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por GFOM (Geração Fora da Ordem de Mérito). Armazenado como VARCHAR
+      pelo formato de serialização.0
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_verifgfom AS DOUBLE)
+    - property: enum
+      value:
+      - '0.51700000'
+      - '0.52700000'
+      - '0.53300000'
+      - '0.53400000'
+      - '0.53550000'
+      - '0.53600000'
+      - '0.53750000'
+      - '0.54150000'
+      - '0.54400000'
+      - '0.54450000'
+      - '0.54500000'
+      - '0.54700000'
+      - '0.54900000'
+      - '0.55050000'
+      - '0.55200000'
+      - '0.55600000'
+      - '0.57000000'
+      - '0.57100000'
+      - '0.57300000'
+      - '0.57400000'
+      - '0.57500000'
+      - '0.57800000'
+      - '0.58550000'
+      - 0E-8
+  - name: val_verifreposicaoperdas
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada para reposição de perdas elétricas na transmissão. Armazenado como
+      VARCHAR pelo formato de serialização.0
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_verifreposicaoperdas AS DOUBLE)
+    - property: enum
+      value:
+      - 0E-8
+  - name: val_verifexportacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada destinada à exportação de energia. Armazenado como VARCHAR pelo formato
+      de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_exportacao
+      - exportacao_verificada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifexportacao AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_fdexp
+    physicalType: VARCHAR
+    logicalType: string
+    description: Fator de disponibilidade para exportação (FDEXP) — fator que pondera a capacidade disponível
+      da usina para fins de exportação. Apresenta 8,6% de nulos, sendo a única coluna com ausência relevante.
+      Armazenado como VARCHAR por formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - fdexp
+      - fator_disponibilidade_exportacao
+      - fator_exportacao
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_fdexp AS DOUBLE)
+    - property: enum
+      value:
+      - '0.0'
+      - '0.5'
+      - '1.0'
+  - name: val_verifreservapotencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada para reserva de potência operativa. Armazenado como VARCHAR pelo formato
+      de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_reserva_potencia
+      - reserva_potencia_verificada
+      - RPO_verif
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifreservapotencia AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0E-8
+  - name: val_atendsatisfatoriorpo
+    physicalType: VARCHAR
+    logicalType: string
+    description: Indicador de atendimento satisfatório à Reserva de Potência Operativa (RPO) — valor numérico
+      que indica se a reserva de potência foi atendida satisfatoriamente no instante. Armazenado como
+      VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - atend_satisfatorio_rpo
+      - atendimento_rpo
+      - satisfatorio_reserva_potencia
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE)
+    - property: enum
+      value:
+      - 0E-8
+  - name: val_verifgsub
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por GSUB (Geração de Substituição). Armazenado como VARCHAR pelo formato
+      de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_gsub
+      - geracao_substituicao_verif
+      - GSUB_verificado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifgsub AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifunitcommitment
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada por unit commitment. Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_unit_commitment
+      - unit_commitment_verificado
+      - UC_verif
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifunitcommitment AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_verifconstrainedoff
+    physicalType: VARCHAR
+    logicalType: string
+    description: Geração verificada com constrained-off (usina operando abaixo do mínimo técnico por restrição
+      de rede). Armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - verif_constrained_off
+      - constrained_off_verificado
+      - CO_verif
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_verifconstrainedoff AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: tip_restricaoeletrica
+    physicalType: DOUBLE
+    logicalType: integer
+    description: Código numérico da restrição elétrica associada ao despacho da usina no instante. Valor
+      0 indica ausência de restrição elétrica; valores de 1 a 1078 identificam restrições específicas
+      de rede cadastradas no sistema ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - restricao_eletrica
+      - codigo_restricao_eletrica
+      - tipo_restricao
+      - restricao_rede
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 0
+      - 1
+      - 9
+      - 1078
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for geracao_termica_despacho_2:\n  - row_count > 0:\n      name: Tabela não\
+      \ pode estar vazia\n\n  # Referential integrity\n  - invalid_count(nom_tipopatamar) = 0:\n     \
+      \ valid values:\n        - 'LEVE'\n        - 'MÉDIA'\n        - 'PESADA'\n      name: nom_tipopatamar\
+      \ deve ser um dos valores válidos\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n\
+      \        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser\
+      \ um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        -\
+      \ 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE'\n        - 'SUL'\n      name: nom_subsistema\
+      \ deve ser um dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de\
+      \ origem)\n  - missing_percent(val_proggeracao) < 5:\n      name: val_proggeracao não pode ter >5%\
+      \ nulos\n  - missing_percent(val_progordemmerito) < 5:\n      name: val_progordemmerito não pode\
+      \ ter >5% nulos\n  - missing_percent(val_progordemdemeritoref) < 5:\n      name: val_progordemdemeritoref\
+      \ não pode ter >5% nulos\n  - missing_percent(val_progordemdemeritoacimadainflex) < 5:\n      name:\
+      \ val_progordemdemeritoacimadainflex não pode ter >5% nulos\n  - missing_percent(val_proginflexibilidade)\
+      \ < 5:\n      name: val_proginflexibilidade não pode ter >5% nulos\n  - missing_percent(val_proginflexembutmerito)\
+      \ < 5:\n      name: val_proginflexembutmerito não pode ter >5% nulos\n  - missing_percent(val_proginflexpura)\
+      \ < 5:\n      name: val_proginflexpura não pode ter >5% nulos\n  - missing_percent(val_prograzaoeletrica)\
+      \ < 5:\n      name: val_prograzaoeletrica não pode ter >5% nulos\n  - missing_percent(val_proggarantiaenergetica)\
+      \ < 5:\n      name: val_proggarantiaenergetica não pode ter >5% nulos\n  - missing_percent(val_proggfom)\
+      \ < 5:\n      name: val_proggfom não pode ter >5% nulos\n  - missing_percent(val_progreposicaoperdas)\
+      \ < 5:\n      name: val_progreposicaoperdas não pode ter >5% nulos\n  - missing_percent(val_progexportacao)\
+      \ < 5:\n      name: val_progexportacao não pode ter >5% nulos\n  - missing_percent(val_progreservapotencia)\
+      \ < 5:\n      name: val_progreservapotencia não pode ter >5% nulos\n  - missing_percent(val_proggsub)\
+      \ < 5:\n      name: val_proggsub não pode ter >5% nulos\n  - missing_percent(val_progunitcommitment)\
+      \ < 5:\n      name: val_progunitcommitment não pode ter >5% nulos\n  - missing_percent(val_progconstrainedoff)\
+      \ < 5:\n      name: val_progconstrainedoff não pode ter >5% nulos\n  - missing_percent(val_proginflexibilidadedessem)\
+      \ < 5:\n      name: val_proginflexibilidadedessem não pode ter >5% nulos\n  - missing_percent(val_verifgeracao)\
+      \ < 5:\n      name: val_verifgeracao não pode ter >5% nulos\n  - missing_percent(val_verifordemmerito)\
+      \ < 5:\n      name: val_verifordemmerito não pode ter >5% nulos\n  - missing_percent(val_verifordemdemeritoacimadainflex)\
+      \ < 5:\n      name: val_verifordemdemeritoacimadainflex não pode ter >5% nulos\n  - missing_percent(val_verifinflexibilidade)\
+      \ < 5:\n      name: val_verifinflexibilidade não pode ter >5% nulos\n  - missing_percent(val_verifinflexembutmerito)\
+      \ < 5:\n      name: val_verifinflexembutmerito não pode ter >5% nulos\n  - missing_percent(val_verifinflexpura)\
+      \ < 5:\n      name: val_verifinflexpura não pode ter >5% nulos\n  - missing_percent(val_verifrazaoeletrica)\
+      \ < 5:\n      name: val_verifrazaoeletrica não pode ter >5% nulos\n  - missing_percent(val_verifgarantiaenergetica)\
+      \ < 5:\n      name: val_verifgarantiaenergetica não pode ter >5% nulos\n  - missing_percent(val_verifgfom)\
+      \ < 5:\n      name: val_verifgfom não pode ter >5% nulos\n  - missing_percent(val_verifreposicaoperdas)\
+      \ < 5:\n      name: val_verifreposicaoperdas não pode ter >5% nulos\n  - missing_percent(val_verifexportacao)\
+      \ < 5:\n      name: val_verifexportacao não pode ter >5% nulos\n  - missing_percent(val_fdexp) <\
+      \ 5:\n      name: val_fdexp não pode ter >5% nulos\n  - missing_percent(val_verifreservapotencia)\
+      \ < 5:\n      name: val_verifreservapotencia não pode ter >5% nulos\n  - missing_percent(val_atendsatisfatoriorpo)\
+      \ < 5:\n      name: val_atendsatisfatoriorpo não pode ter >5% nulos\n  - missing_percent(val_verifgsub)\
+      \ < 5:\n      name: val_verifgsub não pode ter >5% nulos\n  - missing_percent(val_verifunitcommitment)\
+      \ < 5:\n      name: val_verifunitcommitment não pode ter >5% nulos\n  - missing_percent(val_verifconstrainedoff)\
+      \ < 5:\n      name: val_verifconstrainedoff não pode ter >5% nulos\n\n  # Unicidade da chave primária\
+      \ composta ['din_instante', 'ceg', 'tip_restricaoeletrica'] (candidata LLM)\n  - failed rows:\n\
+      \      name: Chave composta (din_instante, ceg, tip_restricaoeletrica) não deve ter duplicatas\n\
+      \      fail query: |\n        SELECT * FROM geracao_termica_despacho_2\n        WHERE (din_instante,\
+      \ ceg, tip_restricaoeletrica) IN (\n          SELECT din_instante, ceg, tip_restricaoeletrica FROM\
+      \ geracao_termica_despacho_2\n          GROUP BY din_instante, ceg, tip_restricaoeletrica\n    \
+      \      HAVING COUNT(*) > 1\n        )\n\n  # Nulos em val_fdexp — alerta de qualidade (real=0%,\
+      \ threshold=5.0%)\n  - missing_percent(val_fdexp) < 5.0:\n      name: val_fdexp não deve ter >5.0%\
+      \ nulos\n\n  # Nulos em cod_usinaplanejamento — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(cod_usinaplanejamento) < 5.0:\n      name: cod_usinaplanejamento não deve ter\
+      \ >5.0% nulos\n\n  # Freshness: din_instante deve ter dados recentes (SLA: Atualizado diariamente)\n\
+      \  - freshness(din_instante) < 3d:\n      name: din_instante não pode ter dados com mais de 3 dias\
+      \ de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/geracao-termica-despacho-2
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - por que a termica foi despachada
+  - motivo do despacho termico
+  - termicas ligadas por inflexibilidade
+  - quais termicas foram acionadas
+  - despacho fora da ordem de merito
+  - razao do acionamento termico
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver geração de usinas termelétricas despachadas
+    pelo ONS com desagregação por motivo de despacho (ordem de mérito, inflexibilidade, razão elétrica,
+    GFOM, constrained-off, unit commitment, garantia energética, exportação ou reserva de potência) em
+    base horária para o período 2022–2024. Também relevante para análises de conformidade de despacho,
+    custo de inflexibilidade, auditoria de despachos fora da ordem de mérito e comparação entre valores
+    programados e verificados por usina.
+- property: agentInstructions
+  value: |
+    - [val_proggeracao] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Contém valores numéricos de geração programada em MWmed que requerem conversão explícita para uso em agregações SQL no dataset geracao-termica-despacho-2.
+
+    - [val_verifgeracao] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Contém valores numéricos de geração verificada em MWmed que requerem conversão explícita para uso em agregações SQL no dataset geracao-termica-despacho-2.
+
+    - [val_fdexp] Única coluna com ausência relevante de dados no dataset geracao-termica-despacho-2 — 8,6% de nulos (~79.672 registros). Pode indicar que o fator de disponibilidade para exportação não é calculado para usinas sem contrato de exportação ou em períodos sem demanda de exportação.
+
+    - [cod_usinaplanejamento] Apresenta 0,2% de nulos (~1.853 registros) no dataset geracao-termica-despacho-2, possivelmente para usinas recém-cadastradas ou sem código atribuído no sistema de planejamento ONS. Impacta joins que utilizam este campo como chave.
+
+    - [val_progordemdemeritoref] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização no dataset geracao-termica-despacho-2. Verificar se há registros com valores não conversíveis que possam indicar strings inválidas além do comportamento padrão.
+
+    - [val_progconstrainedoff] Valores de constrained-off programado podem ser negativos no contexto ONS do dataset geracao-termica-despacho-2, representando constrained-on (despacho forçado acima do mérito). Verificar distribuição de valores negativos para validar consistência operacional.
+
+    - [val_verifconstrainedoff] Valores de constrained-off verificado podem ser negativos (constrained-on efetivo) no dataset geracao-termica-despacho-2. Verificar distribuição para validar consistência entre programado e verificado.
+
+    - [din_instante] Verificar se há horas faltantes na série temporal do dataset geracao-termica-despacho-2 para usinas com presença contínua no período 2022-2024, o que poderia indicar falhas de coleta ou processamento dos dados horários.
+
+    - [tip_restricaoeletrica] Coluna INTEGER com valores entre 0 e 1078 no dataset geracao-termica-despacho-2. Valores muito elevados (acima de 500) podem representar códigos de restrições especiais ou erros de codificação. Verificar distribuição para identificar concentração em valores extremos.
+
+    - [val_fdexp] Coluna 'val_fdexp' ausente em arquivos históricos (ex: GERACAO_TERMICA_DESPACHO-2_2022_01.parquet). Presente apenas a partir de versões recentes (ex: GERACAO_TERMICA_DESPACHO_2024.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [tipos] As colunas de código `cod_usinaplanejamento` variam entre inteiro e decimal entre arquivos; compare-as como número, não como texto.
+- property: typicalQuestions
+  value:
+  - Qual foi a geração térmica total programada e verificada por subsistema em 2023?
+  - Quais usinas termelétricas tiveram maior volume de despacho por inflexibilidade pura no período 2022–2024?
+  - Qual a diferença entre geração programada e verificada (desvio de despacho) por usina no último trimestre?
+  - Quais usinas apresentaram constrained-off e qual o volume total de MW afetados por mês?
+  - Qual a participação percentual de cada motivo de despacho (ordem de mérito, inflexibilidade, razão
+    elétrica, GFOM) na geração térmica total do SIN?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet(['s3://ons-aws-prod-opendata/dataset/geracao_termica_despacho_2_ho/GERACAO_TERMICA_DESPACHO_201*.parquet',
+    's3://ons-aws-prod-opendata/dataset/geracao_termica_despacho_2_ho/GERACAO_TERMICA_DESPACHO_202[01].parquet',
+    's3://ons-aws-prod-opendata/dataset/geracao_termica_despacho_2_ho/GERACAO_TERMICA_DESPACHO-2_*.parquet'],
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2013-01-01'
+- property: semantics
+  value:
+    temporal_perspective: programado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - ceg
+      - nom_usina
+      - tip_restricaoeletrica
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: proggeracao
+      label: Proggeracao
+      columns:
+      - val_proggeracao
+      expression: TRY_CAST(val_proggeracao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proggeracao
+      - geracao_programada
+      - prog_geracao
+      - geracao_prog
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_proggeracao AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_proggeracao AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_proggeracao AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_proggeracao AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_proggeracao AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_proggeracao AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geracao_programada
+      - prog_geracao
+      - geracao_prog
+    - id: progordemmerito
+      label: Progordemmerito
+      columns:
+      - val_progordemmerito
+      expression: TRY_CAST(val_progordemmerito AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progordemmerito
+      - prog_ordem_merito
+      - ordem_merito_programado
+      - despacho_merito
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progordemmerito AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progordemmerito AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progordemmerito AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progordemmerito AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progordemmerito AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progordemmerito AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_ordem_merito
+      - ordem_merito_programado
+      - despacho_merito
+    - id: progordemdemeritoref
+      label: Progordemdemeritoref
+      columns:
+      - val_progordemdemeritoref
+      expression: TRY_CAST(val_progordemdemeritoref AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progordemdemeritoref
+      - prog_ordem_demerito_ref
+      - demerito_referencia_programado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progordemdemeritoref AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progordemdemeritoref AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progordemdemeritoref AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progordemdemeritoref AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progordemdemeritoref AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progordemdemeritoref AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_ordem_demerito_ref
+      - demerito_referencia_programado
+    - id: progordemdemeritoacimadainflex
+      label: Progordemdemeritoacimadainflex
+      columns:
+      - val_progordemdemeritoacimadainflex
+      expression: TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progordemdemeritoacimadainflex
+      - prog_demerito_acima_inflex
+      - demerito_acima_inflexibilidade
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_demerito_acima_inflex
+      - demerito_acima_inflexibilidade
+    - id: proginflexibilidade
+      label: Proginflexibilidade
+      columns:
+      - val_proginflexibilidade
+      expression: TRY_CAST(val_proginflexibilidade AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proginflexibilidade
+      - prog_inflexibilidade
+      - inflexibilidade_programada
+      - inflex_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proginflexibilidade AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proginflexibilidade AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proginflexibilidade AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proginflexibilidade AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proginflexibilidade AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proginflexibilidade AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_inflexibilidade
+      - inflexibilidade_programada
+      - inflex_prog
+    - id: proginflexembutmerito
+      label: Proginflexembutmerito
+      columns:
+      - val_proginflexembutmerito
+      expression: TRY_CAST(val_proginflexembutmerito AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proginflexembutmerito
+      - prog_inflex_embutida_merito
+      - inflexibilidade_embutida_merito
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proginflexembutmerito AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proginflexembutmerito AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proginflexembutmerito AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proginflexembutmerito AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proginflexembutmerito AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proginflexembutmerito AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_inflex_embutida_merito
+      - inflexibilidade_embutida_merito
+    - id: proginflexpura
+      label: Proginflexpura
+      columns:
+      - val_proginflexpura
+      expression: TRY_CAST(val_proginflexpura AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proginflexpura
+      - prog_inflex_pura
+      - inflexibilidade_pura_programada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proginflexpura AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proginflexpura AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proginflexpura AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proginflexpura AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proginflexpura AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proginflexpura AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_inflex_pura
+      - inflexibilidade_pura_programada
+    - id: prograzaoeletrica
+      label: Prograzaoeletrica
+      columns:
+      - val_prograzaoeletrica
+      expression: TRY_CAST(val_prograzaoeletrica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - prograzaoeletrica
+      - prog_razao_eletrica
+      - razao_eletrica_programada
+      - restricao_eletrica_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_prograzaoeletrica AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_prograzaoeletrica AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_prograzaoeletrica AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_prograzaoeletrica AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_prograzaoeletrica AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_prograzaoeletrica AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_razao_eletrica
+      - razao_eletrica_programada
+      - restricao_eletrica_prog
+    - id: proggarantiaenergetica
+      label: Proggarantiaenergetica
+      columns:
+      - val_proggarantiaenergetica
+      expression: TRY_CAST(val_proggarantiaenergetica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proggarantiaenergetica
+      - prog_garantia_energetica
+      - garantia_energetica_programada
+      - GE_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proggarantiaenergetica AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proggarantiaenergetica AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proggarantiaenergetica AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proggarantiaenergetica AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proggarantiaenergetica AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proggarantiaenergetica AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_garantia_energetica
+      - garantia_energetica_programada
+      - GE_prog
+    - id: proggfom
+      label: Proggfom
+      columns:
+      - val_proggfom
+      expression: TRY_CAST(val_proggfom AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proggfom
+      - prog_gfom
+      - GFOM_programado
+      - fora_ordem_merito_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proggfom AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proggfom AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proggfom AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proggfom AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proggfom AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proggfom AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_gfom
+      - GFOM_programado
+      - fora_ordem_merito_prog
+    - id: progreposicaoperdas
+      label: Progreposicaoperdas
+      columns:
+      - val_progreposicaoperdas
+      expression: TRY_CAST(val_progreposicaoperdas AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progreposicaoperdas
+      - prog_reposicao_perdas
+      - reposicao_perdas_programada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progreposicaoperdas AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progreposicaoperdas AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progreposicaoperdas AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progreposicaoperdas AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progreposicaoperdas AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progreposicaoperdas AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_reposicao_perdas
+      - reposicao_perdas_programada
+    - id: progexportacao
+      label: Progexportacao
+      columns:
+      - val_progexportacao
+      expression: TRY_CAST(val_progexportacao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progexportacao
+      - prog_exportacao
+      - exportacao_programada
+      - intercambio_exportacao_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progexportacao AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progexportacao AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progexportacao AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progexportacao AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progexportacao AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progexportacao AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_exportacao
+      - exportacao_programada
+      - intercambio_exportacao_prog
+    - id: progreservapotencia
+      label: Progreservapotencia
+      columns:
+      - val_progreservapotencia
+      expression: TRY_CAST(val_progreservapotencia AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progreservapotencia
+      - prog_reserva_potencia
+      - reserva_potencia_programada
+      - RPO_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progreservapotencia AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_progreservapotencia AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_progreservapotencia AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_progreservapotencia AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_progreservapotencia AS DOUBLE))
+          unit: MW
+      interval_hours: 1.0
+      aliases:
+      - prog_reserva_potencia
+      - reserva_potencia_programada
+      - RPO_prog
+    - id: proggsub
+      label: Proggsub
+      columns:
+      - val_proggsub
+      expression: TRY_CAST(val_proggsub AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proggsub
+      - prog_gsub
+      - geracao_substituicao_prog
+      - GSUB_programado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proggsub AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proggsub AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proggsub AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proggsub AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proggsub AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proggsub AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_gsub
+      - geracao_substituicao_prog
+      - GSUB_programado
+    - id: progunitcommitment
+      label: Progunitcommitment
+      columns:
+      - val_progunitcommitment
+      expression: TRY_CAST(val_progunitcommitment AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progunitcommitment
+      - prog_unit_commitment
+      - unit_commitment_programado
+      - UC_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progunitcommitment AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progunitcommitment AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progunitcommitment AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progunitcommitment AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progunitcommitment AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progunitcommitment AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_unit_commitment
+      - unit_commitment_programado
+      - UC_prog
+    - id: progconstrainedoff
+      label: Progconstrainedoff
+      columns:
+      - val_progconstrainedoff
+      expression: TRY_CAST(val_progconstrainedoff AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - progconstrainedoff
+      - prog_constrained_off
+      - constrained_off_programado
+      - CO_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progconstrainedoff AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_progconstrainedoff AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_progconstrainedoff AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_progconstrainedoff AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_progconstrainedoff AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_progconstrainedoff AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_constrained_off
+      - constrained_off_programado
+      - CO_prog
+    - id: proginflexibilidadedessem
+      label: Proginflexibilidadedessem
+      columns:
+      - val_proginflexibilidadedessem
+      expression: TRY_CAST(val_proginflexibilidadedessem AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - proginflexibilidadedessem
+      - prog_inflex_dessem
+      - inflexibilidade_dessem_programada
+      - dessem_inflex_prog
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_proginflexibilidadedessem AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_proginflexibilidadedessem AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_proginflexibilidadedessem AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_proginflexibilidadedessem AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_proginflexibilidadedessem AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_proginflexibilidadedessem AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - prog_inflex_dessem
+      - inflexibilidade_dessem_programada
+      - dessem_inflex_prog
+    - id: verifgeracao
+      label: Verifgeracao
+      columns:
+      - val_verifgeracao
+      expression: TRY_CAST(val_verifgeracao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifgeracao
+      - geracao_verificada
+      - verif_geracao
+      - geracao_medida
+      - geracao_real
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_verifgeracao AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_verifgeracao AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_verifgeracao AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_verifgeracao AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_verifgeracao AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_verifgeracao AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geracao_verificada
+      - verif_geracao
+      - geracao_medida
+      - geracao_real
+    - id: verifordemmerito
+      label: Verifordemmerito
+      columns:
+      - val_verifordemmerito
+      expression: TRY_CAST(val_verifordemmerito AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifordemmerito
+      - verif_ordem_merito
+      - ordem_merito_verificado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifordemmerito AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifordemmerito AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifordemmerito AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifordemmerito AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifordemmerito AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifordemmerito AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_ordem_merito
+      - ordem_merito_verificado
+    - id: verifordemdemeritoacimadainflex
+      label: Verifordemdemeritoacimadainflex
+      columns:
+      - val_verifordemdemeritoacimadainflex
+      expression: TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifordemdemeritoacimadainflex
+      - verif_demerito_acima_inflex
+      - demerito_acima_inflexibilidade_verificado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifordemdemeritoacimadainflex AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_demerito_acima_inflex
+      - demerito_acima_inflexibilidade_verificado
+    - id: verifinflexibilidade
+      label: Verifinflexibilidade
+      columns:
+      - val_verifinflexibilidade
+      expression: TRY_CAST(val_verifinflexibilidade AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifinflexibilidade
+      - verif_inflexibilidade
+      - inflexibilidade_verificada
+      - inflex_verif
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifinflexibilidade AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifinflexibilidade AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifinflexibilidade AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifinflexibilidade AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifinflexibilidade AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifinflexibilidade AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_inflexibilidade
+      - inflexibilidade_verificada
+      - inflex_verif
+    - id: verifinflexembutmerito
+      label: Verifinflexembutmerito
+      columns:
+      - val_verifinflexembutmerito
+      expression: TRY_CAST(val_verifinflexembutmerito AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifinflexembutmerito
+      - verif_inflex_embutida_merito
+      - inflexibilidade_embutida_merito_verificada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifinflexembutmerito AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifinflexembutmerito AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifinflexembutmerito AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifinflexembutmerito AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifinflexembutmerito AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifinflexembutmerito AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_inflex_embutida_merito
+      - inflexibilidade_embutida_merito_verificada
+    - id: verifinflexpura
+      label: Verifinflexpura
+      columns:
+      - val_verifinflexpura
+      expression: TRY_CAST(val_verifinflexpura AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifinflexpura
+      - verif_inflex_pura
+      - inflexibilidade_pura_verificada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifinflexpura AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifinflexpura AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifinflexpura AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifinflexpura AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifinflexpura AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifinflexpura AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_inflex_pura
+      - inflexibilidade_pura_verificada
+    - id: verifrazaoeletrica
+      label: Verifrazaoeletrica
+      columns:
+      - val_verifrazaoeletrica
+      expression: TRY_CAST(val_verifrazaoeletrica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifrazaoeletrica
+      - verif_razao_eletrica
+      - razao_eletrica_verificada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifrazaoeletrica AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifrazaoeletrica AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifrazaoeletrica AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifrazaoeletrica AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifrazaoeletrica AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifrazaoeletrica AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_razao_eletrica
+      - razao_eletrica_verificada
+    - id: verifgarantiaenergetica
+      label: Verifgarantiaenergetica
+      columns:
+      - val_verifgarantiaenergetica
+      expression: TRY_CAST(val_verifgarantiaenergetica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifgarantiaenergetica
+      - verif_garantia_energetica
+      - garantia_energetica_verificada
+      - GE_verif
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifgarantiaenergetica AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifgarantiaenergetica AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifgarantiaenergetica AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifgarantiaenergetica AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifgarantiaenergetica AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifgarantiaenergetica AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_garantia_energetica
+      - garantia_energetica_verificada
+      - GE_verif
+    - id: verifgfom
+      label: Verifgfom
+      columns:
+      - val_verifgfom
+      expression: TRY_CAST(val_verifgfom AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifgfom
+      - verif_gfom
+      - GFOM_verificado
+      - fora_ordem_merito_verif
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifgfom AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifgfom AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifgfom AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifgfom AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifgfom AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifgfom AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_gfom
+      - GFOM_verificado
+      - fora_ordem_merito_verif
+    - id: verifreposicaoperdas
+      label: Verifreposicaoperdas
+      columns:
+      - val_verifreposicaoperdas
+      expression: TRY_CAST(val_verifreposicaoperdas AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifreposicaoperdas
+      - verif_reposicao_perdas
+      - reposicao_perdas_verificada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifreposicaoperdas AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifreposicaoperdas AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifreposicaoperdas AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifreposicaoperdas AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifreposicaoperdas AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifreposicaoperdas AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_reposicao_perdas
+      - reposicao_perdas_verificada
+    - id: verifexportacao
+      label: Verifexportacao
+      columns:
+      - val_verifexportacao
+      expression: TRY_CAST(val_verifexportacao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifexportacao
+      - verif_exportacao
+      - exportacao_verificada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifexportacao AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifexportacao AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifexportacao AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifexportacao AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifexportacao AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifexportacao AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_exportacao
+      - exportacao_verificada
+    - id: fdexp
+      label: Fdexp
+      columns:
+      - val_fdexp
+      expression: TRY_CAST(val_fdexp AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: adimensional
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - fdexp
+      - fator_disponibilidade_exportacao
+      - fator_exportacao
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_fdexp AS DOUBLE))
+          unit: adimensional
+        maximum:
+          sql: MAX(TRY_CAST(val_fdexp AS DOUBLE))
+          unit: adimensional
+        minimum:
+          sql: MIN(TRY_CAST(val_fdexp AS DOUBLE))
+          unit: adimensional
+        time_series:
+          sql: AVG(TRY_CAST(val_fdexp AS DOUBLE))
+          unit: adimensional
+        comparison:
+          sql: AVG(TRY_CAST(val_fdexp AS DOUBLE))
+          unit: adimensional
+      interval_hours: 1.0
+      aliases:
+      - fdexp
+      - fator_disponibilidade_exportacao
+      - fator_exportacao
+    - id: verifreservapotencia
+      label: Verifreservapotencia
+      columns:
+      - val_verifreservapotencia
+      expression: TRY_CAST(val_verifreservapotencia AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifreservapotencia
+      - verif_reserva_potencia
+      - reserva_potencia_verificada
+      - RPO_verif
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifreservapotencia AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_verifreservapotencia AS DOUBLE))
+          unit: MW
+        time_series: sql
+      interval_hours: 1.0
+    - id: atendsatisfatoriorpo
+      label: Atendsatisfatoriorpo
+      columns:
+      - val_atendsatisfatoriorpo
+      expression: TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE)
+      quantity_kind: numeric
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - atendsatisfatoriorpo
+      - atend_satisfatorio_rpo
+      - atendimento_rpo
+      - satisfatorio_reserva_potencia
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_atendsatisfatoriorpo AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - atend_satisfatorio_rpo
+      - atendimento_rpo
+      - satisfatorio_reserva_potencia
+    - id: verifgsub
+      label: Verifgsub
+      columns:
+      - val_verifgsub
+      expression: TRY_CAST(val_verifgsub AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifgsub
+      - verif_gsub
+      - geracao_substituicao_verif
+      - GSUB_verificado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifgsub AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifgsub AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifgsub AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifgsub AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifgsub AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifgsub AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_gsub
+      - geracao_substituicao_verif
+      - GSUB_verificado
+    - id: verifunitcommitment
+      label: Verifunitcommitment
+      columns:
+      - val_verifunitcommitment
+      expression: TRY_CAST(val_verifunitcommitment AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifunitcommitment
+      - verif_unit_commitment
+      - unit_commitment_verificado
+      - UC_verif
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifunitcommitment AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifunitcommitment AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifunitcommitment AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifunitcommitment AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifunitcommitment AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifunitcommitment AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_unit_commitment
+      - unit_commitment_verificado
+      - UC_verif
+    - id: verifconstrainedoff
+      label: Verifconstrainedoff
+      columns:
+      - val_verifconstrainedoff
+      expression: TRY_CAST(val_verifconstrainedoff AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: flag
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - verifconstrainedoff
+      - verif_constrained_off
+      - constrained_off_verificado
+      - CO_verif
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_verifconstrainedoff AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_verifconstrainedoff AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_verifconstrainedoff AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_verifconstrainedoff AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_verifconstrainedoff AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_verifconstrainedoff AS DOUBLE))
+          unit: ''
+      interval_hours: 1.0
+      aliases:
+      - verif_constrained_off
+      - constrained_off_verificado
+      - CO_verif
+    selection_policy:
+      covers_metrics:
+      - proggeracao
+      - progordemmerito
+      - progordemdemeritoref
+      - progordemdemeritoacimadainflex
+      - proginflexibilidade
+      - proginflexembutmerito
+      - proginflexpura
+      - prograzaoeletrica
+      - proggarantiaenergetica
+      - proggfom
+      - progreposicaoperdas
+      - progexportacao
+      - progreservapotencia
+      - proggsub
+      - progunitcommitment
+      not_preferred_for:
+      - nuclear
+      - MMGD
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_tipopatamar:
+        LEVE:
+          aliases:
+          - LEVE
+          filter: nom_tipopatamar = 'LEVE'
+        MÉDIA:
+          aliases:
+          - MÉDIA
+          filter: nom_tipopatamar = 'MÉDIA'
+        PESADA:
+          aliases:
+          - PESADA
+          filter: nom_tipopatamar = 'PESADA'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          filter: nom_subsistema = 'SUL'
+      val_proggfom:
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_proggfom = '0E-8'
+        '139.00000000':
+          aliases:
+          - '139.00000000'
+          filter: val_proggfom = '139.00000000'
+        '204.00000000':
+          aliases:
+          - '204.00000000'
+          filter: val_proggfom = '204.00000000'
+        '350.00000000':
+          aliases:
+          - '350.00000000'
+          filter: val_proggfom = '350.00000000'
+        '41.00000000':
+          aliases:
+          - '41.00000000'
+          filter: val_proggfom = '41.00000000'
+        '500.00000000':
+          aliases:
+          - '500.00000000'
+          filter: val_proggfom = '500.00000000'
+        '520.00000000':
+          aliases:
+          - '520.00000000'
+          filter: val_proggfom = '520.00000000'
+        '989.00000000':
+          aliases:
+          - '989.00000000'
+          filter: val_proggfom = '989.00000000'
+        '999.00000000':
+          aliases:
+          - '999.00000000'
+          filter: val_proggfom = '999.00000000'
+      val_progreposicaoperdas:
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_progreposicaoperdas = '0E-8'
+      val_progreservapotencia:
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_progreservapotencia = '0E-8'
+      val_verifgfom:
+        '0.51700000':
+          aliases:
+          - '0.51700000'
+          filter: val_verifgfom = '0.51700000'
+        '0.52700000':
+          aliases:
+          - '0.52700000'
+          filter: val_verifgfom = '0.52700000'
+        '0.53300000':
+          aliases:
+          - '0.53300000'
+          filter: val_verifgfom = '0.53300000'
+        '0.53400000':
+          aliases:
+          - '0.53400000'
+          filter: val_verifgfom = '0.53400000'
+        '0.53550000':
+          aliases:
+          - '0.53550000'
+          filter: val_verifgfom = '0.53550000'
+        '0.53600000':
+          aliases:
+          - '0.53600000'
+          filter: val_verifgfom = '0.53600000'
+        '0.53750000':
+          aliases:
+          - '0.53750000'
+          filter: val_verifgfom = '0.53750000'
+        '0.54150000':
+          aliases:
+          - '0.54150000'
+          filter: val_verifgfom = '0.54150000'
+        '0.54400000':
+          aliases:
+          - '0.54400000'
+          filter: val_verifgfom = '0.54400000'
+        '0.54450000':
+          aliases:
+          - '0.54450000'
+          filter: val_verifgfom = '0.54450000'
+        '0.54500000':
+          aliases:
+          - '0.54500000'
+          filter: val_verifgfom = '0.54500000'
+        '0.54700000':
+          aliases:
+          - '0.54700000'
+          filter: val_verifgfom = '0.54700000'
+        '0.54900000':
+          aliases:
+          - '0.54900000'
+          filter: val_verifgfom = '0.54900000'
+        '0.55050000':
+          aliases:
+          - '0.55050000'
+          filter: val_verifgfom = '0.55050000'
+        '0.55200000':
+          aliases:
+          - '0.55200000'
+          filter: val_verifgfom = '0.55200000'
+        '0.55600000':
+          aliases:
+          - '0.55600000'
+          filter: val_verifgfom = '0.55600000'
+        '0.57000000':
+          aliases:
+          - '0.57000000'
+          filter: val_verifgfom = '0.57000000'
+        '0.57100000':
+          aliases:
+          - '0.57100000'
+          filter: val_verifgfom = '0.57100000'
+        '0.57300000':
+          aliases:
+          - '0.57300000'
+          filter: val_verifgfom = '0.57300000'
+        '0.57400000':
+          aliases:
+          - '0.57400000'
+          filter: val_verifgfom = '0.57400000'
+        '0.57500000':
+          aliases:
+          - '0.57500000'
+          filter: val_verifgfom = '0.57500000'
+        '0.57800000':
+          aliases:
+          - '0.57800000'
+          filter: val_verifgfom = '0.57800000'
+        '0.58550000':
+          aliases:
+          - '0.58550000'
+          filter: val_verifgfom = '0.58550000'
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_verifgfom = '0E-8'
+      val_verifreposicaoperdas:
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_verifreposicaoperdas = '0E-8'
+      val_fdexp:
+        '0.0':
+          aliases:
+          - '0.0'
+          filter: val_fdexp = '0.0'
+        '0.5':
+          aliases:
+          - '0.5'
+          filter: val_fdexp = '0.5'
+        '1.0':
+          aliases:
+          - '1.0'
+          filter: val_fdexp = '1.0'
+      val_verifreservapotencia:
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_verifreservapotencia = '0E-8'
+      val_atendsatisfatoriorpo:
+        0E-8:
+          aliases:
+          - 0E-8
+          filter: val_atendsatisfatoriorpo = '0E-8'
+      tip_restricaoeletrica:
+        '0':
+          aliases:
+          - '0'
+          filter: tip_restricaoeletrica = 0
+        '1':
+          aliases:
+          - '1'
+          filter: tip_restricaoeletrica = 1
+        '9':
+          aliases:
+          - '9'
+          filter: tip_restricaoeletrica = 9
+        '1078':
+          aliases:
+          - '1078'
+          filter: tip_restricaoeletrica = 1078
+    ambiguity_policy:
+      default_assumptions:
+      - when: geracao
+        assume_metric: proggeracao
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+        - instantaneo
+      must_clarify_when:
+      - ambiguity: energia_total_vs_potencia_media
+        question: Voce quer energia total no periodo ou potencia media?
+        trigger_terms:
+        - geracao
+        - energia
+        - potencia
+        - media
+        - pico
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+    sql_patterns:
+      proggeracao_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM((TRY_CAST(val_proggeracao AS DOUBLE)) * 1.0) / 1000 AS valor\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - proggeracao
+          grain: month
+        validated_params:
+          year: '2022'
+- property: fewShotQueries
+  value:
+  - question: Quais foram as 10 usinas térmicas com maior volume de Geração Fora da Ordem de Mérito (GFOM)
+      verificado em 2023, e em quais subsistemas estão localizadas?
+    sql: SELECT nom_usina, id_subsistema, SUM(TRY_CAST(val_verifgfom AS DOUBLE)) AS total_gfom_mwmed FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_termica_despacho_2_ho/*.parquet') WHERE
+      din_instante >= TIMESTAMP '2023-01-01 00:00:00' AND din_instante < TIMESTAMP '2024-01-01 00:00:00'
+      AND id_subsistema <> 'SIN' GROUP BY nom_usina, id_subsistema ORDER BY total_gfom_mwmed DESC LIMIT
+      10;
+  - question: Qual foi o desvio médio mensal entre geração total programada e verificada por subsistema
+      ao longo de 2022 e 2023?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema, SUM((TRY_CAST(val_proggeracao
+      AS DOUBLE)) * 1.0) / 1000 AS total_programado_mwmed, SUM((TRY_CAST(val_verifgeracao AS DOUBLE))
+      * 1.0) / 1000 AS total_verificado_mwmed, SUM((TRY_CAST(val_verifgeracao AS DOUBLE)) * 1.0) / 1000
+      - SUM((TRY_CAST(val_proggeracao AS DOUBLE)) * 1.0) / 1000 AS desvio_mwmed, ROUND( 100.0 * ( SUM((TRY_CAST(val_verifgeracao
+      AS DOUBLE)) * 1.0) / 1000 - SUM((TRY_CAST(val_proggeracao AS DOUBLE)) * 1.0) / 1000 ) / NULLIF(SUM((TRY_CAST(val_proggeracao
+      AS DOUBLE)) * 1.0) / 1000, 0), 2 ) AS desvio_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/geracao_termica_despacho_2_ho/*.parquet')
+      WHERE din_instante >= TIMESTAMP '2022-01-01 00:00:00' AND din_instante < TIMESTAMP '2024-01-01 00:00:00'
+      AND id_subsistema <> 'SIN' GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)), id_subsistema
+      ORDER BY mes, id_subsistema;
+- property: relatedDatasets
+  value:
+    geracao-usina-2:
+      join_keys:
+      - ceg
+      - din_instante
+      - nom_usina
+      - id_subsistema
+    fator-capacidade-2:
+      join_keys:
+      - ceg
+      - din_instante
+      - id_subsistema
+      - nom_subsistema
+    disponibilidade_usina:
+      join_keys:
+      - ceg
+      - din_instante
+      - nom_usina
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - nom_usina
+      - ceg
+      - nom_subsistema
+      - din_instante
+    modalidade-usina:
+      join_keys:
+      - ceg
+      - nom_usina
+    capacidade-geracao:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    usina_pqu:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    reservatorio:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    cvu-usitermica:
+      join_keys:
+      - cod_usinaplanejamento
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    restricao_coff_eolica_usi:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    usina_conjunto:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    dados-hidrologicos-res:
+      join_keys:
+      - din_instante
+      - id_subsistema
+      - nom_subsistema
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_subsistema
+      - nom_usina
+- property: license
+  value: CC-BY

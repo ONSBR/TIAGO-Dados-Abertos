@@ -1,0 +1,1253 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:balanco_dessem_detalhe
+name: balanco_dessem_detalhe
+tenant: ons
+tags:
+- 30min
+- DESSEM
+- DESSEM balanço semi-horário
+- DESSEM detalhe
+- PCH
+- balanco_dessem_detalhe
+- balanço DESSEM semi-horário
+- balanço energético
+- despacho semi-horário por subsistema
+- geração eólica
+- geração fotovoltaica
+- geração hidráulica
+- geração térmica
+- programação diária por fonte
+- semi-horário
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/balanco_dessem_detalhe/*.parquet
+  format: parquet
+description:
+  purpose: Suportar operadores e planejadores do ONS no acompanhamento e validação da programação eletro-energética
+    diária resultante do modelo DESSEM, permitindo análise intra-diária do balanço entre demanda e geração
+    por fonte e subsistema. Utilizado para decisões de despacho, verificação de adequação de oferta, análise
+    de participação de fontes renováveis na matriz programada e fechamento do balanço energético semi-horário
+    do SIN.
+  limitations: Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Coluna armazenada
+    como VARCHAR no Parquet devido ao formato de serialização. Coluna armazenada como VARCHAR no Parquet
+    devido a formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver programação eletro-energética diária resultante
+    do modelo DESSEM com detalhamento por fonte de geração (hidráulica, térmica, eólica, solar, PCH, PCT,
+    MMGD) em granularidade semi-horária (30 minutos) por subsistema.
+domain: planejamento
+schema:
+- name: balanco_dessem_detalhe
+  physicalType: parquet
+  logicalType: object
+  physicalName: balanco_dessem_detalhe
+  properties:
+  - name: din_programacaodia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de programação do dia de referência do modelo DESSEM. Representa o dia para o qual
+      a programação eletro-energética foi calculada. Armazenada como VARCHAR no Parquet; requer CAST para
+      DATE em operações temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de programação
+      - dia de programação
+      - data DESSEM
+      - dia de referência
+      - din_programacao
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_patamar
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Número do patamar semi-horário do dia de programação. Varia de 1 a 48, representando
+      cada meia-hora do dia (patamar 1 = 00:00–00:30, patamar 48 = 23:30–24:00). Confirma a granularidade
+      temporal de 30 minutos do dataset.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - patamar
+      - patamar semi-horário
+      - intervalo
+      - meia-hora
+      - num_patamar_semihorario
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+  - name: cod_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico do SIN (Sistema Interligado Nacional). Inclui
+      os quatro subsistemas regionais (SE, S, NE, N) e o agregado SIN.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - região
+      - sistema
+      - submercado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: val_demanda
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Demanda de energia prevista pelo modelo DESSEM para o subsistema no patamar semi-horário.
+      Armazenada como VARCHAR devido ao formato de serialização; representa numericamente a carga total
+      do subsistema em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - demanda
+      - carga
+      - consumo
+      - demanda prevista
+      - val_carga
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_demanda AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_hidraulica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração hidráulica programada pelo modelo DESSEM para o subsistema no patamar semi-horário,
+      referente às usinas hidrelétricas de grande porte (UHE). Armazenada como VARCHAR devido ao formato
+      de serialização; representa valor numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração hidráulica
+      - geração hídrica
+      - hidráulica
+      - UHE
+      - val_hidraulica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_hidraulica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_pch
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração de Pequenas Centrais Hidrelétricas (PCH) programada pelo modelo DESSEM para
+      o subsistema no patamar semi-horário. Armazenada como VARCHAR devido ao formato de serialização;
+      representa valor numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - PCH
+      - pequena central hidrelétrica
+      - geração PCH
+      - val_pch
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_pch AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_termica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração térmica programada pelo modelo DESSEM para o subsistema no patamar semi-horário,
+      referente às usinas termelétricas convencionais (UTE). Armazenada como VARCHAR devido ao formato
+      de serialização; representa valor numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração térmica
+      - térmica
+      - UTE
+      - termelétrica
+      - val_termica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_termica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_pct
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração de Pequenas Centrais Termelétricas (PCT) programada pelo modelo DESSEM para
+      o subsistema no patamar semi-horário. Armazenada como VARCHAR devido ao formato de serialização;
+      representa valor numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - PCT
+      - pequena central termelétrica
+      - geração PCT
+      - val_pct
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_pct AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_eolica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração eólica programada pelo modelo DESSEM para o subsistema no patamar semi-horário.
+      Armazenada como VARCHAR devido ao formato de serialização; representa valor numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração eólica
+      - eólica
+      - vento
+      - EOL
+      - val_eolica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_eolica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_fotovoltaica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração fotovoltaica (solar centralizada) programada pelo modelo DESSEM para o subsistema
+      no patamar semi-horário. Armazenada como VARCHAR devido ao formato de serialização; representa valor
+      numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração solar
+      - fotovoltaica
+      - solar
+      - UFV
+      - val_solar
+      - val_fotovoltaica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_fotovoltaica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_ger_mmgd
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração de Micro e Minigeração Distribuída (MMGD) programada pelo modelo DESSEM para
+      o subsistema no patamar semi-horário. Inclui geração distribuída de pequeno porte conectada à distribuição.
+      Armazenada como VARCHAR devido a formato de serialização; representa valor numérico em MWmed.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - MMGD
+      - micro geração distribuída
+      - mini geração distribuída
+      - geração distribuída
+      - GD
+      - val_mmgd
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ger_mmgd AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_cons_elevatoria
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Consumo de energia das estações elevatórias programado pelo modelo DESSEM para o subsistema
+      no patamar semi-horário. Representa carga especial de elevatórias que pode ser despachada de forma
+      flexível. Armazenada como VARCHAR devido a formato de serialização; representa valor numérico em
+      MWmed. Pode assumir valor zero quando não há despacho de elevatórias no subsistema.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - consumo elevatória
+      - elevatória
+      - bombeamento
+      - estação elevatória
+      - val_elevatoria
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cons_elevatoria AS DOUBLE)
+    - property: unit
+      value: MWmed
+    - property: enum
+      value:
+      - '0.000'
+      - '108.030'
+      - '111.230'
+      - '24.430'
+      - '27.630'
+      - '49.400'
+      - '51.000'
+      - '62.810'
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for balanco_dessem_detalhe:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Referential integrity\n  - invalid_count(cod_subsistema) = 0:\n      valid\
+      \ values:\n        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: cod_subsistema\
+      \ deve ser um dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de\
+      \ origem)\n  - missing_percent(val_demanda) < 5:\n      name: val_demanda não pode ter >5% nulos\n\
+      \  - missing_percent(val_ger_hidraulica) < 5:\n      name: val_ger_hidraulica não pode ter >5% nulos\n\
+      \  - missing_percent(val_ger_pch) < 5:\n      name: val_ger_pch não pode ter >5% nulos\n  - missing_percent(val_ger_termica)\
+      \ < 5:\n      name: val_ger_termica não pode ter >5% nulos\n  - missing_percent(val_ger_pct) < 5:\n\
+      \      name: val_ger_pct não pode ter >5% nulos\n  - missing_percent(val_ger_eolica) < 5:\n    \
+      \  name: val_ger_eolica não pode ter >5% nulos\n  - missing_percent(val_ger_fotovoltaica) < 5:\n\
+      \      name: val_ger_fotovoltaica não pode ter >5% nulos\n  - missing_percent(val_ger_mmgd) < 5:\n\
+      \      name: val_ger_mmgd não pode ter >5% nulos\n  - missing_percent(val_cons_elevatoria) < 5:\n\
+      \      name: val_cons_elevatoria não pode ter >5% nulos\n\n  # Baseline de volume — margem ±20%\
+      \ do row_count validado\n  - row_count between 307 and 460:\n      name: Volume esperado entre 307\
+      \ e 460 registros\n\n  # Unicidade da chave primária composta ['din_programacaodia', 'num_patamar',\
+      \ 'cod_subsistema'] (candidata LLM)\n  - failed rows:\n      name: Chave composta (din_programacaodia,\
+      \ num_patamar, cod_subsistema) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM\
+      \ balanco_dessem_detalhe\n        WHERE (din_programacaodia, num_patamar, cod_subsistema) IN (\n\
+      \          SELECT din_programacaodia, num_patamar, cod_subsistema FROM balanco_dessem_detalhe\n\
+      \          GROUP BY din_programacaodia, num_patamar, cod_subsistema\n          HAVING COUNT(*) >\
+      \ 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente com resultado do modelo DESSEM do dia anterior; sujeito a revisões
+    retroativas por processo de consistência recorrente.
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/balanco_dessem_detalhe
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - o que o dessem programou por fonte
+  - programacao do dessem detalhada
+  - despacho previsto por fonte
+  - saida do modelo dessem
+  - carga prevista por fonte
+  - previsao de carga detalhada
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver programação eletro-energética diária resultante
+    do modelo DESSEM com detalhamento por fonte de geração (hidráulica, térmica, eólica, solar, PCH, PCT,
+    MMGD) em granularidade semi-horária (30 minutos) por subsistema. Também relevante para análises de
+    balanço intra-diário, perfil de geração renovável ao longo do dia, despacho de elevatórias e fechamento
+    do balanço energético do SIN.
+- property: agentInstructions
+  value: '- [din_programacaodia] Coluna de data armazenada como VARCHAR em vez de DATE. O formato exato
+    (YYYY-MM-DD, DD/MM/YYYY ou outro) deve ser verificado antes de operações temporais. Filtros por data
+    requerem conversão explícita para evitar comparações lexicográficas incorretas.
+
+
+    - [val_demanda] Campo numérico armazenado como VARCHAR devido ao formato de serialização. Qualquer
+    agregação (SUM, AVG, MIN, MAX) ou comparação numérica requer TRY_CAST explícito. Valores não conversíveis
+    retornarão NULL silenciosamente.
+
+
+    - [val_ger_hidraulica] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer
+    TRY_CAST para uso analítico. Verificar se existem valores negativos inesperados, que poderiam indicar
+    reversão de fluxo ou erro de sinal na exportação.
+
+
+    - [val_ger_pch] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer TRY_CAST
+    para uso analítico. Valores esperados não negativos; verificar anomalias.
+
+
+    - [val_ger_termica] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer TRY_CAST
+    para uso analítico. Valores esperados não negativos; picos elevados podem indicar despacho de emergência
+    ou erro de modelo.
+
+
+    - [val_ger_pct] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer TRY_CAST
+    para uso analítico.
+
+
+    - [val_ger_eolica] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer TRY_CAST
+    para uso analítico. Valores de geração eólica variam significativamente por patamar; verificar se
+    patamares noturnos apresentam valores coerentes.
+
+
+    - [val_ger_fotovoltaica] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer
+    TRY_CAST para uso analítico. Geração fotovoltaica deve ser zero ou próxima de zero nos patamares noturnos
+    (1–6 e 44–48 aproximadamente); valores positivos nesses patamares indicam possível inconsistência
+    no modelo.
+
+
+    - [val_ger_mmgd] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer TRY_CAST
+    para uso analítico. MMGD de origem solar deve apresentar geração nula em patamares noturnos.
+
+
+    - [val_cons_elevatoria] Campo numérico armazenado como VARCHAR pelo formato de serialização. Requer
+    TRY_CAST para uso analítico. Consumo de elevatórias pode apresentar valores negativos dependendo da
+    convenção de sinal adotada no DESSEM. Verificar consistência do sinal antes de somar ao balanço.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a geração eólica programada pelo DESSEM no subsistema NE no dia 2025-06-01 por patamar?
+  - Como se distribui a geração fotovoltaica ao longo do dia no subsistema SE segundo o DESSEM?
+  - Qual a participação percentual de cada fonte na geração total programada pelo DESSEM por subsistema?
+  - Qual o patamar de maior demanda programada pelo DESSEM no subsistema SE em um dia típico?
+  - Qual a diferença entre demanda e geração total programada pelo DESSEM (balanço) por subsistema e patamar?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_detalhe/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2025-05-23'
+- property: semantics
+  value:
+    temporal_perspective: programado
+    row_grain:
+      temporal: 30 min
+      temporal_column: din_programacaodia
+      spatial: subsistema
+      entity: fonte_agregada
+      one_row_per:
+      - din_programacaodia
+      - cod_subsistema
+      - num_patamar
+    dimension_columns:
+      subsistema: cod_subsistema
+      fonte: _pivot(val_ger_eolica, val_ger_hidraulica, val_ger_termica)
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: num_patamar
+    metrics:
+    - id: geracao_total
+      label: Geração Total
+      columns:
+      - val_ger_hidraulica
+      - val_ger_pch
+      - val_ger_termica
+      - val_ger_pct
+      - val_ger_eolica
+      - val_ger_fotovoltaica
+      - val_ger_mmgd
+      expression: TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+        AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+        AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_total
+      - matriz_eletrica
+      - balanco_energetico
+      - geracao_por_fonte
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+            AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+            AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+            AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+            AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+            AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+            AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+            AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+            AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+            AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+            AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica
+            AS DOUBLE) + TRY_CAST(val_ger_pct AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_fotovoltaica
+            AS DOUBLE) + TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+    - id: demanda
+      label: Demanda
+      columns:
+      - val_demanda
+      expression: TRY_CAST(val_demanda AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - demanda
+      - carga
+      - consumo
+      - demanda prevista
+      - val_carga
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_demanda AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_demanda AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - demanda
+      - carga
+      - consumo
+      - demanda prevista
+      - val_carga
+    - id: geracao_hidraulica
+      label: Geracao Hidraulica
+      columns:
+      - val_ger_hidraulica
+      expression: TRY_CAST(val_ger_hidraulica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_hidraulica
+      - geração hidráulica
+      - geração hídrica
+      - hidráulica
+      - UHE
+      - val_hidraulica
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_ger_hidraulica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_ger_hidraulica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_ger_hidraulica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_hidraulica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_ger_hidraulica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_hidraulica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geração hidráulica
+      - geração hídrica
+      - hidráulica
+      - UHE
+      - val_hidraulica
+      - hidraulica
+      - hidreletrica
+      - hidrica
+      - agua
+    - id: geracao_pch
+      label: Geracao Pch
+      columns:
+      - val_ger_pch
+      expression: TRY_CAST(val_ger_pch AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_pch
+      - PCH
+      - pequena central hidrelétrica
+      - geração PCH
+      - val_pch
+      - pequena central hidreletrica
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_ger_pch AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_ger_pch AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_ger_pch AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_pch AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_ger_pch AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_pch AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - PCH
+      - pequena central hidrelétrica
+      - geração PCH
+      - val_pch
+      - pequena central hidreletrica
+    - id: geracao_termica
+      label: Geracao Termica
+      columns:
+      - val_ger_termica
+      expression: TRY_CAST(val_ger_termica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_termica
+      - geração térmica
+      - térmica
+      - UTE
+      - termelétrica
+      - val_termica
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_ger_termica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_ger_termica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_ger_termica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_termica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_ger_termica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_termica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geração térmica
+      - térmica
+      - UTE
+      - termelétrica
+      - val_termica
+      - termica
+      - termeletrica
+    - id: geracao_pct
+      label: Geracao Pct
+      columns:
+      - val_ger_pct
+      expression: TRY_CAST(val_ger_pct AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - geracao_pct
+      - PCT
+      - pequena central termelétrica
+      - geração PCT
+      - val_pct
+      - pequena central termica
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_ger_pct AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_ger_pct AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_ger_pct AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_pct AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_ger_pct AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_pct AS DOUBLE))
+          unit: '%'
+      interval_hours: 0.5
+      aliases:
+      - PCT
+      - pequena central termelétrica
+      - geração PCT
+      - val_pct
+      - pequena central termica
+    - id: geracao_eolica
+      label: Geracao Eolica
+      columns:
+      - val_ger_eolica
+      expression: TRY_CAST(val_ger_eolica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_eolica
+      - geração eólica
+      - eólica
+      - vento
+      - EOL
+      - val_eolica
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_ger_eolica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_ger_eolica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_ger_eolica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_eolica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_ger_eolica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_eolica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geração eólica
+      - eólica
+      - vento
+      - EOL
+      - val_eolica
+      - eolica
+      - energia dos ventos
+      - wind
+      - parques eolicos
+    - id: geracao_fotovoltaica
+      label: Geracao Fotovoltaica
+      columns:
+      - val_ger_fotovoltaica
+      expression: TRY_CAST(val_ger_fotovoltaica AS DOUBLE)
+      quantity_kind: volume
+      unit_native: MWmed
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_fotovoltaica
+      - geração solar
+      - fotovoltaica
+      - solar
+      - UFV
+      - val_solar
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_ger_fotovoltaica AS DOUBLE))
+          unit: hm3
+        maximum:
+          sql: MAX(TRY_CAST(val_ger_fotovoltaica AS DOUBLE))
+          unit: hm3
+        average:
+          sql: AVG(TRY_CAST(val_ger_fotovoltaica AS DOUBLE))
+          unit: hm3
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_fotovoltaica AS DOUBLE))
+          unit: hm3
+        ranking:
+          sql: AVG(TRY_CAST(val_ger_fotovoltaica AS DOUBLE))
+          unit: hm3
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_fotovoltaica AS DOUBLE))
+          unit: hm3
+      interval_hours: 0.5
+      aliases:
+      - geração solar
+      - fotovoltaica
+      - solar
+      - UFV
+      - val_solar
+      - val_fotovoltaica
+      - fv
+      - energia solar
+    - id: geracao_mmgd
+      label: Geracao Mmgd
+      columns:
+      - val_ger_mmgd
+      expression: TRY_CAST(val_ger_mmgd AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracao_mmgd
+      - MMGD
+      - micro geração distribuída
+      - mini geração distribuída
+      - geração distribuída
+      - GD
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_ger_mmgd AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_ger_mmgd AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_ger_mmgd AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - MMGD
+      - micro geração distribuída
+      - mini geração distribuída
+      - geração distribuída
+      - GD
+      - val_mmgd
+      - micro e minigeracao distribuida
+      - geracao distribuida
+    - id: cons_elevatoria
+      label: Cons Elevatoria
+      columns:
+      - val_cons_elevatoria
+      expression: TRY_CAST(val_cons_elevatoria AS DOUBLE)
+      quantity_kind: numeric
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - cons_elevatoria
+      - consumo elevatória
+      - elevatória
+      - bombeamento
+      - estação elevatória
+      - val_elevatoria
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: ''
+      interval_hours: 0.5
+      aliases:
+      - consumo elevatória
+      - elevatória
+      - bombeamento
+      - estação elevatória
+      - val_elevatoria
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - geracao_total
+      - demanda
+      - geracao_hidraulica
+      - geracao_pch
+      - geracao_termica
+      - geracao_pct
+      - geracao_eolica
+      - geracao_fotovoltaica
+      - geracao_mmgd
+      - cons_elevatoria
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - gas
+      - carvao
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: cod_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: cod_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: cod_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: cod_subsistema = 'N'
+      fonte:
+        hidraulica:
+          aliases:
+          - hidraulica
+          - hidreletrica
+          - hidrica
+          - uhe
+          - agua
+          columns:
+          - val_ger_hidraulica
+        pch:
+          aliases:
+          - pch
+          - pequena central hidreletrica
+          columns:
+          - val_ger_pch
+        termica:
+          aliases:
+          - termica
+          - termeletrica
+          - ute
+          columns:
+          - val_ger_termica
+        pct:
+          aliases:
+          - pct
+          - pequena central termica
+          columns:
+          - val_ger_pct
+        eolica:
+          aliases:
+          - eolica
+          - vento
+          - energia dos ventos
+          - wind
+          - parques eolicos
+          columns:
+          - val_ger_eolica
+        solar:
+          aliases:
+          - solar
+          - fotovoltaica
+          - fv
+          - energia solar
+          columns:
+          - val_ger_fotovoltaica
+        mmgd:
+          aliases:
+          - mmgd
+          - micro e minigeracao distribuida
+          - geracao distribuida
+          columns:
+          - val_ger_mmgd
+      val_cons_elevatoria:
+        '0.000':
+          aliases:
+          - '0.000'
+          filter: val_cons_elevatoria = '0.000'
+        '108.030':
+          aliases:
+          - '108.030'
+          filter: val_cons_elevatoria = '108.030'
+        '111.230':
+          aliases:
+          - '111.230'
+          filter: val_cons_elevatoria = '111.230'
+        '24.430':
+          aliases:
+          - '24.430'
+          filter: val_cons_elevatoria = '24.430'
+        '27.630':
+          aliases:
+          - '27.630'
+          filter: val_cons_elevatoria = '27.630'
+        '49.400':
+          aliases:
+          - '49.400'
+          filter: val_cons_elevatoria = '49.400'
+        '51.000':
+          aliases:
+          - '51.000'
+          filter: val_cons_elevatoria = '51.000'
+        '62.810':
+          aliases:
+          - '62.810'
+          filter: val_cons_elevatoria = '62.810'
+    sql_patterns:
+      geracao_total_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes, cod_subsistema,\n\
+          \  SUM(TRY_CAST(val_ger_hidraulica AS DOUBLE) + TRY_CAST(val_ger_pch AS DOUBLE) + TRY_CAST(val_ger_termica\
+          \ AS DOUBLE) + TRY_CAST(val_ger_eolica AS DOUBLE) + TRY_CAST(val_ger_solar AS DOUBLE)) AS geracao_total_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_programacaodia AS TIMESTAMP)) = {year}\n\
+          GROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao_total
+          grain: month
+      balanco_dessem_detalhe_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_cons_elevatoria AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1)\
+          \ AS val_cons_elevatoria_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_demanda AS VARCHAR) AS DOUBLE))\
+          \ * 0.5 / 1000, 1) AS val_demanda_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_eolica AS VARCHAR)\
+          \ AS DOUBLE)) * 0.5 / 1000, 1) AS val_ger_eolica_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_fotovoltaica\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_ger_fotovoltaica_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_hidraulica\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_ger_hidraulica_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_mmgd\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_ger_mmgd_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_pch\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_ger_pch_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_pct\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_ger_pct_gwh\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_programacaodia AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      balanco_dessem_detalhe_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_cons_elevatoria AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_cons_elevatoria_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_demanda\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS\
+          \ val_demanda_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_eolica AS VARCHAR) AS DOUBLE)) /\
+          \ COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_ger_eolica_mwmed,\n \
+          \ ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_fotovoltaica AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_ger_fotovoltaica_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_hidraulica\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS\
+          \ val_ger_hidraulica_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_mmgd AS VARCHAR) AS DOUBLE))\
+          \ / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_ger_mmgd_mwmed,\n \
+          \ ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_pch AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_programacaodia\
+          \ AS TIMESTAMP)), 1) AS val_ger_pch_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_ger_pct AS VARCHAR)\
+          \ AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_ger_pct_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_programacaodia AS TIMESTAMP)) = {year}\n\
+          GROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+    ambiguity_policy:
+      default_assumptions:
+      - when: geracao
+        assume_metric: geracao_total
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+        - instantaneo
+      must_clarify_when:
+      - ambiguity: energia_total_vs_potencia_media
+        question: Voce quer energia total no periodo ou potencia media?
+        trigger_terms:
+        - geracao
+        - energia
+        - potencia
+        - media
+        - pico
+      - ambiguity: usina_vs_subsistema
+        question: Voce quer por usina individual ou por subsistema?
+        trigger_terms:
+        - usina
+        - subsistema
+        - ranking
+        - ceg
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - gas
+        - gas natural
+        reason: Geracao termica esta agregada; nao ha abertura por combustivel.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - carvao
+        - carvoeira
+        reason: Geracao termica esta agregada; nao ha abertura por combustivel.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - biomassa
+        reason: Geracao termica esta agregada; nao ha abertura por combustivel.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+- property: fewShotQueries
+  value:
+  - question: Qual foi a participação de cada fonte de geração na demanda total programada pelo DESSEM
+      por subsistema em um dia específico?
+    sql: SELECT cod_subsistema, SUM((TRY_CAST(val_demanda AS DOUBLE)) * 0.5) / 1000 AS demanda_total_mwmed,
+      SUM((TRY_CAST(val_ger_hidraulica AS DOUBLE)) * 0.5) / 1000 AS hidraulica_mwmed, SUM((TRY_CAST(val_ger_pch
+      AS DOUBLE)) * 0.5) / 1000 AS pch_mwmed, SUM((TRY_CAST(val_ger_termica AS DOUBLE)) * 0.5) / 1000
+      AS termica_mwmed, SUM(TRY_CAST(val_ger_pct AS DOUBLE)) AS pct_mwmed, SUM((TRY_CAST(val_ger_eolica
+      AS DOUBLE)) * 0.5) / 1000 AS eolica_mwmed, SUM(TRY_CAST(val_ger_fotovoltaica AS DOUBLE)) AS fotovoltaica_mwmed,
+      SUM((TRY_CAST(val_ger_mmgd AS DOUBLE)) * 0.5) / 1000 AS mmgd_mwmed, ROUND( 100.0 * SUM((TRY_CAST(val_ger_hidraulica
+      AS DOUBLE)) * 0.5) / 1000 / NULLIF(SUM((TRY_CAST(val_demanda AS DOUBLE)) * 0.5) / 1000, 0), 2 )
+      AS pct_hidraulica FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_detalhe/*.parquet')
+      WHERE TRY_CAST(din_programacaodia AS DATE) = '2025-06-01' AND cod_subsistema NOT IN ('SIN', 'TOTAL')
+      GROUP BY cod_subsistema ORDER BY cod_subsistema;
+  - question: Como varia a geração eólica e fotovoltaica programada pelo DESSEM ao longo dos 48 patamares
+      do dia no subsistema Nordeste?
+    sql: SELECT num_patamar, AVG(TRY_CAST(val_ger_eolica AS DOUBLE)) AS media_eolica_mwmed, AVG(TRY_CAST(val_ger_fotovoltaica
+      AS DOUBLE)) AS media_solar_mwmed, AVG(TRY_CAST(val_ger_mmgd AS DOUBLE)) AS media_mmgd_mwmed, AVG(TRY_CAST(val_demanda
+      AS DOUBLE)) AS media_demanda_mwmed, ROUND( 100.0 * AVG(TRY_CAST(val_ger_eolica AS DOUBLE)) / NULLIF(AVG(TRY_CAST(val_demanda
+      AS DOUBLE)), 0), 2 ) AS pct_eolica_demanda FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_detalhe/*.parquet')
+      WHERE cod_subsistema = 'NE' GROUP BY num_patamar ORDER BY num_patamar;
+  - question: O balanço entre geração total e demanda programada pelo DESSEM fecha corretamente em cada
+      patamar e subsistema?
+    sql: SELECT TRY_CAST(din_programacaodia AS DATE) AS data_programacao, cod_subsistema, num_patamar,
+      TRY_CAST(val_demanda AS DOUBLE) AS demanda_mwmed, ( COALESCE(TRY_CAST(val_ger_hidraulica AS DOUBLE),
+      0) + COALESCE(TRY_CAST(val_ger_pch AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_termica AS DOUBLE),
+      0) + COALESCE(TRY_CAST(val_ger_pct AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_eolica AS DOUBLE),
+      0) + COALESCE(TRY_CAST(val_ger_fotovoltaica AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_mmgd AS DOUBLE),
+      0) ) AS geracao_total_mwmed, ( COALESCE(TRY_CAST(val_ger_hidraulica AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_pch
+      AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_termica AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_pct
+      AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_eolica AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_fotovoltaica
+      AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_mmgd AS DOUBLE), 0) ) - TRY_CAST(val_demanda AS DOUBLE)
+      AS desvio_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_detalhe/*.parquet')
+      WHERE cod_subsistema NOT IN ('SIN', 'TOTAL') ORDER BY ABS( ( COALESCE(TRY_CAST(val_ger_hidraulica
+      AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_pch AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_termica
+      AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_pct AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_eolica
+      AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_fotovoltaica AS DOUBLE), 0) + COALESCE(TRY_CAST(val_ger_mmgd
+      AS DOUBLE), 0) ) - TRY_CAST(val_demanda AS DOUBLE) ) DESC LIMIT 20;
+- property: relatedDatasets
+  value:
+    balanco_dessem_geral:
+      join_keys:
+      - cod_subsistema
+      - din_programacaodia
+      - num_patamar
+      - val_demanda
+      - val_cons_elevatoria
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - cod_subsistema
+      - num_patamar
+- property: license
+  value: CC-BY

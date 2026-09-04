@@ -1,0 +1,54 @@
+{
+  "cod resplanejamento newave": [
+    "ear-diario-por-reservatorio",
+    "reservatorio"
+  ],
+  "curtailment eolico usina": [
+    "restricao_coff_eolica_detail",
+    "restricao_coff_eolica_usi"
+  ],
+  "curtailment solar usina": [
+    "restricao_coff_fotovoltaica",
+    "restricao_coff_fotovoltaica_detail"
+  ],
+  "energia cortada ufv": [
+    "restricao_coff_fotovoltaica",
+    "restricao_coff_fotovoltaica_detail"
+  ],
+  "energia nao suprida": [
+    "ind_confiarb_energianaosuprida",
+    "interrupcao_carga"
+  ],
+  "ens subsistema": [
+    "ind_confiarb_energianaosuprida",
+    "interrupcao_carga"
+  ],
+  "exportador liquido subsistema": [
+    "balanco-energia-subsistema",
+    "intercambio-nacional"
+  ],
+  "flag irradiancia invalida": [
+    "restricao_coff_fotovoltaica",
+    "restricao_coff_fotovoltaica_detail"
+  ],
+  "geracao estimada vs verificada solar": [
+    "restricao_coff_fotovoltaica",
+    "restricao_coff_fotovoltaica_detail"
+  ],
+  "modalidade operacao usina": [
+    "geracao-usina-2",
+    "modalidade-usina"
+  ],
+  "reservatorio equivalente energia": [
+    "ear-diario-por-ree-reservatorio-equivalente-de-energia",
+    "ena-diario-por-ree-reservatorio-equivalente-de-energia"
+  ],
+  "risco hidrologico bacia": [
+    "ear-diario-por-bacia",
+    "ena-diario-por-bacia"
+  ],
+  "tipo despacho usina": [
+    "modalidade-usina",
+    "parcela_usina_montante_mensal"
+  ]
+}

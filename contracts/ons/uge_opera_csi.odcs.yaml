@@ -1,0 +1,760 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:uge_opera_csi
+name: uge_opera_csi
+tenant: ons
+tags:
+- CSI
+- ONS
+- SIN
+- UG compensador síncrono
+- compensador síncrono
+- compensador-síncrono
+- controle-de-tensão
+- geração
+- inércia-sintética
+- operação síncrona
+- operação-síncrona
+- snapshot-operacional
+- suporte-de-reativo
+- uge_opera_csi
+- unidade-geradora
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/uge_opera_csi/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que operadores do sistema elétrico e analistas de confiabilidade monitorem quais unidades
+    geradoras estão operando no modo compensador síncrono em um dado momento, suportando decisões operacionais
+    relacionadas ao controle de tensão, estabilidade do sistema e disponibilidade de suporte de reativo
+    no SIN. Utilizado por equipes de operação em tempo real do ONS e por analistas de planejamento da
+    operação para avaliar a capacidade de suporte de reativo disponível por usina e subsistema.
+  limitations: Coluna possui 100% de valores nulos em todos os 63. Coluna possui aproximadamente 66. Nome
+    da coluna possui inicial maiúscula ('Hora_verificada') divergindo do padrão snake_case minúsculo das
+    demais colunas do dataset.
+  usage: Recuperar este dataset quando a pergunta envolver monitoramento de unidades geradoras operando
+    em modo compensador síncrono, suporte de reativo, inércia sintética ou controle de tensão no SIN.
+domain: geração
+schema:
+- name: uge_opera_csi
+  physicalType: parquet
+  logicalType: object
+  physicalName: uge_opera_csi
+  properties:
+  - name: dat_verificada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data em que o estado da unidade geradora foi verificado/registrado, armazenada como
+      texto. Formato esperado DD/MM/YYYY ou YYYY-MM-DD. Requer TRY_CAST ou TRY_STRPTIME para conversão
+      em pipelines analíticos.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de verificação
+      - data do snapshot
+      - data de referência
+    - property: semanticType
+      value: TIMESTAMP
+  - name: Hora_verificada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Hora em que o estado da unidade geradora foi verificado/registrado, armazenada como
+      texto (formato esperado HH:MM ou HH:MM:SS). Atenção ao nome com inicial maiúscula — pode causar
+      erros em queries case-sensitive e pipelines que assumem normalização de nomes.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - hora de verificação
+      - hora do snapshot
+      - hora_verificada
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - '12:00'
+      - '19:00'
+  - name: tip_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo da usina geradora (ex: UHE para hidrelétrica, UTE para termelétrica, EOL para eólica,
+      UFV para solar fotovoltaica). Classifica a tecnologia de geração da usina.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de usina
+      - tipo usina
+      - categoria da usina
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - MP
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da usina geradora à qual a unidade geradora pertence, conforme cadastro ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome da usina
+      - usina
+      - nome usina
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BELO MONTE
+      - BENTO MUNHOZ
+      - CANA BRAVA
+      - EMBORCACAO
+      - FURNAS
+      - G.JOSE RICHA
+      - GUILMA AMORIM
+      - H.BORDEN EXT
+      - H.BORDEN SUB
+      - ILHA POMBOS
+      - ILHA SOLTEIRA
+      - IRAPE-US
+      - ITAUBA
+      - ITUMBIARA
+      - ITUTINGA-US
+      - L.C.BARRETO
+      - NEY BRAGA
+      - NOVA PONTE
+      - P. AFONSO IV
+      - PORTO ESTRELA
+      - SALTO GRANDE
+      - SALTO GRANDE MG
+      - SAO SIMAO-US
+      - THEO C SANTIAGO
+      - U.BARRAGRANDE
+      - U.C NOVOS
+      - U.D.FRANCISCA
+      - U.FOZ CHAPECO
+      - U.ITA
+      - U.MACHADINHO
+      - U.PASSO FUNDO
+      - U.S.OSORIO
+      - U.S.SANTIAGO
+      - U.SOBRADINHO
+      - UB.ESPERANCA
+      - UHE S.DA MESA
+      - US. TUCURUI
+      - USI PAR.SOUZA
+      - USINA XINGO
+      - VOLTA GRANDE
+  - name: nom_unidadegeradora
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome ou identificação da unidade geradora específica que está operando como compensador
+      síncrono, conforme cadastro ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - unidade geradora
+      - nome da unidade geradora
+      - UG
+      - nome UG
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_usinadpp
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da usina no sistema DPP (Departamento de Planejamento e Programação
+      da Operação) do ONS. Armazenado como VARCHAR — verificar presença de zeros à esquerda antes de joins
+      com tabelas cadastrais que usam INTEGER.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - código da usina DPP
+      - código usina
+      - cod usina DPP
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - '103'
+      - '11'
+      - '113'
+      - '114'
+      - '115'
+      - '119'
+      - '130'
+      - '134'
+      - '135'
+      - '148'
+      - '169'
+      - '175'
+      - '178'
+      - '190'
+      - '192'
+      - '2'
+      - '24'
+      - '25'
+      - '251'
+      - '252'
+      - '275'
+      - '288'
+      - '31'
+      - '33'
+      - '34'
+      - '6'
+      - '74'
+      - '76'
+      - '77'
+      - '78'
+      - '8'
+      - '82'
+      - '86'
+      - '90'
+      - '91'
+      - '92'
+      - '93'
+  - name: cod_ugedpp
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Código numérico identificador da unidade geradora no sistema DPP do ONS. Varia de 1001
+      a 5006 conforme estatísticas reais do dataset.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da unidade geradora DPP
+      - código UG DPP
+      - cod UG
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1001
+      - 1002
+      - 1003
+      - 1004
+      - 1005
+      - 1006
+      - 1007
+      - 1014
+      - 2001
+      - 2002
+      - 2004
+      - 2006
+      - 3001
+      - 3002
+      - 3003
+      - 3004
+      - 3005
+      - 4001
+      - 5001
+      - 5002
+      - 5003
+      - 5004
+      - 5005
+      - 5006
+  - name: cod_pontomedicao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código do ponto de medição associado à unidade geradora operando como compensador síncrono,
+      conforme cadastro ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - ponto de medição
+      - código ponto de medição
+      - cod ponto medição
+    - property: semanticType
+      value: IDENTIFIER
+  - name: flg_sincrono
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Flag indicando se a unidade geradora está operando em modo síncrono. Valores esperados:
+      0 (não) ou 1 (sim). Possui aproximadamente 66.6% de nulos — possivelmente substituído por flg_operasincrono
+      em versões mais recentes do schema.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - flag síncrono
+      - indicador síncrono
+      - operação síncrona
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 0
+      - 1
+  - name: dsc_comentario
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Campo de comentário descritivo sobre a operação da unidade geradora como compensador
+      síncrono. Atualmente 100% nulo em todos os registros — sem utilidade prática no estado atual do
+      dataset.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - comentário
+      - descrição comentário
+      - observação
+    - property: semanticType
+      value: DIMENSION
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for uge_opera_csi:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(Hora_verificada) = 0:\n      valid values:\n\
+      \        - '12:00'\n        - '19:00'\n      name: Hora_verificada deve ser um dos valores válidos\n\
+      \  - invalid_count(tip_usina) = 0:\n      valid values:\n        - 'MP'\n      name: tip_usina deve\
+      \ ser um dos valores válidos\n  - invalid_count(nom_usina) = 0:\n      valid values:\n        -\
+      \ 'BELO MONTE'\n        - 'BENTO MUNHOZ'\n        - 'CANA BRAVA'\n        - 'EMBORCACAO'\n     \
+      \   - 'FURNAS'\n        - 'G.JOSE RICHA'\n        - 'GUILMA AMORIM'\n        - 'H.BORDEN EXT'\n\
+      \        - 'H.BORDEN SUB'\n        - 'ILHA POMBOS'\n        - 'ILHA SOLTEIRA'\n        - 'IRAPE-US'\n\
+      \        - 'ITAUBA'\n        - 'ITUMBIARA'\n        - 'ITUTINGA-US'\n        - 'L.C.BARRETO'\n \
+      \       - 'NEY BRAGA'\n        - 'NOVA PONTE'\n        - 'P. AFONSO IV'\n        - 'PORTO ESTRELA'\n\
+      \        - 'SALTO GRANDE'\n        - 'SALTO GRANDE MG'\n        - 'SAO SIMAO-US'\n        - 'THEO\
+      \ C SANTIAGO'\n        - 'U.BARRAGRANDE'\n        - 'U.C NOVOS'\n        - 'U.D.FRANCISCA'\n   \
+      \     - 'U.FOZ CHAPECO'\n        - 'U.ITA'\n        - 'U.MACHADINHO'\n        - 'U.PASSO FUNDO'\n\
+      \        - 'U.S.OSORIO'\n        - 'U.S.SANTIAGO'\n        - 'U.SOBRADINHO'\n        - 'UB.ESPERANCA'\n\
+      \        - 'UHE S.DA MESA'\n        - 'US. TUCURUI'\n        - 'USI PAR.SOUZA'\n        - 'USINA\
+      \ XINGO'\n        - 'VOLTA GRANDE'\n      name: nom_usina deve ser um dos valores válidos\n  - invalid_count(cod_usinadpp)\
+      \ = 0:\n      valid values:\n        - '103'\n        - '11'\n        - '113'\n        - '114'\n\
+      \        - '115'\n        - '119'\n        - '130'\n        - '134'\n        - '135'\n        -\
+      \ '148'\n        - '169'\n        - '175'\n        - '178'\n        - '190'\n        - '192'\n \
+      \       - '2'\n        - '24'\n        - '25'\n        - '251'\n        - '252'\n        - '275'\n\
+      \        - '288'\n        - '31'\n        - '33'\n        - '34'\n        - '6'\n        - '74'\n\
+      \        - '76'\n        - '77'\n        - '78'\n        - '8'\n        - '82'\n        - '86'\n\
+      \        - '90'\n        - '91'\n        - '92'\n        - '93'\n      name: cod_usinadpp deve ser\
+      \ um dos valores válidos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count\
+      \ between 54743 and 82114:\n      name: Volume esperado entre 54,743 e 82,114 registros\n\n  # Unicidade\
+      \ da chave primária composta ['dat_verificada', 'Hora_verificada', 'cod_ugedpp', 'cod_pontomedicao']\
+      \ (candidata LLM)\n  - failed rows:\n      name: Chave composta (dat_verificada, Hora_verificada,\
+      \ cod_ugedpp, cod_pontomedicao) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM\
+      \ uge_opera_csi\n        WHERE (dat_verificada, Hora_verificada, cod_ugedpp, cod_pontomedicao) IN\
+      \ (\n          SELECT dat_verificada, Hora_verificada, cod_ugedpp, cod_pontomedicao FROM uge_opera_csi\n\
+      \          GROUP BY dat_verificada, Hora_verificada, cod_ugedpp, cod_pontomedicao\n          HAVING\
+      \ COUNT(*) > 1\n        )\n\n  # Nulos em dsc_comentario — alerta de qualidade (real=100.0%, threshold=200.0%)\n\
+      \  - missing_percent(dsc_comentario) < 200.0:\n      name: dsc_comentario não deve ter >200.0% nulos\n\
+      \n  # Nulos em flg_sincrono — alerta de qualidade (real=62.2%, threshold=124.4%)\n  - missing_percent(flg_sincrono)\
+      \ < 124.4:\n      name: flg_sincrono não deve ter >124.4% nulos\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/uge_opera_csi
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - usina operando como compensador sincrono
+  - maquina em modo compensador
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver monitoramento de unidades geradoras operando
+    em modo compensador síncrono, suporte de reativo, inércia sintética ou controle de tensão no SIN.
+    Também relevante para perguntas sobre disponibilidade de compensação reativa por usina, tipo de usina
+    ou ponto de medição em uma data específica.
+- property: agentInstructions
+  value: '- [dsc_comentario] Campo com 100% de valores nulos em todo o período 2021-2026 (68.429 linhas).
+    Coluna completamente vazia, sem utilidade analítica. Candidata a remoção em versões futuras do dataset.
+
+
+    - [flg_sincrono] Flag com 62.2% de nulos (aproximadamente 42.563 linhas). Evidência de migração de
+    campo: flg_sincrono foi substituído por flg_operasincrono ao longo do tempo. As duas colunas são mutuamente
+    exclusivas por período. Usar COALESCE para consolidar em análises que exijam série contínua.
+
+
+    - [dat_verificada] Coluna armazenada como VARCHAR no Parquet em vez de DATE. Requer TRY_CAST para
+    operações de filtro temporal, agrupamento por período e cálculo de intervalos. Possível formato de
+    serialização .
+
+
+    - [Hora_verificada] Nome da coluna com inicial maiúscula (Hora_verificada) diverge do padrão snake_case
+    minúsculo adotado pelo ONS nas demais colunas. Pode causar erros de referência em queries case-sensitive.
+    Verificar se os únicos valores são "12:00" e "19:00" conforme frequência declarada.
+
+
+    - [cod_ugedpp] Verificar se a combinação (dat_verificada, cod_ugedpp, Hora_verificada) é de fato única.
+    Duplicatas podem ocorrer se o mesmo snapshot for ingerido mais de uma vez ou se houver registros duplicados
+    por falha no pipeline de carga.
+
+
+    - [cod_pontomedicao] Verificar consistência entre cod_pontomedicao e cod_ugedpp — um mesmo ponto de
+    medição pode estar associado a múltiplas unidades geradoras ou vice-versa, o que pode indicar erro
+    de cadastro.
+
+
+    - [tip_usina] Verificar consistência dos valores de tip_usina — possíveis variações de grafia (maiúsculas/minúsculas,
+    abreviações diferentes) para o mesmo tipo de usina podem comprometer filtros e agrupamentos por tecnologia.
+
+
+    - [Hora_verificada] Coluna ''Hora_verificada'' ausente em arquivos históricos (ex: UGE_OPERA_CSI_2021.parquet).
+    Presente apenas a partir de versões recentes (ex: UGE_OPERA_CSI_2026.parquet). Queries históricas
+    retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+
+    - [flg_sincrono] Coluna ''flg_sincrono'' ausente em arquivos históricos (ex: UGE_OPERA_CSI_2021.parquet).
+    Presente apenas a partir de versões recentes (ex: UGE_OPERA_CSI_2026.parquet). Queries históricas
+    retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+
+    - [flg_operasincrono] Coluna ''flg_operasincrono'' presente em arquivos históricos (ex: UGE_OPERA_CSI_2021.parquet)
+    mas ausente em versões recentes (ex: UGE_OPERA_CSI_2026.parquet). Queries sobre dados recentes não
+    encontrarão esta coluna.
+
+    - [hora_verificada] Coluna ''hora_verificada'' presente em arquivos históricos (ex: UGE_OPERA_CSI_2021.parquet)
+    mas ausente em versões recentes (ex: UGE_OPERA_CSI_2026.parquet). Queries sobre dados recentes não
+    encontrarão esta coluna.'
+- property: typicalQuestions
+  value:
+  - Quais usinas têm unidades geradoras operando como compensador síncrono hoje?
+  - Quantas unidades geradoras estão em modo compensador síncrono por tipo de usina?
+  - Qual a distribuição de compensadores síncronos ativos por usina hidrelétrica?
+  - Houve mudança no número de compensadores síncronos entre o snapshot das 12h e das 19h?
+  - Quais unidades geradoras da usina ITAIPU estão operando como compensador síncrono?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/uge_opera_csi/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2021-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: dat_verificada
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_verificada
+      - Hora_verificada
+      - cod_ugedpp
+      - cod_pontomedicao
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: nom_usina
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics: []
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics: []
+      preferred_for:
+      - compensador sincrono
+      - modo CSI
+      - operacao CSI
+      - suporte de reativo por UG
+      - UG operando como CSI
+      - flag sincrono UG
+      - ponto de medicao CSI
+      - inertia sintetica UG
+      - snapshot CSI 12h 19h
+      - UGE opera CSI
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - geracao ativa MWmed
+      - carga subsistema
+      - preco energia
+      - restricao eolica
+      - balanco energetico
+      - despacho programado
+      - indisponibilidade forçada
+      - TEIFa
+      - TEIP
+    value_aliases:
+      Hora_verificada:
+        '12:00':
+          aliases:
+          - '12:00'
+          - meia-dia
+          - meio-dia
+          - snapshot 12h
+          filter: '"Hora_verificada" = ''12:00'''
+        '19:00':
+          aliases:
+          - '19:00'
+          - 19h
+          - snapshot 19h
+          filter: '"Hora_verificada" = ''19:00'''
+      tip_usina:
+        MP:
+          aliases:
+          - MP
+          filter: tip_usina = 'MP'
+      flg_sincrono:
+        '1':
+          aliases:
+          - sincrono ativo
+          - operando sincrono
+          - CSI ativo
+          - '1'
+          filter: COALESCE(flg_sincrono, flg_operasincrono) = 1
+        '0':
+          aliases:
+          - nao sincrono
+          - CSI inativo
+          - '0'
+          filter: COALESCE(flg_sincrono, flg_operasincrono) = 0
+      cod_ugedpp:
+        '1001':
+          aliases:
+          - '1001'
+          filter: cod_ugedpp = 1001
+        '1002':
+          aliases:
+          - '1002'
+          filter: cod_ugedpp = 1002
+        '1003':
+          aliases:
+          - '1003'
+          filter: cod_ugedpp = 1003
+        '1004':
+          aliases:
+          - '1004'
+          filter: cod_ugedpp = 1004
+        '1005':
+          aliases:
+          - '1005'
+          filter: cod_ugedpp = 1005
+        '1006':
+          aliases:
+          - '1006'
+          filter: cod_ugedpp = 1006
+        '1007':
+          aliases:
+          - '1007'
+          filter: cod_ugedpp = 1007
+        '1014':
+          aliases:
+          - '1014'
+          filter: cod_ugedpp = 1014
+        '2001':
+          aliases:
+          - '2001'
+          filter: cod_ugedpp = 2001
+        '2002':
+          aliases:
+          - '2002'
+          filter: cod_ugedpp = 2002
+        '2004':
+          aliases:
+          - '2004'
+          filter: cod_ugedpp = 2004
+        '2006':
+          aliases:
+          - '2006'
+          filter: cod_ugedpp = 2006
+        '3001':
+          aliases:
+          - '3001'
+          filter: cod_ugedpp = 3001
+        '3002':
+          aliases:
+          - '3002'
+          filter: cod_ugedpp = 3002
+        '3003':
+          aliases:
+          - '3003'
+          filter: cod_ugedpp = 3003
+        '3004':
+          aliases:
+          - '3004'
+          filter: cod_ugedpp = 3004
+        '3005':
+          aliases:
+          - '3005'
+          filter: cod_ugedpp = 3005
+        '4001':
+          aliases:
+          - '4001'
+          filter: cod_ugedpp = 4001
+        '5001':
+          aliases:
+          - '5001'
+          filter: cod_ugedpp = 5001
+        '5002':
+          aliases:
+          - '5002'
+          filter: cod_ugedpp = 5002
+        '5003':
+          aliases:
+          - '5003'
+          filter: cod_ugedpp = 5003
+        '5004':
+          aliases:
+          - '5004'
+          filter: cod_ugedpp = 5004
+        '5005':
+          aliases:
+          - '5005'
+          filter: cod_ugedpp = 5005
+        '5006':
+          aliases:
+          - '5006'
+          filter: cod_ugedpp = 5006
+    sql_patterns:
+      temporal_filter:
+        template: "SELECT nom_usina, din_instante, val_geracao\nFROM {source}\nWHERE TRY_CAST(din_instante\
+          \ AS DATE) >= '{data_inicio}'\n  AND TRY_CAST(din_instante AS DATE) <= '{data_fim}'\nORDER BY\
+          \ din_instante"
+    ambiguity_policy:
+      default_assumptions:
+      - when: compensadores sincronos ativos
+        assume_filter: COALESCE(flg_sincrono, flg_operasincrono) = 1
+        note: Usar COALESCE para consolidar flg_sincrono (recente) e flg_operasincrono (historico)
+      - when: snapshot mais recente
+        assume_filter: '"Hora_verificada" = ''19:00'''
+        note: Snapshot das 19h e o mais recente do dia; usar 12h apenas se explicitamente solicitado
+      - when: quantas UGs em modo CSI
+        assume_output: COUNT(*) agrupado por nom_usina ou dat_verificada conforme contexto
+        note: Dataset nao tem metrica numerica de potencia; contagem de registros e a agregacao natural
+      must_clarify_when:
+      - ambiguity: snapshot_hora
+        question: Voce quer o snapshot das 12h ou das 19h?
+        trigger_terms:
+        - hoje
+        - agora
+        - ultimo snapshot
+        - mais recente
+        note: Perguntar apenas quando o usuario nao especificar a hora e a comparacao entre snapshots
+          for relevante para a analise
+      - ambiguity: periodo_historico_vs_recente
+        question: Voce quer dados historicos (2021-2024, coluna flg_operasincrono) ou recentes (2025-2026,
+          coluna flg_sincrono)? Para serie completa, usar COALESCE das duas colunas.
+        trigger_terms:
+        - serie historica
+        - evolucao temporal
+        - todos os anos
+        - desde 2021
+        note: Alertar sobre a migracao de coluna apenas quando o usuario pedir serie temporal longa
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset nao contem dimensao nuclear; cobre apenas UGs em modo CSI.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - MWmed
+        - MWh
+        - GWh
+        - potencia gerada
+        - energia gerada
+        reason: Dataset registra modo operacional (flag CSI), nao potencia ou energia gerada.
+        redirect: geracao-usina-2 para series de geracao ativa por usina
+      - user_mentions:
+        - PLD
+        - CMO
+        - preco spot
+        - R$/MWh
+        reason: Dataset nao contem colunas de preco.
+        redirect: dataset de preco spot ou PLD quando disponivel
+- property: fewShotQueries
+  value:
+  - question: Quais usinas tiveram mais dias com unidades geradoras operando como compensador síncrono
+      em 2024?
+    sql: SELECT nom_usina, tip_usina, COUNT(DISTINCT TRY_CAST(dat_verificada AS DATE)) AS dias_com_csi,
+      COUNT(DISTINCT cod_ugedpp) AS ugs_distintas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/uge_opera_csi/*.parquet')
+      WHERE TRY_CAST(dat_verificada AS DATE) >= DATE '2024-01-01' AND TRY_CAST(dat_verificada AS DATE)
+      <= DATE '2024-12-31' AND COALESCE(flg_sincrono, 0) = 1 GROUP BY nom_usina, tip_usina ORDER BY dias_com_csi
+      DESC LIMIT 20;
+  - question: Qual foi a evolução mensal do número de unidades geradoras operando como compensador síncrono
+      entre 2021 e 2025?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(dat_verificada AS DATE)) AS mes_referencia, COUNT(DISTINCT
+      cod_ugedpp) AS ugs_em_csi, COUNT(DISTINCT nom_usina) AS usinas_com_csi, COUNT(*) AS registros_totais
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/uge_opera_csi/*.parquet') WHERE TRY_CAST(dat_verificada
+      AS DATE) IS NOT NULL AND COALESCE(flg_sincrono, 0) = 1 AND "Hora_verificada" = '12:00' GROUP BY
+      DATE_TRUNC('month', TRY_CAST(dat_verificada AS DATE)) ORDER BY mes_referencia;
+  - question: Quais tipos de usina (UHE, UTE, EOL) mais contribuem com compensadores síncronos no SIN?
+    sql: SELECT tip_usina, COUNT(DISTINCT nom_usina) AS usinas_distintas, COUNT(DISTINCT cod_ugedpp) AS
+      ugs_distintas, COUNT(DISTINCT TRY_CAST(dat_verificada AS DATE)) AS dias_com_registro, COUNT(*) AS
+      total_registros FROM read_parquet('s3://ons-aws-prod-opendata/dataset/uge_opera_csi/*.parquet')
+      WHERE TRY_CAST(dat_verificada AS DATE) IS NOT NULL GROUP BY tip_usina ORDER BY total_registros DESC;
+- property: relatedDatasets
+  value:
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - nom_usina
+      - nom_unidadegeradora
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - nom_usina
+      - nom_unidadegeradora
+    capacidade-geracao:
+      join_keys:
+      - nom_unidadegeradora
+      - nom_usina
+    taxa_teif_teip_oper:
+      join_keys:
+      - nom_usina
+      - tip_usina
+    taxa_teif_teip_parametro:
+      join_keys:
+      - nom_unidadegeradora
+      - nom_usina
+    taxa_teif_teip:
+      join_keys:
+      - nom_usina
+      - tip_usina
+    modalidade-usina:
+      join_keys:
+      - nom_usina
+    usina_pqu:
+      join_keys:
+      - nom_usina
+    geracao-usina-2:
+      join_keys:
+      - nom_usina
+    restricao_coff_eolica_detail:
+      join_keys:
+      - nom_usina
+- property: license
+  value: CC-BY

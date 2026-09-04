@@ -1,0 +1,640 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_qualid_dfd_evento
+name: ind_qualid_dfd_evento
+tenant: ons
+tags:
+- ANEEL
+- DFD
+- Desempenho da Frequência em Distúrbios
+- ONS
+- SIN
+- Submodulo-9.7
+- desvio de frequência SIN
+- disturbio-de-frequencia
+- distúrbio de frequência
+- indicador de frequência
+- indicador-regulatorio
+- qualidade-de-frequencia
+- sobrefrequencia
+- subfrequencia
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_evento/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar operadores do sistema elétrico, analistas de qualidade de energia e reguladores da
+    ANEEL no monitoramento da conformidade da frequência do SIN, identificação de distúrbios críticos,
+    avaliação de tendências históricas de desvio e elaboração de relatórios regulatórios conforme Submódulo
+    9.7 dos Procedimentos de Rede do ONS. Suporta decisões de ação corretiva, análise de severidade de
+    eventos e correlação com indicadores mensais e anuais de DFD.
+  limitations: O campo val_dfd apresenta amplitude muito elevada (min=1, max=600), sugerindo eventos de
+    duração muito curta e muito longa. O campo val_freqmaxmin varia de 57. Verificar se din_fimdesviofreq
+    é sempre posterior a din_iniciodesviofreq.
+  usage: Recuperar este dataset quando a pergunta envolver eventos individuais de desvio de frequência
+    no SIN, análise de distúrbios de frequência por faixa regulatória, duração de eventos de subfrequência
+    ou sobrefrequência, ou monitoramento do indicador DFD conforme Submódulo 9.
+domain: qualidade
+schema:
+- name: ind_qualid_dfd_evento
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_qualid_dfd_evento
+  properties:
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do evento de desvio de frequência, utilizada como identificador temporal
+      principal do registro.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - data do evento
+      - data do distúrbio
+      - din_referencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: din_iniciodesviofreq
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Timestamp de início do desvio de frequência registrado no evento, marcando o momento
+      em que a frequência saiu da faixa nominal.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - início do desvio
+      - início do distúrbio
+      - timestamp início
+      - din_iniciodesviofreq
+    - property: semanticType
+      value: TIMESTAMP
+  - name: din_fimdesviofreq
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Timestamp de fim do desvio de frequência registrado no evento, marcando o momento em
+      que a frequência retornou à faixa nominal.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - fim do desvio
+      - fim do distúrbio
+      - timestamp fim
+      - din_fimdesviofreq
+    - property: semanticType
+      value: TIMESTAMP
+  - name: id_faixafrequencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da faixa de frequência atingida durante o evento, conforme classificação
+      regulatória do Submódulo 9.7 dos Procedimentos de Rede do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - id faixa
+      - identificador faixa de frequência
+      - faixa id
+      - id_faixafrequencia
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - FI1
+      - FI2
+      - FS1
+  - name: nom_faixafrequencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome descritivo da faixa de frequência atingida durante o evento, conforme nomenclatura
+      regulatória do Submódulo 9.7 dos Procedimentos de Rede do ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome da faixa
+      - faixa de frequência
+      - classificação da faixa
+      - nom_faixafrequencia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - 57,5Hz <= f < 58,5Hz
+      - 58,5Hz <= f < 59,5Hz
+      - 60,5Hz < f <= 62,0Hz
+  - name: val_dfd
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Valor do Indicador de Desempenho da Frequência em Distúrbios (DFD) para o evento, representando
+      a duração ou contagem associada ao distúrbio em segundos ou unidade regulatória definida pelo Submódulo
+      9.7. Varia de 1 a 600 nos dados históricos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - DFD
+      - indicador DFD
+      - valor DFD
+      - desempenho frequência distúrbio
+      - val_dfd
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: s
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 24
+      - 25
+      - 39
+      - 75
+      - 255
+      - 600
+  - name: val_freqmaxmin
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor extremo (máximo ou mínimo) de frequência registrado durante o evento de desvio,
+      em Hertz. Valores abaixo de 60 Hz indicam subfrequência; acima, sobrefrequência. Varia de 57.71
+      Hz a 60.58 Hz nos dados históricos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - frequência máxima
+      - frequência mínima
+      - valor extremo de frequência
+      - freq max min
+      - val_freqmaxmin
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: Hz
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_qualid_dfd_evento:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Referential integrity\n  - invalid_count(id_faixafrequencia) = 0:\n      valid\
+      \ values:\n        - 'FI1'\n        - 'FI2'\n        - 'FS1'\n      name: id_faixafrequencia deve\
+      \ ser um dos valores válidos\n  - invalid_count(nom_faixafrequencia) = 0:\n      valid values:\n\
+      \        - '57,5Hz <= f < 58,5Hz'\n        - '58,5Hz <= f < 59,5Hz'\n        - '60,5Hz < f <= 62,0Hz'\n\
+      \      name: nom_faixafrequencia deve ser um dos valores válidos\n\n  # Baseline de volume — margem\
+      \ ±20% do row_count validado\n  - row_count between 56 and 84:\n      name: Volume esperado entre\
+      \ 56 e 84 registros\n\n  # Unicidade da chave primária composta ['din_referencia', 'din_iniciodesviofreq',\
+      \ 'id_faixafrequencia'] (candidata LLM)\n  - failed rows:\n      name: Chave composta (din_referencia,\
+      \ din_iniciodesviofreq, id_faixafrequencia) não deve ter duplicatas\n      fail query: |\n     \
+      \   SELECT * FROM ind_qualid_dfd_evento\n        WHERE (din_referencia, din_iniciodesviofreq, id_faixafrequencia)\
+      \ IN (\n          SELECT din_referencia, din_iniciodesviofreq, id_faixafrequencia FROM ind_qualid_dfd_evento\n\
+      \          GROUP BY din_referencia, din_iniciodesviofreq, id_faixafrequencia\n          HAVING COUNT(*)\
+      \ > 1\n        )\n\n  # Freshness: din_iniciodesviofreq deve ter dados recentes (SLA: Atualizado\
+      \ diariamente)\n  - freshness(din_iniciodesviofreq) < 3d:\n      name: din_iniciodesviofreq não\
+      \ pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_qualid_dfd_evento
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - eventos de desvio de frequencia
+  - quando a frequencia saiu da faixa
+  - disturbio de frequencia por evento
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver eventos individuais de desvio de frequência
+    no SIN, análise de distúrbios de frequência por faixa regulatória, duração de eventos de subfrequência
+    ou sobrefrequência, ou monitoramento do indicador DFD conforme Submódulo 9.7. Também relevante para
+    perguntas sobre conformidade regulatória de frequência, identificação de distúrbios críticos históricos
+    e correlação de eventos com indicadores mensais ou anuais de desempenho de frequência.
+- property: agentInstructions
+  value: '- [din_fimdesviofreq] A diferença entre din_fimdesviofreq e din_iniciodesviofreq deve ser consistente
+    com val_dfd (duração em segundos). Eventos com val_dfd=600 (valor máximo observado) podem indicar
+    truncamento do registro ou eventos de longa duração que merecem verificação manual de consistência
+    entre as colunas de timestamp e o valor do indicador.
+
+
+    - [val_dfd] val_dfd apresenta valor máximo de 600 segundos, que pode representar um limite de truncamento
+    do indicador DFD conforme definição do Submódulo 9.7, ou eventos excepcionalmente longos. Recomenda-se
+    verificar se registros com val_dfd=600 correspondem a eventos reais ou a um teto operacional do indicador.
+
+
+    - [val_freqmaxmin] val_freqmaxmin varia entre 57,71 Hz e 60,58 Hz. Valores abaixo de 58,0 Hz ou acima
+    de 60,5 Hz são extremamente críticos para o SIN e devem ser verificados quanto à consistência com
+    a faixa de frequência classificada em nom_faixafrequencia, pois indicam distúrbios severos.
+
+
+    - [din_iniciodesviofreq] Com apenas 70 registros em aproximadamente 9 anos, a chave primária natural
+    proposta (din_iniciodesviofreq + id_faixafrequencia) deve ser verificada quanto a duplicatas, pois
+    um mesmo instante de início poderia ser registrado em múltiplas faixas de frequência simultaneamente
+    em eventos de transição de faixa.
+
+
+    - [din_referencia] O dataset cobre o período de 2016 a 2025 com apenas 70 registros, resultando em
+    média de aproximadamente 7 eventos por ano. Longos intervalos sem registros podem indicar períodos
+    sem distúrbios (esperado) ou descontinuidades no processo de coleta/publicação dos dados pelo ONS.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais foram os eventos de desvio de frequência mais severos registrados no SIN?
+  - Qual a duração média dos distúrbios de frequência por faixa regulatória?
+  - Em quais anos ocorreram mais eventos de desvio de frequência no sistema elétrico brasileiro?
+  - Quais eventos registraram frequência abaixo de 59.5 Hz no SIN?
+  - Qual a distribuição dos eventos de DFD por faixa de frequência entre 2016 e 2025?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_evento/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2016-01-08'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - din_iniciodesviofreq
+      - id_faixafrequencia
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dfd
+      label: Indicador DFD (duracao do disturbio)
+      columns:
+      - val_dfd
+      expression: val_dfd
+      quantity_kind: duration_minutes
+      unit_native: s
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - dfd
+      - DFD
+      - indicador DFD
+      - valor DFD
+      - desempenho frequencia disturbio
+      - duracao do disturbio
+      - val_dfd
+      aggregation_modes:
+        total:
+          sql: SUM(val_dfd)
+          unit: s
+        average:
+          sql: AVG(val_dfd)
+          unit: s
+        maximum:
+          sql: MAX(val_dfd)
+          unit: s
+        time_series:
+          sql: SUM(val_dfd)
+          unit: s
+        ranking:
+          sql: SUM(val_dfd)
+          unit: s
+        comparison:
+          sql: AVG(val_dfd)
+          unit: s
+      interval_hours: 8760.0
+      aliases:
+      - DFD
+      - indicador DFD
+      - valor DFD
+      - desempenho frequencia disturbio
+      - duracao disturbio
+      - val_dfd
+    - id: freqmaxmin
+      label: Frequencia extrema do evento (Hz)
+      columns:
+      - val_freqmaxmin
+      expression: val_freqmaxmin
+      quantity_kind: numeric
+      unit_native: Hz
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - freqmaxmin
+      - frequencia maxima
+      - frequencia minima
+      - valor extremo de frequencia
+      - freq max min
+      - val_freqmaxmin
+      - pior frequencia
+      - frequencia critica
+      aggregation_modes:
+        total:
+          sql: AVG(val_freqmaxmin)
+          unit: Hz
+        average:
+          sql: AVG(val_freqmaxmin)
+          unit: Hz
+        maximum:
+          sql: MAX(val_freqmaxmin)
+          unit: Hz
+        time_series:
+          sql: AVG(val_freqmaxmin)
+          unit: Hz
+        ranking:
+          sql: MIN(val_freqmaxmin)
+          unit: Hz
+        comparison:
+          sql: AVG(val_freqmaxmin)
+          unit: Hz
+      interval_hours: 8760.0
+      aliases:
+      - frequencia maxima
+      - frequencia minima
+      - valor extremo de frequencia
+      - freq max min
+      - val_freqmaxmin
+      - pior frequencia
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      preferred_for:
+      - evento individual disturbio frequencia
+      - timestamp inicio desvio frequencia
+      - timestamp fim desvio frequencia
+      - duracao evento DFD segundos
+      - faixa regulatoria FI1 FI2 FS1
+      - subfrequencia sobrefrequencia evento
+      - frequencia extrema disturbio Hz
+      - disturbio critico SIN historico
+      - Submodulo 9.7 evento individual
+      - contagem eventos por faixa
+      covers_metrics:
+      - dfd
+      - freqmaxmin
+      not_preferred_for:
+      - indicador mensal agregado
+      - indicador anual agregado
+      - DFD medio anual
+      - DFP regime
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao eletrica
+      - carga energia
+    value_aliases:
+      id_faixafrequencia:
+        FI1:
+          aliases:
+          - FI1
+          - faixa inferior 1
+          - subfrequencia severa
+          - 57.5 a 58.5 Hz
+          filter: id_faixafrequencia = 'FI1'
+        FI2:
+          aliases:
+          - FI2
+          - faixa inferior 2
+          - subfrequencia moderada
+          - 58.5 a 59.5 Hz
+          filter: id_faixafrequencia = 'FI2'
+        FS1:
+          aliases:
+          - FS1
+          - faixa superior 1
+          - sobrefrequencia
+          - acima de 60.5 Hz
+          filter: id_faixafrequencia = 'FS1'
+      nom_faixafrequencia:
+        57,5Hz <= f < 58,5Hz:
+          aliases:
+          - 57,5Hz <= f < 58,5Hz
+          - FI1 descricao
+          - subfrequencia critica
+          filter: nom_faixafrequencia = '57,5Hz <= f < 58,5Hz'
+        58,5Hz <= f < 59,5Hz:
+          aliases:
+          - 58,5Hz <= f < 59,5Hz
+          - FI2 descricao
+          - subfrequencia leve
+          filter: nom_faixafrequencia = '58,5Hz <= f < 59,5Hz'
+        60,5Hz < f <= 62,0Hz:
+          aliases:
+          - 60,5Hz < f <= 62,0Hz
+          - FS1 descricao
+          - sobrefrequencia registrada
+          filter: nom_faixafrequencia = '60,5Hz < f <= 62,0Hz'
+    sql_patterns:
+      dfd_por_faixa:
+        template: "SELECT\n  id_faixafrequencia,\n  nom_faixafrequencia,\n  COUNT(*) AS num_eventos,\n\
+          \  AVG(val_dfd) AS dfd_medio_s,\n  MAX(val_dfd) AS dfd_maximo_s,\n  SUM(val_dfd) AS dfd_total_s\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) BETWEEN {ano_inicio}\
+          \ AND {ano_fim}\nGROUP BY 1, 2\nORDER BY num_eventos DESC\n"
+        output_unit: s
+        matches:
+          output_modes:
+          - total
+          - average
+          - comparison
+          metrics:
+          - dfd
+          grain: faixa_frequencia
+        validated_params:
+          ano_inicio: '2025'
+          ano_fim: '2025'
+      eventos_por_ano:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  COUNT(*)\
+          \ AS num_eventos,\n  AVG(val_dfd) AS dfd_medio_s,\n  MIN(val_freqmaxmin) AS freq_minima_hz,\n\
+          \  MAX(val_freqmaxmin) AS freq_maxima_hz\nFROM {source}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: s / Hz
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - dfd
+          - freqmaxmin
+          grain: year
+      eventos_criticos:
+        template: "SELECT\n  din_referencia,\n  din_iniciodesviofreq,\n  din_fimdesviofreq,\n  id_faixafrequencia,\n\
+          \  nom_faixafrequencia,\n  val_dfd,\n  val_freqmaxmin\nFROM {source}\nWHERE val_freqmaxmin <\
+          \ 58.0 OR val_freqmaxmin > 60.5\nORDER BY val_dfd DESC\n"
+        output_unit: s / Hz
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - dfd
+          - freqmaxmin
+          grain: evento
+      duracao_evento_calculada:
+        template: "SELECT\n  din_iniciodesviofreq,\n  din_fimdesviofreq,\n  val_dfd,\n  DATEDIFF('second',\
+          \ din_iniciodesviofreq, din_fimdesviofreq) AS duracao_calculada_s,\n  ABS(val_dfd - DATEDIFF('second',\
+          \ din_iniciodesviofreq, din_fimdesviofreq)) AS diferenca_s\nFROM {source}\nWHERE din_iniciodesviofreq\
+          \ IS NOT NULL AND din_fimdesviofreq IS NOT NULL\nORDER BY diferenca_s DESC\n"
+        output_unit: s
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - dfd
+          grain: evento
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre duracao sem especificar metrica
+        assume_metric: dfd
+        assume_output: average
+        note: Duracao media por faixa e a consulta mais comum para este dataset
+      - when: usuario pergunta sobre frequencia sem especificar max ou min
+        assume_metric: freqmaxmin
+        assume_output: average
+        note: 'val_freqmaxmin ja e o extremo registrado no evento. Para subfrequencia (FI1/FI2), o valor
+          critico e o minimo; para sobrefrequencia (FS1), o maximo. Perguntar ao usuario se a intencao
+          e identificar o pior caso.
+
+          '
+      - when: usuario pergunta sobre eventos sem filtro de faixa
+        assume_metric: dfd
+        assume_output: total
+        note: Retornar todos os eventos sem filtro de faixa, agrupando por id_faixafrequencia
+      must_clarify_when:
+      - trigger_terms:
+        - pior evento
+        - mais critico
+        - mais severo
+        question: 'Voce quer o evento com maior duracao (val_dfd maximo) ou com frequencia mais extrema
+          (val_freqmaxmin minimo para subfrequencia / maximo para sobrefrequencia)?
+
+          '
+        options:
+        - maior duracao DFD
+        - frequencia mais extrema Hz
+      - trigger_terms:
+        - subfrequencia
+        - sobrefrequencia
+        question: 'Voce quer filtrar apenas eventos de subfrequencia (faixas FI1 e FI2, abaixo de 60 Hz)
+          ou apenas sobrefrequencia (faixa FS1, acima de 60 Hz)?
+
+          '
+        options:
+        - subfrequencia FI1 FI2
+        - sobrefrequencia FS1
+        - ambos
+      redirect_when:
+      - user_mentions:
+        - indicador mensal
+        - DFD mensal
+        - DFD anual
+        - media anual DFD
+        reason: Indicadores DFD agregados mensais/anuais estao em ind_qualid_dfd_meano, nao neste dataset
+          de eventos individuais.
+        redirect: ind_qualid_dfd_meano
+      - user_mentions:
+        - DFP
+        - desempenho perturbacao
+        - regime frequencia
+        reason: Indicador DFP pertence a outro dataset.
+        redirect: ind_qualid_dfp_regime
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd quando disponivel
+      - user_mentions:
+        - geracao
+        - carga
+        - balanco energetico
+        reason: Dataset contem apenas eventos de desvio de frequencia, sem dados de geracao ou carga.
+        redirect: balanco-energia-subsistema
+- property: fewShotQueries
+  value:
+  - question: Quais foram os 10 eventos de desvio de frequência com maior duração no SIN, e em qual faixa
+      ocorreram?
+    sql: SELECT din_referencia, din_iniciodesviofreq, din_fimdesviofreq, id_faixafrequencia, nom_faixafrequencia,
+      val_dfd, val_freqmaxmin FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_evento/*.parquet')
+      ORDER BY val_dfd DESC LIMIT 10;
+  - question: Quantos eventos de desvio de frequência ocorreram por ano e por faixa operativa no SIN?
+    sql: SELECT YEAR(din_referencia) AS ano, id_faixafrequencia, nom_faixafrequencia, COUNT(*) AS qtd_eventos,
+      SUM(val_dfd) AS soma_duracao_s, AVG(val_dfd) AS media_duracao_s, MIN(val_freqmaxmin) AS freq_minima_hz,
+      MAX(val_freqmaxmin) AS freq_maxima_hz FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_evento/*.parquet')
+      GROUP BY YEAR(din_referencia), id_faixafrequencia, nom_faixafrequencia ORDER BY ano, id_faixafrequencia;
+  - question: Quais eventos registraram frequência abaixo de 58 Hz, indicando distúrbios severos no SIN?
+    sql: SELECT din_referencia, din_iniciodesviofreq, din_fimdesviofreq, id_faixafrequencia, nom_faixafrequencia,
+      val_freqmaxmin, val_dfd, datediff('second', din_iniciodesviofreq, din_fimdesviofreq) AS duracao_calculada_s
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_qualid_dfd_evento/*.parquet') WHERE val_freqmaxmin
+      < 58.0 ORDER BY val_freqmaxmin ASC;
+- property: relatedDatasets
+  value:
+    ind_qualid_dfd_meano:
+      join_keys:
+      - id_faixafrequencia
+      - nom_faixafrequencia
+- property: license
+  value: CC-BY

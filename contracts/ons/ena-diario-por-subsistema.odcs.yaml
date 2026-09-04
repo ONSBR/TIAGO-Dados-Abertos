@@ -1,0 +1,713 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ena-diario-por-subsistema
+name: ena-diario-por-subsistema
+tenant: ons
+tags:
+- ENA
+- ENA bruta diária
+- ENA diária
+- ENA subsistema
+- MLT
+- SIN
+- afluencia
+- afluência diária por subsistema
+- energia natural afluente diária
+- energia-natural-afluente
+- hidrologia
+- media-longo-termo
+- planejamento-energetico
+- reservatorios
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ena_subsistema_di/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos geradores, comercializadores, planejadores e pesquisadores do setor elétrico brasileiro
+    os indicadores diários de afluência hídrica por subsistema, permitindo avaliação das condições hidrológicas
+    dos reservatórios, projeção do Custo Marginal de Operação (CMO), estudos de planejamento energético
+    de curto e médio prazo, monitoramento de desvios em relação à Média de Longo Termo (MLT) e suporte
+    a decisões de despacho e comercialização de energia no mercado de curto prazo.
+  limitations: A coluna ena_data é tipada como VARCHAR no schema físico Parquet, embora represente datas
+    no formato YYYY-MM-DD. A ENA Armazenável pode assumir valores negativos em situações de vertimento
+    intenso, quando as vazões vertidas superam as vazões naturais afluentes em determinados reservatórios.
+    Percentuais de MLT da ENA Armazenável extremamente elevados (acima de 300%) ou muito baixos (negativos)
+    podem indicar eventos hidrológicos excepcionais (cheias históricas ou secas severas) ou inconsistências
+    no processo de revisão recorrente dos dados.
+  usage: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA), afluência hídrica,
+    condições hidrológicas por subsistema ou desvio em relação à Média de Longo Termo (MLT) em granularidade
+    diária.
+domain: hidrologia
+schema:
+- name: ena_diario_por_subsistema
+  physicalType: parquet
+  logicalType: object
+  physicalName: ena_diario_por_subsistema
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador alfanumérico do subsistema elétrico do SIN (Sistema Interligado Nacional).
+      Representa a sigla do subsistema (SE, S, NE, N). Utilizado como chave de join com outros datasets
+      do ONS que referenciam subsistemas.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sigla_subsistema
+      - cod_subsistema
+      - regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico correspondente ao id_subsistema. Identifica a região
+      geográfica do SIN à qual os dados de ENA se referem.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - nome_regiao
+      - regiao
+      - subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: ena_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição da Energia Natural Afluente. Tipada como VARCHAR no schema
+      físico Parquet, mas representa datas no formato ISO 8601 (YYYY-MM-DD). Requer CAST explícito para
+      DATE em queries que envolvam ordenação temporal, filtros por intervalo de datas, funções de data
+      (date_trunc, YEAR, MONTH) ou joins temporais com outros datasets.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data_ena
+      - data_referencia
+      - dt_referencia
+      - din_referencia
+    - property: semanticType
+      value: DIMENSION
+  - name: ena_bruta_regiao_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Bruta do subsistema expressa em MWmed (megawatts médios). Calculada
+      pelo produto das vazões naturais afluentes aos reservatórios pelas produtividades a 65% dos volumes
+      úteis das usinas hidrelétricas da região. Representa o potencial energético total das afluências,
+      sem desconto de vertimentos. Não deve assumir valores negativos — valores negativos indicam possível
+      erro de dados.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ena_bruta
+      - ena_bruta_mwmed
+      - energia_natural_afluente_bruta
+      - ena_bruta_regiao
+    - property: unit
+      value: MWmed
+  - name: ena_bruta_regiao_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Bruta do subsistema expressa como percentual da Média de Longo
+      Termo (MLT). Indica o desvio relativo da afluência bruta em relação à média histórica de longo prazo
+      para aquele subsistema e período do ano. Valores acima de 100% indicam afluência acima da média
+      histórica.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ena_bruta_percentual_mlt
+      - ena_bruta_pct_mlt
+      - percentual_mlt_bruta
+      - ena_bruta_mlt
+    - property: unit
+      value: '%MLT'
+  - name: ena_armazenavel_regiao_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Armazenável do subsistema expressa em MWmed (megawatts médios).
+      Calculada a partir das vazões naturais descontadas das vazões vertidas nos reservatórios, representando
+      a parcela da afluência que efetivamente pode ser armazenada e convertida em energia futura. Pode
+      assumir valores negativos em situações de vertimento intenso, mas valores muito negativos devem
+      ser investigados.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ena_armazenavel
+      - ena_armazenavel_mwmed
+      - energia_armazenavel
+      - ena_arm_mwmed
+    - property: unit
+      value: MWmed
+  - name: ena_armazenavel_regiao_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Armazenável do subsistema expressa como percentual da Média
+      de Longo Termo (MLT). Indica o desvio relativo da afluência armazenável em relação à média histórica
+      de longo prazo. É o indicador mais relevante para avaliação das condições de armazenamento dos reservatórios
+      e projeção do CMO.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ena_armazenavel_percentual_mlt
+      - ena_armazenavel_pct_mlt
+      - percentual_mlt_armazenavel
+      - ena_arm_mlt
+    - property: unit
+      value: '%MLT'
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ena_diario_por_subsistema:\n  - row_count > 0:\n      name: Tabela não\
+      \ pode estar vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid\
+      \ values:\n        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema\
+      \ deve ser um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n\
+      \        - 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE'\n        - 'SUL'\n      name: nom_subsistema\
+      \ deve ser um dos valores válidos\n\n  # Unicidade da chave primária composta ['id_subsistema',\
+      \ 'ena_data'] (candidata LLM)\n  - failed rows:\n      name: Chave composta (id_subsistema, ena_data)\
+      \ não deve ter duplicatas\n      fail query: |\n        SELECT * FROM ena_diario_por_subsistema\n\
+      \        WHERE (id_subsistema, ena_data) IN (\n          SELECT id_subsistema, ena_data FROM ena_diario_por_subsistema\n\
+      \          GROUP BY id_subsistema, ena_data\n          HAVING COUNT(*) > 1\n        )\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ena-diario-por-subsistema
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - ena do sin
+  - ena por submercado
+  - afluencia do subsistema
+  - quanta chuva chegou ao sistema
+  - condicao hidrologica por regiao
+  - mlt por subsistema
+  - ena do sudeste
+  - ena do nordeste
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA), afluência hídrica,
+    condições hidrológicas por subsistema ou desvio em relação à Média de Longo Termo (MLT) em granularidade
+    diária. Também relevante quando a análise requer correlação entre hidrologia e preços de energia (CMO)
+    ou avaliação de risco hídrico por região do SIN em base diária.
+- property: agentInstructions
+  value: |
+    - [ena_data] A coluna ena_data é tipada como VARCHAR no schema físico Parquet, embora represente datas no formato YYYY-MM-DD. Operações de ordenação lexicográfica funcionam corretamente para este formato ISO, mas filtros por intervalo, funções de data (YEAR, MONTH, DAY, date_trunc) e joins temporais exigem CAST explícito para DATE. Sem o cast, funções como date_trunc() falharão.
+
+    - [ena_armazenavel_regiao_mwmed] A ENA Armazenável pode assumir valores negativos em situações de vertimento intenso, quando as vazões vertidas superam as vazões naturais afluentes em determinados reservatórios. Embora fisicamente possível no modelo de cálculo do ONS, valores muito negativos podem indicar inconsistências no processo de consistência recorrente e devem ser investigados antes de uso em modelos.
+
+    - [ena_armazenavel_regiao_percentualmlt] Percentuais de MLT da ENA Armazenável extremamente elevados (acima de 300%) ou muito baixos (negativos) podem indicar eventos hidrológicos excepcionais (cheias históricas ou secas severas) ou inconsistências no processo de revisão recorrente dos dados. Recomenda-se verificar esses registros antes de utilizá-los em modelos de precificação ou planejamento.
+
+    - [ena_bruta_regiao_percentualmlt] Percentuais de MLT da ENA Bruta acima de 300% ou negativos são estatisticamente atípicos e podem sinalizar eventos extremos ou erros no processo de consistência. A ENA Bruta não deveria ser negativa, pois é calculada pelo produto de vazões naturais (sempre não-negativas) pelas produtividades. Valores negativos indicam possível erro de dados.
+
+    - [id_subsistema] Verificar se todos os subsistemas esperados (SE, S, NE, N) possuem registros contínuos para todas as datas do período coberto. Lacunas na série temporal de um subsistema específico podem indicar falhas na coleta ou no processo de publicação, impactando análises de correlação entre subsistemas e cálculos do SIN consolidado.
+
+    - [tipos] As colunas `ena_armazenavel_regiao_mwmed`, `ena_armazenavel_regiao_percentualmlt`, `ena_bruta_regiao_mwmed`, `ena_bruta_regiao_percentualmlt` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi a ENA Bruta do subsistema Sudeste nos últimos 30 dias?
+  - Quais subsistemas apresentaram ENA Armazenável abaixo de 50% da MLT em 2024?
+  - Como evoluiu a ENA Armazenável do subsistema Sul ao longo de 2023?
+  - Qual subsistema teve maior desvio positivo em relação à MLT no verão de 2022?
+  - Qual a média mensal de ENA Bruta por subsistema no primeiro semestre de 2024?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ena_subsistema_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2021-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ena_data
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - ena_data
+      - id_subsistema
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ena_bruta_regiao_mwmed
+      label: ENA Bruta por Subsistema (MWmed)
+      columns:
+      - ena_bruta_regiao_mwmed
+      expression: ena_bruta_regiao_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - ena_bruta_regiao_mwmed
+      - ena_bruta
+      - ena_bruta_mwmed
+      - energia_natural_afluente_bruta
+      - ena_bruta_regiao
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ena_bruta
+      - ena_bruta_mwmed
+      - energia_natural_afluente_bruta
+      - ena_bruta_regiao
+    - id: ena_bruta_regiao_percentualmlt
+      label: ENA Bruta % MLT por Subsistema
+      columns:
+      - ena_bruta_regiao_percentualmlt
+      expression: ena_bruta_regiao_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ena_bruta_regiao_percentualmlt
+      - ena_bruta_percentual_mlt
+      - ena_bruta_pct_mlt
+      - percentual_mlt_bruta
+      - ena_bruta_mlt
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        maximum:
+          sql: MAX(TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        minimum:
+          sql: MIN(TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        ranking:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+      interval_hours: 24.0
+      aliases:
+      - ena_bruta_percentual_mlt
+      - ena_bruta_pct_mlt
+      - percentual_mlt_bruta
+      - ena_bruta_mlt
+    - id: ena_armazenavel_regiao_mwmed
+      label: ENA Armazenavel por Subsistema (MWmed)
+      columns:
+      - ena_armazenavel_regiao_mwmed
+      expression: ena_armazenavel_regiao_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - ena_armazenavel_regiao_mwmed
+      - ena_armazenavel
+      - ena_armazenavel_mwmed
+      - energia_armazenavel
+      - ena_arm_mwmed
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ena_armazenavel
+      - ena_armazenavel_mwmed
+      - energia_armazenavel
+      - ena_arm_mwmed
+    - id: ena_armazenavel_regiao_percentualmlt
+      label: ENA Armazenavel % MLT por Subsistema
+      columns:
+      - ena_armazenavel_regiao_percentualmlt
+      expression: ena_armazenavel_regiao_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ena_armazenavel_regiao_percentualmlt
+      - ena_armazenavel_percentual_mlt
+      - ena_armazenavel_pct_mlt
+      - percentual_mlt_armazenavel
+      - ena_arm_mlt
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        maximum:
+          sql: MAX(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        minimum:
+          sql: MIN(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        ranking:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))
+          unit: '%MLT'
+      interval_hours: 24.0
+      aliases:
+      - ena_armazenavel_percentual_mlt
+      - ena_armazenavel_pct_mlt
+      - percentual_mlt_armazenavel
+      - ena_arm_mlt
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - ena_bruta_regiao_mwmed
+      - ena_bruta_regiao_percentualmlt
+      - ena_armazenavel_regiao_mwmed
+      - ena_armazenavel_regiao_percentualmlt
+      preferred_for:
+      - ENA por subsistema
+      - afluencia hidrica subsistema
+      - desvio MLT subsistema
+      - percentual MLT armazenavel
+      - percentual MLT bruta
+      - ena armazenavel regiao
+      - ena bruta regiao
+      - risco hidrologico subsistema
+      - condicao hidrologica SIN
+      - afluencia abaixo da media subsistema
+      not_preferred_for:
+      - ranking
+      - usina_especifica
+      - usina_individual
+      - nuclear
+      - MMGD
+      - reservatorio individual
+      - ENA por reservatorio
+      - EAR subsistema
+      - energia armazenada reservatorio
+      - carga energia subsistema
+      - geracao hidraulica subsistema
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          filter: nom_subsistema = 'SUL'
+    sql_patterns:
+      ena_bruta_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes,\n  id_subsistema,\n\
+          \  SUM(TRY_CAST(ena_bruta_regiao_mwmed AS DOUBLE) * 24.0) / 1000 AS ena_bruta_gwh\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(ena_data AS DATE)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2\n"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - ena_bruta_regiao_mwmed
+          grain: month
+        validated_params:
+          year: '2026'
+      ena_armazenavel_pct_mlt_serie:
+        template: "SELECT\n  TRY_CAST(ena_data AS DATE) AS data,\n  id_subsistema,\n  AVG(TRY_CAST(ena_armazenavel_regiao_percentualmlt\
+          \ AS DOUBLE)) AS ena_arm_pct_mlt\nFROM {source}\nWHERE id_subsistema = '{subsistema}'\n  AND\
+          \ TRY_CAST(ena_data AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1, 2\nORDER\
+          \ BY 1\n"
+        output_unit: '%MLT'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ena_armazenavel_regiao_percentualmlt
+          grain: day
+      subsistemas_abaixo_mlt:
+        template: "SELECT\n  id_subsistema,\n  AVG(TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE))\
+          \ AS media_pct_mlt\nFROM {source}\nWHERE TRY_CAST(ena_data AS DATE) BETWEEN '{data_inicio}'\
+          \ AND '{data_fim}'\n  AND TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE) < 50\nGROUP\
+          \ BY 1\nORDER BY 2 ASC\n"
+        output_unit: '%MLT'
+        validated_params:
+          data_inicio: '2026-01-01'
+          data_fim: '2026-07-18'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre ENA sem especificar bruta ou armazenavel
+        assume_metric: ena_armazenavel_regiao_mwmed
+        assume_output: average_power
+        note: 'ENA Armazenavel e o indicador operacional primario do ONS para avaliacao de risco hidrologico
+          e projecao de CMO. ENA Bruta e secundaria para esse fim.
+
+          '
+      - when: usuario pergunta sobre percentual MLT sem especificar bruta ou armazenavel
+        assume_metric: ena_armazenavel_regiao_percentualmlt
+        assume_output: average
+        note: 'Percentual MLT da ENA Armazenavel e o indicador mais relevante para avaliacao de condicoes
+          de armazenamento e projecao de CMO conforme pratica ONS.
+
+          '
+      - when: usuario pergunta sobre total nacional ou SIN sem especificar subsistema
+        assume_metric: ena_armazenavel_regiao_mwmed
+        assume_output: total_energy
+        note: 'Nao existe linha SIN no dataset. Somar os 4 subsistemas (SE, S, NE, N) para obter o total
+          nacional. Nunca filtrar por SIN ou BRASIL — esses valores nao existem no enum de id_subsistema.
+
+          '
+      - when: usuario pergunta sobre media mensal ou media anual de ENA
+        assume_metric: ena_armazenavel_regiao_mwmed
+        assume_output: average_power
+        note: 'Media de periodo retorna MWmed. Se usuario quiser energia acumulada, usar total_energy
+          (GWh = MWmed * 24 * dias / 1000).
+
+          '
+      must_clarify_when:
+      - ambiguity: bruta_vs_armazenavel
+        question: Voce quer a ENA Bruta (potencial total das afluencias) ou a ENA Armazenavel (parcela
+          que pode ser armazenada, descontando vertimentos)?
+        trigger_terms:
+        - ENA
+        - energia natural afluente
+        - afluencia
+        when: usuario menciona ENA sem qualificar bruta ou armazenavel E o contexto nao deixa claro qual
+          indicador e relevante
+      - ambiguity: mwmed_vs_percentual_mlt
+        question: Voce quer o valor absoluto em MWmed (potencia media) ou o percentual em relacao a Media
+          de Longo Termo (% MLT)?
+        trigger_terms:
+        - desvio
+        - comparacao historica
+        - acima da media
+        - abaixo da media
+        when: usuario pergunta sobre desvio ou comparacao com historico sem especificar unidade
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - belo monte
+        - tucurui
+        - ranking de usinas
+        reason: Dataset agrega por subsistema. Nao contem identificador de usina individual.
+        redirect: ena-diario-por-reservatorio para ENA por reservatorio; geracao-usina-2 para geracao
+          por usina
+      - user_mentions:
+        - reservatorio
+        - reservatorio individual
+        reason: Dataset agrega por subsistema. Para ENA por reservatorio use dataset especifico.
+        redirect: ena-diario-por-reservatorio
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset nao contem dimensao nuclear. ENA e exclusivamente hidrica.
+        redirect: geracao-usina-2 com filtro de tipo de combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD.
+        redirect: dataset com coluna val_germmgd ou val_ger_mmgd
+      - user_mentions:
+        - energia armazenada
+        - EAR
+        - estoque hidrico
+        - nivel reservatorio
+        reason: ENA e afluencia (entrada de agua), nao armazenamento. Para energia armazenada use EAR.
+        redirect: ear-diario-por-subsistema
+      - user_mentions:
+        - carga
+        - demanda
+        - consumo
+        reason: Dataset nao contem dados de carga ou demanda.
+        redirect: carga-energia
+      - user_mentions:
+        - CMO
+        - custo marginal
+        - preco energia
+        reason: Dataset nao contem CMO. ENA e insumo para calculo de CMO, nao o preco em si.
+        redirect: cmo-semanal
+- property: fewShotQueries
+  value:
+  - question: Qual foi a ENA Bruta e Armazenável de cada subsistema nos últimos 30 dias disponíveis?
+    sql: SELECT TRY_CAST(ena_data AS DATE) AS ena_data_date, id_subsistema, nom_subsistema, ena_bruta_regiao_mwmed,
+      ena_bruta_regiao_percentualmlt, ena_armazenavel_regiao_mwmed, ena_armazenavel_regiao_percentualmlt
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_subsistema_di/*.parquet') WHERE TRY_CAST(ena_data
+      AS DATE) >= ( SELECT MAX(TRY_CAST(ena_data AS DATE)) - INTERVAL '30' DAY FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_subsistema_di/*.parquet')
+      ) ORDER BY ena_data_date DESC, id_subsistema;
+  - question: Qual foi a média mensal de ENA Armazenável por subsistema ao longo de 2024?
+    sql: SELECT date_trunc('month', TRY_CAST(ena_data AS DATE)) AS mes_referencia, id_subsistema, nom_subsistema,
+      ROUND(AVG(ena_armazenavel_regiao_mwmed), 2) AS media_ena_armazenavel_mwmed, ROUND(AVG(ena_armazenavel_regiao_percentualmlt),
+      2) AS media_ena_armazenavel_pct_mlt, ROUND(AVG(ena_bruta_regiao_mwmed), 2) AS media_ena_bruta_mwmed
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_subsistema_di/*.parquet') WHERE TRY_CAST(ena_data
+      AS DATE) >= '2024-01-01' AND TRY_CAST(ena_data AS DATE) < '2025-01-01' GROUP BY date_trunc('month',
+      TRY_CAST(ena_data AS DATE)), id_subsistema, nom_subsistema ORDER BY mes_referencia, id_subsistema;
+  - question: Quais subsistemas apresentaram condições hidrológicas críticas (ENA Armazenável abaixo de
+      50% da MLT) e em quais períodos?
+    sql: "SELECT\n    TRY_CAST(ena_data AS DATE) AS ena_data_date,\n    id_subsistema,\n    nom_subsistema,\n\
+      \    TRY_CAST(ena_armazenavel_regiao_mwmed AS DOUBLE) AS ena_armazenavel_regiao_mwmed,\n    TRY_CAST(ena_armazenavel_regiao_percentualmlt\
+      \ AS DOUBLE) AS ena_armazenavel_regiao_percentualmlt,\n    TRY_CAST(ena_bruta_regiao_percentualmlt\
+      \ AS DOUBLE) AS ena_bruta_regiao_percentualmlt\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_subsistema_di/*.parquet',\
+      \ union_by_name=true)\nWHERE TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE) < 50.0\n \
+      \ AND TRY_CAST(ena_armazenavel_regiao_percentualmlt AS DOUBLE) >= 0.0\nORDER BY TRY_CAST(ena_armazenavel_regiao_percentualmlt\
+      \ AS DOUBLE) ASC, ena_data_date DESC\nLIMIT 100;"
+- property: relatedDatasets
+  value:
+    ear-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    ear-diario-por-reservatorio:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    balanco-energia-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    demanda_maxima_di:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - nom_subsistema
+    cmo-semanal:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    carga-energia:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+- property: license
+  value: CC-BY

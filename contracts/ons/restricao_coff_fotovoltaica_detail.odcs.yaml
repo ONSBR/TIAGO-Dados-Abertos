@@ -1,0 +1,1030 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:restricao_coff_fotovoltaica_detail
+name: restricao_coff_fotovoltaica_detail
+tenant: ons
+tags:
+- 30min
+- ONS
+- UFV
+- coff fotovoltaico por usina
+- constrained-off
+- constrained-off fotovoltaico
+- constrained-off solar
+- corte de geração solar
+- curtailment fotovoltaico
+- curtailment solar
+- fotovoltaico
+- geração solar
+- irradiância
+- restrição UFV
+- restrição operativa
+- usina fotovoltaica
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_detail_tm/*.parquet
+  format: parquet
+description:
+  purpose: Registrar e disponibilizar as restrições operativas por constrained-off em usinas fotovoltaicas
+    individuais para uso por operadores do ONS, agentes do setor elétrico, auditores regulatórios e analistas
+    de energia. Suporta decisões de apuração e auditoria de restrições operativas, cálculo de compensações
+    financeiras por curtailment solar, análise de curtailment por usina e complexo, planejamento operativo
+    de redespacho, conformidade regulatória e estudos de integração de fontes renováveis ao Sistema Interligado
+    Nacional.
+  limitations: Campo apresenta valores negativos (min=-2. Campo apresenta valores negativos (min=-0. Registros
+    com flg_dadoirradianciainvalido=true indicam que val_irradianciaverificado não é confiável para aquele
+    instante.
+  usage: Recuperar este dataset quando a pergunta envolver restrições operativas de usinas fotovoltaicas
+    individuais, curtailment solar por usina ou complexo, comparação entre geração estimada e verificada
+    em patamares de 30 minutos, ou auditoria de constrained-off por modalidade regulatória (Tipo I, II-B,
+    II-C).
+domain: geração
+schema:
+- name: restricao_coff_fotovoltaica_detail
+  physicalType: parquet
+  logicalType: object
+  physicalName: restricao_coff_fotovoltaica_detail
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a usina fotovoltaica pertence (ex: SE,
+      S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - NE
+      - SE
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador da unidade federativa (estado) onde a usina fotovoltaica está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - unidade federativa
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - BA
+      - CE
+      - GO
+      - MG
+      - PB
+      - PE
+      - PI
+      - RN
+      - SP
+  - name: nom_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Modalidade de operação da usina fotovoltaica conforme classificação regulatória ONS para
+      constrained-off (Tipo I, Tipo II-B ou Tipo II-C)
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade
+      - tipo de operação
+      - classificação operativa
+      - modalidade operação
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Tipo II-B
+      - Tipo II-C
+  - name: nom_conjuntousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do conjunto (agrupamento) de usinas ao qual a usina fotovoltaica pertence, permitindo
+      análise agregada por complexo solar
+    customProperties:
+    - property: aliases
+      value:
+      - conjunto de usinas
+      - complexo solar
+      - agrupamento de usinas
+      - conjunto
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome individual da usina fotovoltaica conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome da usina
+      - planta solar
+      - UFV
+    - property: semanticType
+      value: DIMENSION
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código identificador único da usina no sistema do ONS, utilizado para rastreabilidade
+      e joins com cadastros internos
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código ONS
+      - id ONS
+      - código da usina ONS
+    - property: semanticType
+      value: IDENTIFIER
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL, identificador regulatório único da
+      usina fotovoltaica
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - CEG
+      - código ANEEL
+      - código empreendimento
+      - código de geração
+    - property: semanticType
+      value: IDENTIFIER
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora do instante de medição com granularidade de 30 minutos, representando o patamar
+      operativo de geração fotovoltaica
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data hora
+      - timestamp
+      - data e hora
+      - patamar
+      - intervalo
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_irradianciaverificado
+    physicalType: DOUBLE
+    logicalType: number
+    description: Valor de irradiância solar verificada (medida) no local da usina no instante de referência.
+      Pode apresentar valores negativos próximos de zero por ruído de sensor ou medição noturna
+    customProperties:
+    - property: aliases
+      value:
+      - irradiância
+      - irradiância verificada
+      - radiação solar
+      - GHI
+      - irradiância medida
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: W/m²
+  - name: flg_dadoirradianciainvalido
+    physicalType: BOOLEAN
+    logicalType: boolean
+    description: Flag booleano que indica se o dado de irradiância verificada é inválido (true = inválido,
+      false = válido). Utilizado para filtrar registros com problemas de medição de irradiância
+    customProperties:
+    - property: aliases
+      value:
+      - flag irradiância inválida
+      - dado inválido
+      - irradiância inválida
+      - flag invalido
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 'False'
+      - 'True'
+  - name: val_geracaoestimada
+    physicalType: DOUBLE
+    logicalType: number
+    description: Geração de energia elétrica estimada para a usina fotovoltaica no instante de referência,
+      representando o potencial de geração sem restrição de constrained-off
+    customProperties:
+    - property: aliases
+      value:
+      - geração estimada
+      - potencial de geração
+      - geração prevista
+      - geração sem restrição
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_geracaoverificada
+    physicalType: DOUBLE
+    logicalType: number
+    description: Geração de energia elétrica efetivamente verificada (medida) na usina fotovoltaica no
+      instante de referência. Pode apresentar valores ligeiramente negativos por consumo auxiliar ou imprecisão
+      de medição em períodos de geração nula
+    customProperties:
+    - property: aliases
+      value:
+      - geração verificada
+      - geração medida
+      - geração real
+      - geração efetiva
+      - geração realizada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for restricao_coff_fotovoltaica_detail:\n  - row_count > 0:\n      name: Tabela\
+      \ não pode estar vazia\n\n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n   \
+      \   valid values:\n        - 'NE'\n        - 'SE'\n      name: id_subsistema deve ser um dos valores\
+      \ válidos\n  - invalid_count(id_estado) = 0:\n      valid values:\n        - 'BA'\n        - 'CE'\n\
+      \        - 'GO'\n        - 'MG'\n        - 'PB'\n        - 'PE'\n        - 'PI'\n        - 'RN'\n\
+      \        - 'SP'\n      name: id_estado deve ser um dos valores válidos\n  - invalid_count(nom_modalidadeoperacao)\
+      \ = 0:\n      valid values:\n        - 'Tipo II-B'\n        - 'Tipo II-C'\n      name: nom_modalidadeoperacao\
+      \ deve ser um dos valores válidos\n  - invalid_count(flg_dadoirradianciainvalido) = 0:\n      valid\
+      \ values:\n        - 'False'\n        - 'True'\n      name: flg_dadoirradianciainvalido deve ser\
+      \ um dos valores válidos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count\
+      \ between 651532 and 977299:\n      name: Volume esperado entre 651,532 e 977,299 registros\n\n\
+      \  # Unicidade da chave primária composta ['id_ons', 'ceg', 'din_instante'] (candidata LLM)\n  -\
+      \ failed rows:\n      name: Chave composta (id_ons, ceg, din_instante) não deve ter duplicatas\n\
+      \      fail query: |\n        SELECT * FROM restricao_coff_fotovoltaica_detail\n        WHERE (id_ons,\
+      \ ceg, din_instante) IN (\n          SELECT id_ons, ceg, din_instante FROM restricao_coff_fotovoltaica_detail\n\
+      \          GROUP BY id_ons, ceg, din_instante\n          HAVING COUNT(*) > 1\n        )\n\n  # Freshness:\
+      \ din_instante deve ter dados recentes (SLA: Atualizado diariamente)\n  - freshness(din_instante)\
+      \ < 3d:\n      name: din_instante não pode ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/restricao_coff_fotovoltaica_detail
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - corte de geracao solar por usina
+  - motivo do corte fotovoltaico
+  - curtailment por parque solar
+  - quanto cada ufv deixou de gerar
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver restrições operativas de usinas fotovoltaicas
+    individuais, curtailment solar por usina ou complexo, comparação entre geração estimada e verificada
+    em patamares de 30 minutos, ou auditoria de constrained-off por modalidade regulatória (Tipo I, II-B,
+    II-C). Também relevante para perguntas sobre irradiância solar verificada, qualidade de dados de medição
+    fotovoltaica ou cálculo de compensações por corte de geração solar.
+- property: agentInstructions
+  value: '- [val_irradianciaverificado] A coluna val_irradianciaverificado apresenta valores negativos
+    (mín=-2.0 W/m²), possivelmente originados de ruído de sensor ou medições realizadas em períodos noturnos.
+    Esses registros devem ser filtrados ou tratados antes de uso em modelos de estimativa de geração.
+    A coluna flg_dadoirradianciainvalido deve ser consultada em conjunto para identificar registros inválidos.
+
+
+    - [val_geracaoverificada] A coluna val_geracaoverificada apresenta valores levemente negativos (mín=-0.091
+    MW), atribuídos a ruído de medição dos medidores de energia. Embora esperado operacionalmente, valores
+    abaixo de -0.1 MW podem indicar problemas de telemetria e devem ser investigados. Em agregações, recomenda-se
+    aplicar GREATEST(val_geracaoverificada, 0) para evitar distorções em somas de energia.
+
+
+    - [din_instante] Possíveis lacunas temporais na série de 30 minutos por usina podem ocorrer devido
+    a falhas de telemetria, manutenção ou indisponibilidade de dados. O dataset cobre ~800 dias com 814.416
+    linhas; considerando múltiplas usinas e 48 intervalos/dia, a densidade esperada deve ser verificada
+    por usina.
+
+
+    - [flg_dadoirradianciainvalido] A coluna flg_dadoirradianciainvalido é BOOLEAN mas pode apresentar
+    inconsistências entre o flag de invalidade e os valores efetivamente negativos ou nulos de val_irradianciaverificado.
+    Registros com irradiância negativa mas flag=false indicam que nem todos os dados problemáticos são
+    sinalizados pelo processo de consistência do ONS.
+
+
+    - [ceg] O CEG (Código de Empreendimento de Geração) deve seguir o padrão ANEEL (ex: UFV.RS.BA.032967-0.01).
+    Variações de formatação, sufixos adicionais ou CEGs desatualizados podem dificultar joins com bases
+    cadastrais da ANEEL e do ONS. Recomenda-se validar o padrão regex antes de joins críticos.
+
+
+    - [nom_modalidadeoperacao] A coluna nom_modalidadeoperacao deve conter apenas os valores "Tipo I",
+    "Tipo II-B" e "Tipo II-C" conforme a classificação ONS para constrained-off fotovoltaico. Variações
+    de grafia, espaços extras ou novos tipos não mapeados podem indicar mudanças regulatórias ou erros
+    de carga.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o curtailment total (MWh) por usina fotovoltaica no mês de janeiro de 2025?
+  - Quais usinas fotovoltaicas do subsistema NE tiveram maior volume de constrained-off no primeiro trimestre
+    de 2025?
+  - Qual a diferença entre geração estimada e verificada por modalidade de operação (Tipo I, II-B, II-C)
+    em 2024?
+  - Em quais instantes de 30 minutos a irradiância verificada foi alta mas a geração verificada foi próxima
+    de zero, indicando constrained-off severo?
+  - Qual o percentual de registros com dado de irradiância inválido por estado e por mês?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_detail_tm/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-04-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 30 min
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - ceg
+      - id_ons
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: irradianciaverificado
+      label: Irradiancia Verificada
+      columns:
+      - val_irradianciaverificado
+      expression: val_irradianciaverificado
+      quantity_kind: irradiance
+      unit_native: W/m2
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - irradianciaverificado
+      - irradiancia
+      - irradiancia verificada
+      - radiacao solar
+      - GHI
+      - irradiancia medida
+      - insolacao
+      aggregation_modes:
+        average:
+          sql: AVG(val_irradianciaverificado)
+          unit: W/m2
+        maximum:
+          sql: MAX(val_irradianciaverificado)
+          unit: W/m2
+        minimum:
+          sql: MIN(val_irradianciaverificado)
+          unit: W/m2
+        time_series:
+          sql: AVG(val_irradianciaverificado)
+          unit: W/m2
+        ranking:
+          sql: AVG(val_irradianciaverificado)
+          unit: W/m2
+        comparison:
+          sql: AVG(val_irradianciaverificado)
+          unit: W/m2
+      interval_hours: 0.5
+      aliases:
+      - irradiancia
+      - irradiancia verificada
+      - radiacao solar
+      - GHI
+      - irradiancia medida
+      - insolacao
+    - id: geracaoestimada
+      label: Geracao Estimada (sem restricao)
+      columns:
+      - val_geracaoestimada
+      expression: val_geracaoestimada
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracaoestimada
+      - geracao estimada
+      - potencial de geracao
+      - geracao prevista
+      - geracao sem restricao
+      - geracao potencial solar
+      - capacidade disponivel solar
+      aggregation_modes:
+        total_energy:
+          sql: SUM(GREATEST(val_geracaoestimada, 0) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(GREATEST(val_geracaoestimada, 0))
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_geracaoestimada)
+          unit: MWmed
+        time_series:
+          sql: AVG(GREATEST(val_geracaoestimada, 0))
+          unit: MWmed
+        ranking:
+          sql: SUM(GREATEST(val_geracaoestimada, 0) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(GREATEST(val_geracaoestimada, 0))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao estimada
+      - potencial de geracao
+      - geracao prevista
+      - geracao sem restricao
+      - geracao potencial solar
+    - id: geracaoverificada
+      label: Geracao Verificada
+      columns:
+      - val_geracaoverificada
+      expression: val_geracaoverificada
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - geracaoverificada
+      - geracao verificada
+      - geracao medida
+      - geracao real
+      - geracao efetiva
+      - geracao realizada
+      aggregation_modes:
+        total_energy:
+          sql: SUM(GREATEST(val_geracaoverificada, 0) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(GREATEST(val_geracaoverificada, 0))
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_geracaoverificada)
+          unit: MWmed
+        time_series:
+          sql: AVG(GREATEST(val_geracaoverificada, 0))
+          unit: MWmed
+        ranking:
+          sql: SUM(GREATEST(val_geracaoverificada, 0) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(GREATEST(val_geracaoverificada, 0))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao verificada
+      - geracao medida
+      - geracao real
+      - geracao efetiva
+      - geracao realizada
+    - id: curtailment
+      label: Curtailment Solar (energia cortada)
+      columns:
+      - val_geracaoestimada
+      - val_geracaoverificada
+      expression: GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada, 0), 0)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: total_energy
+      forbidden_aggregations: []
+      valid_intents:
+      - curtailment
+      - constrained-off solar
+      - corte de geracao solar
+      - energia cortada solar
+      - restricao operativa solar
+      - coff fotovoltaico
+      - energia nao gerada solar
+      aggregation_modes:
+        total_energy:
+          sql: SUM(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada, 0), 0)
+            * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada, 0), 0))
+          unit: MWmed
+        peak_power:
+          sql: MAX(GREATEST(val_geracaoestimada - val_geracaoverificada, 0))
+          unit: MWmed
+        time_series:
+          sql: AVG(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada, 0), 0))
+          unit: MWmed
+        ranking:
+          sql: SUM(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada, 0), 0)
+            * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada, 0), 0))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - curtailment
+      - constrained-off solar
+      - corte solar
+      - energia cortada
+      - restricao solar
+      - coff solar
+      - energia nao gerada
+    - id: percentual_curtailment
+      label: Percentual de Curtailment Solar
+      columns:
+      - val_geracaoestimada
+      - val_geracaoverificada
+      expression: CASE WHEN SUM(GREATEST(val_geracaoestimada, 0)) > 0 THEN 100.0 * SUM(GREATEST(GREATEST(val_geracaoestimada,
+        0) - GREATEST(val_geracaoverificada, 0), 0)) / SUM(GREATEST(val_geracaoestimada, 0)) ELSE NULL
+        END
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: average
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - percentual curtailment
+      - taxa de corte solar
+      - percentual constrained-off
+      - fracao energia cortada
+      - indice de curtailment
+      - percentual coff
+      aggregation_modes:
+        average:
+          sql: AVG(CASE WHEN val_geracaoestimada > 0 THEN 100.0 * GREATEST(val_geracaoestimada - val_geracaoverificada,
+            0) / val_geracaoestimada ELSE NULL END)
+          unit: '%'
+        maximum:
+          sql: MAX(CASE WHEN val_geracaoestimada > 0 THEN 100.0 * GREATEST(val_geracaoestimada - val_geracaoverificada,
+            0) / val_geracaoestimada ELSE NULL END)
+          unit: '%'
+        minimum:
+          sql: MIN(CASE WHEN val_geracaoestimada > 0 THEN 100.0 * GREATEST(val_geracaoestimada - val_geracaoverificada,
+            0) / val_geracaoestimada ELSE NULL END)
+          unit: '%'
+        time_series:
+          sql: AVG(CASE WHEN val_geracaoestimada > 0 THEN 100.0 * GREATEST(val_geracaoestimada - val_geracaoverificada,
+            0) / val_geracaoestimada ELSE NULL END)
+          unit: '%'
+        ranking:
+          sql: AVG(CASE WHEN val_geracaoestimada > 0 THEN 100.0 * GREATEST(val_geracaoestimada - val_geracaoverificada,
+            0) / val_geracaoestimada ELSE NULL END)
+          unit: '%'
+        comparison:
+          sql: AVG(CASE WHEN val_geracaoestimada > 0 THEN 100.0 * GREATEST(val_geracaoestimada - val_geracaoverificada,
+            0) / val_geracaoestimada ELSE NULL END)
+          unit: '%'
+      interval_hours: 0.5
+      note: Calcular sempre como razao de somas no periodo (SUM curtailment / SUM estimada), nao media
+        de percentuais por intervalo, para evitar distorcao por periodos noturnos com estimada=0.
+      aliases:
+      - percentual curtailment
+      - taxa de corte
+      - percentual coff
+      - fracao cortada
+      - indice curtailment
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - irradianciaverificado
+      - geracaoestimada
+      - geracaoverificada
+      - curtailment
+      - percentual_curtailment
+      preferred_for:
+      - curtailment solar por usina
+      - constrained-off fotovoltaico individual
+      - geracao estimada vs verificada solar
+      - irradiancia verificada por usina
+      - energia cortada UFV
+      - percentual coff solar
+      - flag irradiancia invalida
+      - complexo solar restricao
+      - modalidade Tipo II-B II-C curtailment
+      - auditoria corte solar semihorario
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - microgeracao
+      - minigeracao
+      - geracao distribuida
+      - eolica
+      - hidraulica
+      - termica
+      - balanco carga geracao
+      - subsistema agregado
+      - curtailment eolico
+      - fator de capacidade
+      - disponibilidade usina
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      id_estado:
+        BA:
+          aliases:
+          - bahia
+          - BA
+          filter: id_estado = 'BA'
+        CE:
+          aliases:
+          - ceara
+          - CE
+          filter: id_estado = 'CE'
+        GO:
+          aliases:
+          - goias
+          - GO
+          filter: id_estado = 'GO'
+        MG:
+          aliases:
+          - minas gerais
+          - MG
+          filter: id_estado = 'MG'
+        PB:
+          aliases:
+          - paraiba
+          - PB
+          filter: id_estado = 'PB'
+        PE:
+          aliases:
+          - pernambuco
+          - PE
+          filter: id_estado = 'PE'
+        PI:
+          aliases:
+          - piaui
+          - PI
+          filter: id_estado = 'PI'
+        RN:
+          aliases:
+          - rio grande do norte
+          - RN
+          filter: id_estado = 'RN'
+        SP:
+          aliases:
+          - sao paulo
+          - SP
+          filter: id_estado = 'SP'
+      nom_modalidadeoperacao:
+        Tipo II-B:
+          aliases:
+          - tipo 2b
+          - tipo ii-b
+          - II-B
+          - 2B
+          filter: nom_modalidadeoperacao = 'Tipo II-B'
+        Tipo II-C:
+          aliases:
+          - tipo 2c
+          - tipo ii-c
+          - II-C
+          - 2C
+          filter: nom_modalidadeoperacao = 'Tipo II-C'
+      flg_dadoirradianciainvalido:
+        valido:
+          aliases:
+          - valido
+          - dado valido
+          - irradiancia valida
+          - sem falha
+          filter: flg_dadoirradianciainvalido = false
+        invalido:
+          aliases:
+          - invalido
+          - dado invalido
+          - irradiancia invalida
+          - com falha
+          - flag invalido
+          filter: flg_dadoirradianciainvalido = true
+    sql_patterns:
+      curtailment_mensal_por_usina:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  nom_usina,\n\
+          \  id_subsistema,\n  SUM(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada,\
+          \ 0), 0) * 0.5) / 1000 AS curtailment_gwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM din_instante)\
+          \ = {year}\nGROUP BY 1, 2, 3\nORDER BY curtailment_gwh DESC"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - curtailment
+          grain: month
+        validated_params:
+          year: '2026'
+      percentual_curtailment_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  nom_usina,\n\
+          \  id_subsistema,\n  100.0 * SUM(GREATEST(GREATEST(val_geracaoestimada, 0) - GREATEST(val_geracaoverificada,\
+          \ 0), 0))\n    / NULLIF(SUM(GREATEST(val_geracaoestimada, 0)), 0) AS pct_curtailment\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2, 3\nORDER\
+          \ BY pct_curtailment DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - percentual_curtailment
+          grain: month
+        validated_params:
+          year: '2026'
+      irradiancia_valida_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  id_subsistema,\n\
+          \  id_estado,\n  AVG(val_irradianciaverificado) AS irradiancia_media_wm2\nFROM {source}\nWHERE\
+          \ flg_dadoirradianciainvalido = false\n  AND val_irradianciaverificado >= 0\n  AND EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2, 3\nORDER BY 1, 2, 3"
+        output_unit: W/m2
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - irradianciaverificado
+          grain: month
+        validated_params:
+          year: '2026'
+      constrained_off_severo:
+        template: "SELECT\n  din_instante,\n  nom_usina,\n  id_subsistema,\n  val_irradianciaverificado,\n\
+          \  val_geracaoestimada,\n  val_geracaoverificada,\n  val_geracaoestimada - val_geracaoverificada\
+          \ AS curtailment_mw\nFROM {source}\nWHERE flg_dadoirradianciainvalido = false\n  AND val_irradianciaverificado\
+          \ > {irradiancia_threshold}\n  AND val_geracaoverificada < {geracao_threshold}\nORDER BY curtailment_mw\
+          \ DESC\nLIMIT 100"
+        output_unit: MW
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - curtailment
+          grain: 30min
+        validated_params:
+          irradiancia_threshold: '-2.0'
+          geracao_threshold: '134.044'
+      restricao_coff_fotovoltaica_detail_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoestimada\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracaoestimada_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoverificada\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracaoverificada_gwh\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      restricao_coff_fotovoltaica_detail_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoestimada\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_geracaoestimada_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracaoverificada AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_geracaoverificada_mwmed\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+    ambiguity_policy:
+      default_assumptions:
+      - when: curtailment
+        assume_metric: curtailment
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - percentual
+        - taxa
+        - fracao
+        - media
+        - potencia
+      - when: geracao solar
+        assume_metric: geracaoverificada
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - estimada
+        - prevista
+        - sem restricao
+        - potencial
+        - media
+        - potencia
+        - pico
+      - when: geracao estimada
+        assume_metric: geracaoestimada
+        assume_output: total_energy
+        assume_unit: GWh
+        unless_mentions:
+        - media
+        - potencia
+        - pico
+      - when: irradiancia
+        assume_metric: irradianciaverificado
+        assume_output: average
+        assume_unit: W/m2
+        unless_mentions:
+        - total
+        - soma
+        - maximo
+        - pico
+      must_clarify_when:
+      - ambiguity: curtailment_absoluto_vs_percentual
+        question: Você quer o curtailment em energia absoluta (GWh/MWh) ou como percentual da geração
+          estimada (%)?'
+        trigger_terms:
+        - quanto foi cortado
+        - volume de corte
+        - restricao solar
+      - ambiguity: usina_individual_vs_complexo
+        question: Você quer o resultado por usina individual ou agregado por complexo/conjunto de usinas?
+        trigger_terms:
+        - complexo solar
+        - conjunto de usinas
+        - parque solar
+      - ambiguity: incluir_dados_invalidos_irradiancia
+        question: Deseja incluir registros com flag de iradiância inválida (flg_dadoirradianciainvalido=true)
+          na análise?
+        trigger_terms:
+        - irradiancia
+        - GHI
+        - radiacao solar
+        - insolacao
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset cobre exclusivamente usinas fotovoltaicas.
+        redirect: geracao-usina-2 com filtro por combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem registros de micro/minigeracao distribuida.
+        redirect: dataset especifico de MMGD
+      - user_mentions:
+        - curtailment eolico
+        - restricao eolica
+        - constrained-off eolico
+        reason: Curtailment eolico esta em dataset separado.
+        redirect: restricao_coff_eolica_detail
+      - user_mentions:
+        - tipo I
+        - tipo 1
+        reason: Enum fisico de nom_modalidadeoperacao nao contem Tipo I nos dados amostrados. Verificar
+          dataset agregado.
+        redirect: restricao_coff_fotovoltaica para verificar disponibilidade de Tipo I
+- property: fewShotQueries
+  value:
+  - question: Qual foi a energia constrained-off total (MWh) das usinas fotovoltaicas por subsistema e
+      mês em 2025?
+    sql: SELECT id_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, SUM((GREATEST(val_geracaoestimada
+      - val_geracaoverificada, 0)) * 0.5) * 0.5 AS energia_coff_mwh FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_detail_tm/*.parquet')
+      WHERE YEAR(din_instante) = 2025 GROUP BY id_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY mes, id_subsistema;
+  - question: Quais são as 20 usinas fotovoltaicas com maior energia constrained-off acumulada no período
+      disponível?
+    sql: SELECT id_ons, nom_usina, id_estado, nom_conjuntousina, nom_modalidadeoperacao, SUM((GREATEST(val_geracaoestimada
+      - val_geracaoverificada, 0)) * 0.5) / 1000 * 0.5 AS energia_coff_gwh, COUNT(*) AS total_intervalos
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_detail_tm/*.parquet')
+      GROUP BY id_ons, nom_usina, id_estado, nom_conjuntousina, nom_modalidadeoperacao ORDER BY energia_coff_gwh
+      DESC LIMIT 20;
+  - question: Qual a proporção de intervalos com irradiância inválida por usina em cada mês de 2024?
+    sql: SELECT id_ons, nom_usina, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, COUNT(*)
+      AS total_intervalos, SUM(CASE WHEN flg_dadoirradianciainvalido THEN 1 ELSE 0 END) AS intervalos_invalidos,
+      ROUND( 100.0 * SUM(CASE WHEN flg_dadoirradianciainvalido THEN 1 ELSE 0 END) / COUNT(*), 2 ) AS pct_invalido
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_detail_tm/*.parquet')
+      WHERE YEAR(din_instante) = 2024 GROUP BY id_ons, nom_usina, DATE_TRUNC('month', TRY_CAST(din_instante
+      AS TIMESTAMP)) HAVING SUM(CASE WHEN flg_dadoirradianciainvalido THEN 1 ELSE 0 END) > 0 ORDER BY
+      pct_invalido DESC LIMIT 50;
+- property: relatedDatasets
+  value:
+    restricao_coff_eolica_detail:
+      join_keys:
+      - id_subsistema
+      - id_estado
+      - din_instante
+    geracao-usina-2:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_subsistema
+      - id_estado
+      - din_instante
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_modalidadeoperacao
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_modalidadeoperacao
+      - nom_usina
+    fator-capacidade-2:
+      join_keys:
+      - id_ons
+      - ceg
+      - id_subsistema
+      - id_estado
+      - nom_modalidadeoperacao
+    modalidade-usina:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_estado
+    capacidade-geracao:
+      join_keys:
+      - ceg
+      - id_estado
+      - id_subsistema
+      - nom_modalidadeoperacao
+      - nom_usina
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - id_estado
+      - nom_modalidadeoperacao
+      - nom_usina
+    usina_conjunto:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    reservatorio:
+      join_keys:
+      - ceg
+      - id_subsistema
+      - nom_usina
+    usina_pqu:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_subsistema
+    restricao_coff_fotovoltaica:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - nom_conjuntousina
+      - nom_modalidadeoperacao
+      - id_estado
+      - id_subsistema
+    restricao_coff_eolica_usi:
+      join_keys:
+      - id_ons
+      - din_instante
+    disponibilidade_usina:
+      join_keys:
+      - ceg
+      - din_instante
+- property: license
+  value: CC-BY

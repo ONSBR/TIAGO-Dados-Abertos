@@ -1,0 +1,45 @@
+MCP TIAGO Dados Abertos — ONS
+Avisos de Licença e Atribuição da Fonte de Dados
+==================================================================
+
+CÓDIGO
+------
+O código-fonte deste servidor MCP é licenciado sob a licença MIT (ver LICENSE).
+A licença do código é independente da licença dos DADOS descritos/consultados.
+
+
+COMO O SERVIDOR USA OS DADOS
+----------------------------
+Este servidor NÃO redistribui os conjuntos de dados. Ele:
+  (a) descreve o ESQUEMA (nomes/tipos de coluna) em contratos ODCS;
+  (b) embute pequenas AMOSTRAS ilustrativas de valores (examples / enums) para
+      documentação e roteamento semântico;
+  (c) CONSULTA OS DADOS AO VIVO no endpoint oficial da fonte no momento da
+      execução — o dado não é empacotado nem hospedado aqui.
+
+A licença da fonte, verificada nos termos reais do portal em 2026-07-07, está
+declarada em cada contrato como `customProperties` -> `property: license`, e
+resumida abaixo. Isto é um resumo de boa-fé, NÃO parecer jurídico; confirme os termos
+vigentes.
+
+
+FONTE E ATRIBUIÇÃO
+------------------
+
+ONS — Operador Nacional do Sistema Elétrico
+   Portal: https://dados.ons.org.br  (bucket S3 público: ons-aws-prod-opendata)
+   Licença: CC-BY (Creative Commons Atribuição; o portal declara "cc-by" sem
+            cravar a versão). Reuso e redistribuição livres, inclusive comercial;
+            exige atribuição. Não é share-alike.
+   Atribuição: "Fonte: ONS — Operador Nacional do Sistema Elétrico, Portal de
+                Dados Abertos (dados.ons.org.br), licença CC-BY."
+
+O servidor carimba essa atribuição automaticamente: as respostas de `analisar`,
+`executar_sql` e `descrever_dataset` trazem o bloco `tiago-dados-abertos-sources`
+com o dataset lido e a URL canônica no portal.
+
+
+AVISO A QUEM DERIVAR DESTE PROJETO (downstream)
+-----------------------------------------------
+O CÓDIGO é MIT: você pode copiar, modificar e até comercializar O CÓDIGO. Isso
+NÃO estende os termos da FONTE DE DADOS — para o ONS, o dever é atribuir.

@@ -1,0 +1,755 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:modalidade-usina
+name: modalidade-usina
+tenant: ons
+tags:
+- ANEEL
+- CEG
+- Submodulo-7.2
+- Submódulo 7.2
+- Tipo-I
+- Tipo-II
+- Tipo-III
+- classificação operacional de usinas
+- despacho-centralizado
+- despacho-descentralizado
+- modalidade de operação de usinas
+- modalidade de usina
+- modalidade-operacao
+- tipo de despacho de usina
+- tipo de operação ONS
+- usinas-geradoras
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/modalidade_usina/*.parquet
+  format: parquet
+description:
+  purpose: Prover o cadastro oficial de modalidades de operação de usinas geradoras para uso por agentes
+    de geração, analistas do ONS, reguladores da ANEEL e pesquisadores do setor elétrico. Suporta decisões
+    de despacho centralizado e descentralizado, supervisão operacional por centro de operação, conformidade
+    regulatória com o Submódulo 7.2 dos Procedimentos de Rede, e enriquecimento de datasets de geração
+    horária e capacidade instalada com metadados cadastrais de cada usina.
+  limitations: 43,8% dos registros (aproximadamente 2. Campo armazenado como VARCHAR devido ao formato
+    de serialização no dataset modalidade-usina. 1,1% dos registros (aproximadamente 65 usinas) do dataset
+    modalidade-usina não possuem CEG atribuído.
+  usage: Recuperar este dataset quando a pergunta envolver classificação ou tipo de despacho de usinas
+    geradoras (Tipo I, II-A, II-B, II-C, III), identificação de usinas por centro de operação (COSR),
+    status regulatório ANEEL ou potência autorizada de usinas individuais.
+domain: geração
+schema:
+- name: modalidade_usina
+  physicalType: parquet
+  logicalType: object
+  physicalName: modalidade_usina
+  properties:
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome oficial da usina geradora conforme cadastro ONS/ANEEL
+    customProperties:
+    - property: aliases
+      value:
+      - nome da usina
+      - usina
+      - nome do empreendimento
+    - property: semanticType
+      value: DIMENSION
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código de Empreendimento de Geração — identificador regulatório único atribuído pela
+      ANEEL a cada usina geradora. Ausente em aproximadamente 1,1% dos registros.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código de empreendimento
+      - código ANEEL
+      - CEG
+      - código da usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Modalidade de operação da usina conforme classificação do Submódulo 7.2 dos Procedimentos
+      de Rede do ONS. Valores possíveis: Tipo I (despacho centralizado pelo ONS), Tipo II-A, Tipo II-B,
+      Tipo II-C (despacho descentralizado com diferentes níveis de supervisão) e Tipo III (sem despacho
+      centralizado).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade de operação
+      - tipo de operação
+      - modalidade
+      - tipo de despacho
+      - classificação de operação
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - TIPO I
+      - TIPO II-A
+      - TIPO II-B
+      - TIPO II-C
+      - TIPO III
+      - TIPO III (EM DIT)
+  - name: val_potenciaautorizada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Potência autorizada da usina em MW. Armazenada fisicamente como VARCHAR no Parquet devido
+      ao formato de serialização. Requer TRY_CAST(val_potenciaautorizada AS DOUBLE) para uso em cálculos
+      e agregações numéricas.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - potência autorizada
+      - potência instalada
+      - capacidade autorizada
+      - potência
+      - MW autorizado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_potenciaautorizada AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: sgl_centrooperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Sigla do Centro de Operação responsável pela supervisão e despacho da usina (ex: COSR-SE,
+      COSR-S, COSR-NE, COSR-N, COI).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - centro de operação
+      - COSR
+      - centro operacional
+      - sigla do centro
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - COSR-NCO
+      - COSR-NE
+      - COSR-S
+      - COSR-SE
+  - name: nom_pontoconexao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do ponto de conexão da usina à rede básica ou de distribuição, identificando a
+      subestação ou barra de interligação ao sistema elétrico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ponto de conexão
+      - subestação de conexão
+      - barra de conexão
+      - ponto de interligação
+    - property: semanticType
+      value: DIMENSION
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla/código do estado (UF) onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - sigla do estado
+      - unidade federativa
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome do estado
+      - estado
+      - unidade federativa
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+  - name: sts_aneel
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Status regulatório da usina perante a ANEEL, indicando a situação cadastral ou de outorga
+      do empreendimento (ex: Operação, Construção, Autorizado).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - status ANEEL
+      - situação ANEEL
+      - status regulatório
+      - situação regulatória
+      - status da usina
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - A
+      - I
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador interno ONS da usina. Presente apenas para usinas com despacho centralizado
+      ou já habilitadas no sistema ONS. Ausente (nulo) em 43,8% dos registros, correspondendo a usinas
+      em processo de habilitação, sem despacho centralizado (Tipo III) ou ainda não integradas ao sistema
+      ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ID ONS
+      - identificador ONS
+      - código ONS
+      - id da usina no ONS
+    - property: semanticType
+      value: IDENTIFIER
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for modalidade_usina:\n  - row_count > 0:\n      name: Tabela não pode estar\
+      \ vazia\n\n  # Referential integrity\n  - invalid_count(nom_modalidadeoperacao) = 0:\n      valid\
+      \ values:\n        - 'TIPO I'\n        - 'TIPO II-A'\n        - 'TIPO II-B'\n        - 'TIPO II-C'\n\
+      \        - 'TIPO III'\n        - 'TIPO III (EM DIT)'\n      name: nom_modalidadeoperacao deve ser\
+      \ um dos valores válidos\n  - invalid_count(sgl_centrooperacao) = 0:\n      valid values:\n    \
+      \    - 'COSR-NCO'\n        - 'COSR-NE'\n        - 'COSR-S'\n        - 'COSR-SE'\n      name: sgl_centrooperacao\
+      \ deve ser um dos valores válidos\n  - invalid_count(id_estado) = 0:\n      valid values:\n    \
+      \    - 'AL'\n        - 'AM'\n        - 'AP'\n        - 'BA'\n        - 'CE'\n        - 'DF'\n  \
+      \      - 'ES'\n        - 'GO'\n        - 'MA'\n        - 'MG'\n        - 'MS'\n        - 'MT'\n\
+      \        - 'PA'\n        - 'PB'\n        - 'PE'\n        - 'PI'\n        - 'PR'\n        - 'RJ'\n\
+      \        - 'RN'\n        - 'RO'\n        - 'RR'\n        - 'RS'\n        - 'SC'\n        - 'SE'\n\
+      \        - 'SP'\n        - 'TO'\n      name: id_estado deve ser um dos valores válidos\n  - invalid_count(nom_estado)\
+      \ = 0:\n      valid values:\n        - 'ALAGOAS'\n        - 'AMAPA'\n        - 'AMAZONAS'\n    \
+      \    - 'BAHIA'\n        - 'CEARA'\n        - 'DISTRITO FEDERAL'\n        - 'ESPIRITO SANTO'\n  \
+      \      - 'GOIAS'\n        - 'MARANHAO'\n        - 'MATO GROSSO'\n        - 'MATO GROSSO DO SUL'\n\
+      \        - 'MINAS GERAIS'\n        - 'PARA'\n        - 'PARAIBA'\n        - 'PARANA'\n        -\
+      \ 'PERNAMBUCO'\n        - 'PIAUI'\n        - 'RIO DE JANEIRO'\n        - 'RIO GRANDE DO NORTE'\n\
+      \        - 'RIO GRANDE DO SUL'\n        - 'RONDONIA'\n        - 'RORAIMA'\n        - 'SANTA CATARINA'\n\
+      \        - 'SAO PAULO'\n        - 'SERGIPE'\n        - 'TOCANTINS'\n      name: nom_estado deve\
+      \ ser um dos valores válidos\n  - invalid_count(sts_aneel) = 0:\n      valid values:\n        -\
+      \ 'A'\n        - 'I'\n      name: sts_aneel deve ser um dos valores válidos\n\n  # Circuit breaker:\
+      \ colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_potenciaautorizada) < 5:\n\
+      \      name: val_potenciaautorizada não pode ter >5% nulos\n\n  # Unicidade da chave primária (candidata\
+      \ LLM — confirmar com dados reais)\n  - duplicate_count(ceg) = 0:\n      name: ceg não deve ter\
+      \ duplicatas (chave primária)\n\n  # Nulos em id_ons — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(id_ons) < 5.0:\n      name: id_ons não deve ter >5.0% nulos\n\n  # Nulos em\
+      \ nom_pontoconexao — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(nom_pontoconexao)\
+      \ < 5.0:\n      name: nom_pontoconexao não deve ter >5.0% nulos\n\n  # Nulos em ceg — alerta de\
+      \ qualidade (real=0%, threshold=5.0%)\n  - missing_percent(ceg) < 5.0:\n      name: ceg não deve\
+      \ ter >5.0% nulos\n\n  # Nulos em sts_aneel — alerta de qualidade (real=0%, threshold=5.0%)\n  -\
+      \ missing_percent(sts_aneel) < 5.0:\n      name: sts_aneel não deve ter >5.0% nulos\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/modalidade-usina
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - tipo de despacho da usina
+  - usina tipo i ou tipo ii
+  - usina centralizada ou nao
+  - classificacao da usina
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver classificação ou tipo de despacho de usinas
+    geradoras (Tipo I, II-A, II-B, II-C, III), identificação de usinas por centro de operação (COSR),
+    status regulatório ANEEL ou potência autorizada de usinas individuais. Também relevante quando for
+    necessário enriquecer datasets de geração horária ou capacidade instalada com metadados cadastrais
+    de modalidade operacional.
+- property: agentInstructions
+  value: '- [val_potenciaautorizada] Campo armazenado como VARCHAR devido ao formato de serialização.
+    Contém valores numéricos representando potência em MW mas não pode ser usado diretamente em SUM/AVG/MAX
+    sem conversão explícita. Pode conter valores não numéricos ou formatação inconsistente.
+
+
+    - [id_ons] 44% dos registros (~2.614 usinas) não possuem id_ons atribuído. Concentrado provavelmente
+    em usinas Tipo III (sem supervisão direta ONS) e empreendimentos em processo de habilitação. Impede
+    joins diretos por id_ons com outros datasets ONS para quase metade do cadastro.
+
+
+    - [nom_pontoconexao] 7.1% dos registros (~422 usinas) não possuem ponto de conexão registrado. Pode
+    indicar usinas distribuídas conectadas à rede de distribuição sem ponto de conexão à rede básica,
+    ou dados cadastrais incompletos para empreendimentos menores.
+
+
+    - [ceg] 1.1% dos registros (~65 usinas) não possuem CEG atribuído. O CEG é o identificador primário
+    ANEEL e sua ausência impede joins com outros datasets e rastreabilidade regulatória. Pode indicar
+    usinas em processo de regularização junto à ANEEL.
+
+
+    - [sts_aneel] 1.6% dos registros (~95 usinas) não possuem status ANEEL registrado. Impede análises
+    de conformidade regulatória e filtragem por situação do empreendimento para esse subconjunto.
+
+
+    - [sgl_centrooperacao] Valores com trailing spaces detectados em ''sgl_centrooperacao''. Use TRIM()
+    em filtros WHERE para evitar perda de registros.
+
+    - [nom_estado] Valores com trailing spaces detectados em ''nom_estado''. Use TRIM() em filtros WHERE
+    para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais usinas são despachadas centralizadamente pelo ONS (Tipo I)?
+  - Qual a potência total autorizada por modalidade de operação no SIN?
+  - Quantas usinas de cada tipo existem por estado ou centro de operação?
+  - Quais usinas Tipo III não possuem id_ons atribuído e qual sua potência autorizada?
+  - Qual a distribuição de modalidades de operação por centro de operação (COSR)?
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/modalidade_usina/*.parquet', union_by_name=true)
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - ceg
+      - id_ons
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: potenciaautorizada
+      label: Potenciaautorizada
+      columns:
+      - val_potenciaautorizada
+      expression: TRY_CAST(val_potenciaautorizada AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - potenciaautorizada
+      - potência autorizada
+      - potência instalada
+      - capacidade autorizada
+      - potência
+      - MW autorizado
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_potenciaautorizada AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_potenciaautorizada AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_potenciaautorizada AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_potenciaautorizada AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_potenciaautorizada AS DOUBLE))
+          unit: MW
+      aliases:
+      - potência autorizada
+      - potência instalada
+      - capacidade autorizada
+      - potência
+      - MW autorizado
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    selection_policy:
+      covers_metrics:
+      - potenciaautorizada
+      preferred_for:
+      - modalidade operacao usina
+      - tipo despacho usina
+      - Submódulo 7.2
+      - despacho centralizado descentralizado
+      - Tipo I Tipo II Tipo III
+      - COSR centro operacao usina
+      - status ANEEL usina
+      - sts_aneel
+      - potencia autorizada usina individual
+      - ponto de conexao usina
+      - cadastro operacional usina SIN
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - geracao horaria
+      - fator de capacidade
+      - disponibilidade horaria
+      - constrained-off serie temporal
+      - geracao verificada
+      - programacao diaria serie
+    value_aliases:
+      nom_modalidadeoperacao:
+        TIPO I:
+          aliases:
+          - TIPO I
+          - tipo 1
+          - despacho centralizado
+          - centralizado ONS
+          filter: nom_modalidadeoperacao = 'TIPO I'
+        TIPO II-A:
+          aliases:
+          - TIPO II-A
+          - tipo 2a
+          - tipo dois a
+          filter: nom_modalidadeoperacao = 'TIPO II-A'
+        TIPO II-B:
+          aliases:
+          - TIPO II-B
+          - tipo 2b
+          - tipo dois b
+          filter: nom_modalidadeoperacao = 'TIPO II-B'
+        TIPO II-C:
+          aliases:
+          - TIPO II-C
+          - tipo 2c
+          - tipo dois c
+          filter: nom_modalidadeoperacao = 'TIPO II-C'
+        TIPO III:
+          aliases:
+          - TIPO III
+          - tipo 3
+          - tipo tres
+          - sem despacho centralizado
+          - descentralizado
+          filter: nom_modalidadeoperacao = 'TIPO III'
+        TIPO III (EM DIT):
+          aliases:
+          - TIPO III (EM DIT)
+          - tipo 3 DIT
+          - tipo tres DIT
+          - DIT
+          filter: nom_modalidadeoperacao = 'TIPO III (EM DIT)'
+      sgl_centrooperacao:
+        COSR-NCO:
+          aliases:
+          - COSR-NCO
+          - NCO
+          - norte centro-oeste
+          filter: TRIM(sgl_centrooperacao) = 'COSR-NCO'
+        COSR-NE:
+          aliases:
+          - COSR-NE
+          - nordeste
+          - NE
+          filter: TRIM(sgl_centrooperacao) = 'COSR-NE'
+        COSR-S:
+          aliases:
+          - COSR-S
+          - sul
+          filter: TRIM(sgl_centrooperacao) = 'COSR-S'
+        COSR-SE:
+          aliases:
+          - COSR-SE
+          - sudeste
+          - SE
+          filter: TRIM(sgl_centrooperacao) = 'COSR-SE'
+      sts_aneel:
+        A:
+          aliases:
+          - A
+          - ativo
+          - autorizado
+          - em operacao
+          filter: sts_aneel = 'A'
+        I:
+          aliases:
+          - I
+          - inativo
+          - desativado
+          - cancelado
+          filter: sts_aneel = 'I'
+    sql_patterns:
+      potencia_total_por_modalidade:
+        template: 'SELECT nom_modalidadeoperacao, SUM(TRY_CAST(val_potenciaautorizada AS DOUBLE)) AS potencia_total_mw
+
+          FROM {source}
+
+          WHERE val_potenciaautorizada IS NOT NULL
+
+          GROUP BY nom_modalidadeoperacao
+
+          ORDER BY potencia_total_mw DESC'
+      contagem_por_cosr:
+        template: 'SELECT TRIM(sgl_centrooperacao) AS cosr, COUNT(*) AS qtd_usinas
+
+          FROM {source}
+
+          GROUP BY TRIM(sgl_centrooperacao)'
+      usinas_sem_id_ons:
+        template: "SELECT nom_usina, ceg, nom_modalidadeoperacao,\n       TRY_CAST(val_potenciaautorizada\
+          \ AS DOUBLE) AS potencia_mw\nFROM {source}\nWHERE id_ons IS NULL"
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta potencia sem especificar tipo
+        assume_metric: potenciaautorizada
+        assume_output: total
+        note: Potencia autorizada e a unica metrica numerica disponivel neste dataset cadastral
+      - when: usuario pergunta usinas ativas sem especificar status
+        assume_filter: sts_aneel = 'A'
+        note: Assumir status ativo (A) quando nao especificado; alertar que 1.6% dos registros nao possuem
+          sts_aneel
+      - when: usuario pergunta por centro de operacao sem especificar COSR
+        note: 'Sempre aplicar TRIM() em sgl_centrooperacao para evitar perda de registros por trailing
+          spaces — assume_trim: True'
+      must_clarify_when:
+      - ambiguity: usina_com_ou_sem_id_ons
+        question: Deseja incluir usinas sem id_ons atribuido (44% do cadastro, tipicamente Tipo III e
+          empreendimentos em habilitacao)?
+        trigger_terms:
+        - todas as usinas
+        - total de usinas
+        - lista completa
+      - ambiguity: potencia_nula_ou_invalida
+        question: Deseja excluir registros onde val_potenciaautorizada nao e numericamente valido (TRY_CAST
+          retorna NULL)?
+        trigger_terms:
+        - potencia total
+        - soma de potencia
+        - MW total
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - geracao horaria
+        - geracao verificada
+        - geracao real
+        - MWmed
+        - MWh gerado
+        reason: Dataset e cadastral estatico sem serie temporal de geracao.
+        redirect: geracao-usina-2 para series horarias de geracao por usina
+      - user_mentions:
+        - fator de capacidade
+        - fator capacidade
+        reason: Dataset nao contem fator de capacidade.
+        redirect: fator-capacidade-2
+      - user_mentions:
+        - disponibilidade horaria
+        - indisponibilidade
+        - TEIF
+        - TEF
+        reason: Dataset nao contem registros de disponibilidade operacional com serie temporal.
+        redirect: disponibilidade_usina ou ind_disponibilidade_fgeracao_uge_mensal
+      - user_mentions:
+        - constrained-off
+        - coff
+        - curtailment
+        - restricao operacional
+        reason: Dataset nao contem eventos de restricao operacional.
+        redirect: restricao_coff_eolica_usi ou restricao_coff_fotovoltaica_detail
+      - user_mentions:
+        - gas natural
+        - carvao
+        - biomassa
+        - oleo combustivel
+        - combustivel
+        reason: Dataset nao discrimina combustivel. Modalidade operacional e independente do tipo de combustivel.
+        redirect: geracao-termica-despacho-2 com filtro de combustivel
+- property: fewShotQueries
+  value:
+  - question: Qual a potência total autorizada (em MW) para cada modalidade de operação de usinas?
+    sql: SELECT nom_modalidadeoperacao, COUNT(*) AS total_usinas, ROUND(SUM(TRY_CAST(val_potenciaautorizada
+      AS DOUBLE)), 2) AS total_mw_autorizado, ROUND(AVG(TRY_CAST(val_potenciaautorizada AS DOUBLE)), 2)
+      AS media_mw_por_usina FROM read_parquet('s3://ons-aws-prod-opendata/dataset/modalidade_usina/*.parquet')
+      WHERE nom_modalidadeoperacao IS NOT NULL GROUP BY nom_modalidadeoperacao ORDER BY total_mw_autorizado
+      DESC
+  - question: Quais são as usinas com supervisão direta pelo ONS (Tipo I) e qual centro de operação as
+      supervisiona?
+    sql: SELECT sgl_centrooperacao, COUNT(*) AS total_usinas_tipo_i, ROUND(SUM(TRY_CAST(val_potenciaautorizada
+      AS DOUBLE)), 2) AS total_mw_tipo_i FROM read_parquet('s3://ons-aws-prod-opendata/dataset/modalidade_usina/*.parquet')
+      WHERE nom_modalidadeoperacao = 'TIPO I' AND sgl_centrooperacao IS NOT NULL GROUP BY sgl_centrooperacao
+      ORDER BY total_usinas_tipo_i DESC
+  - question: Quais estados têm mais usinas cadastradas no ONS e qual a distribuição por modalidade?
+    sql: SELECT id_estado, nom_estado, nom_modalidadeoperacao, COUNT(*) AS total_usinas, ROUND(SUM(TRY_CAST(val_potenciaautorizada
+      AS DOUBLE)), 2) AS total_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/modalidade_usina/*.parquet')
+      WHERE id_estado IS NOT NULL AND nom_modalidadeoperacao IS NOT NULL GROUP BY id_estado, nom_estado,
+      nom_modalidadeoperacao ORDER BY id_estado, total_usinas DESC
+- property: relatedDatasets
+  value:
+    disponibilidade_usina:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_ons
+    geracao-usina-2:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_estado
+    usina_conjunto:
+      join_keys:
+      - ceg
+      - nom_usina
+      - nom_estado
+    usina_pqu:
+      join_keys:
+      - ceg
+      - nom_usina
+    fator-capacidade-2:
+      join_keys:
+      - ceg
+      - id_ons
+      - nom_modalidadeoperacao
+    restricao_coff_eolica_usi:
+      join_keys:
+      - ceg
+      - id_ons
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_anual:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_estado
+      - nom_modalidadeoperacao
+    geracao-termica-despacho-2:
+      join_keys:
+      - ceg
+      - nom_usina
+    ind_disponibilidade_fgeracao_uge_mensal:
+      join_keys:
+      - ceg
+      - nom_usina
+      - nom_modalidadeoperacao
+    restricao_coff_fotovoltaica_detail:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_estado
+    capacidade-geracao:
+      join_keys:
+      - ceg
+      - nom_usina
+      - id_estado
+    restricao_coff_eolica_detail:
+      join_keys:
+      - id_ons
+      - ceg
+      - nom_usina
+      - id_estado
+    programacao_diaria:
+      join_keys:
+      - nom_usina
+      - nom_modalidadeoperacao
+      - id_estado
+      - nom_estado
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - ceg
+      - nom_usina
+    reservatorio:
+      join_keys:
+      - ceg
+      - nom_usina
+    uge_opera_csi:
+      join_keys:
+      - nom_usina
+- property: license
+  value: CC-BY

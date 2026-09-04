@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Coverage
+htmlcov/
+coverage.xml
+.coverage
+
+# Ruff
+.ruff_cache/
+
+# Cache de contratos: ARTEFATO, gerado por scripts/build_contracts_cache.py.
+# A fonte de verdade sao os YAML em contracts/ — versionar o cache criaria uma
+# segunda verdade que envelhece calada.
+contracts_cache.json
+
+# Arquivos temporarios na raiz com prefixo underscore. Root-anchored (/) de
+# proposito: um "_*" solto casaria com arquivos internos do pacote em src/.
+/_*
+
+# OS
+.DS_Store
+Thumbs.db

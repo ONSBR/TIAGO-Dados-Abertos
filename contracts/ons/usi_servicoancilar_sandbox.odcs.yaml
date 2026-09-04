@@ -1,0 +1,780 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:usi_servicoancilar_sandbox
+name: usi_servicoancilar_sandbox
+tenant: ons
+tags:
+- CEG
+- CPSA
+- CPSA sandbox
+- MUST
+- compensação de potência reativa sandbox
+- compensação de reativo
+- controle de tensão
+- reativo
+- sandbox reativos
+- sandbox regulatório
+- sandbox regulatório ONS
+- sandbox serviço ancilar reativo CPSA
+- serviço ancilar
+- serviço ancilar reativo sandbox
+- suporte de tensão
+- usinas
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/usi_servicoancilar_sandbox/*.parquet
+  format: parquet
+description:
+  purpose: Registrar e disponibilizar o cadastro de usinas elegíveis e participantes do sandbox regulatório
+    de compensação de reativo do ONS, permitindo que analistas do setor elétrico, reguladores da ANEEL
+    e agentes do mercado acompanhem quais usinas prestam serviço ancilar de suporte de tensão (CPSA),
+    seus pontos de conexão e montantes contratados. Suporta decisões regulatórias sobre elegibilidade,
+    controle de tensão na rede básica e avaliação do programa piloto de reativos.
+  limitations: Coluna val_must armazenada como VARCHAR no Parquet devido ao formato de serialização. Coluna
+    dsc_comentario possui 100% de valores nulos (385/385 registros), tornando-a completamente inútil para
+    análise no estado atual; possível campo reservado para uso futuro ou falha no pipeline de carga do
+    sandbox regulatório. Coluna dat_verificada possui 73,5% de nulos (~283 de 385 registros), indicando
+    que apenas ~102 registros possuem data preenchida; estrutura sugere template parcialmente preenchido
+    ou carga incompleta do sandbox regulatório ONS.
+  usage: Recuperar este dataset quando a pergunta envolver elegibilidade ou participação de usinas no
+    programa sandbox regulatório de compensação de reativo (CPSA) do ONS.
+domain: geração
+schema:
+- name: usi_servicoancilar_sandbox
+  physicalType: parquet
+  logicalType: object
+  physicalName: usi_servicoancilar_sandbox
+  properties:
+  - name: dat_verificada
+    physicalType: DATE
+    logicalType: string
+    description: Data em que a elegibilidade ou condição da usina foi verificada para o sandbox de reativos
+    customProperties:
+    - property: aliases
+      value:
+      - data de verificação
+      - data verificada
+      - data de checagem
+    - property: semanticType
+      value: TIMESTAMP
+    primaryKey: true
+  - name: hor_verificada
+    physicalType: VARCHAR
+    logicalType: string
+    description: Hora em que a elegibilidade ou condição da usina foi verificada para o sandbox de reativos
+    customProperties:
+    - property: aliases
+      value:
+      - hora de verificação
+      - hora verificada
+      - horário de checagem
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - 00:00
+      - 01:09
+      - 02:22
+      - 02:31
+      - 02:55
+      - 04:02
+      - 05:09
+      - 05:12
+      - 07:15
+      - 09:11
+      - 09:29
+      - 09:34
+      - 09:43
+      - '13:45'
+      - '16:05'
+    primaryKey: true
+  - name: cod_pontoconexao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código do ponto de conexão da usina à rede elétrica básica, identificando o barramento
+      ou subestação de interligação
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - ponto de conexão
+      - código ponto de conexão
+      - ponto de interligação
+      - barramento de conexão
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - MGPI2-CFLS-10
+      - MGPIRDUFPPO03
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração — identificador único da usina conforme cadastro
+      ANEEL/ONS, utilizado para joins com datasets de cadastro de usinas
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código de empreendimento de geração
+      - código da usina
+      - identificador da usina
+      - CEG
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - UFV.RS.MG.032339-0
+      - UFV.RS.MG.032340-3
+      - UFV.RS.MG.032341-1
+      - UFV.RS.MG.033185-6
+      - UFV.RS.MG.033186-4
+      - UFV.RS.MG.033187-2
+      - UFV.RS.MG.033188-0
+      - UFV.RS.MG.033189-9
+      - UFV.RS.MG.033190-2
+      - UFV.RS.MG.033192-9
+      - UFV.RS.MG.033193-7
+      - UFV.RS.MG.037830-5
+      - UFV.RS.MG.037831-3
+      - UFV.RS.MG.037836-4
+      - UFV.RS.MG.037837-2
+      - UFV.RS.MG.037838-0
+      - UFV.RS.MG.037839-9
+  - name: nom_conjunto
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do conjunto ou agrupamento ao qual a usina pertence no contexto do sandbox regulatório
+      de suporte de reativos
+    customProperties:
+    - property: aliases
+      value:
+      - nome do conjunto
+      - conjunto de usinas
+      - agrupamento
+      - nome conjunto
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Conj. Lar do Sol
+      - Conj. Pirapora 2
+  - name: val_must
+    physicalType: VARCHAR
+    logicalType: string
+    description: Valor de MUST (Montante de Uso do Sistema de Transmissão) associado à usina, armazenado
+      como VARCHAR no Parquet devido ao formato de serialização.0
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_must AS DOUBLE)
+    - property: enum
+      value:
+      - '328'
+      - 328,000
+      - 481,1
+      - 481,100
+  - name: flg_cpsa
+    physicalType: VARCHAR
+    logicalType: number
+    description: Flag binária indicando se a usina presta Compensação de Potência Reativa (CPSA) como
+      serviço ancilar; 1.0 = presta CPSA, 0.0 = não presta CPSA
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(flg_cpsa AS DOUBLE)
+    - property: aliases
+      value:
+      - flag CPSA
+      - compensação de potência reativa
+      - indicador CPSA
+      - presta serviço ancilar de reativo
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+  - name: dsc_comentario
+    physicalType: VARCHAR
+    logicalType: number
+    description: Campo de comentário descritivo sobre a usina ou sua participação no sandbox; atualmente
+      100% nulo — sem utilidade analítica no estado atual
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(dsc_comentario AS DOUBLE)
+    - property: aliases
+      value:
+      - comentário
+      - descrição
+      - observação
+      - nota
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for usi_servicoancilar_sandbox:\n  - row_count > 0:\n      name: Tabela não\
+      \ pode estar vazia\n\n  # Referential integrity\n  - invalid_count(hor_verificada) = 0:\n      valid\
+      \ values:\n        - '00:00'\n        - '01:09'\n        - '02:22'\n        - '02:31'\n        -\
+      \ '02:55'\n        - '04:02'\n        - '05:09'\n        - '05:12'\n        - '07:15'\n        -\
+      \ '09:11'\n        - '09:29'\n        - '09:34'\n        - '09:43'\n        - '13:45'\n        -\
+      \ '16:05'\n      name: hor_verificada deve ser um dos valores válidos\n  - invalid_count(cod_pontoconexao)\
+      \ = 0:\n      valid values:\n        - 'MGPI2-CFLS-10'\n        - 'MGPIRDUFPPO03'\n      name: cod_pontoconexao\
+      \ deve ser um dos valores válidos\n  - invalid_count(ceg) = 0:\n      valid values:\n        - 'UFV.RS.MG.032339-0'\n\
+      \        - 'UFV.RS.MG.032340-3'\n        - 'UFV.RS.MG.032341-1'\n        - 'UFV.RS.MG.033185-6'\n\
+      \        - 'UFV.RS.MG.033186-4'\n        - 'UFV.RS.MG.033187-2'\n        - 'UFV.RS.MG.033188-0'\n\
+      \        - 'UFV.RS.MG.033189-9'\n        - 'UFV.RS.MG.033190-2'\n        - 'UFV.RS.MG.033192-9'\n\
+      \        - 'UFV.RS.MG.033193-7'\n        - 'UFV.RS.MG.037830-5'\n        - 'UFV.RS.MG.037831-3'\n\
+      \        - 'UFV.RS.MG.037836-4'\n        - 'UFV.RS.MG.037837-2'\n        - 'UFV.RS.MG.037838-0'\n\
+      \        - 'UFV.RS.MG.037839-9'\n      name: ceg deve ser um dos valores válidos\n  - invalid_count(nom_conjunto)\
+      \ = 0:\n      valid values:\n        - 'Conj. Lar do Sol'\n        - 'Conj. Pirapora 2'\n      name:\
+      \ nom_conjunto deve ser um dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR\
+      \ (formato de origem)\n  - missing_percent(val_must) < 5:\n      name: val_must não pode ter >5%\
+      \ nulos\n\n  # Baseline de volume — margem ±20% do row_count validado\n  - row_count between 308\
+      \ and 462:\n      name: Volume esperado entre 308 e 462 registros\n\n  # Unicidade da chave primária\
+      \ composta ['cod_pontoconexao', 'ceg'] (candidata LLM)\n  - failed rows:\n      name: Chave composta\
+      \ (cod_pontoconexao, ceg) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM usi_servicoancilar_sandbox\n\
+      \        WHERE (cod_pontoconexao, ceg) IN (\n          SELECT cod_pontoconexao, ceg FROM usi_servicoancilar_sandbox\n\
+      \          GROUP BY cod_pontoconexao, ceg\n          HAVING COUNT(*) > 1\n        )\n\n  # Nulos\
+      \ em dsc_comentario — alerta de qualidade (real=100.0%, threshold=200.0%)\n  - missing_percent(dsc_comentario)\
+      \ < 200.0:\n      name: dsc_comentario não deve ter >200.0% nulos\n\n  # Nulos em dat_verificada\
+      \ — alerta de qualidade (real=59.0%, threshold=118.0%)\n  - missing_percent(dat_verificada) < 118.0:\n\
+      \      name: dat_verificada não deve ter >118.0% nulos\n\n  # Nulos em hor_verificada — alerta de\
+      \ qualidade (real=59.0%, threshold=118.0%)\n  - missing_percent(hor_verificada) < 118.0:\n     \
+      \ name: hor_verificada não deve ter >118.0% nulos\n\n  # Nulos em ceg — alerta de qualidade (real=59.0%,\
+      \ threshold=118.0%)\n  - missing_percent(ceg) < 118.0:\n      name: ceg não deve ter >118.0% nulos\n\
+      \n  # Nulos em cod_pontoconexao — alerta de qualidade (real=59.0%, threshold=118.0%)\n  - missing_percent(cod_pontoconexao)\
+      \ < 118.0:\n      name: cod_pontoconexao não deve ter >118.0% nulos\n\n  # Nulos em nom_conjunto\
+      \ — alerta de qualidade (real=59.0%, threshold=118.0%)\n  - missing_percent(nom_conjunto) < 118.0:\n\
+      \      name: nom_conjunto não deve ter >118.0% nulos\n\n  # Nulos em flg_cpsa — alerta de qualidade\
+      \ (real=59.0%, threshold=118.0%)\n  - missing_percent(flg_cpsa) < 118.0:\n      name: flg_cpsa não\
+      \ deve ter >118.0% nulos\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/usi_servicoancilar_sandbox
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - sandbox de reativos
+  - usinas no programa cpsa
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver elegibilidade ou participação de usinas no
+    programa sandbox regulatório de compensação de reativo (CPSA) do ONS. Também relevante para perguntas
+    sobre MUST de usinas prestadoras de serviço ancilar de suporte de tensão ou identificação de pontos
+    de conexão no contexto do sandbox piloto de reativos.
+- property: agentInstructions
+  value: '- [val_must] Coluna val_must armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos (Mvar) que não podem ser diretamente agregados. Todas as operações aritméticas
+    e de agregação requerem conversão explícita via TRY_CAST.
+
+
+    - [dsc_comentario] Coluna dsc_comentario possui 100% de valores nulos em todo o período disponível
+    (2026-01-01 a 2026-05-11). Coluna sem dados úteis — não deve ser utilizada em análises, filtros ou
+    joins. Adicionalmente, o tipo DOUBLE é inconsistente com o propósito descritivo textual da coluna.
+
+
+    - [dat_verificada] Aproximadamente 59% das linhas possuem dat_verificada nula, correspondendo a ~227
+    linhas-fantasma de exportação sem dados válidos. Apenas ~158 registros (~41%) contêm dados reais.
+    Filtros por NOT NULL são obrigatórios antes de qualquer análise temporal ou agregação.
+
+
+    - [hor_verificada] Coluna hor_verificada possui ~59% de nulos, alinhado com o padrão de linhas-fantasma
+    do dataset. Sem hor_verificada válida, não é possível determinar a granularidade horária do registro.
+    Deve ser filtrada com NOT NULL em conjunto com dat_verificada.
+
+
+    - [ceg] Coluna ceg (identificador canônico de usina) possui ~59% de nulos, impossibilitando joins
+    com cadastros de usinas para as linhas-fantasma. Qualquer análise por usina deve filtrar WHERE ceg
+    IS NOT NULL para evitar distorções nos resultados.
+
+
+    - [cod_pontoconexao] Coluna cod_pontoconexao possui ~59% de nulos, consistente com o padrão de linhas-fantasma.
+    Joins com datasets de topologia de rede devem filtrar WHERE cod_pontoconexao IS NOT NULL para garantir
+    integridade referencial.
+
+
+    - [nom_conjunto] Coluna nom_conjunto possui ~59% de nulos, alinhado com o padrão geral do dataset.
+    Análises por conjunto de usinas devem filtrar WHERE nom_conjunto IS NOT NULL.
+
+
+    - [flg_cpsa] Flag de conformidade CPSA possui ~59% de nulos, consistente com linhas-fantasma. Cálculos
+    de taxa de conformidade devem usar COUNT(flg_cpsa) no denominador (não COUNT(*)) para evitar distorção
+    pela inclusão de nulos.
+
+
+    - [cod_pontoconexao] Valores com trailing spaces detectados em ''cod_pontoconexao''. Use TRIM() em
+    filtros WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais usinas estão participando do sandbox regulatório de compensação de reativo?
+  - Quais usinas prestam serviço de CPSA (Compensação de Potência Reativa) no sandbox ONS?
+  - Qual o MUST total das usinas participantes do sandbox de reativos?
+  - Quantas usinas por conjunto estão no sandbox regulatório de suporte de tensão?
+  - Quais são os pontos de conexão das usinas elegíveis ao sandbox de reativos?
+- property: granularity
+  value: mensal
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/usi_servicoancilar_sandbox/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2026-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 semana
+      temporal_column: dat_verificada
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_verificada
+      - ceg
+      - hor_verificada
+      - cod_pontoconexao
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: must
+      label: Must
+      columns:
+      - val_must
+      expression: TRY_CAST(val_must AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - must
+      - MUST
+      - montante de uso do sistema de transmissão
+      - valor MUST
+      - capacidade contratada
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_must AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_must AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_must AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_must AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_must AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_must AS DOUBLE))
+          unit: MW
+      interval_hours: 168.0
+      aliases:
+      - MUST
+      - montante de uso do sistema de transmissão
+      - valor MUST
+      - capacidade contratada
+    - id: flg_cpsa
+      label: Flag CPSA
+      columns:
+      - flg_cpsa
+      expression: flg_cpsa
+      quantity_kind: flag
+      unit_native: binario
+      default_aggregation: count_nonzero
+      forbidden_aggregations:
+      - sum
+      - avg
+      valid_intents:
+      - cpsa
+      - CPSA
+      - compensacao de potencia reativa
+      - presta servico ancilar de reativo
+      - flag cpsa
+      - indicador cpsa
+      aggregation_modes:
+        count_eligible:
+          sql: COUNT(CASE WHEN flg_cpsa = 1.0 THEN 1 END)
+          unit: usinas
+        count_not_eligible:
+          sql: COUNT(CASE WHEN flg_cpsa = 0.0 THEN 1 END)
+          unit: usinas
+        rate_eligible:
+          sql: COUNT(CASE WHEN flg_cpsa = 1.0 THEN 1 END) * 1.0 / COUNT(flg_cpsa)
+          unit: proporcao
+      interval_hours: 168.0
+      aliases:
+      - flag CPSA
+      - compensacao de potencia reativa
+      - indicador CPSA
+      - presta servico ancilar de reativo
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - must
+      - flg_cpsa
+      preferred_for:
+      - sandbox regulatorio reativo
+      - elegibilidade CPSA
+      - compensacao potencia reativa sandbox
+      - MUST sandbox ONS
+      - servico ancilar suporte tensao sandbox
+      - habilitacao reativo piloto
+      - programa piloto reativos ONS
+      - usinas prestadoras CPSA
+      - montante uso transmissao sandbox
+      not_preferred_for:
+      - nuclear
+      - MMGD
+      - geracao verificada historica
+      - despacho energia
+      - fator de capacidade
+      - carga subsistema
+      - preco energia
+      - CMO
+      - ENA
+      - armazenamento reservatorio
+    value_aliases:
+      hor_verificada:
+        00:00:
+          aliases:
+          - 00:00
+          filter: hor_verificada = '00:00'
+        01:09:
+          aliases:
+          - 01:09
+          filter: hor_verificada = '01:09'
+        02:22:
+          aliases:
+          - 02:22
+          filter: hor_verificada = '02:22'
+        02:31:
+          aliases:
+          - 02:31
+          filter: hor_verificada = '02:31'
+        02:55:
+          aliases:
+          - 02:55
+          filter: hor_verificada = '02:55'
+        04:02:
+          aliases:
+          - 04:02
+          filter: hor_verificada = '04:02'
+        05:09:
+          aliases:
+          - 05:09
+          filter: hor_verificada = '05:09'
+        05:12:
+          aliases:
+          - 05:12
+          filter: hor_verificada = '05:12'
+        07:15:
+          aliases:
+          - 07:15
+          filter: hor_verificada = '07:15'
+        09:11:
+          aliases:
+          - 09:11
+          filter: hor_verificada = '09:11'
+        09:29:
+          aliases:
+          - 09:29
+          filter: hor_verificada = '09:29'
+        09:34:
+          aliases:
+          - 09:34
+          filter: hor_verificada = '09:34'
+        09:43:
+          aliases:
+          - 09:43
+          filter: hor_verificada = '09:43'
+        '13:45':
+          aliases:
+          - '13:45'
+          filter: hor_verificada = '13:45'
+        '16:05':
+          aliases:
+          - '16:05'
+          filter: hor_verificada = '16:05'
+      cod_pontoconexao:
+        MGPI2-CFLS-10:
+          aliases:
+          - MGPI2-CFLS-10
+          filter: TRIM(cod_pontoconexao) = 'MGPI2-CFLS-10'
+        MGPIRDUFPPO03:
+          aliases:
+          - MGPIRDUFPPO03
+          filter: TRIM(cod_pontoconexao) = 'MGPIRDUFPPO03'
+      ceg:
+        UFV.RS.MG.032339-0:
+          aliases:
+          - UFV.RS.MG.032339-0
+          filter: ceg = 'UFV.RS.MG.032339-0'
+        UFV.RS.MG.032340-3:
+          aliases:
+          - UFV.RS.MG.032340-3
+          filter: ceg = 'UFV.RS.MG.032340-3'
+        UFV.RS.MG.032341-1:
+          aliases:
+          - UFV.RS.MG.032341-1
+          filter: ceg = 'UFV.RS.MG.032341-1'
+        UFV.RS.MG.033185-6:
+          aliases:
+          - UFV.RS.MG.033185-6
+          filter: ceg = 'UFV.RS.MG.033185-6'
+        UFV.RS.MG.033186-4:
+          aliases:
+          - UFV.RS.MG.033186-4
+          filter: ceg = 'UFV.RS.MG.033186-4'
+        UFV.RS.MG.033187-2:
+          aliases:
+          - UFV.RS.MG.033187-2
+          filter: ceg = 'UFV.RS.MG.033187-2'
+        UFV.RS.MG.033188-0:
+          aliases:
+          - UFV.RS.MG.033188-0
+          filter: ceg = 'UFV.RS.MG.033188-0'
+        UFV.RS.MG.033189-9:
+          aliases:
+          - UFV.RS.MG.033189-9
+          filter: ceg = 'UFV.RS.MG.033189-9'
+        UFV.RS.MG.033190-2:
+          aliases:
+          - UFV.RS.MG.033190-2
+          filter: ceg = 'UFV.RS.MG.033190-2'
+        UFV.RS.MG.033192-9:
+          aliases:
+          - UFV.RS.MG.033192-9
+          filter: ceg = 'UFV.RS.MG.033192-9'
+        UFV.RS.MG.033193-7:
+          aliases:
+          - UFV.RS.MG.033193-7
+          filter: ceg = 'UFV.RS.MG.033193-7'
+        UFV.RS.MG.037830-5:
+          aliases:
+          - UFV.RS.MG.037830-5
+          filter: ceg = 'UFV.RS.MG.037830-5'
+        UFV.RS.MG.037831-3:
+          aliases:
+          - UFV.RS.MG.037831-3
+          filter: ceg = 'UFV.RS.MG.037831-3'
+        UFV.RS.MG.037836-4:
+          aliases:
+          - UFV.RS.MG.037836-4
+          filter: ceg = 'UFV.RS.MG.037836-4'
+        UFV.RS.MG.037837-2:
+          aliases:
+          - UFV.RS.MG.037837-2
+          filter: ceg = 'UFV.RS.MG.037837-2'
+        UFV.RS.MG.037838-0:
+          aliases:
+          - UFV.RS.MG.037838-0
+          filter: ceg = 'UFV.RS.MG.037838-0'
+        UFV.RS.MG.037839-9:
+          aliases:
+          - UFV.RS.MG.037839-9
+          filter: ceg = 'UFV.RS.MG.037839-9'
+      nom_conjunto:
+        Conj. Lar do Sol:
+          aliases:
+          - Conj. Lar do Sol
+          - Lar do Sol
+          - conjunto Lar do Sol
+          filter: nom_conjunto = 'Conj. Lar do Sol'
+        Conj. Pirapora 2:
+          aliases:
+          - Conj. Pirapora 2
+          - Pirapora 2
+          - conjunto Pirapora 2
+          filter: nom_conjunto = 'Conj. Pirapora 2'
+      val_must:
+        '328':
+          aliases:
+          - '328'
+          filter: val_must = '328'
+        328,000:
+          aliases:
+          - 328,000
+          filter: val_must = '328,000'
+        481,1:
+          aliases:
+          - 481,1
+          filter: val_must = '481,1'
+        481,100:
+          aliases:
+          - 481,100
+          filter: val_must = '481,100'
+      flg_cpsa:
+        '1.0':
+          aliases:
+          - presta CPSA
+          - elegivel CPSA
+          - habilitado reativo
+          - sim
+          - '1'
+          filter: flg_cpsa = 1.0
+        '0.0':
+          aliases:
+          - nao presta CPSA
+          - nao elegivel CPSA
+          - nao habilitado reativo
+          - nao
+          - '0'
+          filter: flg_cpsa = 0.0
+    sql_patterns:
+      must_total_por_usina:
+        template: "SELECT ceg,\n  SUM(TRY_CAST(val_must AS DOUBLE)) AS must_total_mw\nFROM {source}\n\
+          WHERE dat_verificada IS NOT NULL\n  AND ceg IS NOT NULL\nGROUP BY ceg\nORDER BY must_total_mw\
+          \ DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - ranking
+          - total
+          metrics:
+          - must
+          grain: usina
+      must_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(dat_verificada AS DATE)) AS mes,\n  SUM(TRY_CAST(val_must\
+          \ AS DOUBLE)) AS must_total_mw\nFROM {source}\nWHERE dat_verificada IS NOT NULL\n  AND ceg IS\
+          \ NOT NULL\nGROUP BY 1\nORDER BY 1"
+        output_unit: MW
+        matches:
+          output_modes:
+          - time_series
+          - total
+          metrics:
+          - must
+          grain: month
+      usinas_cpsa_elegiveis:
+        template: "SELECT ceg, nom_conjunto, cod_pontoconexao,\n  TRY_CAST(val_must AS DOUBLE) AS must_mw\n\
+          FROM {source}\nWHERE dat_verificada IS NOT NULL\n  AND ceg IS NOT NULL\n  AND flg_cpsa = 1.0\n\
+          ORDER BY ceg"
+        output_unit: lista
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - flg_cpsa
+          grain: usina
+      contagem_cpsa_por_conjunto:
+        template: "SELECT nom_conjunto,\n  COUNT(CASE WHEN flg_cpsa = 1.0 THEN 1 END) AS usinas_cpsa,\n\
+          \  COUNT(flg_cpsa) AS total_usinas_validas,\n  COUNT(CASE WHEN flg_cpsa = 1.0 THEN 1 END) *\
+          \ 1.0 / COUNT(flg_cpsa) AS taxa_cpsa\nFROM {source}\nWHERE dat_verificada IS NOT NULL\n  AND\
+          \ nom_conjunto IS NOT NULL\nGROUP BY nom_conjunto\nORDER BY nom_conjunto"
+        output_unit: usinas / proporcao
+        matches:
+          output_modes:
+          - comparison
+          - count_eligible
+          metrics:
+          - flg_cpsa
+          grain: nom_conjunto
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre MUST sem especificar agregacao
+        assume_metric: must
+        assume_output: total
+        note: MUST e capacidade contratada por usina; soma e a agregacao mais util para visao de portfolio
+      - when: usuario pergunta quais usinas prestam CPSA sem especificar periodo
+        assume_metric: flg_cpsa
+        assume_output: count_eligible
+        note: Filtrar WHERE dat_verificada IS NOT NULL AND ceg IS NOT NULL AND flg_cpsa = 1.0
+      - when: usuario pergunta sobre sandbox de reativos sem especificar metrica
+        assume_metric: flg_cpsa
+        assume_output: count_eligible
+        note: Pergunta generica sobre sandbox assume listagem de usinas elegiveis CPSA
+      must_clarify_when:
+      - trigger_terms:
+        - conjunto
+        - agrupamento
+        question: Voce quer filtrar por conjunto especifico (Conj. Lar do Sol ou Conj. Pirapora 2) ou
+          ver todos os conjuntos?
+        reason: Apenas dois conjuntos existem no dataset; pode ser relevante especificar
+      - trigger_terms:
+        - ponto de conexao
+        - barramento
+        question: Voce quer filtrar por ponto de conexao especifico (MGPI2-CFLS-10 ou MGPIRDUFPPO03)?
+        reason: Apenas dois pontos de conexao existem; pode ser relevante especificar
+      redirect_when:
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Dataset cobre apenas usinas fotovoltaicas (UFV) no sandbox de reativos. Nenhuma coluna
+          de geracao nuclear presente.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - fator de capacidade
+        - fator capacidade
+        reason: Dataset nao contem dados de geracao bruta para calculo de fator de capacidade.
+        redirect: fator-capacidade-2
+      - user_mentions:
+        - despacho
+        - historico de despacho
+        reason: Dataset nao contem series de despacho de energia.
+        redirect: descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024
+- property: fewShotQueries
+  value:
+  - question: Quais usinas tiveram maior e menor taxa de conformidade com o CPSA durante o sandbox regulatório?
+    sql: SELECT ceg, nom_conjunto, COUNT(flg_cpsa) AS horas_verificadas, SUM(CASE WHEN flg_cpsa = 1.0
+      THEN 1 ELSE 0 END) AS horas_conforme, SUM(CASE WHEN flg_cpsa = 0.0 THEN 1 ELSE 0 END) AS horas_nao_conforme,
+      ROUND(100.0 * SUM(CASE WHEN flg_cpsa = 1.0 THEN 1 ELSE 0 END) / NULLIF(COUNT(flg_cpsa), 0), 2) AS
+      pct_conformidade FROM read_parquet('s3://ons-aws-prod-opendata/dataset/usi_servicoancilar_sandbox/*.parquet')
+      WHERE ceg IS NOT NULL AND dat_verificada IS NOT NULL GROUP BY ceg, nom_conjunto ORDER BY pct_conformidade
+      ASC LIMIT 100
+  - question: Como evoluiu a taxa diária de conformidade das usinas com o serviço ancilar de reativo ao
+      longo do período do sandbox?
+    sql: SELECT dat_verificada, COUNT(DISTINCT ceg) AS usinas_verificadas, COUNT(flg_cpsa) AS registros_validos,
+      SUM(CASE WHEN flg_cpsa = 1.0 THEN 1 ELSE 0 END) AS conformes, SUM(CASE WHEN flg_cpsa = 0.0 THEN
+      1 ELSE 0 END) AS nao_conformes, ROUND(100.0 * SUM(CASE WHEN flg_cpsa = 1.0 THEN 1 ELSE 0 END) /
+      NULLIF(COUNT(flg_cpsa), 0), 2) AS pct_conformidade_diaria FROM read_parquet('s3://ons-aws-prod-opendata/dataset/usi_servicoancilar_sandbox/*.parquet')
+      WHERE dat_verificada IS NOT NULL AND ceg IS NOT NULL GROUP BY dat_verificada ORDER BY dat_verificada
+  - question: Qual é o valor médio de MUST (Mínimo de Suporte de Tensão) exigido para cada conjunto de
+      usinas no sandbox?
+    sql: SELECT nom_conjunto, COUNT(DISTINCT ceg) AS usinas_no_conjunto, ROUND(AVG(TRY_CAST(val_must AS
+      DOUBLE)), 2) AS must_medio_mvar, ROUND(MIN(TRY_CAST(val_must AS DOUBLE)), 2) AS must_minimo_mvar,
+      ROUND(MAX(TRY_CAST(val_must AS DOUBLE)), 2) AS must_maximo_mvar FROM read_parquet('s3://ons-aws-prod-opendata/dataset/usi_servicoancilar_sandbox/*.parquet')
+      WHERE nom_conjunto IS NOT NULL AND ceg IS NOT NULL AND TRY_CAST(val_must AS DOUBLE) IS NOT NULL
+      GROUP BY nom_conjunto ORDER BY must_medio_mvar DESC
+- property: relatedDatasets
+  value:
+    fator-capacidade-2:
+      join_keys:
+      - ceg
+      - cod_pontoconexao
+    usina_conjunto:
+      join_keys:
+      - ceg
+      - nom_conjunto
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - ceg
+- property: license
+  value: CC-BY

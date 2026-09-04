@@ -1,0 +1,788 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_dreq_freq
+name: ind_confiarb_dreq_freq
+tenant: ons
+tags:
+- DREQ
+- FREQ
+- SIN
+- confiabilidade
+- duração equivalente de interrupção
+- frequência equivalente de interrupção
+- indicadores
+- indicadores de confiabilidade
+- interrupção de carga
+- qualidade
+- rede básica
+- subsistema
+- transmissão
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_dreq_freq/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que agentes do setor elétrico, reguladores da ANEEL e o próprio ONS monitorem a qualidade
+    e confiabilidade do sistema de transmissão da Rede Básica do SIN ao longo do tempo, suportando decisões
+    de planejamento da expansão da transmissão, avaliação de desempenho de empresas transmissoras, cumprimento
+    de metas regulatórias e identificação de períodos e regiões com maior incidência de interrupções de
+    carga.
+  limitations: Valor máximo de val_dreq é ~15. Valor máximo de val_freq é ~11,24 interrupções por período.
+    O dataset contém registros mensais e anuais coexistentes (id_periodicidade M e A).
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de confiabilidade, duração ou frequência
+    de interrupções da rede básica de transmissão do SIN, incluindo análises de desempenho de transmissoras,
+    cumprimento de metas regulatórias da ANEEL ou comparações históricas de qualidade do sistema elétrico
+    por subsistema, região ou estado.
+domain: qualidade
+schema:
+- name: ind_confiarb_dreq_freq
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_dreq_freq
+  properties:
+  - name: dsc_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nível geográfico de agregação dos indicadores. Indica se o registro se refere ao Sistema
+      Interligado Nacional (SIN), a um Subsistema elétrico, a uma Região geográfica ou a um Estado brasileiro.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - nível de agregação
+      - agregação geográfica
+      - nível espacial
+      - escopo geográfico
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Estado
+      - Região Geográfica
+      - Sistema
+      - Subsistema
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da característica geográfica correspondente ao nível de agregação
+      definido em dsc_agregacao. Pode representar o código do subsistema (ex: SE, S, NE, N), código de
+      região ou sigla de estado.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código do subsistema
+      - código da região
+      - código do estado
+      - cod_subsistema
+      - sigla
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - CO
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - N
+      - NE
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - S
+      - SBR
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: dsc_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Descrição textual da característica geográfica identificada por cod_caracteristica.
+      Exemplos: nome do subsistema (Sudeste/Centro-Oeste), nome da região geográfica ou nome do estado.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome do subsistema
+      - nome da região
+      - nome do estado
+      - descrição geográfica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - Centro-Oeste
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - NORDESTE
+      - NORTE
+      - Nordeste
+      - Norte
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - SUDESTE
+      - SUL
+      - Sistema Brasileiro
+      - Sudeste
+      - Sul
+      - TOCANTINS
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do indicador. Indica se o registro representa um acumulado
+      mensal (''M'') ou anual (''A''), conforme padrão ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - frequência do indicador
+      - mensal
+      - anual
+      - tipo de período
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador, sempre no primeiro dia do mês ou do ano. Para registros
+      mensais, representa o mês de apuração (ex: 2024-01-01 = janeiro/2024). Para registros anuais, representa
+      o ano de apuração (ex: 2024-01-01 = ano 2024). Cobre o período de 2007-01-01 a 2026-03-01.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - mês de referência
+      - ano de referência
+      - competência
+      - período
+      - dat_referencia
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_dreq
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Duração Equivalente de Interrupção de Carga (DREQ) da Rede Básica, em horas. Mede o
+      tempo total equivalente de interrupção ponderado pela carga afetada no período de referência, conforme
+      Submódulo 9.1 dos Procedimentos de Rede do ONS. Valores anuais do SIN podem atingir ~15.636 horas
+      (acumulado ponderado). Valor mínimo é 0,0 (sem interrupções no período).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - DREQ
+      - duração equivalente de interrupção
+      - duração de interrupção
+      - horas de interrupção
+      - DEC rede básica
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: horas
+  - name: val_freq
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Frequência Equivalente de Interrupção de Carga (FREQ) da Rede Básica, em número de interrupções
+      por período. Mede a quantidade equivalente de interrupções ponderada pela carga afetada no período
+      de referência, conforme Submódulo 9.1 dos Procedimentos de Rede do ONS. Valor máximo observado ~11,24.
+      Valor mínimo é 0,0.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - FREQ
+      - frequência equivalente de interrupção
+      - número de interrupções
+      - FEC rede básica
+      - frequência de interrupção
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: interrupções/período
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ind_confiarb_dreq_freq:\n  - row_count > 0:\n      name: Tabela não pode\
+      \ estar vazia\n\n  # Referential integrity\n  - invalid_count(dsc_agregacao) = 0:\n      valid values:\n\
+      \        - 'Estado'\n        - 'Região Geográfica'\n        - 'Sistema'\n        - 'Subsistema'\n\
+      \      name: dsc_agregacao deve ser um dos valores válidos\n  - invalid_count(cod_caracteristica)\
+      \ = 0:\n      valid values:\n        - 'AC'\n        - 'AL'\n        - 'AM'\n        - 'AP'\n  \
+      \      - 'BA'\n        - 'CE'\n        - 'CO'\n        - 'DF'\n        - 'ES'\n        - 'GO'\n\
+      \        - 'MA'\n        - 'MG'\n        - 'MS'\n        - 'MT'\n        - 'N'\n        - 'NE'\n\
+      \        - 'PA'\n        - 'PB'\n        - 'PE'\n        - 'PI'\n        - 'PR'\n        - 'RJ'\n\
+      \        - 'RN'\n        - 'RO'\n        - 'RR'\n        - 'RS'\n        - 'S'\n        - 'SBR'\n\
+      \        - 'SC'\n        - 'SE'\n        - 'SP'\n        - 'TO'\n      name: cod_caracteristica\
+      \ deve ser um dos valores válidos\n  - invalid_count(dsc_caracteristica) = 0:\n      valid values:\n\
+      \        - 'ACRE'\n        - 'ALAGOAS'\n        - 'AMAPA'\n        - 'AMAZONAS'\n        - 'BAHIA'\n\
+      \        - 'CEARA'\n        - 'Centro-Oeste'\n        - 'DISTRITO FEDERAL'\n        - 'ESPIRITO\
+      \ SANTO'\n        - 'GOIAS'\n        - 'MARANHAO'\n        - 'MATO GROSSO'\n        - 'MATO GROSSO\
+      \ DO SUL'\n        - 'MINAS GERAIS'\n        - 'NORDESTE'\n        - 'NORTE'\n        - 'Nordeste'\n\
+      \        - 'Norte'\n        - 'PARA'\n        - 'PARAIBA'\n        - 'PARANA'\n        - 'PERNAMBUCO'\n\
+      \        - 'PIAUI'\n        - 'RIO DE JANEIRO'\n        - 'RIO GRANDE DO NORTE'\n        - 'RIO\
+      \ GRANDE DO SUL'\n        - 'RONDONIA'\n        - 'RORAIMA'\n        - 'SANTA CATARINA'\n      \
+      \  - 'SAO PAULO'\n        - 'SERGIPE'\n        - 'SUDESTE'\n        - 'SUL'\n        - 'Sistema\
+      \ Brasileiro'\n        - 'Sudeste'\n        - 'Sul'\n        - 'TOCANTINS'\n      name: dsc_caracteristica\
+      \ deve ser um dos valores válidos\n  - invalid_count(id_periodicidade) = 0:\n      valid values:\n\
+      \        - 'AN'\n        - 'ME'\n      name: id_periodicidade deve ser um dos valores válidos\n\n\
+      \  # Baseline de volume — margem ±20% do row_count validado\n  - row_count between 7429 and 11144:\n\
+      \      name: Volume esperado entre 7,429 e 11,144 registros\n\n  # Unicidade da chave primária composta\
+      \ ['dsc_agregacao', 'cod_caracteristica', 'id_periodicidade', 'din_referencia'] (candidata LLM)\n\
+      \  - failed rows:\n      name: Chave composta (dsc_agregacao, cod_caracteristica, id_periodicidade,\
+      \ din_referencia) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM ind_confiarb_dreq_freq\n\
+      \        WHERE (dsc_agregacao, cod_caracteristica, id_periodicidade, din_referencia) IN (\n    \
+      \      SELECT dsc_agregacao, cod_caracteristica, id_periodicidade, din_referencia FROM ind_confiarb_dreq_freq\n\
+      \          GROUP BY dsc_agregacao, cod_caracteristica, id_periodicidade, din_referencia\n      \
+      \    HAVING COUNT(*) > 1\n        )\n\n  # Freshness: din_referencia deve ter dados recentes (SLA:\
+      \ Atualizado diariamente)\n  - freshness(din_referencia) < 3d:\n      name: din_referencia não pode\
+      \ ter dados com mais de 3 dias de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_dreq_freq
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto tempo ficou sem energia
+  - quantas interrupcoes houve
+  - duracao e frequencia de interrupcao
+  - indicador de interrupcao da transmissao
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de confiabilidade, duração ou frequência
+    de interrupções da rede básica de transmissão do SIN, incluindo análises de desempenho de transmissoras,
+    cumprimento de metas regulatórias da ANEEL ou comparações históricas de qualidade do sistema elétrico
+    por subsistema, região ou estado. Também relevante para correlações entre confiabilidade e condições
+    hidrológicas ou balanço energético.
+- property: agentInstructions
+  value: '- [id_periodicidade] A coexistência de registros mensais e anuais na mesma tabela para a mesma
+    entidade geográfica e período de referência pode gerar dupla contagem em agregações que não filtrem
+    explicitamente por id_periodicidade. Consultas de soma de val_dreq ou val_freq sem filtro de periodicidade
+    produzirão resultados incorretos, pois valores anuais já incorporam os mensais do mesmo ano.
+
+
+    - [val_dreq] Valor máximo de val_dreq é ~15.636 horas, muito superior ao número de horas em um ano
+    (~8.760h). Isso é esperado para registros anuais de entidades com múltiplos pontos de carga (DREQ
+    é ponderado pela carga), mas deve ser validado para garantir que não há erros de cálculo ou registros
+    duplicados inflacionando o indicador. Recomenda-se verificar se valores extremos pertencem exclusivamente
+    a id_periodicidade anual e a agregações de maior escopo (SIN ou Subsistema).
+
+
+    - [val_freq] Valor máximo de val_freq é ~11,24 interrupções equivalentes. Embora coerente com indicadores
+    de frequência equivalente para períodos anuais, valores acima de 5 interrupções mensais seriam atípicos
+    e merecem verificação. Recomenda-se checar se valores elevados ocorrem apenas em registros anuais
+    ou se há anomalias em registros mensais específicos.
+
+
+    - [din_referencia] O período cobre 2007-01-01 a 2026-04-01. Possíveis lacunas temporais em meses específicos
+    para determinadas entidades geográficas podem indicar ausência de dados ou períodos sem interrupções
+    não registrados. Recomenda-se verificar a completude da série temporal por entidade geográfica e periodicidade.
+
+
+    - [cod_caracteristica] Sem dicionário de dados formal disponível no CKAN, os valores de cod_caracteristica
+    para diferentes níveis de dsc_agregacao (SIN, Subsistema, Região, Estado) podem usar convenções de
+    codificação distintas ou sobrepor códigos entre níveis. É necessário sempre filtrar por dsc_agregacao
+    em conjunto com cod_caracteristica para evitar ambiguidade na identificação da entidade geográfica.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a evolução do DREQ do subsistema Sudeste/Centro-Oeste nos últimos 5 anos?
+  - Quais subsistemas apresentaram maior frequência de interrupções (FREQ) em 2023?
+  - Como o indicador DREQ anual do SIN variou entre 2010 e 2025?
+  - Em quais meses historicamente ocorrem os maiores valores de DREQ por subsistema?
+  - Qual o ranking de estados com maior duração equivalente de interrupção em 2022?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_dreq_freq/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2007-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dreq
+      label: Dreq
+      columns:
+      - val_dreq
+      expression: val_dreq
+      quantity_kind: numeric
+      unit_native: horas
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - dreq
+      - DREQ
+      - duração equivalente de interrupção
+      - duração de interrupção
+      - horas de interrupção
+      - DEC rede básica
+      aggregation_modes:
+        total:
+          sql: SUM(val_dreq)
+          unit: horas
+        average:
+          sql: AVG(val_dreq)
+          unit: horas
+        maximum:
+          sql: MAX(val_dreq)
+          unit: horas
+        time_series:
+          sql: SUM(val_dreq)
+          unit: horas
+        ranking:
+          sql: SUM(val_dreq)
+          unit: horas
+        comparison:
+          sql: SUM(val_dreq)
+          unit: horas
+      interval_hours: 8760.0
+      aliases:
+      - DREQ
+      - duração equivalente de interrupção
+      - duração de interrupção
+      - horas de interrupção
+      - DEC rede básica
+    - id: freq
+      label: Freq
+      columns:
+      - val_freq
+      expression: val_freq
+      quantity_kind: count
+      unit_native: interrupções/período
+      default_aggregation: sum
+      forbidden_aggregations: []
+      valid_intents:
+      - freq
+      - FREQ
+      - frequência equivalente de interrupção
+      - número de interrupções
+      - FEC rede básica
+      - frequência de interrupção
+      aggregation_modes:
+        total:
+          sql: SUM(val_freq)
+          unit: interrupções/período
+        average:
+          sql: AVG(val_freq)
+          unit: interrupções/período
+        maximum:
+          sql: MAX(val_freq)
+          unit: interrupções/período
+        time_series:
+          sql: SUM(val_freq)
+          unit: interrupções/período
+        ranking:
+          sql: SUM(val_freq)
+          unit: interrupções/período
+        comparison:
+          sql: SUM(val_freq)
+          unit: interrupções/período
+      interval_hours: 8760.0
+      aliases:
+      - FREQ
+      - frequência equivalente de interrupção
+      - número de interrupções
+      - FEC rede básica
+      - frequência de interrupção
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - dreq
+      - freq
+      preferred_for:
+      - DREQ rede basica
+      - FREQ rede basica
+      - duracao equivalente interrupcao transmissao
+      - frequencia equivalente interrupcao transmissao
+      - DEC rede basica SIN
+      - FEC rede basica SIN
+      - horas interrupcao carga ponderada
+      - submódulo 9.1 DREQ
+      - submódulo 9.1 FREQ
+      - indisponibilidade transmissao por carga
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - carga interrompida perturbacao
+      - energia nao suprida
+      - severidade perturbacao
+      - robustez sistema
+      - CIPER
+      - ENS
+      - geracao por fonte
+      - preco energia
+    value_aliases:
+      dsc_agregacao:
+        Estado:
+          aliases:
+          - estado
+          - UF
+          - unidade federativa
+          filter: dsc_agregacao = 'Estado'
+        Região Geográfica:
+          aliases:
+          - região geográfica
+          - regiao geografica
+          - região
+          - regiao
+          filter: dsc_agregacao = 'Região Geográfica'
+        Sistema:
+          aliases:
+          - sistema
+          - SIN
+          - sistema interligado nacional
+          - sistema brasileiro
+          filter: dsc_agregacao = 'Sistema'
+        Subsistema:
+          aliases:
+          - subsistema
+          - submercado
+          filter: dsc_agregacao = 'Subsistema'
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          - anual
+          - ano
+          - acumulado anual
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          - mês
+          - acumulado mensal
+          filter: id_periodicidade = 'ME'
+      cod_caracteristica:
+        SE:
+          aliases:
+          - SE
+          - Sudeste
+          - sudeste
+          - Sudeste/Centro-Oeste
+          - sudeste centro-oeste
+          filter: cod_caracteristica = 'SE'
+        S:
+          aliases:
+          - S
+          - Sul
+          - sul
+          filter: cod_caracteristica = 'S'
+        NE:
+          aliases:
+          - NE
+          - Nordeste
+          - nordeste
+          filter: cod_caracteristica = 'NE'
+        N:
+          aliases:
+          - N
+          - Norte
+          - norte
+          filter: cod_caracteristica = 'N'
+        SBR:
+          aliases:
+          - SBR
+          - SIN
+          - sistema brasileiro
+          - sistema interligado
+          - Brasil
+          - nacional
+          filter: cod_caracteristica = 'SBR'
+        CO:
+          aliases:
+          - CO
+          - Centro-Oeste
+          - centro-oeste
+          filter: cod_caracteristica = 'CO'
+    sql_patterns:
+      dreq_anual_sin:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  SUM(val_dreq)\
+          \ AS dreq_total_horas\nFROM {source}\nWHERE id_periodicidade = 'AN'\n  AND cod_caracteristica\
+          \ = 'SBR'\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: horas
+        matches:
+          output_modes:
+          - total
+          - time_series
+          metrics:
+          - dreq
+          grain: year
+      dreq_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  SUM(val_dreq)\
+          \ AS dreq_total_horas\nFROM {source}\nWHERE id_periodicidade = 'ME'\n  AND EXTRACT(YEAR FROM\
+          \ TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1\n"
+        output_unit: horas
+        matches:
+          output_modes:
+          - total
+          - time_series
+          metrics:
+          - dreq
+          grain: month
+        validated_params:
+          year: '2026'
+      freq_ranking_subsistema:
+        template: "SELECT cod_caracteristica,\n  dsc_caracteristica,\n  SUM(val_freq) AS freq_total\n\
+          FROM {source}\nWHERE id_periodicidade = 'AN'\n  AND dsc_agregacao = 'Subsistema'\n  AND EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY freq_total DESC\n"
+        output_unit: interrupções/período
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - freq
+          grain: year
+      dreq_freq_por_estado:
+        template: "SELECT cod_caracteristica,\n  dsc_caracteristica,\n  SUM(val_dreq) AS dreq_horas,\n\
+          \  SUM(val_freq) AS freq_interrupcoes\nFROM {source}\nWHERE id_periodicidade = 'AN'\n  AND dsc_agregacao\
+          \ = 'Estado'\n  AND EXTRACT(YEAR FROM din_referencia) = {year}\nGROUP BY 1, 2\nORDER BY dreq_horas\
+          \ DESC\n"
+        output_unit: horas / interrupções/período
+        matches:
+          output_modes:
+          - ranking
+          - comparison
+          metrics:
+          - dreq
+          - freq
+          grain: year
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre DREQ sem especificar periodicidade
+        assume_metric: dreq
+        assume_output: total
+        assume_filter: id_periodicidade = 'AN'
+        note: Periodicidade anual e o padrao regulatorio para avaliacao de desempenho de transmissoras.
+      - when: usuario pergunta sobre FREQ sem especificar periodicidade
+        assume_metric: freq
+        assume_output: total
+        assume_filter: id_periodicidade = 'AN'
+        note: Periodicidade anual e o padrao regulatorio para avaliacao de desempenho de transmissoras.
+      - when: usuario pergunta sobre SIN ou Brasil sem especificar nivel de agregacao
+        assume_filter: cod_caracteristica = 'SBR' AND dsc_agregacao = 'Sistema'
+        note: SBR representa o Sistema Brasileiro (SIN) no nivel mais agregado disponivel.
+      must_clarify_when:
+      - ambiguity: periodicidade_mensal_vs_anual
+        question: Voce quer o indicador acumulado anual (id_periodicidade='AN') ou o valor mensal (id_periodicidade='ME')?
+        trigger_terms:
+        - mensal
+        - anual
+        - acumulado
+        - por mes
+        - por ano
+        - historico mensal
+        notes: 'A coexistencia de registros mensais e anuais na mesma tabela para a mesma entidade geografica
+          pode gerar dupla contagem se id_periodicidade nao for filtrado explicitamente.
+
+          '
+      - ambiguity: nivel_geografico_ambiguo
+        question: Voce quer o indicador por subsistema, regiao geografica, estado ou para o SIN como um
+          todo?
+        trigger_terms:
+        - nordeste
+        - norte
+        - sul
+        - sudeste
+        - centro-oeste
+        notes: 'Alguns termos geograficos (ex: ''Nordeste'') podem corresponder tanto a dsc_agregacao=''Subsistema''
+          (cod_caracteristica=''NE'') quanto a dsc_agregacao=''Região Geográfica''. Sempre filtrar dsc_agregacao
+          em conjunto com cod_caracteristica.
+
+          '
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - belo monte
+        - angra
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina. Granularidade minima e
+          geografica.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: DREQ/FREQ sao indicadores agregados de transmissao; nao ha dimensao de fonte geradora.
+        redirect: geracao-usina-2 com filtro de combustivel/tipo quando disponivel
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Dataset cobre rede basica de transmissao (Submódulo 9.1), nao distribuicao ou microgeracao.
+        redirect: dataset com coluna val_germmgd/val_ger_mmgd quando disponivel
+      - user_mentions:
+        - carga interrompida
+        - CIPER
+        reason: CIPER e metrica distinta de carga interrompida por perturbacao, nao disponivel neste dataset.
+        redirect: ind_confiarb_ciper
+      - user_mentions:
+        - energia nao suprida
+        - ENS
+        reason: ENS e metrica distinta disponivel em dataset especifico.
+        redirect: ind_confiarb_energianaosuprida
+      - user_mentions:
+        - severidade
+        - perturbacao severa
+        reason: Indicador de severidade e metrica distinta disponivel em dataset especifico.
+        redirect: ind_confiarb_severidade
+      - user_mentions:
+        - robustez
+        reason: Indicador de robustez e metrica distinta disponivel em dataset especifico.
+        redirect: ind_confiarb_robustez
+      - user_mentions:
+        - previsao
+        - programacao
+        - programada
+        - prevista
+        - dessem
+        - pmo
+        reason: Dataset contem apenas dados verificados (realizados). Nao ha dados programados ou previstos.
+        redirect: dataset de programacao ou previsao operativa ONS quando disponivel
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o indicador DREQ anual para cada subsistema elétrico entre 2010 e 2025?
+    sql: SELECT cod_caracteristica, dsc_caracteristica, YEAR(din_referencia) AS ano, val_dreq FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_dreq_freq/*.parquet')
+      WHERE id_periodicidade = 'AN' AND dsc_agregacao = 'Subsistema' AND YEAR(din_referencia) BETWEEN
+      2010 AND 2025 ORDER BY cod_caracteristica, ano;
+  - question: Quais estados tiveram maior frequência equivalente de interrupção (FREQ) mensal em 2025?
+    sql: SELECT cod_caracteristica, dsc_caracteristica, MONTH(din_referencia) AS mes, val_freq FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_dreq_freq/*.parquet')
+      WHERE id_periodicidade = 'ME' AND dsc_agregacao = 'Estado' AND YEAR(din_referencia) = 2025 ORDER
+      BY val_freq DESC LIMIT 50;
+  - question: A soma dos DREQs mensais de 2023 é consistente com o valor anual registrado para o SIN?
+    sql: SELECT mensal.cod_caracteristica, mensal.dsc_caracteristica, SUM(mensal.val_dreq) AS soma_dreq_mensal,
+      MAX(anual.val_dreq) AS dreq_anual_registrado, MAX(anual.val_dreq) - SUM(mensal.val_dreq) AS diferenca
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_dreq_freq/*.parquet') AS mensal
+      INNER JOIN read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_dreq_freq/*.parquet') AS
+      anual ON mensal.cod_caracteristica = anual.cod_caracteristica AND mensal.dsc_agregacao = anual.dsc_agregacao
+      AND YEAR(mensal.din_referencia) = YEAR(anual.din_referencia) WHERE mensal.id_periodicidade = 'ME'
+      AND anual.id_periodicidade = 'AN' AND mensal.dsc_agregacao = 'SIN' AND YEAR(mensal.din_referencia)
+      = 2023 GROUP BY mensal.cod_caracteristica, mensal.dsc_caracteristica ORDER BY mensal.cod_caracteristica;
+- property: relatedDatasets
+  value:
+    ind_confiarb_robustez:
+      join_keys:
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    ind_confiarb_severidade:
+      join_keys:
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    ind_confiarb_ciper:
+      join_keys:
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    ind_confiarb_energianaosuprida:
+      join_keys:
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    ind_providencia_ecpa_pcpa:
+      join_keys:
+      - dsc_agregacao
+      - dsc_caracteristica
+      - din_referencia
+- property: license
+  value: CC-BY

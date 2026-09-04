@@ -1,0 +1,733 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:cmo-semanal
+name: cmo-semanal
+tenant: ons
+tags:
+- CMO
+- CMO DECOMP
+- DECOMP
+- ONS
+- PLD
+- cmo semanal
+- custo marginal
+- custo marginal de operação
+- mercado de curto prazo
+- patamar de carga
+- preço de energia
+- semana operativa
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/cmo_se/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos agentes do mercado de energia elétrica, ao ONS, à ANEEL e à CCEE o Custo Marginal
+    de Operação semanal estimado pelo DECOMP por subsistema e patamar de carga, suportando decisões de
+    precificação no mercado de curto prazo (PLD), planejamento da operação hidrotérmica, análise de risco
+    hidrológico, despacho de geração e estudos regulatórios sobre formação de preços no setor elétrico
+    brasileiro.
+  limitations: O dataset possui apenas 300 linhas cobrindo ~21 anos (2005-01-07 a 2026-06-05) com 4 subsistemas.
+    Valores de CMO médio semanal fora do intervalo histórico plausível [0, 10000] R$/MWh devem ser investigados
+    como possíveis erros de exportação ou revisões do DECOMP ainda não consolidadas. O CMO no patamar
+    leve pode teoricamente assumir valores negativos em cenários de excesso de geração renovável não despachável,
+    porém valores negativos neste dataset devem ser verificados pois podem indicar inconsistência no modelo
+    DECOMP ou erro de exportação.
+  usage: Recuperar este dataset quando a pergunta envolver custo marginal de operação (CMO), formação
+    do PLD, precificação no mercado de curto prazo, análise de patamares de carga (leve, média, pesada)
+    ou comparação de custos de operação entre subsistemas do SIN.
+domain: preço
+schema:
+- name: cmo_semanal
+  physicalType: parquet
+  logicalType: object
+  physicalName: cmo_semanal
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador alfanumérico do subsistema elétrico do SIN (Sistema Interligado Nacional).
+      Valores típicos: SE (Sudeste/Centro-Oeste), S (Sul), NE (Nordeste), N (Norte).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema
+      - código subsistema
+      - cod_subsistema
+      - região
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico correspondente ao id_subsistema. Exemplos: Sudeste,
+      Sul, Nordeste, Norte.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - subsistema
+      - região elétrica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora de referência da semana operativa para a qual o CMO foi estimado pelo modelo
+      DECOMP. Representa o início da semana operativa. Granularidade semanal.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - semana
+      - semana operativa
+      - data de referência
+      - instante
+      - din_instante
+      - período
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_cmomediasemanal
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Custo Marginal de Operação médio da semana operativa para o subsistema, calculado como
+      média ponderada dos três patamares de carga (leve, média e pesada). Expresso em R$/MWh. Utilizado
+      como referência para o PLD (Preço de Liquidação das Diferenças).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - CMO médio semanal
+      - custo marginal médio
+      - CMO semanal
+      - média semanal
+      - cmo media semanal
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cmomediasemanal AS DOUBLE)
+    - property: unit
+      value: R$/MWh
+  - name: val_cmoleve
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Custo Marginal de Operação estimado pelo DECOMP para o patamar de carga leve da semana
+      operativa, por subsistema. O patamar leve corresponde aos períodos de menor demanda de energia elétrica.
+      Expresso em R$/MWh.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - CMO leve
+      - custo marginal leve
+      - patamar leve
+      - cmo patamar leve
+      - carga leve
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cmoleve AS DOUBLE)
+    - property: unit
+      value: R$/MWh
+  - name: val_cmomedia
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Custo Marginal de Operação estimado pelo DECOMP para o patamar de carga média da semana
+      operativa, por subsistema. O patamar médio corresponde aos períodos de demanda intermediária de
+      energia elétrica. Expresso em R$/MWh.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - CMO média
+      - custo marginal médio patamar
+      - patamar médio
+      - cmo patamar media
+      - carga média
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cmomedia AS DOUBLE)
+    - property: unit
+      value: R$/MWh
+  - name: val_cmopesada
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Custo Marginal de Operação estimado pelo DECOMP para o patamar de carga pesada da semana
+      operativa, por subsistema. O patamar pesado corresponde aos períodos de maior demanda de energia
+      elétrica (horário de pico). Expresso em R$/MWh.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - CMO pesada
+      - custo marginal pesado
+      - patamar pesado
+      - cmo patamar pesada
+      - carga pesada
+      - pico
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cmopesada AS DOUBLE)
+    - property: unit
+      value: R$/MWh
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for cmo_semanal:\n  - row_count > 0:\n      name: Tabela não pode estar vazia\n\
+      \n  # Referential integrity\n  - invalid_count(id_subsistema) = 0:\n      valid values:\n      \
+      \  - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n      name: id_subsistema deve ser um dos\
+      \ valores válidos\n  - invalid_count(nom_subsistema) = 0:\n      valid values:\n        - 'NORDESTE'\n\
+      \        - 'NORTE'\n        - 'SUDESTE'\n        - 'SUL'\n      name: nom_subsistema deve ser um\
+      \ dos valores válidos\n\n  # Circuit breaker: colunas numéricas VARCHAR (formato de origem)\n  -\
+      \ missing_percent(val_cmomediasemanal) < 5:\n      name: val_cmomediasemanal não pode ter >5% nulos\n\
+      \  - missing_percent(val_cmoleve) < 5:\n      name: val_cmoleve não pode ter >5% nulos\n  - missing_percent(val_cmomedia)\
+      \ < 5:\n      name: val_cmomedia não pode ter >5% nulos\n  - missing_percent(val_cmopesada) < 5:\n\
+      \      name: val_cmopesada não pode ter >5% nulos\n\n  # Unicidade da chave primária composta ['id_subsistema',\
+      \ 'din_instante'] (candidata LLM)\n  - failed rows:\n      name: Chave composta (id_subsistema,\
+      \ din_instante) não deve ter duplicatas\n      fail query: |\n        SELECT * FROM cmo_semanal\n\
+      \        WHERE (id_subsistema, din_instante) IN (\n          SELECT id_subsistema, din_instante\
+      \ FROM cmo_semanal\n          GROUP BY id_subsistema, din_instante\n          HAVING COUNT(*) >\
+      \ 1\n        )\n\n  # Freshness: din_instante deve ter dados recentes (SLA: Atualizado diariamente)\n\
+      \  - freshness(din_instante) < 3d:\n      name: din_instante não pode ter dados com mais de 3 dias\
+      \ de atraso\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/cmo-semanal
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - preco da energia por semana
+  - custo marginal semanal
+  - pld semanal
+  - preco por patamar de carga
+  - quanto custou a energia na semana
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver custo marginal de operação (CMO), formação
+    do PLD, precificação no mercado de curto prazo, análise de patamares de carga (leve, média, pesada)
+    ou comparação de custos de operação entre subsistemas do SIN. Também relevante para perguntas sobre
+    impacto hidrológico nos preços de energia e planejamento da operação hidrotérmica semanal pelo DECOMP.
+- property: agentInstructions
+  value: |
+    - [val_cmomediasemanal] Valores de CMO médio semanal negativos ou acima de R$ 10.000/MWh são fisicamente implausíveis. Valores extremos podem indicar erros de processamento do DECOMP ou períodos de crise energética severa (ex: 2001, 2021). O teto regulatório do PLD variou historicamente entre R$ 500/MWh e R$ 9.999/MWh conforme resoluções ANEEL.
+
+    - [val_cmoleve] O CMO do patamar leve deve ser menor ou igual ao CMO dos patamares médio e pesado na mesma semana e subsistema. Inversões podem indicar inconsistência no modelo DECOMP ou erro de exportação dos dados do dataset cmo-semanal.
+
+    - [val_cmopesada] O CMO do patamar pesado deve ser maior ou igual ao CMO dos patamares médio e leve na mesma semana e subsistema. Inversões (pesada menor que média ou leve) indicam inconsistência no modelo DECOMP ou erro de exportação do dataset cmo-semanal.
+
+    - [din_instante] Verificar se há semanas operativas faltantes na série temporal para cada subsistema do dataset cmo-semanal. Gaps superiores a 14 dias entre semanas consecutivas indicam descontinuidade. O total de 308 linhas sugere subconjunto da série histórica completa (~4.368 linhas esperadas para 21 anos × 52 semanas × 4 subsistemas).
+
+    - [id_subsistema] Verificar duplicatas na chave primária composta (din_instante, id_subsistema) do dataset cmo-semanal. Atualizações recorrentes do DECOMP podem gerar múltiplas versões do CMO para a mesma semana e subsistema nos arquivos parquet, comprometendo agregações.
+
+    - [tipos] As colunas `val_cmoleve`, `val_cmomedia`, `val_cmomediasemanal`, `val_cmopesada` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi o CMO médio semanal do subsistema Sudeste no último trimestre?
+  - Como o CMO variou entre os patamares leve, média e pesada no subsistema Sul em 2023?
+  - Qual subsistema apresentou o maior CMO médio semanal nos últimos 12 meses?
+  - Qual a diferença histórica entre o CMO no patamar pesado e leve por subsistema?
+  - Em quais semanas o CMO do Nordeste superou R$ 500/MWh?
+- property: granularity
+  value: semanal
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_se/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2005-01-07'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 semana
+      temporal_column: din_instante
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - din_instante
+      - id_subsistema
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: cmomediasemanal
+      label: CMO Médio Semanal
+      columns:
+      - val_cmomediasemanal
+      expression: TRY_CAST(val_cmomediasemanal AS DOUBLE)
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - cmomediasemanal
+      - CMO médio semanal
+      - custo marginal médio
+      - CMO semanal
+      - média semanal
+      - cmo media semanal
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+          unit: R$/MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+          unit: R$/MWh
+        minimum:
+          sql: MIN(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+          unit: R$/MWh
+        time_series:
+          sql: AVG(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+          unit: R$/MWh
+        ranking:
+          sql: AVG(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+          unit: R$/MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+          unit: R$/MWh
+      interval_hours: 168.0
+      aliases:
+      - CMO médio semanal
+      - custo marginal médio
+      - CMO semanal
+      - media semanal
+      - cmo media semanal
+      - PLD referencia
+      - preco semanal energia
+    - id: cmoleve
+      label: CMO Patamar Leve
+      columns:
+      - val_cmoleve
+      expression: TRY_CAST(val_cmoleve AS DOUBLE)
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - cmoleve
+      - CMO leve
+      - custo marginal leve
+      - patamar leve
+      - cmo patamar leve
+      - carga leve
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_cmoleve AS DOUBLE))
+          unit: R$/MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_cmoleve AS DOUBLE))
+          unit: R$/MWh
+        minimum:
+          sql: MIN(TRY_CAST(val_cmoleve AS DOUBLE))
+          unit: R$/MWh
+        time_series:
+          sql: AVG(TRY_CAST(val_cmoleve AS DOUBLE))
+          unit: R$/MWh
+        ranking:
+          sql: AVG(TRY_CAST(val_cmoleve AS DOUBLE))
+          unit: R$/MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cmoleve AS DOUBLE))
+          unit: R$/MWh
+      interval_hours: 168.0
+      aliases:
+      - CMO leve
+      - custo marginal leve
+      - patamar leve
+      - cmo patamar leve
+      - carga leve
+      - off-peak
+    - id: cmomedia
+      label: CMO Patamar Médio
+      columns:
+      - val_cmomedia
+      expression: TRY_CAST(val_cmomedia AS DOUBLE)
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - cmomedia
+      - CMO média
+      - custo marginal médio patamar
+      - patamar médio
+      - cmo patamar media
+      - carga média
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_cmomedia AS DOUBLE))
+          unit: R$/MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_cmomedia AS DOUBLE))
+          unit: R$/MWh
+        minimum:
+          sql: MIN(TRY_CAST(val_cmomedia AS DOUBLE))
+          unit: R$/MWh
+        time_series:
+          sql: AVG(TRY_CAST(val_cmomedia AS DOUBLE))
+          unit: R$/MWh
+        ranking:
+          sql: AVG(TRY_CAST(val_cmomedia AS DOUBLE))
+          unit: R$/MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cmomedia AS DOUBLE))
+          unit: R$/MWh
+      interval_hours: 168.0
+      aliases:
+      - CMO média
+      - custo marginal médio patamar
+      - patamar médio
+      - cmo patamar media
+      - carga média
+      - intermediario
+    - id: cmopesada
+      label: CMO Patamar Pesado
+      columns:
+      - val_cmopesada
+      expression: TRY_CAST(val_cmopesada AS DOUBLE)
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - cmopesada
+      - CMO pesada
+      - custo marginal pesado
+      - patamar pesado
+      - cmo patamar pesada
+      - carga pesada
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_cmopesada AS DOUBLE))
+          unit: R$/MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_cmopesada AS DOUBLE))
+          unit: R$/MWh
+        minimum:
+          sql: MIN(TRY_CAST(val_cmopesada AS DOUBLE))
+          unit: R$/MWh
+        time_series:
+          sql: AVG(TRY_CAST(val_cmopesada AS DOUBLE))
+          unit: R$/MWh
+        ranking:
+          sql: AVG(TRY_CAST(val_cmopesada AS DOUBLE))
+          unit: R$/MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cmopesada AS DOUBLE))
+          unit: R$/MWh
+      interval_hours: 168.0
+      aliases:
+      - CMO pesada
+      - custo marginal pesado
+      - patamar pesado
+      - cmo patamar pesada
+      - carga pesada
+      - horario pico
+      - on-peak
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - cmomediasemanal
+      - cmoleve
+      - cmomedia
+      - cmopesada
+      preferred_for:
+      - custo marginal operacao semanal
+      - CMO por patamar
+      - CMO leve media pesada
+      - formacao PLD semanal
+      - preco liquidacao diferencas semanal
+      - spread patamar leve pesada
+      - DECOMP semanal subsistema
+      - diferenca CMO patamares
+      - teto PLD historico
+      - crise energetica CMO
+      not_preferred_for:
+      - ranking usinas
+      - usina individual
+      - nuclear
+      - MMGD
+      - geracao por fonte
+      - carga energia MWmed
+      - fator capacidade
+      - despacho termico
+      - ENA afluencia
+      - CMO semi-horario
+      - CMO horario
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - SUDESTE
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          - SUL
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          - NORDESTE
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          - NORTE
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          - sudeste
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          - sul
+          filter: nom_subsistema = 'SUL'
+    sql_patterns:
+      cmomediasemanal_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  AVG(TRY_CAST(val_cmomediasemanal AS DOUBLE)) AS cmo_medio_rwh\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - cmomediasemanal
+          grain: month
+        validated_params:
+          year: '2026'
+      cmo_patamares_comparacao:
+        template: "SELECT din_instante, id_subsistema,\n  TRY_CAST(val_cmoleve AS DOUBLE) AS cmo_leve,\n\
+          \  TRY_CAST(val_cmomedia AS DOUBLE) AS cmo_media,\n  TRY_CAST(val_cmopesada AS DOUBLE) AS cmo_pesada,\n\
+          \  TRY_CAST(val_cmomediasemanal AS DOUBLE) AS cmo_medio_semanal,\n  TRY_CAST(val_cmopesada AS\
+          \ DOUBLE) - TRY_CAST(val_cmoleve AS DOUBLE) AS spread_pesada_leve\nFROM {source}\nWHERE id_subsistema\
+          \ = '{subsistema}'\n  AND din_instante BETWEEN '{data_inicio}' AND '{data_fim}'\nORDER BY din_instante"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - cmoleve
+          - cmomedia
+          - cmopesada
+          - cmomediasemanal
+          grain: week
+        validated_params:
+          subsistema: N
+          data_inicio: '2026-01-01'
+          data_fim: '2026-07-24'
+      cmo_pico_historico:
+        template: "SELECT id_subsistema,\n  MAX(TRY_CAST(val_cmopesada AS DOUBLE)) AS cmo_pesada_max,\n\
+          \  MAX(TRY_CAST(val_cmomediasemanal AS DOUBLE)) AS cmo_medio_max,\n  MIN(TRY_CAST(val_cmoleve\
+          \ AS DOUBLE)) AS cmo_leve_min\nFROM {source}\nGROUP BY id_subsistema\nORDER BY cmo_pesada_max\
+          \ DESC"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - maximum
+          - minimum
+          metrics:
+          - cmopesada
+          - cmomediasemanal
+          - cmoleve
+          grain: all_time
+    ambiguity_policy:
+      default_assumptions:
+      - when: CMO
+        assume_metric: cmomediasemanal
+        assume_output: average
+        note: Quando o usuario menciona CMO sem especificar patamar, assume-se o CMO medio semanal (val_cmomediasemanal),
+          que e a referencia para o PLD.
+      - when: patamar
+        assume_metric: cmomediasemanal
+        assume_output: average
+        note: Quando o usuario menciona patamar sem especificar qual, solicitar esclarecimento entre leve,
+          media e pesada.
+      - when: preco energia
+        assume_metric: cmomediasemanal
+        assume_output: average
+        note: Preco de energia no contexto de mercado de curto prazo mapeia para CMO medio semanal.
+      - when: PLD
+        assume_metric: cmomediasemanal
+        assume_output: average
+        note: PLD e calculado a partir do CMO medio semanal com teto e piso regulatorios. Usar val_cmomediasemanal
+          como proxy.
+      must_clarify_when:
+      - ambiguity: qual_patamar
+        question: Voce quer o CMO do patamar leve, medio ou pesado? Ou o CMO medio semanal (media ponderada
+          dos tres patamares)?
+        trigger_terms:
+        - patamar
+        - leve
+        - media
+        - pesada
+        - pico
+        - off-peak
+        - on-peak
+      - ambiguity: periodo_referencia
+        question: Voce quer a serie historica completa, um ano especifico ou um intervalo de datas?
+        trigger_terms:
+        - historico
+        - serie
+        - evolucao
+        - tendencia
+      redirect_when:
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - angra
+        - ranking de usinas
+        reason: Schema nao contem CEG, usina ou identificador fisico de usina.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        reason: Schema nao contem coluna ou dimensao nuclear separada.
+        redirect: geracao-usina-2 com filtro de combustivel nuclear
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD separada.
+        redirect: dataset com coluna val_germmgd ou val_ger_mmgd
+      - user_mentions:
+        - semi-horario
+        - horario
+        - meia hora
+        - 30 minutos
+        reason: Este dataset tem granularidade semanal. Para CMO em granularidade semi-horaria use cmo-semi-horario.
+        redirect: cmo-semi-horario
+      - user_mentions:
+        - geracao hidraulica
+        - geracao termica
+        - geracao eolica
+        - geracao solar
+        - mix geracao
+        - balanco energia
+        reason: Schema nao contem colunas de geracao por fonte. Apenas CMO por patamar e subsistema.
+        redirect: balanco-energia-subsistema
+- property: fewShotQueries
+  value:
+  - question: Qual foi a evolução do CMO médio semanal por subsistema no último ano disponível?
+    sql: SELECT id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
+      AS mes, AVG(val_cmomediasemanal) AS cmo_medio_mensal, MIN(val_cmomediasemanal) AS cmo_minimo, MAX(val_cmomediasemanal)
+      AS cmo_maximo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_se/*.parquet') WHERE din_instante
+      >= ( SELECT MAX(din_instante) - INTERVAL '1 year' FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_se/*.parquet')
+      ) GROUP BY id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
+      ORDER BY mes, id_subsistema;
+  - question: Qual é a diferença histórica entre o CMO do patamar pesado e leve para cada subsistema?
+    sql: SELECT id_subsistema, nom_subsistema, CAST(DATE_TRUNC('year', TRY_CAST(din_instante AS TIMESTAMP))
+      AS DATE) AS ano, AVG(val_cmopesada - val_cmoleve) AS spread_medio_anual, MAX(val_cmopesada - val_cmoleve)
+      AS spread_maximo, MIN(val_cmopesada - val_cmoleve) AS spread_minimo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_se/*.parquet')
+      GROUP BY id_subsistema, nom_subsistema, CAST(DATE_TRUNC('year', TRY_CAST(din_instante AS TIMESTAMP))
+      AS DATE) ORDER BY ano DESC, id_subsistema;
+  - question: Quais subsistemas tiveram o maior CMO durante a crise hídrica de 2021?
+    sql: SELECT id_subsistema, nom_subsistema, AVG(TRY_CAST(val_cmomediasemanal AS DOUBLE)) AS cmo_medio, MAX(TRY_CAST(val_cmomediasemanal AS DOUBLE))
+      AS cmo_pico, COUNT(*) AS semanas_analisadas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_se/*.parquet')
+      WHERE din_instante >= '2021-01-01' AND din_instante < '2022-01-01' GROUP BY id_subsistema, nom_subsistema
+      ORDER BY cmo_medio DESC;
+- property: relatedDatasets
+  value:
+    ena-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024:
+      join_keys:
+      - din_instante
+      - nom_subsistema
+    demanda_maxima_di:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    balanco-energia-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    cmo-semi-horario:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    carga-mensal:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+- property: license
+  value: CC-BY

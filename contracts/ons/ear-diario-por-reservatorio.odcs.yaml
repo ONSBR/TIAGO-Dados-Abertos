@@ -1,0 +1,1711 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ear-diario-por-reservatorio
+name: ear-diario-por-reservatorio
+tenant: ons
+tags:
+- EAR
+- EAR diario
+- EAR por usina
+- EAR reservatorio diario
+- MWmes
+- REE
+- SIN
+- armazenamento hidreletrico
+- bacia-hidrografica
+- diario
+- energia armazenada reservatorio
+- energia-armazenada
+- hidreletrica
+- nivel reservatorio
+- reservatorio
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ear_reservatorio_di/*.parquet
+  format: parquet
+description:
+  purpose: Prover a série histórica diária de energia armazenada por reservatório hidrelétrico para uso
+    de geradores, comercializadores, agentes do mercado de energia e pesquisadores do setor elétrico brasileiro.
+    Suporta estudos energéticos, projeção do Custo Marginal de Operação (CMO), acompanhamento da segurança
+    energética do SIN, análise de risco hidrológico, planejamento da operação hidrotérmica e validação
+    de modelos como NEWAVE e DECOMP. Decisões de despacho, contratação de energia e gestão de reservatórios
+    dependem diretamente desta série.
+  limitations: Coluna de data tipada como VARCHAR no schema físico DuckDB, devendo ser DATE. Código de
+    planejamento apresenta 1,2% de nulos. Apresenta 3,6% de nulos, possivelmente reservatórios sem dados
+    históricos completos no início da série (próximo a 2000-01-01).
+  usage: Recuperar este dataset quando a pergunta envolver energia armazenada, nível de reservatório,
+    percentual de armazenamento ou capacidade hídrica de usinas hidrelétricas individuais em base diária.
+domain: reservatorio
+schema:
+- name: ear_diario_por_reservatorio
+  physicalType: parquet
+  logicalType: object
+  physicalName: ear_diario_por_reservatorio
+  properties:
+  - name: nom_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do reservatório hidrelétrico identificado no dataset. É o identificador primário
+      da entidade espacial e compõe a chave primária natural junto com ear_data.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - reservatorio
+      - nome do reservatorio
+      - usina
+      - nome da usina
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_resplanejamento
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Código numérico do reservatório utilizado nos modelos de planejamento energético do
+      ONS (ex. NEWAVE, DECOMP). Nem sempre preenchido (1,2% de nulos). Range observado de 1 a 311.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - codigo de planejamento
+      - codigo do reservatorio
+      - cod planejamento
+      - codigo NEWAVE
+    - property: semanticType
+      value: IDENTIFIER
+  - name: tip_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo do reservatório, indicando sua característica operativa (ex. regularização, fio
+      d''água, acumulação, equivalente).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de reservatorio
+      - tipo reservatorio
+      - classificacao do reservatorio
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Reservatório com Usina
+      - Reservatório sem usina
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da bacia hidrográfica à qual o reservatório pertence. Permite agregações por bacia
+      e join com datasets de vazão.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrografica
+      - nome da bacia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - JACUI
+      - JEQUITINHONHA
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: nom_ree
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do Reservatório Equivalente de Energia (REE) ao qual o reservatório está associado.
+      Agrupamento utilizado nos modelos de otimização energética NEWAVE e DECOMP.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - REE
+      - reservatorio equivalente
+      - reservatorio equivalente de energia
+      - nome do REE
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BELO MONTE
+      - IGUACU
+      - MADEIRA
+      - MANAUS-AMAPA
+      - NORDESTE
+      - NORTE
+      - PARANA
+      - PARANAPANEMA
+      - SUDESTE
+      - SUL
+      - TELES PIRES
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual o reservatório pertence (subsistema próprio).
+      Valores típicos: SE, S, NE, N.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema proprio
+      - subsistema proprio
+      - regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome por extenso do subsistema elétrico próprio do reservatório.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome do subsistema
+      - subsistema por extenso
+      - nome subsistema proprio
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: id_subsistema_jusante
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico à jusante na cascata. Quando igual ao id_subsistema,
+      indica que não há subsistema à jusante diferente. Preenchido mesmo quando não há subsistema à jusante
+      distinto (sem nulos).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema jusante
+      - id subsistema a jusante
+      - subsistema downstream
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema_jusante
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome por extenso do subsistema elétrico à jusante na cascata.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema jusante
+      - subsistema a jusante por extenso
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: ear_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição da energia armazenada. Tipada como VARCHAR no schema físico
+      — deve ser convertida para DATE em consultas temporais. Formato observado YYYY-MM-DD. Série de 2000-01-01
+      a 2026-05-28.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data de referencia
+      - data EAR
+      - data da medicao
+      - din_instante
+    - property: semanticType
+      value: DIMENSION
+  - name: ear_reservatorio_subsistema_proprio_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada no reservatório considerando apenas a contribuição para o subsistema
+      próprio, em MWmês. Apresenta 3,6% de nulos, possivelmente reservatórios sem dados históricos completos
+      no início da série.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_reservatorio_subsistema_proprio_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR subsistema proprio
+      - energia armazenada propria
+      - EAR proprio MWmes
+    - property: unit
+      value: MWmes
+  - name: ear_reservatorio_subsistema_jusante_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada no reservatório considerando a contribuição para o subsistema à jusante
+      (quando diferente do próprio), em MWmês. Apresenta 27,7% de nulos — esperado pois nem todo reservatório
+      possui subsistema à jusante distinto.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_reservatorio_subsistema_jusante_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR subsistema jusante
+      - energia armazenada jusante
+      - EAR jusante MWmes
+    - property: unit
+      value: MWmes
+  - name: earmax_reservatorio_subsistema_proprio_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada máxima do reservatório para o subsistema próprio (capacidade total
+      com reservatório cheio), em MWmês. Apresenta 3,6% de nulos.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(earmax_reservatorio_subsistema_proprio_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EARmax subsistema proprio
+      - capacidade maxima propria
+      - EAR maxima propria MWmes
+    - property: unit
+      value: MWmes
+  - name: earmax_reservatorio_subsistema_jusante_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada máxima do reservatório para o subsistema à jusante (capacidade total
+      com reservatório cheio), em MWmês. Apresenta 27,7% de nulos — esperado para reservatórios sem subsistema
+      à jusante distinto.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(earmax_reservatorio_subsistema_jusante_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EARmax subsistema jusante
+      - capacidade maxima jusante
+      - EAR maxima jusante MWmes
+    - property: unit
+      value: MWmes
+    - property: enum
+      value:
+      - 0.0
+      - 1004.893
+      - 147.034
+      - 16040.745
+      - 16085.0
+      - 42.91
+      - 451.213
+      - 4657.0
+      - 484.803
+      - 6620.419
+  - name: ear_reservatorio_percentual
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Percentual de energia armazenada no reservatório em relação à sua capacidade máxima
+      total. Varia de 0 a 100. Apresenta 3,6% de nulos. Pode ultrapassar 100% em situações de vertimento
+      ou revisões de EARmax.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_reservatorio_percentual AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR percentual
+      - percentual armazenado
+      - porcentagem EAR
+      - EAR pct
+    - property: unit
+      value: '%'
+  - name: ear_total_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada total do reservatório (soma das contribuições para subsistema próprio
+      e à jusante), em MWmês. Sem nulos.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_total_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR total
+      - energia armazenada total
+      - EAR total MWmes
+    - property: unit
+      value: MWmes
+  - name: ear_maxima_total_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada máxima total do reservatório (capacidade total considerando subsistema
+      próprio e à jusante), em MWmês. Sem nulos.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_maxima_total_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EARmax total
+      - capacidade maxima total
+      - EAR maxima total MWmes
+    - property: unit
+      value: MWmes
+  - name: val_contribearbacia
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EAR total da bacia hidrográfica à qual
+      pertence. Sem nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EAR bacia
+      - contrib EAR bacia
+      - participacao na bacia
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearbacia AS DOUBLE)
+  - name: val_contribearmaxbacia
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EARmax total da bacia hidrográfica. Sem
+      nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EARmax bacia
+      - contrib EARmax bacia
+      - participacao maxima na bacia
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearmaxbacia AS DOUBLE)
+  - name: val_contribearsubsistema
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EAR total do subsistema próprio. Sem
+      nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EAR subsistema
+      - contrib EAR subsistema proprio
+      - participacao no subsistema
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearsubsistema AS DOUBLE)
+  - name: val_contribearmaxsubsistema
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EARmax total do subsistema próprio. Sem
+      nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EARmax subsistema
+      - contrib EARmax subsistema proprio
+      - participacao maxima no subsistema
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearmaxsubsistema AS DOUBLE)
+  - name: val_contribearsubsistemajusante
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EAR total do subsistema à jusante. Quando
+      não há subsistema à jusante distinto, o valor reflete a contribuição para o próprio subsistema.
+      Sem nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EAR subsistema jusante
+      - contrib EAR jusante
+      - participacao no subsistema a jusante
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearsubsistemajusante AS DOUBLE)
+  - name: val_contribearmaxsubsistemajusante
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EARmax total do subsistema à jusante.
+      Sem nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EARmax subsistema jusante
+      - contrib EARmax jusante
+      - participacao maxima no subsistema a jusante
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE)
+    - property: enum
+      value:
+      - 0.0
+      - 0.00083012
+      - 0.00220518
+      - 0.00937883
+      - 0.00960856
+      - 0.0194403
+      - 0.31031852
+      - 0.32191246
+      - 0.37827959
+      - 0.43263937
+      - 0.0
+  - name: val_contribearsin
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EAR total do Sistema Interligado Nacional
+      (SIN). Permite análise da relevância de cada reservatório para o sistema como um todo. Sem nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EAR SIN
+      - contrib EAR SIN
+      - participacao no SIN
+      - peso no sistema
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearsin AS DOUBLE)
+  - name: val_contribearmaxsin
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Contribuição percentual do reservatório para a EARmax total do SIN. Sem nulos.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - contribuicao EARmax SIN
+      - contrib EARmax SIN
+      - participacao maxima no SIN
+      - peso maximo no sistema
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_contribearmaxsin AS DOUBLE)
+  quality:
+  - type: custom
+    engine: soda
+    implementation: "checks for ear_diario_por_reservatorio:\n  - row_count > 0:\n      name: Tabela não\
+      \ pode estar vazia\n\n  # Referential integrity\n  - invalid_count(tip_reservatorio) = 0:\n    \
+      \  valid values:\n        - 'Reservatório com Usina'\n        - 'Reservatório sem usina'\n     \
+      \ name: tip_reservatorio deve ser um dos valores válidos\n  - invalid_count(nom_bacia) = 0:\n  \
+      \    valid values:\n        - 'AMAZONAS'\n        - 'CAPIVARI'\n        - 'DOCE'\n        - 'GRANDE'\n\
+      \        - 'IGUACU'\n        - 'JACUI'\n        - 'JEQUITINHONHA'\n        - 'PARAGUACU'\n     \
+      \   - 'PARAGUAI'\n        - 'PARAIBA DO SUL'\n        - 'PARANA'\n        - 'PARANAIBA'\n      \
+      \  - 'PARANAPANEMA'\n        - 'PARNAIBA'\n        - 'SAO FRANCISCO'\n        - 'TIETE'\n      \
+      \  - 'TOCANTINS'\n        - 'URUGUAI'\n      name: nom_bacia deve ser um dos valores válidos\n \
+      \ - invalid_count(nom_ree) = 0:\n      valid values:\n        - 'BELO MONTE'\n        - 'IGUACU'\n\
+      \        - 'MADEIRA'\n        - 'MANAUS-AMAPA'\n        - 'NORDESTE'\n        - 'NORTE'\n      \
+      \  - 'PARANA'\n        - 'PARANAPANEMA'\n        - 'SUDESTE'\n        - 'SUL'\n        - 'TELES\
+      \ PIRES'\n      name: nom_ree deve ser um dos valores válidos\n  - invalid_count(id_subsistema)\
+      \ = 0:\n      valid values:\n        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n    \
+      \  name: id_subsistema deve ser um dos valores válidos\n  - invalid_count(nom_subsistema) = 0:\n\
+      \      valid values:\n        - 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE'\n        - 'SUL'\n\
+      \      name: nom_subsistema deve ser um dos valores válidos\n  - invalid_count(id_subsistema_jusante)\
+      \ = 0:\n      valid values:\n        - 'N'\n        - 'NE'\n        - 'S'\n        - 'SE'\n    \
+      \  name: id_subsistema_jusante deve ser um dos valores válidos\n  - invalid_count(nom_subsistema_jusante)\
+      \ = 0:\n      valid values:\n        - 'NORDESTE'\n        - 'NORTE'\n        - 'SUDESTE'\n    \
+      \    - 'SUL'\n      name: nom_subsistema_jusante deve ser um dos valores válidos\n\n  # Circuit\
+      \ breaker: colunas numéricas VARCHAR (formato de origem)\n  - missing_percent(val_contribearbacia)\
+      \ < 5:\n      name: val_contribearbacia não pode ter >5% nulos\n  - missing_percent(val_contribearmaxbacia)\
+      \ < 5:\n      name: val_contribearmaxbacia não pode ter >5% nulos\n  - missing_percent(val_contribearsubsistema)\
+      \ < 5:\n      name: val_contribearsubsistema não pode ter >5% nulos\n  - missing_percent(val_contribearmaxsubsistema)\
+      \ < 5:\n      name: val_contribearmaxsubsistema não pode ter >5% nulos\n  - missing_percent(val_contribearsubsistemajusante)\
+      \ < 5:\n      name: val_contribearsubsistemajusante não pode ter >5% nulos\n  - missing_percent(val_contribearmaxsubsistemajusante)\
+      \ < 5:\n      name: val_contribearmaxsubsistemajusante não pode ter >5% nulos\n  - missing_percent(val_contribearsin)\
+      \ < 5:\n      name: val_contribearsin não pode ter >5% nulos\n  - missing_percent(val_contribearmaxsin)\
+      \ < 5:\n      name: val_contribearmaxsin não pode ter >5% nulos\n\n  # Unicidade da chave primária\
+      \ composta ['nom_reservatorio', 'ear_data'] (candidata LLM)\n  - failed rows:\n      name: Chave\
+      \ composta (nom_reservatorio, ear_data) não deve ter duplicatas\n      fail query: |\n        SELECT\
+      \ * FROM ear_diario_por_reservatorio\n        WHERE (nom_reservatorio, ear_data) IN (\n        \
+      \  SELECT nom_reservatorio, ear_data FROM ear_diario_por_reservatorio\n          GROUP BY nom_reservatorio,\
+      \ ear_data\n          HAVING COUNT(*) > 1\n        )\n\n  # Nulos em cod_resplanejamento — alerta\
+      \ de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(cod_resplanejamento) < 5.0:\n    \
+      \  name: cod_resplanejamento não deve ter >5.0% nulos\n\n  # Nulos em ear_reservatorio_subsistema_proprio_mwmes\
+      \ — alerta de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(ear_reservatorio_subsistema_proprio_mwmes)\
+      \ < 5.0:\n      name: ear_reservatorio_subsistema_proprio_mwmes não deve ter >5.0% nulos\n\n  #\
+      \ Nulos em ear_reservatorio_subsistema_jusante_mwmes — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(ear_reservatorio_subsistema_jusante_mwmes) < 5.0:\n      name: ear_reservatorio_subsistema_jusante_mwmes\
+      \ não deve ter >5.0% nulos\n\n  # Nulos em earmax_reservatorio_subsistema_proprio_mwmes — alerta\
+      \ de qualidade (real=0%, threshold=5.0%)\n  - missing_percent(earmax_reservatorio_subsistema_proprio_mwmes)\
+      \ < 5.0:\n      name: earmax_reservatorio_subsistema_proprio_mwmes não deve ter >5.0% nulos\n\n\
+      \  # Nulos em earmax_reservatorio_subsistema_jusante_mwmes — alerta de qualidade (real=0%, threshold=5.0%)\n\
+      \  - missing_percent(earmax_reservatorio_subsistema_jusante_mwmes) < 5.0:\n      name: earmax_reservatorio_subsistema_jusante_mwmes\
+      \ não deve ter >5.0% nulos\n\n  # Nulos em ear_reservatorio_percentual — alerta de qualidade (real=0%,\
+      \ threshold=5.0%)\n  - missing_percent(ear_reservatorio_percentual) < 5.0:\n      name: ear_reservatorio_percentual\
+      \ não deve ter >5.0% nulos\n"
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ear-diario-por-reservatorio
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - nivel do reservatorio da usina
+  - armazenamento de cada usina
+  - quanto cada represa tem armazenado
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver energia armazenada, nível de reservatório,
+    percentual de armazenamento ou capacidade hídrica de usinas hidrelétricas individuais em base diária.
+    Também relevante para análises de cascata, contribuição de reservatórios para subsistemas ou SIN,
+    e correlação entre armazenamento e risco hidrológico. Preferir sobre ear-diario-por-subsistema quando
+    a granularidade espacial requerida for o reservatório individual, não o subsistema agregado.
+- property: agentInstructions
+  value: |
+    - [ear_data] Coluna de data tipada como VARCHAR no schema físico DuckDB, devendo ser DATE. Filtros e ordenações temporais diretas podem falhar ou produzir resultados incorretos sem conversão explícita.
+
+    - [cod_resplanejamento] Código de planejamento apresenta 1,2% de nulos. Reservatórios sem código não podem ser utilizados em joins com modelos de planejamento (NEWAVE/DECOMP) que referenciam este identificador.
+
+    - [ear_reservatorio_subsistema_proprio_mwmes] Apresenta 3,6% de nulos, possivelmente reservatórios sem dados históricos completos no início da série (próximo a 2000-01-01). Agregações de EAR por subsistema podem subestimar valores em datas antigas.
+
+    - [ear_reservatorio_subsistema_jusante_mwmes] Apresenta 27,7% de nulos — esperado para reservatórios cujo subsistema à jusante é idêntico ao próprio (id_subsistema = id_subsistema_jusante). Deve ser tratado como ausência de contribuição inter-subsistema, não como dado faltante.
+
+    - [earmax_reservatorio_subsistema_proprio_mwmes] Apresenta 3,6% de nulos, coincidindo com ear_reservatorio_subsistema_proprio_mwmes. Indica que os mesmos reservatórios sem EAR também não possuem EARmax, comprometendo o cálculo de percentual de armazenamento.
+
+    - [earmax_reservatorio_subsistema_jusante_mwmes] Apresenta 27,7% de nulos, espelhando ear_reservatorio_subsistema_jusante_mwmes. Reservatórios sem subsistema à jusante distinto não possuem capacidade máxima para esse componente.
+
+    - [ear_reservatorio_percentual] Apresenta 3,6% de nulos, coincidindo com as colunas de EAR e EARmax do subsistema próprio. Percentual não pode ser calculado quando EARmax é nulo ou zero.
+
+    - [ear_reservatorio_percentual] Percentual de armazenamento pode ultrapassar 100% em situações de vertimento ou revisões de EARmax, ou apresentar valores negativos por inconsistências de consistência recorrente mencionada nos metadados CKAN.
+
+    - [ear_total_mwmes] Energia armazenada total não deveria ser negativa. Valores negativos indicariam inconsistência no processo de consistência recorrente descrito nos metadados CKAN.
+
+    - [nom_reservatorio] A chave primária natural é (nom_reservatorio, ear_data). Duplicatas nessa combinação indicariam registros redundantes ou erro de carga, comprometendo agregações e joins temporais.
+
+    - [ear_data] Série diária de 26 anos pode conter lacunas temporais por reservatório. Dias faltantes afetam análises de tendência, médias móveis e modelos de previsão que assumem continuidade da série.
+
+    - [tipos] As colunas `ear_maxima_total_mwmes`, `ear_reservatorio_percentual`, `ear_reservatorio_subsistema_jusante_mwmes`, `ear_reservatorio_subsistema_proprio_mwmes`, `ear_total_mwmes`, `earmax_reservatorio_subsistema_jusante_mwmes`, `earmax_reservatorio_subsistema_proprio_mwmes`, `val_contribearbacia`, `val_contribearmaxbacia`, `val_contribearmaxsin`, `val_contribearmaxsubsistema`, `val_contribearmaxsubsistemajusante`, `val_contribearsin`, `val_contribearsubsistema`, `val_contribearsubsistemajusante` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação. As colunas de código `cod_resplanejamento` variam entre inteiro e decimal entre arquivos; compare-as como número, não como texto.
+- property: typicalQuestions
+  value:
+  - Qual foi o percentual de armazenamento do reservatório de Furnas nos últimos 30 dias?
+  - Quais reservatórios do subsistema Sudeste estavam abaixo de 30% de capacidade em janeiro de 2021?
+  - Como evoluiu a EAR total dos reservatórios da bacia do Paraná entre 2015 e 2020?
+  - Quais são os 10 reservatórios com maior contribuição para a EAR do SIN hoje?
+  - Qual a diferença entre a EAR do subsistema próprio e à jusante para reservatórios de cascata inter-subsistemas?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ear_reservatorio_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ear_data
+      spatial: usina
+      entity: reservatorio
+      one_row_per:
+      - ear_data
+      - id_subsistema
+      - nom_reservatorio
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: nom_reservatorio
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ear_reservatorio_subsistema_proprio_mwmes
+      label: Energia Armazenada Subsistema Proprio
+      columns:
+      - ear_reservatorio_subsistema_proprio_mwmes
+      expression: ear_reservatorio_subsistema_proprio_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ear_reservatorio_subsistema_proprio_mwmes
+      - EAR subsistema proprio
+      - energia armazenada propria
+      - EAR proprio MWmes
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_reservatorio_subsistema_proprio_mwmes AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_proprio_mwmes AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_proprio_mwmes AS DOUBLE))
+          unit: MWmes
+        ranking:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_proprio_mwmes AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_proprio_mwmes AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR subsistema proprio
+      - energia armazenada propria
+      - EAR proprio MWmes
+    - id: ear_reservatorio_subsistema_jusante_mwmes
+      label: Energia Armazenada Subsistema Jusante
+      columns:
+      - ear_reservatorio_subsistema_jusante_mwmes
+      expression: ear_reservatorio_subsistema_jusante_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ear_reservatorio_subsistema_jusante_mwmes
+      - EAR subsistema jusante
+      - energia armazenada jusante
+      - EAR jusante MWmes
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_reservatorio_subsistema_jusante_mwmes AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_jusante_mwmes AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_jusante_mwmes AS DOUBLE))
+          unit: MWmes
+        ranking:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_jusante_mwmes AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_reservatorio_subsistema_jusante_mwmes AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR subsistema jusante
+      - energia armazenada jusante
+      - EAR jusante MWmes
+    - id: ear_reservatorio_percentual
+      label: Percentual de Energia Armazenada
+      columns:
+      - ear_reservatorio_percentual
+      expression: ear_reservatorio_percentual
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ear_reservatorio_percentual
+      - EAR percentual
+      - percentual armazenado
+      - porcentagem EAR
+      - EAR pct
+      - nivel de armazenamento
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - EAR percentual
+      - percentual armazenado
+      - porcentagem EAR
+      - EAR pct
+      - nivel de armazenamento
+    - id: ear_total_mwmes
+      label: Energia Armazenada Total
+      columns:
+      - ear_total_mwmes
+      expression: ear_total_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ear_total_mwmes
+      - EAR total
+      - energia armazenada total
+      - EAR total MWmes
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_total_mwmes AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_total_mwmes AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_total_mwmes AS DOUBLE))
+          unit: MWmes
+        ranking:
+          sql: AVG(TRY_CAST(ear_total_mwmes AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_total_mwmes AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR total
+      - energia armazenada total
+      - EAR total MWmes
+    - id: ear_maxima_total_mwmes
+      label: Energia Armazenada Maxima Total
+      columns:
+      - ear_maxima_total_mwmes
+      expression: ear_maxima_total_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - ear_maxima_total_mwmes
+      - EARmax total
+      - capacidade maxima total
+      - EAR maxima total MWmes
+      - capacidade hidrica maxima
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_maxima_total_mwmes AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_maxima_total_mwmes AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_maxima_total_mwmes AS DOUBLE))
+          unit: MWmes
+        ranking:
+          sql: AVG(TRY_CAST(ear_maxima_total_mwmes AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_maxima_total_mwmes AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EARmax total
+      - capacidade maxima total
+      - EAR maxima total MWmes
+      - capacidade hidrica maxima
+    - id: contribearbacia
+      label: Contribuicao EAR Bacia
+      columns:
+      - val_contribearbacia
+      expression: TRY_CAST(val_contribearbacia AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearbacia
+      - contribuicao EAR bacia
+      - contrib EAR bacia
+      - participacao na bacia
+      - peso do reservatorio na bacia
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearbacia AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearbacia AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearbacia AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearbacia AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearbacia AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearbacia AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EAR bacia
+      - contrib EAR bacia
+      - participacao na bacia
+      - peso do reservatorio na bacia
+    - id: contribearmaxbacia
+      label: Contribuicao EARmax Bacia
+      columns:
+      - val_contribearmaxbacia
+      expression: TRY_CAST(val_contribearmaxbacia AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearmaxbacia
+      - contribuicao EARmax bacia
+      - contrib EARmax bacia
+      - participacao maxima na bacia
+      - capacidade relativa na bacia
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearmaxbacia AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearmaxbacia AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearmaxbacia AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearmaxbacia AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearmaxbacia AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearmaxbacia AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EARmax bacia
+      - contrib EARmax bacia
+      - participacao maxima na bacia
+      - capacidade relativa na bacia
+    - id: contribearsubsistema
+      label: Contribuicao EAR Subsistema Proprio
+      columns:
+      - val_contribearsubsistema
+      expression: TRY_CAST(val_contribearsubsistema AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearsubsistema
+      - contribuicao EAR subsistema
+      - contrib EAR subsistema proprio
+      - participacao no subsistema
+      - peso do reservatorio no subsistema
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearsubsistema AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearsubsistema AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearsubsistema AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearsubsistema AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearsubsistema AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearsubsistema AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EAR subsistema
+      - contrib EAR subsistema proprio
+      - participacao no subsistema
+      - peso do reservatorio no subsistema
+    - id: contribearmaxsubsistema
+      label: Contribuicao EARmax Subsistema Proprio
+      columns:
+      - val_contribearmaxsubsistema
+      expression: TRY_CAST(val_contribearmaxsubsistema AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearmaxsubsistema
+      - contribuicao EARmax subsistema
+      - contrib EARmax subsistema proprio
+      - participacao maxima no subsistema
+      - capacidade relativa no subsistema
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistema AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearmaxsubsistema AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearmaxsubsistema AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistema AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistema AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistema AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EARmax subsistema
+      - contrib EARmax subsistema proprio
+      - participacao maxima no subsistema
+      - capacidade relativa no subsistema
+    - id: contribearsubsistemajusante
+      label: Contribuicao EAR Subsistema Jusante
+      columns:
+      - val_contribearsubsistemajusante
+      expression: TRY_CAST(val_contribearsubsistemajusante AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearsubsistemajusante
+      - contribuicao EAR subsistema jusante
+      - contrib EAR jusante
+      - participacao no subsistema a jusante
+      - EAR cascata inter-subsistema
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearsubsistemajusante AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearsubsistemajusante AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearsubsistemajusante AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearsubsistemajusante AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearsubsistemajusante AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearsubsistemajusante AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EAR subsistema jusante
+      - contrib EAR jusante
+      - participacao no subsistema a jusante
+      - EAR cascata inter-subsistema
+    - id: contribearmaxsubsistemajusante
+      label: Contribuicao EARmax Subsistema Jusante
+      columns:
+      - val_contribearmaxsubsistemajusante
+      expression: TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearmaxsubsistemajusante
+      - contribuicao EARmax subsistema jusante
+      - contrib EARmax jusante
+      - participacao maxima no subsistema a jusante
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearmaxsubsistemajusante AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EARmax subsistema jusante
+      - contrib EARmax jusante
+      - participacao maxima no subsistema a jusante
+    - id: contribearsin
+      label: Contribuicao EAR SIN
+      columns:
+      - val_contribearsin
+      expression: TRY_CAST(val_contribearsin AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearsin
+      - contribuicao EAR SIN
+      - contrib EAR SIN
+      - participacao no SIN
+      - peso do reservatorio no sistema
+      - relevancia hidrica nacional
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearsin AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearsin AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearsin AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearsin AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearsin AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearsin AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EAR SIN
+      - contrib EAR SIN
+      - participacao no SIN
+      - peso do reservatorio no sistema
+      - relevancia hidrica nacional
+    - id: contribearmaxsin
+      label: Contribuicao EARmax SIN
+      columns:
+      - val_contribearmaxsin
+      expression: TRY_CAST(val_contribearmaxsin AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      valid_intents:
+      - contribearmaxsin
+      - contribuicao EARmax SIN
+      - contrib EARmax SIN
+      - participacao maxima no SIN
+      - capacidade relativa no sistema
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_contribearmaxsin AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_contribearmaxsin AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_contribearmaxsin AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_contribearmaxsin AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_contribearmaxsin AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_contribearmaxsin AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - contribuicao EARmax SIN
+      - contrib EARmax SIN
+      - participacao maxima no SIN
+      - capacidade relativa no sistema
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    selection_policy:
+      covers_metrics:
+      - ear_reservatorio_subsistema_proprio_mwmes
+      - ear_reservatorio_subsistema_jusante_mwmes
+      - ear_reservatorio_percentual
+      - ear_total_mwmes
+      - ear_maxima_total_mwmes
+      - contribearbacia
+      - contribearmaxbacia
+      - contribearsubsistema
+      - contribearmaxsubsistema
+      - contribearsubsistemajusante
+      - contribearmaxsubsistemajusante
+      - contribearsin
+      - contribearmaxsin
+      preferred_for:
+      - EAR por reservatorio individual
+      - percentual armazenamento reservatorio
+      - contribuicao reservatorio SIN
+      - contribuicao EAR por bacia
+      - EARmax reservatorio MWmes
+      - cascata inter-subsistema EAR
+      - cod_resplanejamento NEWAVE
+      - peso hidrico reservatorio
+      - armazenamento diario reservatorio
+      - EAR subsistema jusante reservatorio
+      not_preferred_for:
+      - EAR agregada por subsistema
+      - EAR agregada por REE
+      - energia natural afluente
+      - vazao afluente
+      - geracao hidraulica
+      - usina individual CEG
+      - nuclear
+      - MMGD
+      - geracao termica
+      - carga de energia
+      - intercambio
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      tip_reservatorio:
+        Reservatório com Usina:
+          aliases:
+          - reservatorio com usina
+          - com usina
+          filter: tip_reservatorio = 'Reservatório com Usina'
+        Reservatório sem usina:
+          aliases:
+          - reservatorio sem usina
+          - sem usina
+          filter: tip_reservatorio = 'Reservatório sem usina'
+      nom_bacia:
+        AMAZONAS:
+          aliases:
+          - amazonas
+          - bacia amazonica
+          filter: nom_bacia = 'AMAZONAS'
+        CAPIVARI:
+          aliases:
+          - capivari
+          filter: nom_bacia = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - doce
+          - rio doce
+          filter: nom_bacia = 'DOCE'
+        GRANDE:
+          aliases:
+          - grande
+          - rio grande
+          filter: nom_bacia = 'GRANDE'
+        IGUACU:
+          aliases:
+          - iguacu
+          - rio iguacu
+          filter: nom_bacia = 'IGUACU'
+        JACUI:
+          aliases:
+          - jacui
+          filter: nom_bacia = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - jequitinhonha
+          filter: nom_bacia = 'JEQUITINHONHA'
+        PARAGUACU:
+          aliases:
+          - paraguacu
+          filter: nom_bacia = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - paraguai
+          filter: nom_bacia = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - paraiba do sul
+          filter: nom_bacia = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - parana
+          - rio parana
+          filter: nom_bacia = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - paranaiba
+          filter: nom_bacia = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: nom_bacia = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - parnaiba
+          filter: nom_bacia = 'PARNAIBA'
+        SAO FRANCISCO:
+          aliases:
+          - sao francisco
+          - sao chico
+          filter: nom_bacia = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - tiete
+          filter: nom_bacia = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - tocantins
+          filter: nom_bacia = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - uruguai
+          filter: nom_bacia = 'URUGUAI'
+      nom_ree:
+        BELO MONTE:
+          aliases:
+          - belo monte
+          filter: nom_ree = 'BELO MONTE'
+        IGUACU:
+          aliases:
+          - iguacu
+          filter: nom_ree = 'IGUACU'
+        MADEIRA:
+          aliases:
+          - madeira
+          filter: nom_ree = 'MADEIRA'
+        MANAUS-AMAPA:
+          aliases:
+          - manaus amapa
+          - manaus-amapa
+          filter: nom_ree = 'MANAUS-AMAPA'
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_ree = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_ree = 'NORTE'
+        PARANA:
+          aliases:
+          - parana
+          filter: nom_ree = 'PARANA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: nom_ree = 'PARANAPANEMA'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: nom_ree = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_ree = 'SUL'
+        TELES PIRES:
+          aliases:
+          - teles pires
+          filter: nom_ree = 'TELES PIRES'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema = 'SUL'
+      id_subsistema_jusante:
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema_jusante = 'N'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema_jusante = 'NE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema_jusante = 'S'
+        SE:
+          aliases:
+          - sudeste
+          filter: id_subsistema_jusante = 'SE'
+      nom_subsistema_jusante:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema_jusante = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema_jusante = 'NORTE'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: nom_subsistema_jusante = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema_jusante = 'SUL'
+    sql_patterns:
+      ear_percentual_reservatorio_periodo:
+        template: "SELECT\n  nom_reservatorio,\n  AVG(TRY_CAST(ear_reservatorio_percentual AS DOUBLE))\
+          \ AS ear_pct_medio,\n  MIN(TRY_CAST(ear_reservatorio_percentual AS DOUBLE)) AS ear_pct_minimo,\n\
+          \  MAX(TRY_CAST(ear_reservatorio_percentual AS DOUBLE)) AS ear_pct_maximo\nFROM {source}\nWHERE\
+          \ TRY_CAST(ear_data AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY nom_reservatorio\n\
+          ORDER BY ear_pct_medio DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          - minimum
+          - maximum
+          metrics:
+          - ear_reservatorio_percentual
+          grain: reservatorio
+        validated_params:
+          data_inicio: '2000-01-01'
+          data_fim: '2003-11-25'
+      ear_total_serie_diaria:
+        template: "SELECT\n  TRY_CAST(ear_data AS DATE) AS data,\n  nom_reservatorio,\n  TRY_CAST(ear_total_mwmes\
+          \ AS DOUBLE) AS ear_total_mwmes\nFROM {source}\nWHERE nom_reservatorio = '{reservatorio}'\n\
+          ORDER BY TRY_CAST(ear_data AS DATE)"
+        output_unit: MWmes
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ear_total_mwmes
+          grain: day
+      ranking_contribuicao_sin:
+        template: "SELECT\n  nom_reservatorio,\n  nom_bacia,\n  nom_subsistema,\n  AVG(TRY_CAST(val_contribearsin\
+          \ AS DOUBLE)) AS contrib_ear_sin_pct\nFROM {source}\nWHERE TRY_CAST(ear_data AS DATE) = '{data}'\n\
+          GROUP BY nom_reservatorio, nom_bacia, nom_subsistema\nORDER BY contrib_ear_sin_pct DESC\nLIMIT\
+          \ 20"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - contribearsin
+          grain: reservatorio
+      reservatorios_abaixo_threshold:
+        template: "SELECT\n  nom_reservatorio,\n  nom_subsistema,\n  nom_bacia,\n  TRY_CAST(ear_reservatorio_percentual\
+          \ AS DOUBLE) AS ear_pct\nFROM {source}\nWHERE TRY_CAST(ear_data AS DATE) = '{data}'\n  AND TRY_CAST(ear_reservatorio_percentual\
+          \ AS DOUBLE) < {threshold}\nORDER BY ear_pct ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ear_reservatorio_percentual
+          grain: reservatorio
+        validated_params:
+          data: '2002-11-23'
+          threshold: '121.81'
+    ambiguity_policy:
+      default_assumptions:
+      - when: usuario pergunta sobre armazenamento sem especificar metrica
+        assume_metric: ear_reservatorio_percentual
+        assume_output: average
+        note: Percentual e a forma mais intuitiva de expressar nivel de armazenamento para usuarios nao
+          tecnicos
+      - when: usuario pergunta sobre capacidade maxima sem especificar proprio ou jusante
+        assume_metric: ear_maxima_total_mwmes
+        assume_output: last_value
+        note: ear_maxima_total_mwmes agrega proprio e jusante e e a capacidade total do reservatorio
+      - when: usuario pergunta sobre EAR em MWmes sem especificar proprio ou jusante
+        assume_metric: ear_total_mwmes
+        assume_output: last_value
+        note: ear_total_mwmes e a soma das contribuicoes proprio e jusante, representando o armazenamento
+          total do reservatorio
+      - when: usuario pergunta sobre contribuicao do reservatorio sem especificar bacia, subsistema ou
+          SIN
+        assume_metric: contribearsin
+        assume_output: average
+        note: Contribuicao para o SIN e a metrica mais abrangente e frequentemente solicitada para avaliar
+          relevancia hidrica
+      must_clarify_when:
+      - ambiguity: ear_proprio_vs_jusante
+        question: Voce quer a EAR considerando apenas o subsistema proprio do reservatorio ou incluindo
+          a contribuicao para o subsistema a jusante (cascata inter-subsistema)?
+        trigger_terms:
+        - subsistema proprio
+        - subsistema jusante
+        - cascata
+        - inter-subsistema
+        - downstream
+      - ambiguity: contribuicao_bacia_vs_subsistema_vs_sin
+        question: Voce quer a contribuicao percentual do reservatorio para a bacia hidrografica, para
+          o subsistema eletrico ou para o SIN como um todo?
+        trigger_terms:
+        - contribuicao
+        - participacao
+        - peso
+        - relevancia
+      redirect_when:
+      - user_mentions:
+        - EAR subsistema
+        - armazenamento subsistema
+        - ear por subsistema
+        reason: Este dataset tem granularidade por reservatorio. Para EAR agregada por subsistema use
+          ear-diario-por-subsistema.
+        redirect: ear-diario-por-subsistema
+      - user_mentions:
+        - EAR REE
+        - reservatorio equivalente
+        - ear por REE
+        reason: Este dataset tem granularidade por reservatorio. Para EAR por REE use ear-diario-por-ree-reservatorio-equivalente-de-energia.
+        redirect: ear-diario-por-ree-reservatorio-equivalente-de-energia
+      - user_mentions:
+        - energia natural afluente
+        - ENA
+        - afluencia
+        reason: ENA nao existe neste dataset. Use ena-diario-por-reservatorio.
+        redirect: ena-diario-por-reservatorio
+      - user_mentions:
+        - vazao
+        - afluente
+        - turbinada
+        - vertida
+        reason: Vazoes nao existem neste dataset. Use dados-hidrologicos-res.
+        redirect: dados-hidrologicos-res
+      - user_mentions:
+        - geracao
+        - despacho
+        - potencia gerada
+        reason: Geracao nao existe neste dataset. Use dataset de geracao por usina ou subsistema.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - usina
+        - ceg
+        - itaipu
+        - belo monte
+        - tucurui
+        reason: Schema nao contem CEG ou identificador fisico de usina. nom_reservatorio identifica o
+          reservatorio, nao a usina geradora.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - nuclear
+        - angra
+        reason: Schema nao contem coluna ou dimensao nuclear.
+        redirect: geracao-usina-2
+      - user_mentions:
+        - mmgd
+        - microgeracao
+        - minigeracao
+        - geracao distribuida
+        reason: Schema nao contem coluna MMGD.
+        redirect: dataset com coluna val_germmgd
+      - user_mentions:
+        - preco
+        - pld
+        - cmo
+        - custo marginal
+        reason: Precos e custos nao existem neste dataset.
+        redirect: dataset de preco spot ONS/CCEE
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o percentual de armazenamento do reservatório de Furnas ao longo de 2021?
+    sql: SELECT TRY_CAST(ear_data AS DATE) AS data_ref, nom_reservatorio, ear_reservatorio_percentual,
+      ear_total_mwmes, ear_maxima_total_mwmes FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_reservatorio_di/*.parquet')
+      WHERE nom_reservatorio = 'FURNAS' AND TRY_CAST(ear_data AS DATE) BETWEEN DATE '2021-01-01' AND DATE
+      '2021-12-31' ORDER BY data_ref
+  - question: Quais reservatórios do subsistema Nordeste estavam abaixo de 20% de capacidade em 15/03/2021?
+    sql: SELECT nom_reservatorio, id_subsistema, nom_bacia, nom_ree, TRY_CAST(ear_reservatorio_percentual
+      AS DOUBLE) AS ear_reservatorio_percentual, TRY_CAST(ear_total_mwmes AS DOUBLE) AS ear_total_mwmes,
+      TRY_CAST(ear_maxima_total_mwmes AS DOUBLE) AS ear_maxima_total_mwmes FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_reservatorio_di/*.parquet',
+      union_by_name=true) WHERE id_subsistema = 'NE' AND TRY_CAST(ear_data AS DATE) = DATE '2021-03-15'
+      AND TRY_CAST(ear_reservatorio_percentual AS DOUBLE) < 20.0 ORDER BY TRY_CAST(ear_reservatorio_percentual
+      AS DOUBLE) ASC LIMIT 100
+  - question: Quais os 10 reservatórios com maior contribuição percentual para a EAR do SIN na última
+      data disponível?
+    sql: WITH ultima_data AS ( SELECT MAX(TRY_CAST(ear_data AS DATE)) AS max_data FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_reservatorio_di/*.parquet')
+      ) SELECT r.nom_reservatorio, r.id_subsistema, r.nom_bacia, r.ear_total_mwmes, r.ear_reservatorio_percentual,
+      r.val_contribearsin, ROUND(r.val_contribearsin * 100, 4) AS pct_contribuicao_sin FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_reservatorio_di/*.parquet')
+      AS r INNER JOIN ultima_data AS u ON TRY_CAST(r.ear_data AS DATE) = u.max_data ORDER BY r.val_contribearsin
+      DESC LIMIT 10
+- property: relatedDatasets
+  value:
+    ena-diario-por-reservatorio:
+      join_keys:
+      - cod_resplanejamento
+      - id_subsistema
+      - nom_bacia
+      - nom_ree
+      - nom_reservatorio
+      - nom_subsistema
+      - tip_reservatorio
+    dados-hidrologicos-res:
+      join_keys:
+      - id_subsistema
+      - nom_bacia
+      - nom_ree
+      - nom_reservatorio
+      - nom_subsistema
+      - tip_reservatorio
+    ena-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+    dados_hidrologicos_ho:
+      join_keys:
+      - id_subsistema
+      - nom_bacia
+      - nom_reservatorio
+      - nom_subsistema
+      - tip_reservatorio
+    ena-diario-por-bacia:
+      join_keys:
+      - nom_bacia
+    reservatorio:
+      join_keys:
+      - cod_resplanejamento
+      - id_subsistema
+      - nom_bacia
+      - nom_ree
+      - nom_reservatorio
+      - nom_subsistema
+      - tip_reservatorio
+    res_volumeespera:
+      join_keys:
+      - nom_reservatorio
+      - nom_subsistema
+      - nom_bacia
+      - nom_ree
+      - tip_reservatorio
+    energia-vertida-turbinavel:
+      join_keys:
+      - nom_reservatorio
+      - id_subsistema
+      - nom_bacia
+    ear-diario-por-subsistema:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+      - ear_data
+    ear-diario-por-ree-reservatorio-equivalente-de-energia:
+      join_keys:
+      - nom_ree
+      - ear_data
+    programacao_diaria:
+      join_keys:
+      - id_subsistema
+      - nom_subsistema
+- property: license
+  value: CC-BY
