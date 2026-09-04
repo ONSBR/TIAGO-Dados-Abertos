@@ -4,7 +4,6 @@ on:
   workflow_run:
     workflows: ["Publish to PyPI"]
     types: [completed]
-    branches: [main]
 
 jobs:
   publish:
@@ -16,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Install mcp-publisher
         run: |
