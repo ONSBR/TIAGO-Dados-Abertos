@@ -7,7 +7,7 @@
 
 [![tests](https://github.com/ONSBR/TIAGO-Dados-Abertos/actions/workflows/tests.yml/badge.svg)](https://github.com/ONSBR/TIAGO-Dados-Abertos/actions/workflows/tests.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple.svg)](https://modelcontextprotocol.io/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-1.0+-orange.svg)](https://duckdb.org/)
 [![ODCS](https://img.shields.io/badge/ODCS-v3.1.0-blue.svg)](https://github.com/bitol-io/open-data-contract-standard)
@@ -264,6 +264,6 @@ Vulnerabilidade: [SECURITY.md](SECURITY.md). Mudanças entre versões:
 
 ## Licença
 
-O código é MIT: [LICENSE](LICENSE). Os dados são do ONS, sob CC-BY, e seguem os termos do
+O código é Apache 2.0: [LICENSE](LICENSE). Os dados são do ONS, sob CC-BY, e seguem os termos do
 [Portal de Dados Abertos do ONS](https://dados.ons.org.br/); ver [NOTICE](NOTICE). Este
 projeto não redistribui dados: ele lê a origem oficial no momento da consulta.

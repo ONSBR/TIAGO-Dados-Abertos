@@ -1,11 +1,9 @@
 MCP TIAGO Dados Abertos — ONS
-Avisos de Licença e Atribuição da Fonte de Dados
-==================================================================
+Copyright 2026 Operador Nacional do Sistema Elétrico - ONS
 
-CÓDIGO
-------
-O código-fonte deste servidor MCP é licenciado sob a licença MIT (ver LICENSE).
-A licença do código é independente da licença dos DADOS descritos/consultados.
+Este produto é licenciado sob a Apache License, Version 2.0 (ver LICENSE).
+A licença do CÓDIGO é independente da licença dos DADOS descritos e consultados.
+==================================================================
 
 
 COMO O SERVIDOR USA OS DADOS
@@ -34,12 +32,18 @@ ONS — Operador Nacional do Sistema Elétrico
    Atribuição: "Fonte: ONS — Operador Nacional do Sistema Elétrico, Portal de
                 Dados Abertos (dados.ons.org.br), licença CC-BY."
 
-O servidor carimba essa atribuição automaticamente: as respostas de `analisar`,
-`executar_sql` e `descrever_dataset` trazem o bloco `tiago-dados-abertos-sources`
-com o dataset lido e a URL canônica no portal.
+O servidor carimba essa atribuição automaticamente: as respostas de `executar_sql`
+e `descrever_dataset` trazem o bloco `tiago-dados-abertos-sources` com o dataset
+lido e a URL canônica no portal.
 
 
 AVISO A QUEM DERIVAR DESTE PROJETO (downstream)
 -----------------------------------------------
-O CÓDIGO é MIT: você pode copiar, modificar e até comercializar O CÓDIGO. Isso
-NÃO estende os termos da FONTE DE DADOS — para o ONS, o dever é atribuir.
+O CÓDIGO é Apache 2.0: você pode copiar, modificar, redistribuir e comercializar
+O CÓDIGO, mantendo este arquivo NOTICE e os avisos de copyright, como a licença
+exige (seção 4). Isso NÃO estende os termos da FONTE DE DADOS — para o ONS, o
+dever é atribuir. A licença dos dados NÃO é Apache 2.0.
+
+Se você acrescentar outro portal, confira os termos dele: outros portais do setor
+elétrico brasileiro trazem cláusulas share-alike ou não comerciais que a licença
+deste código não cobre.

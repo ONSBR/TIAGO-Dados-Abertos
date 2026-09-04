@@ -7,14 +7,14 @@ name = "mcp-tiago-dados-abertos"
 dynamic = ["version"]
 description = "MCP server que conecta agentes de IA aos dados abertos do ONS (Operador Nacional do Sistema Eletrico) por contratos de dados"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
-authors = [{name = "ONStec Soluções"}]
+authors = [{name = "Operador Nacional do Sistema Elétrico - ONS"}]
 keywords = ["mcp", "ons", "setor-eletrico", "energia", "brasil", "duckdb", "open-data", "text2sql"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",

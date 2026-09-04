@@ -229,6 +229,12 @@ patch.
 - Escrita de qualquer tipo: o validador bloqueia DML e DDL por construção.
 - Host novo na allowlist de rede que não seja domínio oficial do ONS.
 
+## Licença das contribuições
+
+O código é distribuído sob a [Apache License 2.0](LICENSE). Ao abrir um PR, você concorda
+que sua contribuição entra sob essa mesma licença, nos termos da seção 5 dela, sem
+condições adicionais. Não é preciso assinar CLA.
+
 ## Segurança
 
 Não abra issue pública para vulnerabilidade. Veja [SECURITY.md](SECURITY.md).
