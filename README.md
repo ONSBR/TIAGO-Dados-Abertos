@@ -1,3 +1,4 @@
+<!-- mcp-name: io.github.ONSBR/tiago-dados-abertos -->
 <p align="center">
   <img src="docs/assets/logo-onstec.png" alt="ONStec" width="180">
 </p>
