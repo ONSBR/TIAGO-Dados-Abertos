@@ -1,0 +1,211 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024
+name: descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024
+tenant: ons
+tags:
+- 30min
+- ONS
+- balanço energético
+- descontinuado
+- despacho
+- despacho de energia
+- despacho de energia por usina
+- despacho semi-horário
+- geração
+- geração por usina
+- histórico
+- histórico de despacho
+- programação diária
+- programação diária ONS
+- semi-horário
+- usinas
+- non-pii
+- public_data
+status: discontinued
+description:
+  purpose: 'Fornecer série histórica semi-horária do despacho de energia por usina para analistas de operação,
+    planejadores e pesquisadores que necessitam auditar ou modelar o fechamento da programação diária
+    do ONS no período 2021–2024.
+
+    '
+  limitations: 'Dataset descontinuado sem previsão de atualização. A coluna val_geracao é armazenada como
+    VARCHAR pelo formato de serialização. Inconsistências cadastrais reportadas para o subperíodo 01/2024–09/2024.
+
+    '
+  usage: 'Análise histórica de despacho por usina e subsistema, comparação entre geração programada e
+    realizada, estudos de planejamento energético e auditoria operacional do período 2021–2024.
+
+    '
+domain: geracao
+schema: []
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+customProperties:
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver geração ou despacho de energia desagregado
+    por usina individual em base semi-horária ou intradiária para o período 2021–2024. Também relevante
+    para análises históricas de programação diária do ONS, auditoria de despacho por tipo de usina ou
+    subsistema, e estudos de balanço energético que requerem granularidade de 30 minutos por planta geradora.
+- property: agentInstructions
+  value: '- [cod_usina] Atualizações cadastrais das usinas no período 01/2024–09/2024 podem ter gerado
+    alterações nos códigos de usina, resultando em registros com cod_usina inconsistente ou duplicado
+    para a mesma planta física.
+
+
+    - [din_instante] Dataset descontinuado com série encerrada em setembro/2024. Podem existir lacunas
+    temporais (patamares ausentes) em datas de manutenção ou falha de coleta, especialmente na transição
+    entre anos. Verificar completude dos 48 patamares diários por usina.
+
+
+    - [val_geracao] Valores de geração negativos podem ocorrer em usinas com consumo líquido (ex: bombeamento
+    em usinas reversíveis) ou por erros de medição/cadastro. Devem ser investigados antes de uso em análises
+    de balanço energético.
+
+
+    - [nom_usina] Atualizações cadastrais no período 01/2024–09/2024 podem ter gerado variações no nome
+    da usina (maiúsculas/minúsculas, acentuação, abreviações) para o mesmo cod_usina, dificultando agrupamentos
+    por nome.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a geração total despachada pela usina de Itaipu em 2022?
+  - Quais usinas eólicas do Nordeste tiveram maior despacho médio em 2023?
+  - Como evoluiu o despacho de usinas termelétricas no subsistema SE ao longo de 2021?
+  - Qual a participação percentual de cada tipo de usina (UHE, UTE, EOL, UFV) no despacho total do SIN
+    em 2022?
+  - Existem lacunas na série de despacho da usina X entre janeiro e setembro de 2024?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_usina
+- property: temporalCoverageStart
+  value: '2021-01-01'
+- property: temporalCoverageEnd
+  value: '2024-09-30'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 30 min
+      spatial: usina
+      entity: usina
+      one_row_per: []
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics: []
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      UHE: tipo_usina = 'UHE'
+      UTE: tipo_usina = 'UTE'
+      EOL: tipo_usina = 'EOL'
+      UFV: tipo_usina = 'UFV'
+      PCH: tipo_usina = 'PCH'
+      CGH: tipo_usina = 'CGH'
+      SE: nom_subsistema = 'SE'
+      sudeste: nom_subsistema = 'SE'
+      sul: nom_subsistema = 'S'
+      nordeste: nom_subsistema = 'NE'
+      norte: nom_subsistema = 'N'
+      eolica: tipo_usina = 'EOL'
+      solar: tipo_usina = 'UFV'
+      fotovoltaica: tipo_usina = 'UFV'
+      hidraulica: tipo_usina = 'UHE'
+      termica: tipo_usina = 'UTE'
+    sql_patterns:
+      geracao_negativa:
+        template: '-- Valores negativos indicam bombeamento (usinas reversiveis) ou erro de medicao
+
+          -- Sempre investigar antes de incluir em balanco energetico
+
+          SELECT nom_usina, din_instante, val_geracao
+
+          FROM read_parquet(''s3://ons-aws-prod-opendata/dataset/historico_despacho_01-2021_09-2024/*.parquet'',
+          union_by_name=true)
+
+          WHERE val_geracao < 0
+
+          ORDER BY din_instante
+
+          '
+      lacunas_patamares:
+        template: "-- Verificar completude dos 48 patamares diarios por usina\nSELECT nom_usina, CAST(din_instante\
+          \ AS DATE) AS data,\n  COUNT(*) AS patamares_presentes,\n  48 - COUNT(*) AS patamares_ausentes\n\
+          FROM read_parquet('s3://ons-aws-prod-opendata/dataset/historico_despacho_01-2021_09-2024/*.parquet',\
+          \ union_by_name=true)\nGROUP BY nom_usina, CAST(din_instante AS DATE)\nHAVING COUNT(*) < 48\n\
+          ORDER BY patamares_ausentes DESC\n"
+      energia_total_mwh:
+        template: "-- Energia total = SUM(val_geracao_mwmed) * 0.5 (interval_hours para 30min)\n-- Resultado\
+          \ em MWh\nSELECT nom_usina,\n  SUM(val_geracao) * 0.5 AS energia_total_mwh\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/historico_despacho_01-2021_09-2024/*.parquet',\
+          \ union_by_name=true)\nGROUP BY nom_usina\n"
+      energia_total_gwh:
+        template: "-- Para GWh: dividir MWh por 1000\nSELECT nom_usina,\n  SUM(val_geracao) * 0.5 / 1000.0\
+          \ AS energia_total_gwh\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/historico_despacho_01-2021_09-2024/*.parquet',\
+          \ union_by_name=true)\nGROUP BY nom_usina\n"
+      cod_usina_inconsistente:
+        template: '-- Detectar cod_usina duplicado para mesma planta fisica (anomalia cadastral 2024)
+
+          SELECT nom_usina, COUNT(DISTINCT cod_usina) AS qtd_codigos
+
+          FROM read_parquet(''s3://ons-aws-prod-opendata/dataset/historico_despacho_01-2021_09-2024/*.parquet'',
+          union_by_name=true)
+
+          GROUP BY nom_usina
+
+          HAVING COUNT(DISTINCT cod_usina) > 1
+
+          '
+- property: fewShotQueries
+  value:
+  - question: Qual foi a geração média mensal em MWmed por tipo de usina (UHE, UTE, EOL, UFV) ao longo
+      de 2022?
+    sql: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia,\n  COALESCE(sig_tipo_usina,\
+      \ 'NAO_CLASSIFICADO') AS tipo_usina,\n  AVG(TRY_CAST(REPLACE(val_geracao, ',', '.') AS DOUBLE))\
+      \ AS geracao_media_mwmed,\n  SUM(TRY_CAST(REPLACE(val_geracao, ',', '.') AS DOUBLE)) AS geracao_total_mwmed,\n\
+      \  COUNT(*) AS qtd_patamares\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024/*.parquet')\n\
+      WHERE din_instante >= '2022-01-01'\n  AND din_instante < '2023-01-01'\n  AND cod_subsistema != 'SIN'\n\
+      GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)), COALESCE(sig_tipo_usina, 'NAO_CLASSIFICADO')\n\
+      ORDER BY mes_referencia, tipo_usina"
+  - question: Qual é o perfil médio de geração hidrelétrica (UHE) ao longo dos 48 patamares do dia no
+      subsistema Sudeste em janeiro de 2023?
+    sql: "SELECT\n  num_patamar,\n  AVG(TRY_CAST(REPLACE(val_geracao, ',', '.') AS DOUBLE)) AS geracao_media_mwmed,\n\
+      \  MIN(TRY_CAST(REPLACE(val_geracao, ',', '.') AS DOUBLE)) AS geracao_min_mwmed,\n  MAX(TRY_CAST(REPLACE(val_geracao,\
+      \ ',', '.') AS DOUBLE)) AS geracao_max_mwmed,\n  COUNT(DISTINCT cod_usina) AS qtd_usinas\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024/*.parquet')\n\
+      WHERE din_instante >= '2023-01-01'\n  AND din_instante < '2023-02-01'\n  AND sig_tipo_usina = 'UHE'\n\
+      \  AND cod_subsistema = 'SE'\n  AND num_patamar BETWEEN 1 AND 48\nGROUP BY num_patamar\nORDER BY\
+      \ num_patamar"
+  - question: Quais foram as 10 usinas com maior geração total acumulada em MWmed no período completo
+      do dataset?
+    sql: "SELECT\n  cod_usina,\n  nom_usina,\n  COALESCE(sig_tipo_usina, 'NAO_CLASSIFICADO') AS tipo_usina,\n\
+      \  COALESCE(cod_subsistema, 'NAO_INFORMADO') AS subsistema,\n  SUM(TRY_CAST(REPLACE(val_geracao,\
+      \ ',', '.') AS DOUBLE)) AS geracao_total_mwmed,\n  COUNT(*) AS qtd_patamares,\n  MIN(din_instante)\
+      \ AS primeiro_registro,\n  MAX(din_instante) AS ultimo_registro\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/descontinuado-dados-do-historico-de-despacho-de-energia-de-01-2021-a-09-2024/*.parquet')\n\
+      WHERE cod_subsistema != 'SIN'\n  AND TRY_CAST(REPLACE(val_geracao, ',', '.') AS DOUBLE) IS NOT NULL\n\
+      GROUP BY cod_usina, nom_usina, COALESCE(sig_tipo_usina, 'NAO_CLASSIFICADO'), COALESCE(cod_subsistema,\
+      \ 'NAO_INFORMADO')\nORDER BY geracao_total_mwmed DESC\nLIMIT 10"
+- property: vectorTags
+  value:
+  - geração despachada
+- property: license
+  value: CC-BY
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/historico_despacho_01-2021_09-2024/*.parquet
+  format: parquet

@@ -1,0 +1,445 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:demanda_maxima_di
+name: demanda_maxima_di
+tenant: ons
+tags:
+- ONS
+- SIN
+- carga máxima diária
+- carga_eletrica
+- demanda de pico
+- demanda máxima
+- demanda máxima diária
+- demanda_instantanea
+- demanda_integralizada
+- demanda_maxima
+- demanda_maxima_di
+- diario
+- pico de carga
+- pico_de_carga
+- planejamento_operativo
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/demanda_maxima_di/*.parquet
+  format: parquet
+description:
+  purpose: Prover aos operadores, planejadores e analistas do ONS e do setor elétrico brasileiro a série
+    histórica diária de demanda máxima por subsistema, suportando decisões de despacho, programação operativa,
+    análise de tendências de consumo, estudos de adequação de capacidade e monitoramento da carga atendida
+    pelo SIN.
+  limitations: O dataset é atualizado duas vezes ao dia (12h e 19h), o que pode gerar registros duplicados
+    para a mesma combinação dat_referencia + id_subsistema em dias de atualização recente, com valores
+    distintos entre as duas publicações diárias. Valores variam de 7. Valores variam de 7.
+  usage: Recuperar este dataset quando a pergunta envolver demanda máxima, pico de carga, carga atendida
+    ou consumo máximo diário por subsistema do SIN.
+domain: carga
+schema:
+- name: demanda_maxima_di
+  physicalType: parquet
+  logicalType: object
+  physicalName: demanda_maxima_di
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador alfanumérico do subsistema elétrico do SIN. Valores possíveis: SE (Sudeste/Centro-Oeste),
+      S (Sul), NE (Nordeste), N (Norte) e SIN (agregado nacional).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema
+      - código subsistema
+      - sigla subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico do SIN correspondente ao id_subsistema. Exemplos:
+      Sudeste/Centro-Oeste, Sul, Nordeste, Norte, Sistema Interligado Nacional.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - subsistema
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: dat_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do registro, representando o dia ao qual a demanda máxima diária
+      se refere. Apesar do tipo TIMESTAMP, a variação intradiária é nula — o campo funciona como DATE
+      com granularidade diária.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data de referência
+      - dia
+      - data referência
+    - property: semanticType
+      value: TIMESTAMP
+  - name: din_demandaintegralizada
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante exato (data e hora) em que ocorreu a demanda máxima integralizada (MW médio)
+      no dia de referência para o subsistema. Representa o intervalo de integração de maior carga média
+      do dia.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - horário pico integralizado
+      - instante demanda integralizada
+      - timestamp demanda integralizada
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_demandaintegralizada
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor da demanda máxima integralizada diária em MW médio para o subsistema na data de
+      referência. Representa a maior carga média integralizada no intervalo de medição do dia, incluindo
+      estimativa de micro e minigeração distribuída (MMGD).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - demanda integralizada
+      - carga integralizada
+      - demanda média máxima
+      - val demanda integralizada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: din_demandainstantanea
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante exato (data e hora) em que ocorreu o pico de demanda instantânea (MW) no dia
+      de referência para o subsistema. Representa o momento de maior carga instantânea registrada no dia.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - horário pico instantâneo
+      - instante demanda instantânea
+      - timestamp pico
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_demandainstantanea
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor da demanda máxima instantânea diária em MW para o subsistema na data de referência.
+      Representa o maior valor de carga instantânea registrado no dia, incluindo estimativa de micro e
+      minigeração distribuída (MMGD). Tipicamente ligeiramente superior ao val_demandaintegralizada.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - demanda instantânea
+      - pico de carga
+      - carga instantânea máxima
+      - val demanda instantânea
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/demanda_maxima_di
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - pico de demanda
+  - maior carga do dia
+  - horario de pico
+  - quando o consumo foi maior
+  - recorde de demanda
+  - demanda maxima do sin
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver demanda máxima, pico de carga, carga atendida
+    ou consumo máximo diário por subsistema do SIN. Também relevante para perguntas sobre horário de pico,
+    fator de carga diário ou comparação de demanda entre subsistemas em datas específicas.
+- property: agentInstructions
+  value: '- [val_demandainstantanea] O valor máximo registrado de val_demandainstantanea é 59.327 MW,
+    próximo ao limite histórico do SIN. Valores acima de 59.000 MW devem ser verificados, pois podem representar
+    registros do subsistema SIN (agregado) em períodos de pico extremo ou eventual erro de apuração. Recomenda-se
+    filtrar por id_subsistema ao analisar subsistemas individuais para evitar dupla contagem com o agregado
+    SIN.
+
+
+    - [val_demandaintegralizada] O valor máximo de val_demandaintegralizada é 58.928 MW. Valores acima
+    de 58.000 MW merecem verificação. A diferença entre val_demandainstantanea e val_demandaintegralizada
+    deve ser sempre não-negativa (instantânea >= integralizada); inversões indicam inconsistência nos
+    dados de apuração.
+
+
+    - [dat_referencia] Série diária pode apresentar lacunas em datas específicas devido ao processo de
+    consistência recorrente do ONS. Recomenda-se verificar continuidade da série por subsistema, especialmente
+    em feriados e fins de semana onde atualizações podem ser atrasadas.
+
+
+    - [id_subsistema] A chave primária natural é (dat_referencia, id_subsistema). Dado que o ONS atualiza
+    os dados duas vezes ao dia (12h e 19h), podem existir registros duplicados para a mesma data e subsistema
+    caso o processo de ingestão não deduplique corretamente.
+
+
+    - [id_subsistema] Valores com trailing spaces detectados em ''id_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_subsistema] Valores com trailing spaces detectados em ''nom_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Qual foi a demanda máxima instantânea do subsistema Sudeste/Centro-Oeste em janeiro de 2025?
+  - Em quais dias o SIN atingiu demanda integralizada acima de 90.000 MW?
+  - Qual subsistema apresentou maior crescimento de demanda máxima entre 2024 e 2025?
+  - Qual o horário típico de pico de demanda instantânea no subsistema Nordeste?
+  - Como evoluiu a demanda máxima diária do subsistema Sul ao longo de 2024?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/demanda_maxima_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-01-01'
+- property: temporalCoverageEnd
+  value: '2026-05-19'
+- property: semantics
+  value:
+    family: carga
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: dat_referencia
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - dat_referencia
+      - id_subsistema
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: demandaintegralizada
+      label: Demanda Integralizada
+      columns:
+      - val_demandaintegralizada
+      expression: val_demandaintegralizada
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_demandaintegralizada) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_demandaintegralizada)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_demandaintegralizada)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_demandaintegralizada)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_demandaintegralizada) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_demandaintegralizada)
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - demanda integralizada
+      - carga integralizada
+      - demanda media maxima
+      - val demanda integralizada
+    - id: demandainstantanea
+      label: Demanda Instantanea
+      columns:
+      - val_demandainstantanea
+      expression: val_demandainstantanea
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_demandainstantanea) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_demandainstantanea)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_demandainstantanea)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_demandainstantanea)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_demandainstantanea) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_demandainstantanea)
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - demanda instantanea
+      - pico de carga
+      - carga instantanea maxima
+      - val demanda instantanea
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      id_subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - SE/CO
+          filter: TRIM(id_subsistema) = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: TRIM(id_subsistema) = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: TRIM(id_subsistema) = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: TRIM(id_subsistema) = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: TRIM(nom_subsistema) = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: TRIM(nom_subsistema) = 'NORTE'
+        SUDESTE:
+          aliases:
+          - sudeste
+          - sudeste centro-oeste
+          filter: TRIM(nom_subsistema) = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: TRIM(nom_subsistema) = 'SUL'
+    sql_patterns:
+      demandainstantanea_diaria_subsistema:
+        template: "SELECT\n  dat_referencia::DATE AS dia,\n  TRIM(id_subsistema) AS subsistema,\n  MAX(val_demandainstantanea)\
+          \ AS pico_mw\nFROM {source}\nWHERE TRIM(id_subsistema) = '{subsistema}'\n  AND dat_referencia\
+          \ >= '{data_inicio}'\n  AND dat_referencia < '{data_fim}'\nGROUP BY 1, 2\nORDER BY 1\n"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - peak_power
+          metrics:
+          - demandainstantanea
+          grain: day
+        validated_params:
+          subsistema: N
+          data_inicio: '2026-01-01'
+          data_fim: '2026-05-19'
+      horario_pico_instantaneo:
+        template: "SELECT\n  dat_referencia::DATE AS dia,\n  TRIM(id_subsistema) AS subsistema,\n  din_demandainstantanea\
+          \ AS instante_pico,\n  val_demandainstantanea AS demanda_mw\nFROM {source}\nWHERE TRIM(id_subsistema)\
+          \ = '{subsistema}'\n  AND dat_referencia >= '{data_inicio}'\n  AND dat_referencia < '{data_fim}'\n\
+          ORDER BY dat_referencia\n"
+        output_unit: MWmed
+        validated_params:
+          subsistema: N
+          data_inicio: '2026-01-01'
+          data_fim: '2026-05-19'
+      total_sin_sem_linha_agregada:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,\n  SUM(val_demandainstantanea)\
+          \ AS demanda_sin_mw\nFROM {source}\nWHERE TRIM(id_subsistema) IN ('N', 'NE', 'S', 'SE')\n  AND\
+          \ dat_referencia >= '{data_inicio}'\n  AND dat_referencia < '{data_fim}'\nGROUP BY 1\nORDER\
+          \ BY 1\n"
+        output_unit: MWmed
+        validated_params:
+          data_inicio: '2026-01-01'
+          data_fim: '2026-05-19'
+- property: fewShotQueries
+  value:
+  - question: Quais foram os 10 maiores picos de demanda instantânea registrados por subsistema, excluindo
+      o agregado SIN?
+    sql: SELECT id_subsistema, nom_subsistema, CAST(dat_referencia AS DATE) AS data_ref, din_demandainstantanea,
+      val_demandainstantanea FROM read_parquet('s3://ons-aws-prod-opendata/dataset/demanda_maxima_di/*.parquet')
+      WHERE TRIM(id_subsistema) != 'SIN' ORDER BY val_demandainstantanea DESC LIMIT 10;
+  - question: Como evoluiu a média mensal da demanda máxima integralizada em cada subsistema ao longo
+      de 2024 e 2025?
+    sql: SELECT id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP))
+      AS mes_ref, ROUND(AVG(val_demandaintegralizada), 2) AS media_demanda_mw, ROUND(MAX(val_demandaintegralizada),
+      2) AS pico_mensal_mw, ROUND(MIN(val_demandaintegralizada), 2) AS minimo_mensal_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/demanda_maxima_di/*.parquet')
+      WHERE TRIM(id_subsistema) != 'SIN' AND dat_referencia >= '2024-01-01' GROUP BY id_subsistema, nom_subsistema,
+      DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) ORDER BY id_subsistema, mes_ref;
+  - question: Em qual faixa horária ocorre com mais frequência o pico de demanda instantânea em cada subsistema?
+    sql: SELECT id_subsistema, nom_subsistema, EXTRACT(HOUR FROM TRY_CAST(din_demandainstantanea AS TIMESTAMP))
+      AS hora_pico, COUNT(*) AS frequencia_dias FROM read_parquet('s3://ons-aws-prod-opendata/dataset/demanda_maxima_di/*.parquet')
+      WHERE TRIM(id_subsistema) != 'SIN' GROUP BY id_subsistema, nom_subsistema, EXTRACT(HOUR FROM TRY_CAST(din_demandainstantanea
+      AS TIMESTAMP)) ORDER BY id_subsistema, frequencia_dias DESC;
+- property: license
+  value: CC-BY

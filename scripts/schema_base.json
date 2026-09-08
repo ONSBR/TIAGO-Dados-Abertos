@@ -1,0 +1,2966 @@
+{
+  "balanco-energia-subsistema": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "BALANCO_ENERGIA_SUBSISTEMA_2000.parquet",
+    "ultimo_arquivo": "BALANCO_ENERGIA_SUBSISTEMA_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_carga",
+      "val_gereolica",
+      "val_gerhidraulica",
+      "val_gersolar",
+      "val_gertermica",
+      "val_intercambio"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_gerhidraulica": "VARCHAR",
+      "val_gertermica": "VARCHAR",
+      "val_gereolica": "VARCHAR",
+      "val_gersolar": "VARCHAR",
+      "val_carga": "VARCHAR",
+      "val_intercambio": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_gerhidraulica": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_gertermica": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_gereolica": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_gersolar": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_carga": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_intercambio": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "balanco_dessem_detalhe": {
+    "n_arquivos": 469,
+    "primeiro_arquivo": "BALANCO_DESSEM_DETALHE_2025_05_23.parquet",
+    "ultimo_arquivo": "BALANCO_DESSEM_DETALHE_2026_09_07.parquet",
+    "colunas_uniao": [
+      "cod_subsistema",
+      "din_programacaodia",
+      "num_patamar",
+      "val_cons_elevatoria",
+      "val_demanda",
+      "val_ger_eolica",
+      "val_ger_fotovoltaica",
+      "val_ger_hidraulica",
+      "val_ger_mmgd",
+      "val_ger_pch",
+      "val_ger_pct",
+      "val_ger_termica"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_programacaodia": "VARCHAR",
+      "num_patamar": "INTEGER",
+      "cod_subsistema": "VARCHAR",
+      "val_demanda": "VARCHAR",
+      "val_ger_hidraulica": "VARCHAR",
+      "val_ger_pch": "VARCHAR",
+      "val_ger_termica": "VARCHAR",
+      "val_ger_pct": "VARCHAR",
+      "val_ger_eolica": "VARCHAR",
+      "val_ger_fotovoltaica": "VARCHAR",
+      "val_ger_mmgd": "VARCHAR",
+      "val_cons_elevatoria": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "balanco_dessem_geral": {
+    "n_arquivos": 469,
+    "primeiro_arquivo": "BALANCO_DESSEM_GERAL_2025_05_23.parquet",
+    "ultimo_arquivo": "BALANCO_DESSEM_GERAL_2026_09_07.parquet",
+    "colunas_uniao": [
+      "cod_subsistema",
+      "din_programacaodia",
+      "num_patamar",
+      "val_cons_elevatoria",
+      "val_demanda",
+      "val_geracao_hidraulica",
+      "val_geracao_renovavel",
+      "val_geracao_termica"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_programacaodia": "VARCHAR",
+      "num_patamar": "INTEGER",
+      "cod_subsistema": "VARCHAR",
+      "val_demanda": "VARCHAR",
+      "val_geracao_renovavel": "VARCHAR",
+      "val_geracao_hidraulica": "VARCHAR",
+      "val_geracao_termica": "VARCHAR",
+      "val_cons_elevatoria": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "capacidade-geracao": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "CAPACIDADE_GERACAO.parquet",
+    "ultimo_arquivo": "CAPACIDADE_GERACAO.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_equipamento",
+      "dat_desativacao",
+      "dat_entradaoperacao",
+      "dat_entradateste",
+      "id_estado",
+      "id_subsistema",
+      "nom_agenteoperador",
+      "nom_agenteproprietario",
+      "nom_combustivel",
+      "nom_estado",
+      "nom_modalidadeoperacao",
+      "nom_subsistema",
+      "nom_tipousina",
+      "nom_unidadegeradora",
+      "nom_usina",
+      "num_unidadegeradora",
+      "val_potenciaefetiva"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_agenteproprietario": "VARCHAR",
+      "nom_agenteoperador": "VARCHAR",
+      "nom_tipousina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR",
+      "nom_unidadegeradora": "VARCHAR",
+      "cod_equipamento": "VARCHAR",
+      "num_unidadegeradora": "VARCHAR",
+      "nom_combustivel": "VARCHAR",
+      "dat_entradateste": "VARCHAR",
+      "dat_entradaoperacao": "VARCHAR",
+      "dat_desativacao": "VARCHAR",
+      "val_potenciaefetiva": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "capacidade-transformacao": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "CAPACIDADE_TRANSFORMACAO.parquet",
+    "ultimo_arquivo": "CAPACIDADE_TRANSFORMACAO.parquet",
+    "colunas_uniao": [
+      "cod_equipamento",
+      "dat_desativacao",
+      "dat_entradaoperacao",
+      "id_estado",
+      "id_subsistema",
+      "nom_agenteproprietario",
+      "nom_estado",
+      "nom_subestacao",
+      "nom_subsistema",
+      "nom_tipoderede",
+      "nom_tipotransformador",
+      "nom_transformador",
+      "num_barra_primario",
+      "num_barra_secundario",
+      "val_potencianominal_mva",
+      "val_tensaoprimario_kv",
+      "val_tensaosecundario_kv",
+      "val_tensaoterciario_kv"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_tipotransformador": "VARCHAR",
+      "nom_agenteproprietario": "VARCHAR",
+      "nom_subestacao": "VARCHAR",
+      "nom_transformador": "VARCHAR",
+      "cod_equipamento": "VARCHAR",
+      "dat_entradaoperacao": "VARCHAR",
+      "dat_desativacao": "VARCHAR",
+      "val_tensaoprimario_kv": "DOUBLE",
+      "val_tensaosecundario_kv": "DOUBLE",
+      "val_tensaoterciario_kv": "DOUBLE",
+      "val_potencianominal_mva": "DOUBLE",
+      "nom_tipoderede": "VARCHAR",
+      "num_barra_primario": "INTEGER",
+      "num_barra_secundario": "INTEGER"
+    },
+    "drift_de_tipo": {}
+  },
+  "carga-energia": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "CARGA_ENERGIA_2000.parquet",
+    "ultimo_arquivo": "CARGA_ENERGIA_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_cargaenergiamwmed"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_cargaenergiamwmed": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_cargaenergiamwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "carga-mensal": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "CARGA_MENSAL.parquet",
+    "ultimo_arquivo": "CARGA_MENSAL.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_cargaenergiamwmed"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_cargaenergiamwmed": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "cargaglobal-roraima": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "CargaGlobalRoraima-2022.parquet",
+    "ultimo_arquivo": "CargaGlobalRoraima-2025.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "val_carga_mw"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "VARCHAR",
+      "val_carga_mw": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "classificacao-evt": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "classificacao_evt.parquet",
+    "ultimo_arquivo": "classificacao_evt.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "val_evt_razaoeletrica",
+      "val_evt_razaoenergetica",
+      "val_evt_verificado"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "VARCHAR",
+      "val_evt_verificado": "VARCHAR",
+      "val_evt_razaoenergetica": "VARCHAR",
+      "val_evt_razaoeletrica": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "cmo-semanal": {
+    "n_arquivos": 22,
+    "primeiro_arquivo": "CMO_SEMANAL_2005.parquet",
+    "ultimo_arquivo": "CMO_SEMANAL_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_cmoleve",
+      "val_cmomedia",
+      "val_cmomediasemanal",
+      "val_cmopesada"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_cmomediasemanal": "VARCHAR",
+      "val_cmoleve": "VARCHAR",
+      "val_cmomedia": "VARCHAR",
+      "val_cmopesada": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "cmo-semi-horario": {
+    "n_arquivos": 7,
+    "primeiro_arquivo": "CMO_SEMIHORARIO_2020.parquet",
+    "ultimo_arquivo": "CMO_SEMIHORARIO_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_cmo"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_cmo": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "curva-carga": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "CURVA_CARGA_2000.parquet",
+    "ultimo_arquivo": "CURVA_CARGA_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_cargaenergiahomwmed"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_cargaenergiahomwmed": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_cargaenergiahomwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "cvu-usitermica": {
+    "n_arquivos": 22,
+    "primeiro_arquivo": "CVU_USINA_TERMICA_2005.parquet",
+    "ultimo_arquivo": "CVU_USINA_TERMICA_2026.parquet",
+    "colunas_uniao": [
+      "ano_referencia",
+      "cod_usinaplanejamento",
+      "dat_fimsemana",
+      "dat_iniciosemana",
+      "id_subsistema",
+      "mes_referencia",
+      "nom_semanaoperativa",
+      "nom_subsistema",
+      "nom_usina",
+      "num_revisao",
+      "val_cvu"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dat_iniciosemana": "TIMESTAMP",
+      "dat_fimsemana": "TIMESTAMP",
+      "ano_referencia": "BIGINT",
+      "mes_referencia": "BIGINT",
+      "num_revisao": "BIGINT",
+      "nom_semanaoperativa": "VARCHAR",
+      "cod_usinaplanejamento": "BIGINT",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "val_cvu": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "dados-hidrologicos-res": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "DADOS_HIDROLOGICOS_RES_2000.parquet",
+    "ultimo_arquivo": "DADOS_HIDROLOGICOS_RES_2026.parquet",
+    "colunas_uniao": [
+      "cod_usina",
+      "din_instante",
+      "id_reservatorio",
+      "id_subsistema",
+      "nom_bacia",
+      "nom_ree",
+      "nom_reservatorio",
+      "nom_subsistema",
+      "num_ordemcs",
+      "tip_reservatorio",
+      "val_niveljusante",
+      "val_nivelmontante",
+      "val_vazaoafluente",
+      "val_vazaoartificial",
+      "val_vazaodefluente",
+      "val_vazaoevaporacaoliquida",
+      "val_vazaoincremental",
+      "val_vazaoincrementalbruta",
+      "val_vazaonatural",
+      "val_vazaooutrasestruturas",
+      "val_vazaotransferida",
+      "val_vazaoturbinada",
+      "val_vazaousoconsuntivo",
+      "val_vazaovertida",
+      "val_volumeutilcon"
+    ],
+    "so_no_ultimo": [
+      "val_vazaoincrementalbruta"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "tip_reservatorio": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "nom_ree": "VARCHAR",
+      "nom_reservatorio": "VARCHAR",
+      "num_ordemcs": "DOUBLE",
+      "cod_usina": "DOUBLE",
+      "din_instante": "TIMESTAMP",
+      "val_nivelmontante": "VARCHAR",
+      "val_niveljusante": "VARCHAR",
+      "val_volumeutilcon": "VARCHAR",
+      "val_vazaoafluente": "VARCHAR",
+      "val_vazaoturbinada": "VARCHAR",
+      "val_vazaovertida": "VARCHAR",
+      "val_vazaooutrasestruturas": "VARCHAR",
+      "val_vazaodefluente": "VARCHAR",
+      "val_vazaotransferida": "VARCHAR",
+      "val_vazaonatural": "VARCHAR",
+      "val_vazaoartificial": "VARCHAR",
+      "val_vazaoincremental": "VARCHAR",
+      "val_vazaoevaporacaoliquida": "VARCHAR",
+      "val_vazaousoconsuntivo": "VARCHAR",
+      "id_reservatorio": "VARCHAR",
+      "val_vazaoincrementalbruta": "DOUBLE"
+    },
+    "drift_de_tipo": {
+      "val_nivelmontante": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_niveljusante": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_volumeutilcon": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaoafluente": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaoturbinada": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaovertida": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaooutrasestruturas": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaodefluente": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaotransferida": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaonatural": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaoartificial": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaoincremental": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaoevaporacaoliquida": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_vazaousoconsuntivo": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "dados_hidrologicos_ho": {
+    "n_arquivos": 201,
+    "primeiro_arquivo": "DADOS_HIDROLOGICOS_HO_2010_01.parquet",
+    "ultimo_arquivo": "DADOS_HIDROLOGICOS_HO_2026_09.parquet",
+    "colunas_uniao": [
+      "cod_usina",
+      "din_instante",
+      "id_reservatorio",
+      "id_subsistema",
+      "nom_bacia",
+      "nom_reservatorio",
+      "nom_subsistema",
+      "tip_reservatorio",
+      "val_niveljusante",
+      "val_nivelmontante",
+      "val_vazaoafluente",
+      "val_vazaodefluente",
+      "val_vazaooutrasestruturas",
+      "val_vazaotransferida",
+      "val_vazaoturbinada",
+      "val_vazaovertida",
+      "val_vazaovertidanaoturbinavel",
+      "val_volumeutil"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "tip_reservatorio": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "id_reservatorio": "VARCHAR",
+      "nom_reservatorio": "VARCHAR",
+      "cod_usina": "DOUBLE",
+      "din_instante": "TIMESTAMP",
+      "val_nivelmontante": "DOUBLE",
+      "val_niveljusante": "DOUBLE",
+      "val_volumeutil": "DOUBLE",
+      "val_vazaoafluente": "DOUBLE",
+      "val_vazaodefluente": "DOUBLE",
+      "val_vazaoturbinada": "DOUBLE",
+      "val_vazaovertida": "DOUBLE",
+      "val_vazaooutrasestruturas": "DOUBLE",
+      "val_vazaotransferida": "DOUBLE",
+      "val_vazaovertidanaoturbinavel": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "demanda_maxima_di": {
+    "n_arquivos": 3,
+    "primeiro_arquivo": "DEMANDA_MAXIMA_DI_2024.parquet",
+    "ultimo_arquivo": "DEMANDA_MAXIMA_DI_2026.parquet",
+    "colunas_uniao": [
+      "dat_referencia",
+      "din_demandainstantanea",
+      "din_demandaintegralizada",
+      "id_subsistema",
+      "nom_subsistema",
+      "val_demandainstantanea",
+      "val_demandaintegralizada"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "dat_referencia": "TIMESTAMP",
+      "din_demandaintegralizada": "TIMESTAMP",
+      "val_demandaintegralizada": "DOUBLE",
+      "din_demandainstantanea": "TIMESTAMP",
+      "val_demandainstantanea": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "disponibilidade_usina": {
+    "n_arquivos": 47,
+    "primeiro_arquivo": "DISPONIBILIDADE_USINA_2015_01.parquet",
+    "ultimo_arquivo": "DISPONIBILIDADE_USINA_2026_09.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "din_instante",
+      "id_estado",
+      "id_ons",
+      "id_subsistema",
+      "id_tipousina",
+      "nom_estado",
+      "nom_subsistema",
+      "nom_tipocombustivel",
+      "nom_usina",
+      "val_dispoperacional",
+      "val_dispsincronizada",
+      "val_potenciainstalada"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "id_tipousina": "VARCHAR",
+      "nom_tipocombustivel": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_potenciainstalada": "VARCHAR",
+      "val_dispoperacional": "VARCHAR",
+      "val_dispsincronizada": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_potenciainstalada": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "val_dispoperacional": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "val_dispsincronizada": [
+        "DOUBLE",
+        "VARCHAR"
+      ]
+    }
+  },
+  "ear-diario-por-bacia": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "EAR_DIARIO_BACIAS_2000.parquet",
+    "ultimo_arquivo": "EAR_DIARIO_BACIAS_2026.parquet",
+    "colunas_uniao": [
+      "ear_data",
+      "ear_max_bacia",
+      "ear_verif_bacia_mwmes",
+      "ear_verif_bacia_percentual",
+      "nomecurto"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nomecurto": "VARCHAR",
+      "ear_data": "VARCHAR",
+      "ear_max_bacia": "DOUBLE",
+      "ear_verif_bacia_mwmes": "DOUBLE",
+      "ear_verif_bacia_percentual": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ear-diario-por-ree-reservatorio-equivalente-de-energia": {
+    "n_arquivos": 11,
+    "primeiro_arquivo": "EAR_DIARIO_REE_2016.parquet",
+    "ultimo_arquivo": "EAR_DIARIO_REE_2026.parquet",
+    "colunas_uniao": [
+      "ear_data",
+      "ear_max_ree",
+      "ear_verif_ree_mwmes",
+      "ear_verif_ree_percentual",
+      "nom_ree"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_ree": "VARCHAR",
+      "ear_data": "VARCHAR",
+      "ear_max_ree": "VARCHAR",
+      "ear_verif_ree_mwmes": "VARCHAR",
+      "ear_verif_ree_percentual": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ear_max_ree": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "ear_verif_ree_mwmes": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "ear_verif_ree_percentual": [
+        "DOUBLE",
+        "VARCHAR"
+      ]
+    }
+  },
+  "ear-diario-por-reservatorio": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "EAR_DIARIO_RESERVATORIOS_2000.parquet",
+    "ultimo_arquivo": "EAR_DIARIO_RESERVATORIOS_2026.parquet",
+    "colunas_uniao": [
+      "cod_resplanejamento",
+      "ear_data",
+      "ear_maxima_total_mwmes",
+      "ear_reservatorio_percentual",
+      "ear_reservatorio_subsistema_jusante_mwmes",
+      "ear_reservatorio_subsistema_proprio_mwmes",
+      "ear_total_mwmes",
+      "earmax_reservatorio_subsistema_jusante_mwmes",
+      "earmax_reservatorio_subsistema_proprio_mwmes",
+      "id_subsistema",
+      "id_subsistema_jusante",
+      "nom_bacia",
+      "nom_ree",
+      "nom_reservatorio",
+      "nom_subsistema",
+      "nom_subsistema_jusante",
+      "tip_reservatorio",
+      "val_contribearbacia",
+      "val_contribearmaxbacia",
+      "val_contribearmaxsin",
+      "val_contribearmaxsubsistema",
+      "val_contribearmaxsubsistemajusante",
+      "val_contribearsin",
+      "val_contribearsubsistema",
+      "val_contribearsubsistemajusante"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_reservatorio": "VARCHAR",
+      "cod_resplanejamento": "DOUBLE",
+      "tip_reservatorio": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "nom_ree": "VARCHAR",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_subsistema_jusante": "VARCHAR",
+      "nom_subsistema_jusante": "VARCHAR",
+      "ear_data": "VARCHAR",
+      "ear_reservatorio_subsistema_proprio_mwmes": "VARCHAR",
+      "ear_reservatorio_subsistema_jusante_mwmes": "VARCHAR",
+      "earmax_reservatorio_subsistema_proprio_mwmes": "VARCHAR",
+      "earmax_reservatorio_subsistema_jusante_mwmes": "VARCHAR",
+      "ear_reservatorio_percentual": "VARCHAR",
+      "ear_total_mwmes": "VARCHAR",
+      "ear_maxima_total_mwmes": "VARCHAR",
+      "val_contribearbacia": "VARCHAR",
+      "val_contribearmaxbacia": "VARCHAR",
+      "val_contribearsubsistema": "VARCHAR",
+      "val_contribearmaxsubsistema": "VARCHAR",
+      "val_contribearsubsistemajusante": "VARCHAR",
+      "val_contribearmaxsubsistemajusante": "VARCHAR",
+      "val_contribearsin": "VARCHAR",
+      "val_contribearmaxsin": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ear_reservatorio_subsistema_proprio_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ear_reservatorio_subsistema_jusante_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "earmax_reservatorio_subsistema_proprio_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "earmax_reservatorio_subsistema_jusante_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ear_reservatorio_percentual": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ear_total_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ear_maxima_total_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearbacia": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearmaxbacia": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearsubsistema": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearmaxsubsistema": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearsubsistemajusante": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearmaxsubsistemajusante": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearsin": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "val_contribearmaxsin": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "ear-diario-por-subsistema": {
+    "n_arquivos": 27,
+    "primeiro_arquivo": "EAR_DIARIO_SUBSISTEMA_2000.parquet",
+    "ultimo_arquivo": "EAR_DIARIO_SUBSISTEMA_2026.parquet",
+    "colunas_uniao": [
+      "ear_data",
+      "ear_max_subsistema",
+      "ear_verif_subsistema_mwmes",
+      "ear_verif_subsistema_percentual",
+      "id_subsistema",
+      "nom_subsistema"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "ear_data": "VARCHAR",
+      "ear_max_subsistema": "VARCHAR",
+      "ear_verif_subsistema_mwmes": "VARCHAR",
+      "ear_verif_subsistema_percentual": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ear_max_subsistema": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ear_verif_subsistema_mwmes": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ear_verif_subsistema_percentual": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "ena-diario-por-bacia": {
+    "n_arquivos": 6,
+    "primeiro_arquivo": "ENA_DIARIO_BACIAS_2021.parquet",
+    "ultimo_arquivo": "ENA_DIARIO_BACIAS_2026.parquet",
+    "colunas_uniao": [
+      "ena_armazenavel_bacia_mwmed",
+      "ena_armazenavel_bacia_percentualmlt",
+      "ena_bruta_bacia_mwmed",
+      "ena_bruta_bacia_percentualmlt",
+      "ena_data",
+      "nom_bacia"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_bacia": "VARCHAR",
+      "ena_data": "VARCHAR",
+      "ena_bruta_bacia_mwmed": "VARCHAR",
+      "ena_bruta_bacia_percentualmlt": "VARCHAR",
+      "ena_armazenavel_bacia_mwmed": "VARCHAR",
+      "ena_armazenavel_bacia_percentualmlt": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ena_bruta_bacia_mwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_bruta_bacia_percentualmlt": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_armazenavel_bacia_mwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_armazenavel_bacia_percentualmlt": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "ena-diario-por-ree-reservatorio-equivalente-de-energia": {
+    "n_arquivos": 6,
+    "primeiro_arquivo": "ENA_DIARIO_REE_2021.parquet",
+    "ultimo_arquivo": "ENA_DIARIO_REE_2026.parquet",
+    "colunas_uniao": [
+      "ena_armazenavel_ree_mwmed",
+      "ena_armazenavel_ree_percentualmlt",
+      "ena_bruta_ree_mwmed",
+      "ena_bruta_ree_percentualmlt",
+      "ena_data",
+      "nom_reservatorioee"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_reservatorioee": "VARCHAR",
+      "ena_data": "VARCHAR",
+      "ena_bruta_ree_mwmed": "VARCHAR",
+      "ena_bruta_ree_percentualmlt": "VARCHAR",
+      "ena_armazenavel_ree_mwmed": "VARCHAR",
+      "ena_armazenavel_ree_percentualmlt": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ena_bruta_ree_mwmed": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "ena_bruta_ree_percentualmlt": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "ena_armazenavel_ree_mwmed": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "ena_armazenavel_ree_percentualmlt": [
+        "DOUBLE",
+        "VARCHAR"
+      ]
+    }
+  },
+  "ena-diario-por-reservatorio": {
+    "n_arquivos": 6,
+    "primeiro_arquivo": "ENA_DIARIO_RESERVATORIOS_2021.parquet",
+    "ultimo_arquivo": "ENA_DIARIO_RESERVATORIOS_2026.parquet",
+    "colunas_uniao": [
+      "cod_resplanejamento",
+      "ena_armazenavel_res_mwmed",
+      "ena_armazenavel_res_percentualmlt",
+      "ena_bruta_res_mwmed",
+      "ena_bruta_res_percentualmlt",
+      "ena_data",
+      "ena_queda_bruta",
+      "id_subsistema",
+      "mlt_ena",
+      "nom_bacia",
+      "nom_ree",
+      "nom_reservatorio",
+      "nom_subsistema",
+      "tip_reservatorio"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_reservatorio": "VARCHAR",
+      "cod_resplanejamento": "DOUBLE",
+      "tip_reservatorio": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "nom_ree": "VARCHAR",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "ena_data": "VARCHAR",
+      "ena_bruta_res_mwmed": "VARCHAR",
+      "ena_bruta_res_percentualmlt": "VARCHAR",
+      "ena_armazenavel_res_mwmed": "VARCHAR",
+      "ena_armazenavel_res_percentualmlt": "VARCHAR",
+      "ena_queda_bruta": "VARCHAR",
+      "mlt_ena": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ena_bruta_res_mwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_bruta_res_percentualmlt": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_armazenavel_res_mwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_armazenavel_res_percentualmlt": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_queda_bruta": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "mlt_ena": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "ena-diario-por-subsistema": {
+    "n_arquivos": 6,
+    "primeiro_arquivo": "ENA_DIARIO_SUBSISTEMA_2021.parquet",
+    "ultimo_arquivo": "ENA_DIARIO_SUBSISTEMA_2026.parquet",
+    "colunas_uniao": [
+      "ena_armazenavel_regiao_mwmed",
+      "ena_armazenavel_regiao_percentualmlt",
+      "ena_bruta_regiao_mwmed",
+      "ena_bruta_regiao_percentualmlt",
+      "ena_data",
+      "id_subsistema",
+      "nom_subsistema"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "ena_data": "VARCHAR",
+      "ena_bruta_regiao_mwmed": "VARCHAR",
+      "ena_bruta_regiao_percentualmlt": "VARCHAR",
+      "ena_armazenavel_regiao_mwmed": "VARCHAR",
+      "ena_armazenavel_regiao_percentualmlt": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "ena_bruta_regiao_mwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_bruta_regiao_percentualmlt": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_armazenavel_regiao_mwmed": [
+        "VARCHAR",
+        "DOUBLE"
+      ],
+      "ena_armazenavel_regiao_percentualmlt": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "energia-vertida-turbinavel": {
+    "n_arquivos": 42,
+    "primeiro_arquivo": "ENERGIA_VERTIDA_TURBINAVEL_2015.parquet",
+    "ultimo_arquivo": "ENERGIA_VERTIDA_TURBINAVEL_2026_09.parquet",
+    "colunas_uniao": [
+      "cod_usina",
+      "din_instante",
+      "id_subsistema",
+      "nom_agente",
+      "nom_bacia",
+      "nom_reservatorio",
+      "nom_rio",
+      "nom_subsistema",
+      "val_disponibilidade",
+      "val_energiavertida",
+      "val_energiavertidaturbinavel",
+      "val_folgadegeracao",
+      "val_geracao",
+      "val_produtividade",
+      "val_vazaoturbinada",
+      "val_vazaovertida",
+      "val_vazaovertidanaoturbinavel",
+      "val_vazaovertidaturbinavel"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "nom_rio": "VARCHAR",
+      "nom_agente": "VARCHAR",
+      "nom_reservatorio": "VARCHAR",
+      "cod_usina": "INTEGER",
+      "din_instante": "TIMESTAMP",
+      "val_geracao": "DOUBLE",
+      "val_disponibilidade": "DOUBLE",
+      "val_vazaoturbinada": "DOUBLE",
+      "val_vazaovertida": "DOUBLE",
+      "val_vazaovertidanaoturbinavel": "DOUBLE",
+      "val_produtividade": "DOUBLE",
+      "val_folgadegeracao": "DOUBLE",
+      "val_energiavertida": "DOUBLE",
+      "val_vazaovertidaturbinavel": "DOUBLE",
+      "val_energiavertidaturbinavel": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "equipamento-controle-reativo": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "EQP_CONTROLE_REATIVO.parquet",
+    "ultimo_arquivo": "EQP_CONTROLE_REATIVO.parquet",
+    "colunas_uniao": [
+      "cod_equipamento",
+      "dat_desativacao",
+      "dat_entradaoperacao",
+      "id_estado",
+      "id_subsistema",
+      "nom_agente_proprietario",
+      "nom_equipamento",
+      "nom_estado",
+      "nom_subestacao",
+      "nom_subsistema",
+      "nom_tipoderede",
+      "nom_tipoequipamento",
+      "val_limiteinferior_mvar",
+      "val_limitesuperior_mvar",
+      "val_potreativanominal_mvar"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_subestacao": "VARCHAR",
+      "nom_agente_proprietario": "VARCHAR",
+      "nom_tipoderede": "VARCHAR",
+      "nom_tipoequipamento": "VARCHAR",
+      "nom_equipamento": "VARCHAR",
+      "val_potreativanominal_mvar": "DOUBLE",
+      "val_limiteinferior_mvar": "DOUBLE",
+      "val_limitesuperior_mvar": "DOUBLE",
+      "dat_entradaoperacao": "VARCHAR",
+      "dat_desativacao": "VARCHAR",
+      "cod_equipamento": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "fator-capacidade-2": {
+    "n_arquivos": 70,
+    "primeiro_arquivo": "FATOR_CAPACIDADE-2_2022_01.parquet",
+    "ultimo_arquivo": "FATOR_CAPACIDADE_2021.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_pontoconexao",
+      "din_instante",
+      "id_estado",
+      "id_ons",
+      "id_subsistema",
+      "nom_estado",
+      "nom_localizacao",
+      "nom_modalidadeoperacao",
+      "nom_pontoconexao",
+      "nom_subsistema",
+      "nom_tipousina",
+      "nom_usina_conjunto",
+      "val_capacidadeinstalada",
+      "val_fatorcapacidade",
+      "val_geracaoprogramada",
+      "val_geracaoverificada",
+      "val_latitudepontoconexao",
+      "val_latitudesecoletora",
+      "val_longitudepontoconexao",
+      "val_longitudesecoletora"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "cod_pontoconexao": "VARCHAR",
+      "nom_pontoconexao": "VARCHAR",
+      "nom_localizacao": "VARCHAR",
+      "val_latitudesecoletora": "DOUBLE",
+      "val_longitudesecoletora": "DOUBLE",
+      "val_latitudepontoconexao": "DOUBLE",
+      "val_longitudepontoconexao": "DOUBLE",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_tipousina": "VARCHAR",
+      "nom_usina_conjunto": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_geracaoprogramada": "VARCHAR",
+      "val_geracaoverificada": "VARCHAR",
+      "val_capacidadeinstalada": "VARCHAR",
+      "val_fatorcapacidade": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "geracao-exportacao-internacional": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "GERACAO_EXPORTACAO_INTERNACIONAL_2023.parquet",
+    "ultimo_arquivo": "GERACAO_EXPORTACAO_INTERNACIONAL_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "val_exportacao_ar",
+      "val_exportacao_uy",
+      "val_gerexpevt_ar",
+      "val_gerexpevt_uy",
+      "val_gerexptermica"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "TIMESTAMP",
+      "val_gerexpevt_ar": "DOUBLE",
+      "val_gerexpevt_uy": "DOUBLE",
+      "val_gerexptermica": "DOUBLE",
+      "val_exportacao_ar": "DOUBLE",
+      "val_exportacao_uy": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "geracao-termica-despacho-2": {
+    "n_arquivos": 7,
+    "primeiro_arquivo": "GERACAO_TERMICA_DESPACHO_2013.parquet",
+    "ultimo_arquivo": "GERACAO_TERMICA_DESPACHO_2019.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_usinaplanejamento",
+      "din_instante",
+      "id_subsistema",
+      "nom_subsistema",
+      "nom_tipopatamar",
+      "nom_usina",
+      "tip_restricaoeletrica",
+      "val_atendsatisfatoriorpo",
+      "val_fdexp",
+      "val_progconstrainedoff",
+      "val_progexportacao",
+      "val_proggarantiaenergetica",
+      "val_proggeracao",
+      "val_proggfom",
+      "val_proggsub",
+      "val_proginflexembutmerito",
+      "val_proginflexibilidade",
+      "val_proginflexibilidadedessem",
+      "val_proginflexpura",
+      "val_progordemdemeritoacimadainflex",
+      "val_progordemdemeritoref",
+      "val_progordemmerito",
+      "val_prograzaoeletrica",
+      "val_progreposicaoperdas",
+      "val_progreservapotencia",
+      "val_progunitcommitment",
+      "val_verifconstrainedoff",
+      "val_verifexportacao",
+      "val_verifgarantiaenergetica",
+      "val_verifgeracao",
+      "val_verifgfom",
+      "val_verifgsub",
+      "val_verifinflexembutmerito",
+      "val_verifinflexibilidade",
+      "val_verifinflexpura",
+      "val_verifordemdemeritoacimadainflex",
+      "val_verifordemmerito",
+      "val_verifrazaoeletrica",
+      "val_verifreposicaoperdas",
+      "val_verifreservapotencia",
+      "val_verifunitcommitment"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "TIMESTAMP",
+      "nom_tipopatamar": "VARCHAR",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "cod_usinaplanejamento": "DOUBLE",
+      "ceg": "VARCHAR",
+      "val_proggeracao": "VARCHAR",
+      "val_progordemmerito": "VARCHAR",
+      "val_progordemdemeritoref": "VARCHAR",
+      "val_progordemdemeritoacimadainflex": "VARCHAR",
+      "val_proginflexibilidade": "VARCHAR",
+      "val_proginflexembutmerito": "VARCHAR",
+      "val_proginflexpura": "VARCHAR",
+      "val_prograzaoeletrica": "VARCHAR",
+      "val_proggarantiaenergetica": "VARCHAR",
+      "val_proggfom": "VARCHAR",
+      "val_progreposicaoperdas": "VARCHAR",
+      "val_progexportacao": "VARCHAR",
+      "val_progreservapotencia": "VARCHAR",
+      "val_proggsub": "VARCHAR",
+      "val_progunitcommitment": "VARCHAR",
+      "val_progconstrainedoff": "VARCHAR",
+      "val_proginflexibilidadedessem": "VARCHAR",
+      "val_verifgeracao": "VARCHAR",
+      "val_verifordemmerito": "VARCHAR",
+      "val_verifordemdemeritoacimadainflex": "VARCHAR",
+      "val_verifinflexibilidade": "VARCHAR",
+      "val_verifinflexembutmerito": "VARCHAR",
+      "val_verifinflexpura": "VARCHAR",
+      "val_verifrazaoeletrica": "VARCHAR",
+      "val_verifgarantiaenergetica": "VARCHAR",
+      "val_verifgfom": "VARCHAR",
+      "val_verifreposicaoperdas": "VARCHAR",
+      "val_verifexportacao": "VARCHAR",
+      "val_fdexp": "VARCHAR",
+      "val_verifreservapotencia": "VARCHAR",
+      "val_atendsatisfatoriorpo": "VARCHAR",
+      "val_verifgsub": "VARCHAR",
+      "val_verifunitcommitment": "VARCHAR",
+      "val_verifconstrainedoff": "VARCHAR",
+      "tip_restricaoeletrica": "DOUBLE",
+      "val_progdisponibilidade": "VARCHAR",
+      "val_geracaodespachada": "VARCHAR",
+      "nom_combustivel": "VARCHAR",
+      "dsc_tpmotivorestricao": "VARCHAR",
+      "din_publicacao": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "geracao-usina-2": {
+    "n_arquivos": 79,
+    "primeiro_arquivo": "GERACAO_USINA-2_2000.parquet",
+    "ultimo_arquivo": "GERACAO_USINA-2_2026_09.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_modalidadeoperacao",
+      "din_instante",
+      "id_estado",
+      "id_ons",
+      "id_subsistema",
+      "nom_estado",
+      "nom_subsistema",
+      "nom_tipocombustivel",
+      "nom_tipousina",
+      "nom_usina",
+      "val_geracao"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "TIMESTAMP",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "cod_modalidadeoperacao": "VARCHAR",
+      "nom_tipousina": "VARCHAR",
+      "nom_tipocombustivel": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "val_geracao": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_geracao": [
+        "VARCHAR",
+        "DOUBLE"
+      ]
+    }
+  },
+  "geracao_itaipu": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "GERACAO_ITAIPU.parquet",
+    "ultimo_arquivo": "GERACAO_ITAIPU.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "val_itaipu_50hz",
+      "val_itaipu_50hz_br",
+      "val_itaipu_60hz",
+      "val_itaipu_br",
+      "val_itaipu_total"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "TIMESTAMP",
+      "val_itaipu_total": "DOUBLE",
+      "val_itaipu_60hz": "DOUBLE",
+      "val_itaipu_50hz": "DOUBLE",
+      "val_itaipu_50hz_br": "DOUBLE",
+      "val_itaipu_br": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "grandezas_fluviometricas": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "GRANDEZAS_FLUVIOMETRICAS_2023.parquet",
+    "ultimo_arquivo": "GRANDEZAS_FLUVIOMETRICAS_2026.parquet",
+    "colunas_uniao": [
+      "din_medicao",
+      "id_postofluv",
+      "nom_bacia",
+      "nom_postofluviometrico",
+      "nom_rio",
+      "val_latitude",
+      "val_longitude",
+      "val_vazaomedia",
+      "val_vazaomediaincr"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_postofluv": "VARCHAR",
+      "nom_postofluviometrico": "VARCHAR",
+      "val_latitude": "DOUBLE",
+      "val_longitude": "DOUBLE",
+      "nom_rio": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "din_medicao": "VARCHAR",
+      "val_vazaomedia": "DOUBLE",
+      "val_vazaomediaincr": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "importacaoenergia-comercial-2": {
+    "n_arquivos": 8,
+    "primeiro_arquivo": "IMPORTACAOENERGIA_COMERCIAL-2_2019.parquet",
+    "ultimo_arquivo": "IMPORTACAOENERGIA_COMERCIAL-2_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "nom_agente",
+      "nom_bloco",
+      "nom_pais",
+      "val_importacaodespachada",
+      "val_importacaoprogramada",
+      "val_importacaoverificada",
+      "val_preco"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_pais": "VARCHAR",
+      "nom_agente": "VARCHAR",
+      "nom_bloco": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_importacaoprogramada": "DOUBLE",
+      "val_importacaodespachada": "DOUBLE",
+      "val_importacaoverificada": "DOUBLE",
+      "val_preco": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind-disponibilidade-geracao-sin": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "IND_DISPONIBILIDADE_GERACAO_2023.parquet",
+    "ultimo_arquivo": "IND_DISPONIBILIDADE_GERACAO_2026.parquet",
+    "colunas_uniao": [
+      "dat_referencia",
+      "val_dispf",
+      "val_indispff",
+      "val_indisppf"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dat_referencia": "VARCHAR",
+      "val_dispf": "DOUBLE",
+      "val_indisppf": "DOUBLE",
+      "val_indispff": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_atls": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_ATLS.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_ATLS.parquet",
+    "colunas_uniao": [
+      "din_referencia",
+      "id_periodicidade",
+      "nom_fluxo",
+      "num_horasviolacao",
+      "val_atls"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_fluxo": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "val_atls": "DOUBLE",
+      "num_horasviolacao": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_ccal": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_CCAL.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_CCAL.parquet",
+    "colunas_uniao": [
+      "cod_tipoagregacao",
+      "din_referencia",
+      "id_periodicidade",
+      "nom_agregacao",
+      "num_linhasoperacao",
+      "num_linhasvioladas",
+      "val_ccal"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_tipoagregacao": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "nom_agregacao": "VARCHAR",
+      "din_referencia": "VARCHAR",
+      "num_linhasoperacao": "BIGINT",
+      "num_linhasvioladas": "BIGINT",
+      "val_ccal": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_ccat": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_CCAT.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_CCAT.parquet",
+    "colunas_uniao": [
+      "cod_tipoagregacao",
+      "din_referencia",
+      "id_periodicidade",
+      "nom_agregacao",
+      "num_transformadoresoperacao",
+      "num_transformadoresviolados",
+      "val_ccat"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_tipoagregacao": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "nom_agregacao": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "num_transformadoresoperacao": "BIGINT",
+      "num_transformadoresviolados": "BIGINT",
+      "val_ccat": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_ciper": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_CIPER.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_CIPER.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "din_referencia",
+      "dsc_agregacao",
+      "dsc_caracteristica",
+      "id_periodicidade",
+      "val_ciper1",
+      "val_ciper2",
+      "val_ciper3",
+      "val_ciper4",
+      "val_ciper5"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dsc_agregacao": "VARCHAR",
+      "cod_caracteristica": "VARCHAR",
+      "dsc_caracteristica": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "val_ciper1": "DOUBLE",
+      "val_ciper2": "DOUBLE",
+      "val_ciper3": "DOUBLE",
+      "val_ciper4": "DOUBLE",
+      "val_ciper5": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_dreq_freq": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_DREQ_FREQ.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_DREQ_FREQ.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "din_referencia",
+      "dsc_agregacao",
+      "dsc_caracteristica",
+      "id_periodicidade",
+      "val_dreq",
+      "val_freq"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dsc_agregacao": "VARCHAR",
+      "cod_caracteristica": "VARCHAR",
+      "dsc_caracteristica": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "val_dreq": "DOUBLE",
+      "val_freq": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_energianaosuprida": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_ENS.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_ENS.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "din_referencia",
+      "dsc_agregacao",
+      "dsc_caracteristica",
+      "id_periodicidade",
+      "val_ens"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dsc_agregacao": "VARCHAR",
+      "cod_caracteristica": "VARCHAR",
+      "dsc_caracteristica": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "val_ens": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_robustez": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_ROBUSTEZ.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_ROBUSTEZ.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "cod_indicador",
+      "din_referencia",
+      "dsc_agregacao",
+      "dsc_caracteristica",
+      "id_periodicidade",
+      "num_perturbacoes",
+      "num_perturbacoescortecarga",
+      "num_perturbacoescortecarga_0a50mw",
+      "num_perturbacoescortecarga_50a100mw",
+      "num_perturbacoescortecarga_maior100mw",
+      "val_indicador"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_indicador": "VARCHAR",
+      "dsc_agregacao": "VARCHAR",
+      "cod_caracteristica": "VARCHAR",
+      "dsc_caracteristica": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "val_indicador": "DOUBLE",
+      "num_perturbacoes": "DOUBLE",
+      "num_perturbacoescortecarga": "DOUBLE",
+      "num_perturbacoescortecarga_0a50mw": "DOUBLE",
+      "num_perturbacoescortecarga_50a100mw": "DOUBLE",
+      "num_perturbacoescortecarga_maior100mw": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_confiarb_severidade": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_CONFIARB_SEVERIDADE.parquet",
+    "ultimo_arquivo": "IND_CONFIARB_SEVERIDADE.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "din_referencia",
+      "dsc_agregacao",
+      "dsc_caracteristica",
+      "id_periodicidade",
+      "val_sm1",
+      "val_sm2",
+      "val_sm3",
+      "val_sm4",
+      "val_sm5"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dsc_agregacao": "VARCHAR",
+      "cod_caracteristica": "VARCHAR",
+      "dsc_caracteristica": "VARCHAR",
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "val_sm1": "DOUBLE",
+      "val_sm2": "DOUBLE",
+      "val_sm3": "DOUBLE",
+      "val_sm4": "DOUBLE",
+      "val_sm5": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_disponibilidade_fgeracao_uge_anual": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_DISPONIBILIDADE_FCGERACAO_UGE_ANUAL.parquet",
+    "ultimo_arquivo": "IND_DISPONIBILIDADE_FCGERACAO_UGE_ANUAL.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_equipamento",
+      "din_ano",
+      "estad_id",
+      "id_subsistema",
+      "id_tipousina",
+      "id_usina",
+      "nom_agenteproprietario",
+      "nom_estado",
+      "nom_modalidadeoperacao",
+      "nom_subsistema",
+      "nom_unidadegeradora",
+      "nom_usina",
+      "num_unidadegeradora",
+      "val_dispf",
+      "val_dmdff",
+      "val_fdff",
+      "val_indispff",
+      "val_indisppf",
+      "val_potencia",
+      "val_tdff"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "estad_id": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_agenteproprietario": "VARCHAR",
+      "id_tipousina": "VARCHAR",
+      "id_usina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR",
+      "cod_equipamento": "VARCHAR",
+      "num_unidadegeradora": "VARCHAR",
+      "nom_unidadegeradora": "VARCHAR",
+      "val_potencia": "DOUBLE",
+      "din_ano": "BIGINT",
+      "val_dispf": "DOUBLE",
+      "val_indisppf": "DOUBLE",
+      "val_indispff": "DOUBLE",
+      "val_dmdff": "DOUBLE",
+      "val_fdff": "DOUBLE",
+      "val_tdff": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_disponibilidade_fgeracao_uge_mensal": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_DISPONIBILIDADE_FCGERACAO_UGE_ANUAL.parquet",
+    "ultimo_arquivo": "IND_DISPONIBILIDADE_FCGERACAO_UGE_ANUAL.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_equipamento",
+      "din_ano",
+      "estad_id",
+      "id_subsistema",
+      "id_tipousina",
+      "id_usina",
+      "nom_agenteproprietario",
+      "nom_estado",
+      "nom_modalidadeoperacao",
+      "nom_subsistema",
+      "nom_unidadegeradora",
+      "nom_usina",
+      "num_unidadegeradora",
+      "val_dispf",
+      "val_dmdff",
+      "val_fdff",
+      "val_indispff",
+      "val_indisppf",
+      "val_potencia",
+      "val_tdff"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "estad_id": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_agenteproprietario": "VARCHAR",
+      "id_tipousina": "VARCHAR",
+      "id_usina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR",
+      "cod_equipamento": "VARCHAR",
+      "num_unidadegeradora": "VARCHAR",
+      "nom_unidadegeradora": "VARCHAR",
+      "val_potencia": "DOUBLE",
+      "din_ano": "BIGINT",
+      "val_dispf": "DOUBLE",
+      "val_indisppf": "DOUBLE",
+      "val_indispff": "DOUBLE",
+      "val_dmdff": "DOUBLE",
+      "val_fdff": "DOUBLE",
+      "val_tdff": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_disponibilidade_ft_conversor": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "IND_DISPONIBILIDADE_FT_CONVERSOR_2023.parquet",
+    "ultimo_arquivo": "IND_DISPONIBILIDADE_FT_CONVERSOR_2026.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "dat_referencia",
+      "val_dispftconv"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_caracteristica": "VARCHAR",
+      "dat_referencia": "TIMESTAMP",
+      "val_dispftconv": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_disponibilidade_ft_reativo": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "IND_DISPONIBILIDADE_FT_REATIVO_2023.parquet",
+    "ultimo_arquivo": "IND_DISPONIBILIDADE_FT_REATIVO_2026.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "dat_referencia",
+      "val_dispf"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_caracteristica": "VARCHAR",
+      "dat_referencia": "TIMESTAMP",
+      "val_dispf": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_disponibilidade_ft_trlt": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "IND_DISPONIBILIDADE_FT_TRLT_2023.parquet",
+    "ultimo_arquivo": "IND_DISPONIBILIDADE_FT_TRLT_2026.parquet",
+    "colunas_uniao": [
+      "cod_caracteristica",
+      "dat_referencia",
+      "val_disp",
+      "val_indispff",
+      "val_indisppf"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_caracteristica": "VARCHAR",
+      "dat_referencia": "TIMESTAMP",
+      "val_disp": "DOUBLE",
+      "val_indisppf": "DOUBLE",
+      "val_indispff": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_providencia_ecpa_pcpa": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_PROVIDENCIA_ECPA_PCPA.parquet",
+    "ultimo_arquivo": "IND_PROVIDENCIA_ECPA_PCPA.parquet",
+    "colunas_uniao": [
+      "din_referencia",
+      "dsc_agregacao",
+      "dsc_caracteristica",
+      "num_npra_antecipadas",
+      "num_nprat_atrasadas",
+      "num_nprc_concluidas",
+      "num_nprcp_concluidas_prazo",
+      "num_nprp_programadas",
+      "val_ecpa",
+      "val_pcpa"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dsc_agregacao": "VARCHAR",
+      "dsc_caracteristica": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "num_nprc_concluidas": "DOUBLE",
+      "num_nprp_programadas": "DOUBLE",
+      "num_nprat_atrasadas": "DOUBLE",
+      "num_npra_antecipadas": "DOUBLE",
+      "num_nprcp_concluidas_prazo": "DOUBLE",
+      "val_ecpa": "DOUBLE",
+      "val_pcpa": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_qualid_dfd_evento": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_QUALID_DFD_EVENTO.parquet",
+    "ultimo_arquivo": "IND_QUALID_DFD_EVENTO.parquet",
+    "colunas_uniao": [
+      "din_fimdesviofreq",
+      "din_iniciodesviofreq",
+      "din_referencia",
+      "id_faixafrequencia",
+      "nom_faixafrequencia",
+      "val_dfd",
+      "val_freqmaxmin"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_referencia": "TIMESTAMP",
+      "din_iniciodesviofreq": "TIMESTAMP",
+      "din_fimdesviofreq": "TIMESTAMP",
+      "id_faixafrequencia": "VARCHAR",
+      "nom_faixafrequencia": "VARCHAR",
+      "val_dfd": "BIGINT",
+      "val_freqmaxmin": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_qualid_dfd_meano": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_QUALID_DFD_MEANO.parquet",
+    "ultimo_arquivo": "IND_QUALID_DFD_MEANO.parquet",
+    "colunas_uniao": [
+      "din_referencia",
+      "id_faixafrequencia",
+      "id_periodicidade",
+      "nom_faixafrequencia",
+      "val_dfd"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "id_faixafrequencia": "VARCHAR",
+      "nom_faixafrequencia": "VARCHAR",
+      "val_dfd": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "ind_qualid_dfp_regime": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "IND_QUALID_DFP_REGIME_PERMANENTE.parquet",
+    "ultimo_arquivo": "IND_QUALID_DFP_REGIME_PERMANENTE.parquet",
+    "colunas_uniao": [
+      "din_referencia",
+      "id_periodicidade",
+      "num_desvio_dist_sobre",
+      "num_desvio_dist_sub",
+      "num_desvio_perm_sobre",
+      "num_desvio_perm_sub",
+      "num_minutos",
+      "val_dfp"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_periodicidade": "VARCHAR",
+      "din_referencia": "TIMESTAMP",
+      "num_desvio_perm_sobre": "BIGINT",
+      "num_desvio_perm_sub": "BIGINT",
+      "num_desvio_dist_sobre": "BIGINT",
+      "num_desvio_dist_sub": "BIGINT",
+      "num_minutos": "BIGINT",
+      "val_dfp": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "intercambio-internacional": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "INTERCAMBIO_INTERNACIONAL_2023.parquet",
+    "ultimo_arquivo": "INTERCAMBIO_INTERNACIONAL_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "nom_paisdestino",
+      "val_intercambiomwmed",
+      "val_intercambioprogmwmed"
+    ],
+    "so_no_ultimo": [
+      "val_intercambioprogmwmed"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "TIMESTAMP",
+      "nom_paisdestino": "VARCHAR",
+      "val_intercambiomwmed": "VARCHAR",
+      "val_intercambioprogmwmed": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_intercambiomwmed": [
+        "DOUBLE",
+        "VARCHAR"
+      ]
+    }
+  },
+  "intercambio-nacional": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "INTERCAMBIO_NACIONAL_2023.parquet",
+    "ultimo_arquivo": "INTERCAMBIO_NACIONAL_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "id_subsistema_destino",
+      "id_subsistema_origem",
+      "nom_subsistema_destino",
+      "nom_subsistema_origem",
+      "val_intercambiomwmed",
+      "val_intercambioprogmwmed"
+    ],
+    "so_no_ultimo": [
+      "val_intercambioprogmwmed"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_instante": "TIMESTAMP",
+      "id_subsistema_origem": "VARCHAR",
+      "nom_subsistema_origem": "VARCHAR",
+      "id_subsistema_destino": "VARCHAR",
+      "nom_subsistema_destino": "VARCHAR",
+      "val_intercambiomwmed": "VARCHAR",
+      "val_intercambioprogmwmed": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_intercambiomwmed": [
+        "DOUBLE",
+        "VARCHAR"
+      ]
+    }
+  },
+  "intercambio_modalidade": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet",
+    "ultimo_arquivo": "INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet",
+    "colunas_uniao": [
+      "din_instante",
+      "nom_conversora",
+      "nom_paisconversora",
+      "val_modalidadecontratual",
+      "val_modalidadeemergencial",
+      "val_modalidadeexcepcional",
+      "val_modalidadeoportunidade",
+      "val_modalidadeteste",
+      "val_progmodalidadecontratual",
+      "val_progmodalidadeemergencial",
+      "val_progmodalidadeoportunidade",
+      "val_progmodalidadeteste",
+      "val_totalprogramado",
+      "val_totalverificado"
+    ],
+    "so_no_ultimo": [
+      "nom_paisconversora",
+      "val_progmodalidadecontratual",
+      "val_progmodalidadeemergencial",
+      "val_progmodalidadeoportunidade",
+      "val_progmodalidadeteste",
+      "val_totalprogramado",
+      "val_totalverificado"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_conversora": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_modalidadecontratual": "VARCHAR",
+      "val_modalidadeemergencial": "VARCHAR",
+      "val_modalidadeoportunidade": "VARCHAR",
+      "val_modalidadeteste": "VARCHAR",
+      "val_modalidadeexcepcional": "VARCHAR",
+      "nom_paisconversora": "VARCHAR",
+      "val_progmodalidadecontratual": "VARCHAR",
+      "val_progmodalidadeemergencial": "VARCHAR",
+      "val_progmodalidadeoportunidade": "VARCHAR",
+      "val_progmodalidadeteste": "VARCHAR",
+      "val_totalprogramado": "VARCHAR",
+      "val_totalverificado": "VARCHAR"
+    },
+    "drift_de_tipo": {
+      "val_modalidadecontratual": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "val_modalidadeemergencial": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "val_modalidadeoportunidade": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "val_modalidadeteste": [
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      "val_modalidadeexcepcional": [
+        "DOUBLE",
+        "VARCHAR"
+      ]
+    }
+  },
+  "interrupcao_carga": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "INTERRUPCAO_CARGA.parquet",
+    "ultimo_arquivo": "INTERRUPCAO_CARGA.parquet",
+    "colunas_uniao": [
+      "cod_perturbacao",
+      "din_interrupcaocarga",
+      "flg_envolveuredebasica",
+      "flg_envolveuredeoperacao",
+      "id_estado",
+      "id_subsistema",
+      "nom_agente",
+      "nom_subsistema",
+      "val_cargainterrompida_mw",
+      "val_energianaosuprida_mwh",
+      "val_tempomedio_minutos"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "cod_perturbacao": "VARCHAR",
+      "din_interrupcaocarga": "TIMESTAMP",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_agente": "VARCHAR",
+      "val_cargainterrompida_mw": "DOUBLE",
+      "val_tempomedio_minutos": "DOUBLE",
+      "val_energianaosuprida_mwh": "DOUBLE",
+      "flg_envolveuredebasica": "VARCHAR",
+      "flg_envolveuredeoperacao": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "linha-transmissao": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "LINHA_TRANSMISSAO.parquet",
+    "ultimo_arquivo": "LINHA_TRANSMISSAO.parquet",
+    "colunas_uniao": [
+      "cod_equipamento",
+      "dat_desativacao",
+      "dat_entradaoperacao",
+      "dat_prevista",
+      "id_estado_terminalde",
+      "id_estado_terminalpara",
+      "id_subsistema_terminalde",
+      "id_subsistema_terminalpara",
+      "nom_agenteproprietario",
+      "nom_estado_de",
+      "nom_estado_para",
+      "nom_linhadetransmissao",
+      "nom_subestacao_de",
+      "nom_subestacao_para",
+      "nom_subsistema_terminalde",
+      "nom_subsistema_terminalpara",
+      "nom_tipoderede",
+      "nom_tipolinha",
+      "num_barra_de",
+      "num_barra_para",
+      "val_capacidadeoperveraodialonga",
+      "val_capacidadeoperveraonoitelonga",
+      "val_capacopercurtacomlimit",
+      "val_capacopercurtasemlimit",
+      "val_capacoperinvernodiacurta",
+      "val_capacoperinvernodialonga",
+      "val_capacoperinvernonoitecurta",
+      "val_capacoperinvernonoitelonga",
+      "val_capacoperlongacomlimit",
+      "val_capacoperlongasemlimit",
+      "val_capacoperveradiacurta",
+      "val_capacoperveraonoitecurta",
+      "val_comprimento",
+      "val_niveltensao_kv",
+      "val_reatancia",
+      "val_resistencia",
+      "val_shunt"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema_terminalde": "VARCHAR",
+      "nom_subsistema_terminalde": "VARCHAR",
+      "id_subsistema_terminalpara": "VARCHAR",
+      "nom_subsistema_terminalpara": "VARCHAR",
+      "id_estado_terminalde": "VARCHAR",
+      "nom_estado_de": "VARCHAR",
+      "id_estado_terminalpara": "VARCHAR",
+      "nom_estado_para": "VARCHAR",
+      "nom_subestacao_de": "VARCHAR",
+      "nom_subestacao_para": "VARCHAR",
+      "val_niveltensao_kv": "DOUBLE",
+      "nom_tipoderede": "VARCHAR",
+      "nom_tipolinha": "VARCHAR",
+      "nom_agenteproprietario": "VARCHAR",
+      "nom_linhadetransmissao": "VARCHAR",
+      "cod_equipamento": "VARCHAR",
+      "dat_entradaoperacao": "VARCHAR",
+      "dat_desativacao": "VARCHAR",
+      "dat_prevista": "VARCHAR",
+      "val_comprimento": "DOUBLE",
+      "val_resistencia": "DOUBLE",
+      "val_reatancia": "DOUBLE",
+      "val_shunt": "DOUBLE",
+      "val_capacoperlongasemlimit": "DOUBLE",
+      "val_capacoperlongacomlimit": "DOUBLE",
+      "val_capacopercurtasemlimit": "DOUBLE",
+      "val_capacopercurtacomlimit": "DOUBLE",
+      "val_capacidadeoperveraodialonga": "DOUBLE",
+      "val_capacidadeoperveraonoitelonga": "DOUBLE",
+      "val_capacoperinvernodialonga": "DOUBLE",
+      "val_capacoperinvernonoitelonga": "DOUBLE",
+      "val_capacoperveradiacurta": "DOUBLE",
+      "val_capacoperveraonoitecurta": "DOUBLE",
+      "val_capacoperinvernodiacurta": "DOUBLE",
+      "val_capacoperinvernonoitecurta": "DOUBLE",
+      "num_barra_de": "INTEGER",
+      "num_barra_para": "INTEGER"
+    },
+    "drift_de_tipo": {}
+  },
+  "modalidade-usina": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "MODALIDADE_USINA.parquet",
+    "ultimo_arquivo": "MODALIDADE_USINA.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "id_estado",
+      "id_ons",
+      "nom_estado",
+      "nom_modalidadeoperacao",
+      "nom_pontoconexao",
+      "nom_usina",
+      "sgl_centrooperacao",
+      "sts_aneel",
+      "val_potenciaautorizada"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "val_potenciaautorizada": "VARCHAR",
+      "sgl_centrooperacao": "VARCHAR",
+      "nom_pontoconexao": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "sts_aneel": "VARCHAR",
+      "id_ons": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "oferta-resposta-da-demanda": {
+    "n_arquivos": 4,
+    "primeiro_arquivo": "OFERTA_RESPOSTADEMANDA_2023.parquet",
+    "ultimo_arquivo": "OFERTA_RESPOSTADEMANDA_2026.parquet",
+    "colunas_uniao": [
+      "dat_reducao",
+      "hor_final",
+      "hor_inicial",
+      "id_subsistema",
+      "nom_agente",
+      "nom_subsistema",
+      "tip_oferta",
+      "val_duracao",
+      "val_montante",
+      "val_preco"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_agente": "VARCHAR",
+      "tip_oferta": "VARCHAR",
+      "val_preco": "VARCHAR",
+      "dat_reducao": "VARCHAR",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "hor_inicial": "VARCHAR",
+      "hor_final": "VARCHAR",
+      "val_duracao": "VARCHAR",
+      "val_montante": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "ofertapreco-importacao": {
+    "n_arquivos": 8,
+    "primeiro_arquivo": "OFERTA_PRECO_IMPORTACAO_2019.parquet",
+    "ultimo_arquivo": "OFERTA_PRECO_IMPORTACAO_2026.parquet",
+    "colunas_uniao": [
+      "dat_fimvalidade",
+      "dat_iniciovalidade",
+      "nom_agente",
+      "nom_bloco",
+      "nom_pais",
+      "val_preco"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_pais": "VARCHAR",
+      "nom_agente": "VARCHAR",
+      "nom_bloco": "VARCHAR",
+      "dat_iniciovalidade": "VARCHAR",
+      "dat_fimvalidade": "VARCHAR",
+      "val_preco": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "programacao_diaria": {
+    "n_arquivos": 706,
+    "primeiro_arquivo": "PROGRAMACAO_DIARIA_2024_10_01.parquet",
+    "ultimo_arquivo": "PROGRAMACAO_DIARIA_2026_09_07.parquet",
+    "colunas_uniao": [
+      "cod_exibicaousina",
+      "din_programacaodia",
+      "id_estado",
+      "id_subsistema",
+      "nom_estado",
+      "nom_modalidadeoperacao",
+      "nom_subsistema",
+      "nom_usina",
+      "num_patamar",
+      "tip_geracao",
+      "val_disponibilidade",
+      "val_exportacao",
+      "val_faltacombustivel",
+      "val_geracaoenergetica",
+      "val_geracaoprogramada",
+      "val_gesubgsub",
+      "val_inflexibilidade",
+      "val_ordemmerito",
+      "val_razaoeletrica",
+      "val_reposicaoexportacao",
+      "val_uc"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_programacaodia": "VARCHAR",
+      "num_patamar": "BIGINT",
+      "cod_exibicaousina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "tip_geracao": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "val_geracaoprogramada": "VARCHAR",
+      "val_disponibilidade": "VARCHAR",
+      "val_ordemmerito": "VARCHAR",
+      "val_inflexibilidade": "VARCHAR",
+      "val_uc": "VARCHAR",
+      "val_razaoeletrica": "VARCHAR",
+      "val_geracaoenergetica": "VARCHAR",
+      "val_gesubgsub": "VARCHAR",
+      "val_exportacao": "VARCHAR",
+      "val_reposicaoexportacao": "VARCHAR",
+      "val_faltacombustivel": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "programacao_fluxo_controlado": {
+    "n_arquivos": 705,
+    "primeiro_arquivo": "PROGRAMACAO_FLUXO_CONTROLADO_2024_10_01.parquet",
+    "ultimo_arquivo": "PROGRAMACAO_FLUXO_CONTROLADO_2026_09_07.parquet",
+    "colunas_uniao": [
+      "cod_submercado",
+      "din_programacaodia",
+      "dsc_elementofluxocontrolado",
+      "nom_elementofluxocontrolado",
+      "num_patamar",
+      "tip_terminal",
+      "val_carga"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "din_programacaodia": "VARCHAR",
+      "num_patamar": "INTEGER",
+      "nom_elementofluxocontrolado": "VARCHAR",
+      "dsc_elementofluxocontrolado": "VARCHAR",
+      "tip_terminal": "INTEGER",
+      "cod_submercado": "VARCHAR",
+      "val_carga": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "programacao_x_previsao": {
+    "n_arquivos": 704,
+    "primeiro_arquivo": "PROGRAMACAO_X_PREVISAO_2024_10_01.parquet",
+    "ultimo_arquivo": "PROGRAMACAO_X_PREVISAO_2026_09_07.parquet",
+    "colunas_uniao": [
+      "cod_usinapdp",
+      "dat_programacao",
+      "nom_usinapdp",
+      "num_patamar",
+      "val_previsao",
+      "val_programado"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dat_programacao": "VARCHAR",
+      "num_patamar": "BIGINT",
+      "cod_usinapdp": "VARCHAR",
+      "nom_usinapdp": "VARCHAR",
+      "val_previsao": "VARCHAR",
+      "val_programado": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "res_volumeespera": {
+    "n_arquivos": 21,
+    "primeiro_arquivo": "RES_VOLUMEESPERA_2006.parquet",
+    "ultimo_arquivo": "RES_VOLUMEESPERA_2027.parquet",
+    "colunas_uniao": [
+      "cod_usina",
+      "din_instante",
+      "id_reservatorio",
+      "id_subsistema",
+      "nom_bacia",
+      "nom_ree",
+      "nom_reservatorio",
+      "nom_subsistema",
+      "num_ordemcs",
+      "tip_reservatorio",
+      "val_volumeespera"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "tip_reservatorio": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "nom_ree": "VARCHAR",
+      "id_reservatorio": "VARCHAR",
+      "nom_reservatorio": "VARCHAR",
+      "num_ordemcs": "DOUBLE",
+      "cod_usina": "BIGINT",
+      "din_instante": "TIMESTAMP",
+      "val_volumeespera": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "reservatorio": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "RESERVATORIOS.parquet",
+    "ultimo_arquivo": "RESERVATORIOS.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_posto",
+      "cod_resplanejamento",
+      "dat_entrada",
+      "id_subsistema",
+      "nom_bacia",
+      "nom_ree",
+      "nom_reservatorio",
+      "nom_rio",
+      "nom_subsistema",
+      "nom_usina",
+      "res_id",
+      "tip_reservatorio",
+      "val_cotamaxima",
+      "val_cotaminima",
+      "val_latitude",
+      "val_longitude",
+      "val_perda",
+      "val_produtibilidadeespecifica",
+      "val_produtividade65volutil",
+      "val_tipoperda",
+      "val_volmax",
+      "val_volmin",
+      "val_volutiltot"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_reservatorio": "VARCHAR",
+      "tip_reservatorio": "VARCHAR",
+      "cod_resplanejamento": "INTEGER",
+      "cod_posto": "INTEGER",
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR",
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "nom_bacia": "VARCHAR",
+      "nom_rio": "VARCHAR",
+      "nom_ree": "VARCHAR",
+      "dat_entrada": "VARCHAR",
+      "val_cotamaxima": "VARCHAR",
+      "val_cotaminima": "VARCHAR",
+      "val_volmax": "VARCHAR",
+      "val_volmin": "VARCHAR",
+      "val_volutiltot": "VARCHAR",
+      "val_produtibilidadeespecifica": "DOUBLE",
+      "val_produtividade65volutil": "DOUBLE",
+      "val_tipoperda": "VARCHAR",
+      "val_perda": "DOUBLE",
+      "val_latitude": "DOUBLE",
+      "val_longitude": "DOUBLE",
+      "res_id": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "restricao_coff_eolica_detail": {
+    "n_arquivos": 45,
+    "primeiro_arquivo": "RESTRICAO_COFF_EOLICA_DETAIL_2023_01.parquet",
+    "ultimo_arquivo": "RESTRICAO_COFF_EOLICA_DETAIL_2026_09.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "din_instante",
+      "flg_dadoventoinvalido",
+      "flg_dadoventosupervisaoinvalido",
+      "flg_geracaorestrita",
+      "id_estado",
+      "id_ons",
+      "id_ons_conjuntousina",
+      "id_subsistema",
+      "nom_conjuntousina",
+      "nom_modalidadeoperacao",
+      "nom_origemgeracaoreferencia",
+      "nom_origemvento",
+      "nom_usina",
+      "val_geracaoestimada",
+      "val_geracaoreferenciafinal",
+      "val_geracaoverificada",
+      "val_ventoverificado"
+    ],
+    "so_no_ultimo": [
+      "flg_dadoventosupervisaoinvalido",
+      "flg_geracaorestrita",
+      "id_ons_conjuntousina",
+      "nom_origemgeracaoreferencia",
+      "nom_origemvento",
+      "val_geracaoreferenciafinal"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_conjuntousina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_ventoverificado": "DOUBLE",
+      "flg_dadoventoinvalido": "DOUBLE",
+      "val_geracaoestimada": "DOUBLE",
+      "val_geracaoverificada": "DOUBLE",
+      "id_ons_conjuntousina": "VARCHAR",
+      "nom_origemvento": "VARCHAR",
+      "flg_dadoventosupervisaoinvalido": "INTEGER",
+      "nom_origemgeracaoreferencia": "VARCHAR",
+      "val_geracaoreferenciafinal": "DOUBLE",
+      "flg_geracaorestrita": "INTEGER"
+    },
+    "drift_de_tipo": {
+      "flg_dadoventoinvalido": [
+        "DOUBLE",
+        "INTEGER"
+      ]
+    }
+  },
+  "restricao_coff_eolica_usi": {
+    "n_arquivos": 36,
+    "primeiro_arquivo": "RESTRICAO_COFF_EOLICA_2023_10.parquet",
+    "ultimo_arquivo": "RESTRICAO_COFF_EOLICA_2026_09.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_origemrestricao",
+      "cod_razaorestricao",
+      "din_instante",
+      "dsc_restricao",
+      "id_estado",
+      "id_ons",
+      "id_pontoconexao",
+      "id_subsistema",
+      "nom_agenteoperador",
+      "nom_estado",
+      "nom_pontoconexao",
+      "nom_subsistema",
+      "nom_usina",
+      "num_minutos_cnf",
+      "num_minutos_ene",
+      "num_minutos_rel",
+      "num_minutos_restricao",
+      "val_disponibilidade",
+      "val_geracao",
+      "val_geracaolimitada",
+      "val_geracaonaorealizadaapurada",
+      "val_geracaoreferencia",
+      "val_geracaoreferenciafinal"
+    ],
+    "so_no_ultimo": [
+      "dsc_restricao",
+      "id_pontoconexao",
+      "nom_agenteoperador",
+      "nom_pontoconexao",
+      "num_minutos_cnf",
+      "num_minutos_ene",
+      "num_minutos_rel",
+      "num_minutos_restricao",
+      "val_geracaonaorealizadaapurada"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_geracao": "VARCHAR",
+      "val_geracaolimitada": "VARCHAR",
+      "val_disponibilidade": "VARCHAR",
+      "val_geracaoreferencia": "VARCHAR",
+      "val_geracaoreferenciafinal": "VARCHAR",
+      "cod_razaorestricao": "VARCHAR",
+      "cod_origemrestricao": "VARCHAR",
+      "dsc_restricao": "VARCHAR",
+      "id_pontoconexao": "VARCHAR",
+      "nom_pontoconexao": "VARCHAR",
+      "nom_agenteoperador": "VARCHAR",
+      "val_geracaonaorealizadaapurada": "DOUBLE",
+      "num_minutos_rel": "BIGINT",
+      "num_minutos_cnf": "BIGINT",
+      "num_minutos_ene": "BIGINT",
+      "num_minutos_restricao": "BIGINT"
+    },
+    "drift_de_tipo": {}
+  },
+  "restricao_coff_fotovoltaica": {
+    "n_arquivos": 30,
+    "primeiro_arquivo": "RESTRICAO_COFF_FOTOVOLTAICA_DETAIL_2024_04.parquet",
+    "ultimo_arquivo": "RESTRICAO_COFF_FOTOVOLTAICA_DETAIL_2026_09.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "din_instante",
+      "flg_dadoirradianciainvalido",
+      "id_estado",
+      "id_ons",
+      "id_subsistema",
+      "nom_conjuntousina",
+      "nom_modalidadeoperacao",
+      "nom_usina",
+      "val_geracaoestimada",
+      "val_geracaoverificada",
+      "val_irradianciaverificado"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_conjuntousina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_irradianciaverificado": "DOUBLE",
+      "flg_dadoirradianciainvalido": "BOOLEAN",
+      "val_geracaoestimada": "DOUBLE",
+      "val_geracaoverificada": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "restricao_coff_fotovoltaica_detail": {
+    "n_arquivos": 30,
+    "primeiro_arquivo": "RESTRICAO_COFF_FOTOVOLTAICA_DETAIL_2024_04.parquet",
+    "ultimo_arquivo": "RESTRICAO_COFF_FOTOVOLTAICA_DETAIL_2026_09.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "din_instante",
+      "flg_dadoirradianciainvalido",
+      "id_estado",
+      "id_ons",
+      "id_subsistema",
+      "nom_conjuntousina",
+      "nom_modalidadeoperacao",
+      "nom_usina",
+      "val_geracaoestimada",
+      "val_geracaoverificada",
+      "val_irradianciaverificado"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_modalidadeoperacao": "VARCHAR",
+      "nom_conjuntousina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "id_ons": "VARCHAR",
+      "ceg": "VARCHAR",
+      "din_instante": "TIMESTAMP",
+      "val_irradianciaverificado": "DOUBLE",
+      "flg_dadoirradianciainvalido": "BOOLEAN",
+      "val_geracaoestimada": "DOUBLE",
+      "val_geracaoverificada": "DOUBLE"
+    },
+    "drift_de_tipo": {}
+  },
+  "subestacao": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "SUBESTACAO.parquet",
+    "ultimo_arquivo": "SUBESTACAO.parquet",
+    "colunas_uniao": [
+      "id_estacao",
+      "id_estado",
+      "id_subestacao",
+      "id_subsistema",
+      "nom_agente_principal",
+      "nom_estado",
+      "nom_subestacao",
+      "nom_subsistema",
+      "num_barra",
+      "val_latitude",
+      "val_longitude",
+      "val_niveltensao"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "id_estado": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "nom_agente_principal": "VARCHAR",
+      "id_subestacao": "VARCHAR",
+      "nom_subestacao": "VARCHAR",
+      "val_niveltensao": "DOUBLE",
+      "id_estacao": "VARCHAR",
+      "num_barra": "INTEGER",
+      "val_latitude": "VARCHAR",
+      "val_longitude": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "taxa_teif_teip": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "TAXA_TEIF_TEIP.parquet",
+    "ultimo_arquivo": "TAXA_TEIF_TEIP.parquet",
+    "colunas_uniao": [
+      "cod_ceg",
+      "din_calculo",
+      "din_mes",
+      "nom_taxa",
+      "nom_usina",
+      "num_versao",
+      "tip_usina",
+      "val_taxa"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_usina": "VARCHAR",
+      "cod_ceg": "VARCHAR",
+      "tip_usina": "VARCHAR",
+      "din_mes": "TIMESTAMP",
+      "nom_taxa": "VARCHAR",
+      "val_taxa": "DOUBLE",
+      "num_versao": "DOUBLE",
+      "din_calculo": "TIMESTAMP"
+    },
+    "drift_de_tipo": {}
+  },
+  "taxa_teif_teip_oper": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "TAXA_TEIF_TEIP_OPER.parquet",
+    "ultimo_arquivo": "TAXA_TEIF_TEIP_OPER.parquet",
+    "colunas_uniao": [
+      "cod_ceg",
+      "din_calculo",
+      "din_mes",
+      "nom_taxa",
+      "nom_usina",
+      "num_versao",
+      "tip_usina",
+      "val_taxa"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_usina": "VARCHAR",
+      "cod_ceg": "VARCHAR",
+      "tip_usina": "VARCHAR",
+      "din_mes": "TIMESTAMP",
+      "nom_taxa": "VARCHAR",
+      "val_taxa": "DOUBLE",
+      "num_versao": "DOUBLE",
+      "din_calculo": "TIMESTAMP"
+    },
+    "drift_de_tipo": {}
+  },
+  "taxa_teif_teip_parametro": {
+    "n_arquivos": 7,
+    "primeiro_arquivo": "TAXA_TEIF_TEIP_PARAM_2020.parquet",
+    "ultimo_arquivo": "TAXA_TEIF_TEIP_PARAM_2026.parquet",
+    "colunas_uniao": [
+      "cod_ceg",
+      "dat_periodo",
+      "din_parametro",
+      "id_tipousina",
+      "nom_tpinsumo",
+      "nom_unidadegeradora",
+      "nom_usina",
+      "num_versao",
+      "val_parametro"
+    ],
+    "so_no_ultimo": [
+      "din_parametro"
+    ],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "nom_usina": "VARCHAR",
+      "id_tipousina": "VARCHAR",
+      "nom_unidadegeradora": "VARCHAR",
+      "cod_ceg": "VARCHAR",
+      "dat_periodo": "VARCHAR",
+      "nom_tpinsumo": "VARCHAR",
+      "val_parametro": "DOUBLE",
+      "num_versao": "DOUBLE",
+      "din_parametro": "TIMESTAMP"
+    },
+    "drift_de_tipo": {}
+  },
+  "uge_opera_csi": {
+    "n_arquivos": 6,
+    "primeiro_arquivo": "UGE_OPERA_CSI_2021.parquet",
+    "ultimo_arquivo": "UGE_OPERA_CSI_2026.parquet",
+    "colunas_uniao": [
+      "Hora_verificada",
+      "cod_pontomedicao",
+      "cod_ugedpp",
+      "cod_usinadpp",
+      "dat_verificada",
+      "dsc_comentario",
+      "flg_operasincrono",
+      "flg_sincrono",
+      "hora_verificada",
+      "nom_unidadegeradora",
+      "nom_usina",
+      "tip_usina"
+    ],
+    "so_no_ultimo": [
+      "flg_sincrono"
+    ],
+    "so_no_primeiro": [
+      "flg_operasincrono"
+    ],
+    "tipos_servidos": {
+      "dat_verificada": "VARCHAR",
+      "hora_verificada": "VARCHAR",
+      "tip_usina": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "nom_unidadegeradora": "VARCHAR",
+      "cod_usinadpp": "VARCHAR",
+      "cod_ugedpp": "INTEGER",
+      "cod_pontomedicao": "VARCHAR",
+      "flg_operasincrono": "INTEGER",
+      "dsc_comentario": "VARCHAR",
+      "flg_sincrono": "INTEGER"
+    },
+    "drift_de_tipo": {}
+  },
+  "usi_servicoancilar_sandbox": {
+    "n_arquivos": 8,
+    "primeiro_arquivo": "USI_SERVICOANCILAR_SANDBOX_2026_01.parquet",
+    "ultimo_arquivo": "USI_SERVICOANCILAR_SANDBOX_2026_08.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "cod_pontoconexao",
+      "dat_verificada",
+      "dsc_comentario",
+      "flg_cpsa",
+      "hor_verificada",
+      "nom_conjunto",
+      "val_must"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "dat_verificada": "DATE",
+      "hor_verificada": "VARCHAR",
+      "cod_pontoconexao": "VARCHAR",
+      "ceg": "VARCHAR",
+      "nom_conjunto": "VARCHAR",
+      "val_must": "VARCHAR",
+      "flg_cpsa": "VARCHAR",
+      "dsc_comentario": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "usina_conjunto": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "RELACIONAMENTO_USINA_CONJUNTO.parquet",
+    "ultimo_arquivo": "RELACIONAMENTO_USINA_CONJUNTO.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "dat_fimrelacionamento",
+      "dat_iniciorelacionamento",
+      "estad_id",
+      "id_conjuntousina",
+      "id_ons_conjunto",
+      "id_ons_usina",
+      "id_subsistema",
+      "id_tipousina",
+      "nom_conjunto",
+      "nom_estado",
+      "nom_subsistema",
+      "nom_tipousina",
+      "nom_usina"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "estad_id": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "id_tipousina": "VARCHAR",
+      "nom_tipousina": "VARCHAR",
+      "id_conjuntousina": "INTEGER",
+      "id_ons_conjunto": "VARCHAR",
+      "id_ons_usina": "VARCHAR",
+      "nom_conjunto": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR",
+      "dat_iniciorelacionamento": "VARCHAR",
+      "dat_fimrelacionamento": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  },
+  "usina_pqu": {
+    "n_arquivos": 1,
+    "primeiro_arquivo": "RELACIONAMENTO_USINA_PEQUENAUSINA.parquet",
+    "ultimo_arquivo": "RELACIONAMENTO_USINA_PEQUENAUSINA.parquet",
+    "colunas_uniao": [
+      "ceg",
+      "estad_id",
+      "id_ons_pequenasusinas",
+      "id_ons_usina",
+      "id_subsistema",
+      "id_tipousina",
+      "nom_estado",
+      "nom_pequenasusinas",
+      "nom_subsistema",
+      "nom_usina"
+    ],
+    "so_no_ultimo": [],
+    "so_no_primeiro": [],
+    "tipos_servidos": {
+      "id_subsistema": "VARCHAR",
+      "nom_subsistema": "VARCHAR",
+      "estad_id": "VARCHAR",
+      "nom_estado": "VARCHAR",
+      "id_tipousina": "VARCHAR",
+      "id_ons_pequenasusinas": "VARCHAR",
+      "id_ons_usina": "VARCHAR",
+      "nom_pequenasusinas": "VARCHAR",
+      "nom_usina": "VARCHAR",
+      "ceg": "VARCHAR"
+    },
+    "drift_de_tipo": {}
+  }
+}

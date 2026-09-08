@@ -1,0 +1,43 @@
+# Ciclo de desenvolvimento: editar um arquivo e ver o efeito em segundos.
+#
+# A imagem instala o pacote em site-packages, entao um `docker build` refaz o
+# `pip install` a cada mudanca de codigo — 82 segundos medidos, dos quais 53 sao
+# so' a reinstalacao das dependencias, que nao mudaram.
+#
+# Aqui o codigo e os contratos entram por bind mount e PYTHONPATH coloca /app/src
+# na frente de site-packages, sombreando o pacote instalado. Editar no host e'
+# instantaneo dentro do container; so' o processo precisa reiniciar para
+# reimportar os modulos:
+#
+#   docker compose -f docker-compose.dev.yml up -d      # sobe
+#   docker compose -f docker-compose.dev.yml restart    # ~9s apos editar
+#   curl localhost:8011/health                          # confere 78 contratos
+#
+# Isto e' para desenvolvimento. O Dockerfile continua sendo o artefato de
+# producao, e a imagem publicada nao tem mount nenhum.
+#
+# No Git Bash do Windows, prefixe com MSYS_NO_PATHCONV=1 para o /app dos caminhos
+# nao virar C:/Program Files/Git/app.
+
+services:
+  tiago-dev:
+    image: mcp-tiago-dados-abertos:latest
+    container_name: tiago-dev
+    ports:
+      - "8011:8000"
+    volumes:
+      # somente leitura: o container executa o codigo, nao o edita
+      - ./src:/app/src:ro
+      - ./contracts:/app/contracts:ro
+    environment:
+      # precede site-packages em sys.path, entao o codigo montado vence o instalado
+      PYTHONPATH: /app/src
+      MCP_CONTRACTS_DIR: /app/contracts
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

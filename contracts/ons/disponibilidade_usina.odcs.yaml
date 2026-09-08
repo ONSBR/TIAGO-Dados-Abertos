@@ -1,0 +1,832 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:disponibilidade_usina
+name: disponibilidade_usina
+tenant: ons
+tags:
+- ONS
+- capacidade disponível usina
+- disp usina
+- disponibilidade
+- disponibilidade de usinas
+- disponibilidade horária
+- disponibilidade operacional
+- disponibilidade operacional ONS
+- disponibilidade sincronizada
+- disponibilidade usina
+- geração
+- hidráulica
+- horária
+- potência instalada
+- térmica
+- usina
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/disponibilidade_usina_ho/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar operadores do ONS e analistas de planejamento energético no monitoramento horário
+    da capacidade disponível do parque gerador nacional, permitindo decisões de despacho, programação
+    operativa, análise de confiabilidade do sistema elétrico e cálculo de índices de disponibilidade e
+    utilização de usinas hidráulicas e térmicas.
+  limitations: Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Coluna armazenada
+    como VARCHAR no Parquet devido ao formato de serialização. Coluna armazenada como VARCHAR no Parquet
+    devido a formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver disponibilidade operacional, disponibilidade
+    sincronizada ou potência instalada de usinas hidráulicas ou térmicas em base horária.
+domain: geração
+schema:
+- name: disponibilidade_usina
+  physicalType: parquet
+  logicalType: object
+  physicalName: disponibilidade_usina
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a usina pertence (ex: SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+      - id subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual a usina pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado brasileiro onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - unidade federativa
+      - sigla estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - I
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado brasileiro onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome estado
+      - nome do estado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Alagoas
+      - Amapá
+      - Amazonas
+      - Bahia
+      - Ceará
+      - Distrito Federal
+      - Espírito Santo
+      - Goiás
+      - Maranhão
+      - Mato Grosso
+      - Mato Grosso do Sul
+      - Minas Gerais
+      - Paraná
+      - Paraíba
+      - Pará
+      - Pernambuco
+      - Piauí
+      - Rio Grande do Norte
+      - Rio Grande do Sul
+      - Rio de Janeiro
+      - Rondônia
+      - Santa Catarina
+      - Sergipe
+      - São Paulo
+      - Tocantins
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina geradora (hidráulica ou térmica) conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome usina
+      - nome da usina
+      - planta
+      - gerador
+    - property: semanticType
+      value: DIMENSION
+  - name: id_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código identificador do tipo de usina (hidráulica ou térmica)
+    customProperties:
+    - property: aliases
+      value:
+      - tipo usina
+      - tipo de usina
+      - id tipo
+      - categoria usina
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - UHE
+      - UTE
+      - UTN
+  - name: nom_tipocombustivel
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do tipo de combustível ou fonte energética utilizada pela usina (ex: Água, Gás
+      Natural, Óleo, Carvão)'
+    customProperties:
+    - property: aliases
+      value:
+      - combustível
+      - tipo combustível
+      - fonte
+      - fonte energética
+      - insumo
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Biomassa
+      - Carvão
+      - Gás
+      - Hidráulica
+      - Nuclear
+      - Resíduos Industriais
+      - Óleo Combustível
+      - Óleo Diesel
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único da usina no sistema do ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código ONS
+      - id ons
+      - código usina ONS
+      - identificador ONS
+    - property: semanticType
+      value: IDENTIFIER
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL que identifica unicamente o empreendimento
+      gerador
+    customProperties:
+    - property: aliases
+      value:
+      - CEG
+      - código ANEEL
+      - código empreendimento
+      - código geração
+    - property: semanticType
+      value: IDENTIFIER
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora do registro de disponibilidade da usina, com granularidade horária
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data hora
+      - timestamp
+      - hora
+      - data
+      - período
+      - din instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_potenciainstalada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Potência instalada da usina em MW no instante registrado. Armazenada como VARCHAR pelo
+      formato de serialização.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - potência instalada
+      - capacidade instalada
+      - potência total
+      - MW instalado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_potenciainstalada AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_dispoperacional
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Disponibilidade operacional da usina em MW no instante registrado, representando a capacidade
+      disponível para operação. Armazenada como VARCHAR pelo formato de serialização; requer TRY_CAST(val_dispoperacional
+      AS DOUBLE) para uso analítico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade operacional
+      - disp operacional
+      - capacidade operacional
+      - disponível operacional
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_dispoperacional AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_dispsincronizada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Disponibilidade sincronizada da usina em MW no instante registrado, representando a
+      capacidade disponível e sincronizada à rede. Armazenada como VARCHAR pelo formato de serialização;
+      requer TRY_CAST(val_dispsincronizada AS DOUBLE) para uso analítico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade sincronizada
+      - disp sincronizada
+      - capacidade sincronizada
+      - disponível sincronizado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_dispsincronizada AS DOUBLE)
+    - property: unit
+      value: MW
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/disponibilidade_usina
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto a usina podia gerar
+  - usina disponivel ou parada
+  - capacidade disponivel da usina
+  - quanto do parque estava disponivel
+  - usina fora de operacao
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver disponibilidade operacional, disponibilidade
+    sincronizada ou potência instalada de usinas hidráulicas ou térmicas em base horária. Também relevante
+    para análises de confiabilidade do parque gerador, fator de capacidade, índices de indisponibilidade
+    e monitoramento da capacidade disponível por subsistema ou usina. Priorizar quando o contexto mencionar
+    despacho, programação operativa ou análise de reserva de potência.
+- property: agentInstructions
+  value: |
+    - [val_potenciainstalada] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Contém valores numéricos representando potência instalada em MW. Qualquer operação aritmética ou agregação (SUM, AVG, MAX, MIN) exige conversão explícita via TRY_CAST.
+
+    - [val_dispoperacional] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Contém valores numéricos representando disponibilidade operacional em MW. Qualquer operação aritmética ou agregação exige conversão explícita via TRY_CAST.
+
+    - [val_dispsincronizada] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Contém valores numéricos representando disponibilidade sincronizada em MW. Qualquer operação aritmética ou agregação exige conversão explícita via TRY_CAST.
+
+    - [val_dispoperacional] Disponibilidade operacional não deveria exceder a potência instalada nem ser negativa. Valores fora do intervalo [0, val_potenciainstalada] indicam inconsistência nos dados, possivelmente oriundos de revisões recorrentes ainda não consolidadas.
+
+    - [val_dispsincronizada] Disponibilidade sincronizada não deveria exceder a disponibilidade operacional nem ser negativa. Valores fora do intervalo [0, val_dispoperacional] indicam inconsistência, pois a capacidade sincronizada é subconjunto da capacidade operacional disponível.
+
+    - [din_instante] Dataset cobre período de 2015-01-01 em diante com granularidade horária. Podem existir lacunas horárias para usinas específicas decorrentes de indisponibilidade de dados na fonte ou do processo de consistência recorrente com revisões pós-publicação.
+
+    - [id_ons] A chave primária natural é composta por (din_instante, id_ons). Duplicatas nessa combinação podem ocorrer em decorrência do processo de consistência recorrente com múltiplas versões de um mesmo registro publicadas em diferentes execuções diárias (12h e 19h).
+
+    - [tipos] As colunas `val_dispoperacional`, `val_dispsincronizada`, `val_potenciainstalada` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi a disponibilidade operacional média das usinas hidráulicas do subsistema Sudeste em janeiro
+    de 2024?
+  - Quais usinas apresentaram maior diferença entre potência instalada e disponibilidade operacional no
+    último mês?
+  - Qual o índice de disponibilidade sincronizada das usinas térmicas a gás natural em 2023?
+  - Houve alguma usina com disponibilidade operacional superior à potência instalada nos últimos 12 meses?
+  - Como evoluiu a disponibilidade total do parque gerador hidráulico do subsistema Sul ao longo de 2022?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/disponibilidade_usina_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2015-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - disponibilidade
+    - disponivel
+    - indisponibilidade
+    - indisponivel
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - ceg
+      - id_ons
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: nom_tipocombustivel
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: potenciainstalada
+      label: Potencia Instalada
+      columns:
+      - val_potenciainstalada
+      expression: TRY_CAST(val_potenciainstalada AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_potenciainstalada AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_potenciainstalada AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_potenciainstalada AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_potenciainstalada AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_potenciainstalada AS DOUBLE))
+          unit: MW
+      interval_hours: 1.0
+      aliases:
+      - potencia instalada
+      - capacidade instalada
+      - potencia total
+      - MW instalado
+    - id: dispoperacional
+      label: Disponibilidade Operacional
+      columns:
+      - val_dispoperacional
+      expression: TRY_CAST(val_dispoperacional AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_dispoperacional AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_dispoperacional AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_dispoperacional AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: AVG(TRY_CAST(val_dispoperacional AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: AVG(TRY_CAST(val_dispoperacional AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: AVG(TRY_CAST(val_dispoperacional AS DOUBLE))
+          unit: MW
+      interval_hours: 1.0
+      aliases:
+      - disponibilidade operacional
+      - disp operacional
+      - capacidade operacional
+      - disponivel operacional
+      - capacidade disponivel
+    - id: dispsincronizada
+      label: Disponibilidade Sincronizada
+      columns:
+      - val_dispsincronizada
+      expression: TRY_CAST(val_dispsincronizada AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_dispsincronizada AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_dispsincronizada AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_dispsincronizada AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: AVG(TRY_CAST(val_dispsincronizada AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: AVG(TRY_CAST(val_dispsincronizada AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: AVG(TRY_CAST(val_dispsincronizada AS DOUBLE))
+          unit: MW
+      interval_hours: 1.0
+      aliases:
+      - disponibilidade sincronizada
+      - disp sincronizada
+      - capacidade sincronizada
+      - disponivel sincronizado
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          filter: nom_subsistema = 'Sul'
+      nom_estado:
+        Alagoas:
+          aliases:
+          - Alagoas
+          filter: nom_estado = 'Alagoas'
+        Amapa:
+          aliases:
+          - Amapá
+          - Amapa
+          filter: nom_estado = 'Amapá'
+        Amazonas:
+          aliases:
+          - Amazonas
+          filter: nom_estado = 'Amazonas'
+        Bahia:
+          aliases:
+          - Bahia
+          filter: nom_estado = 'Bahia'
+        Ceara:
+          aliases:
+          - Ceará
+          - Ceara
+          filter: nom_estado = 'Ceará'
+        Distrito Federal:
+          aliases:
+          - Distrito Federal
+          - DF
+          filter: nom_estado = 'Distrito Federal'
+        Espirito Santo:
+          aliases:
+          - Espírito Santo
+          - Espirito Santo
+          filter: nom_estado = 'Espírito Santo'
+        Goias:
+          aliases:
+          - Goiás
+          - Goias
+          filter: nom_estado = 'Goiás'
+        Maranhao:
+          aliases:
+          - Maranhão
+          - Maranhao
+          filter: nom_estado = 'Maranhão'
+        Mato Grosso:
+          aliases:
+          - Mato Grosso
+          filter: nom_estado = 'Mato Grosso'
+        Mato Grosso do Sul:
+          aliases:
+          - Mato Grosso do Sul
+          filter: nom_estado = 'Mato Grosso do Sul'
+        Minas Gerais:
+          aliases:
+          - Minas Gerais
+          filter: nom_estado = 'Minas Gerais'
+        Parana:
+          aliases:
+          - Paraná
+          - Parana
+          filter: nom_estado = 'Paraná'
+        Paraiba:
+          aliases:
+          - Paraíba
+          - Paraiba
+          filter: nom_estado = 'Paraíba'
+        Para:
+          aliases:
+          - Pará
+          - Para
+          filter: nom_estado = 'Pará'
+        Pernambuco:
+          aliases:
+          - Pernambuco
+          filter: nom_estado = 'Pernambuco'
+        Piaui:
+          aliases:
+          - Piauí
+          - Piaui
+          filter: nom_estado = 'Piauí'
+        Rio Grande do Norte:
+          aliases:
+          - Rio Grande do Norte
+          - RN
+          filter: nom_estado = 'Rio Grande do Norte'
+        Rio Grande do Sul:
+          aliases:
+          - Rio Grande do Sul
+          - RS
+          filter: nom_estado = 'Rio Grande do Sul'
+        Rio de Janeiro:
+          aliases:
+          - Rio de Janeiro
+          - RJ
+          filter: nom_estado = 'Rio de Janeiro'
+        Rondonia:
+          aliases:
+          - Rondônia
+          - Rondonia
+          filter: nom_estado = 'Rondônia'
+        Santa Catarina:
+          aliases:
+          - Santa Catarina
+          - SC
+          filter: nom_estado = 'Santa Catarina'
+        Sergipe:
+          aliases:
+          - Sergipe
+          filter: nom_estado = 'Sergipe'
+        Sao Paulo:
+          aliases:
+          - São Paulo
+          - Sao Paulo
+          - SP
+          filter: nom_estado = 'São Paulo'
+        Tocantins:
+          aliases:
+          - Tocantins
+          filter: nom_estado = 'Tocantins'
+      id_tipousina:
+        UHE:
+          aliases:
+          - UHE
+          - hidreletrica
+          - hidraulica
+          - usina hidraulica
+          filter: id_tipousina = 'UHE'
+        UTE:
+          aliases:
+          - UTE
+          - termica
+          - usina termica
+          filter: id_tipousina = 'UTE'
+        UTN:
+          aliases:
+          - UTN
+          - nuclear
+          - usina nuclear
+          filter: id_tipousina = 'UTN'
+      nom_tipocombustivel:
+        Biomassa:
+          aliases:
+          - Biomassa
+          - biomassa
+          filter: nom_tipocombustivel = 'Biomassa'
+        Carvao:
+          aliases:
+          - Carvão
+          - Carvao
+          - carvao mineral
+          filter: nom_tipocombustivel = 'Carvão'
+        Gas:
+          aliases:
+          - Gás
+          - Gas
+          - gas natural
+          filter: nom_tipocombustivel = 'Gás'
+        Hidraulica:
+          aliases:
+          - Hidráulica
+          - Hidraulica
+          - agua
+          filter: nom_tipocombustivel = 'Hidráulica'
+        Nuclear:
+          aliases:
+          - Nuclear
+          - nuclear
+          - uranio
+          filter: nom_tipocombustivel = 'Nuclear'
+        Residuos Industriais:
+          aliases:
+          - Resíduos Industriais
+          - Residuos Industriais
+          - residuos
+          filter: nom_tipocombustivel = 'Resíduos Industriais'
+        Oleo Combustivel:
+          aliases:
+          - Óleo Combustível
+          - Oleo Combustivel
+          - oleo combustivel
+          filter: nom_tipocombustivel = 'Óleo Combustível'
+        Oleo Diesel:
+          aliases:
+          - Óleo Diesel
+          - Oleo Diesel
+          - diesel
+          filter: nom_tipocombustivel = 'Óleo Diesel'
+    sql_patterns:
+      potenciainstalada_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM(TRY_CAST(val_potenciainstalada AS DOUBLE)) AS valor\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - potenciainstalada
+          grain: month
+        validated_params:
+          year: '2015'
+      dispoperacional_media_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  AVG(TRY_CAST(val_dispoperacional AS DOUBLE)) AS disp_operacional_media_mw\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER\
+          \ BY 1, 2"
+        output_unit: MW
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - dispoperacional
+          grain: month
+        validated_params:
+          year: '2015'
+      diferenca_potencia_disponibilidade:
+        template: "SELECT nom_usina, id_subsistema,\n  AVG(TRY_CAST(val_potenciainstalada AS DOUBLE))\
+          \ AS potencia_instalada_media_mw,\n  AVG(TRY_CAST(val_dispoperacional AS DOUBLE)) AS disp_operacional_media_mw,\n\
+          \  AVG(TRY_CAST(val_potenciainstalada AS DOUBLE)) - AVG(TRY_CAST(val_dispoperacional AS DOUBLE))\
+          \ AS diferenca_mw\nFROM {source}\nWHERE din_instante >= {start_date} AND din_instante < {end_date}\n\
+          GROUP BY 1, 2\nORDER BY diferenca_mw DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - potenciainstalada
+          - dispoperacional
+          grain: period
+        validated_params:
+          start_date: '2015-01-01 01:00:00'
+          end_date: '2015-01-31 23:00:00'
+      dispsincronizada_por_combustivel:
+        template: "SELECT nom_tipocombustivel,\n  AVG(TRY_CAST(val_dispsincronizada AS DOUBLE)) AS disp_sincronizada_media_mw\n\
+          FROM {source}\nWHERE din_instante >= {start_date} AND din_instante < {end_date}\n  AND nom_tipocombustivel\
+          \ IS NOT NULL\nGROUP BY 1\nORDER BY disp_sincronizada_media_mw DESC"
+        output_unit: MW
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - dispsincronizada
+          grain: period
+        validated_params:
+          start_date: '2015-01-01 01:00:00'
+          end_date: '2015-01-31 23:00:00'
+- property: fewShotQueries
+  value:
+  - question: Qual foi a disponibilidade operacional média (em MW) por subsistema e tipo de usina em 2023?
+    sql: SELECT id_subsistema, nom_subsistema, id_tipousina, AVG(TRY_CAST(val_dispoperacional AS DOUBLE))
+      AS avg_disp_operacional_mw, AVG(TRY_CAST(val_potenciainstalada AS DOUBLE)) AS avg_potencia_instalada_mw,
+      AVG(TRY_CAST(val_dispoperacional AS DOUBLE)) / NULLIF(AVG(TRY_CAST(val_potenciainstalada AS DOUBLE)),
+      0) AS fator_disponibilidade FROM read_parquet('s3://ons-aws-prod-opendata/dataset/disponibilidade_usina_ho/*.parquet')
+      WHERE din_instante >= '2023-01-01' AND din_instante < '2024-01-01' GROUP BY id_subsistema, nom_subsistema,
+      id_tipousina ORDER BY id_subsistema, id_tipousina;
+  - question: Quais usinas acumularam maior indisponibilidade (MW×hora) no ano de 2024?
+    sql: SELECT id_ons, nom_usina, id_subsistema, id_tipousina, SUM( TRY_CAST(val_potenciainstalada AS
+      DOUBLE) - TRY_CAST(val_dispoperacional AS DOUBLE) ) AS indisponibilidade_acumulada_mwh, COUNT(*)
+      AS horas_com_registro, AVG(TRY_CAST(val_potenciainstalada AS DOUBLE)) AS potencia_media_mw FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/disponibilidade_usina_ho/*.parquet') WHERE din_instante
+      >= '2024-01-01' AND din_instante < '2025-01-01' AND TRY_CAST(val_potenciainstalada AS DOUBLE) >
+      0 GROUP BY id_ons, nom_usina, id_subsistema, id_tipousina ORDER BY indisponibilidade_acumulada_mwh
+      DESC LIMIT 20;
+  - question: Como evoluiu a disponibilidade sincronizada total do SIN hora a hora em janeiro de 2024?
+    sql: SELECT din_instante, SUM(TRY_CAST(val_dispsincronizada AS DOUBLE)) AS total_disp_sincronizada_mw,
+      SUM(TRY_CAST(val_dispoperacional AS DOUBLE)) AS total_disp_operacional_mw, SUM(TRY_CAST(val_potenciainstalada
+      AS DOUBLE)) AS total_potencia_instalada_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/disponibilidade_usina_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2024-02-01' GROUP BY din_instante ORDER BY
+      din_instante;
+- property: license
+  value: CC-BY

@@ -1,0 +1,1151 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:reservatorio
+name: reservatorio
+tenant: ons
+tags:
+- DECOMP
+- NEWAVE
+- REE
+- cadastro
+- cadastro de reservatórios
+- cota operacional
+- hidrelétrica
+- posto fluviométrico
+- produtibilidade
+- reservatório
+- reservatório equivalente de energia
+- reservatório hidrelétrico cadastro
+- reservatórios ONS
+- reservatórios hidrelétricos
+- volume útil
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/reservatorio/*.parquet
+  format: parquet
+description:
+  purpose: Prover tabela de referência cadastral para planejadores, operadores e analistas do ONS e agentes
+    do setor elétrico que necessitam dos parâmetros físicos dos reservatórios hidrelétricos do SIN. Suporta
+    decisões de despacho hidrotérmico, cálculo de energia armazenada, modelagem nos sistemas NEWAVE e
+    DECOMP, e estudos de planejamento energético que dependem de cotas, volumes, produtibilidade e localização
+    geográfica dos reservatórios. É utilizado como dimensão de enriquecimento em joins com séries temporais
+    de vazões, energia armazenada e geração hidrelétrica.
+  limitations: Coluna armazena valores numéricos de cota máxima (metros) como VARCHAR devido ao formato
+    de serialização. Coluna armazena valores numéricos de cota mínima (metros) como VARCHAR devido ao
+    formato de serialização. Coluna armazena valores numéricos de volume máximo (hm³) como VARCHAR devido
+    ao formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver atributos físicos ou operacionais de reservatórios
+    hidrelétricos do SIN, como cotas, volumes, produtibilidade, perdas hidráulicas ou localização geográfica.
+domain: reservatório
+schema:
+- name: reservatorio
+  physicalType: parquet
+  logicalType: object
+  physicalName: reservatorio
+  properties:
+  - name: nom_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do reservatório hidrelétrico conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - nome do reservatório
+      - reservatório
+      - nome reservatorio
+    - property: semanticType
+      value: DIMENSION
+  - name: tip_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Tipo do reservatório (ex. acumulação, fio d'água, etc.)
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de reservatório
+      - tipo reservatorio
+      - classificação do reservatório
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - FIO DAGUA
+      - RESERVATÓRIO COM USINA
+      - RESERVATÓRIO COM USINA DE BOMBEAMENTO
+      - RESERVATÓRIO SEM USINA
+  - name: cod_resplanejamento
+    physicalType: INTEGER
+    logicalType: integer
+    description: Código numérico do reservatório utilizado nos modelos de planejamento energético (ex.
+      NEWAVE, DECOMP)
+    customProperties:
+    - property: aliases
+      value:
+      - código de planejamento
+      - código reservatório planejamento
+      - cod planejamento
+    - property: semanticType
+      value: IDENTIFIER
+  - name: cod_posto
+    physicalType: INTEGER
+    logicalType: integer
+    description: Código do posto fluviométrico associado ao reservatório, utilizado para identificação
+      hidrológica
+    customProperties:
+    - property: aliases
+      value:
+      - código do posto
+      - posto fluviométrico
+      - cod posto
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina hidrelétrica à qual o reservatório está associado
+    customProperties:
+    - property: aliases
+      value:
+      - nome da usina
+      - usina
+      - nome usina
+    - property: semanticType
+      value: DIMENSION
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL, identificador único da usina no sistema
+      regulatório
+    customProperties:
+    - property: aliases
+      value:
+      - CEG
+      - código de empreendimento
+      - código ANEEL
+      - código empreendimento de geração
+    - property: semanticType
+      value: IDENTIFIER
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador abreviado do subsistema elétrico ao qual o reservatório pertence (SE, S,
+      NE, N)
+    customProperties:
+    - property: aliases
+      value:
+      - id subsistema
+      - subsistema id
+      - sigla subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual o reservatório pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome do subsistema
+      - subsistema
+      - região elétrica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE/CENTRO-OESTE
+      - SUL
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da bacia hidrográfica onde o reservatório está localizado
+    customProperties:
+    - property: aliases
+      value:
+      - bacia hidrográfica
+      - bacia
+      - nome da bacia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - ARAGUARI
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - ITABAPOANA
+      - ITAJAI
+      - JACUI
+      - JEQUITINHONHA
+      - MUCURI
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SANTA MARIA VIT
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: nom_rio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do rio no qual o reservatório está inserido
+    customProperties:
+    - property: aliases
+      value:
+      - rio
+      - nome do rio
+      - curso d'água
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_ree
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do Reservatório Equivalente de Energia (REE) ao qual o reservatório pertence, utilizado
+      nos modelos de planejamento
+    customProperties:
+    - property: aliases
+      value:
+      - REE
+      - reservatório equivalente
+      - reservatório equivalente de energia
+      - nome REE
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BELO MONTE
+      - IGUACU
+      - ITAIPU
+      - MADEIRA
+      - MANAUS-AMAPA
+      - NORDESTE
+      - NORTE
+      - PARANA
+      - PARANAPANEMA
+      - SUDESTE
+      - SUL
+      - TELES PIRES
+  - name: dat_entrada
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de entrada do reservatório no sistema elétrico (atributo cadastral, não eixo temporal
+      de série histórica)
+    customProperties:
+    - property: aliases
+      value:
+      - data de entrada
+      - data entrada em operação
+      - data início operação
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_cotamaxima
+    physicalType: VARCHAR
+    logicalType: string
+    description: Cota máxima operacional do reservatório (nível d'água máximo permitido em operação normal),
+      armazenada como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - cota máxima
+      - nível máximo
+      - cota máxima operacional
+      - nível máximo operacional
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cotamaxima AS DOUBLE)
+    - property: unit
+      value: m
+  - name: val_cotaminima
+    physicalType: VARCHAR
+    logicalType: string
+    description: Cota mínima operacional do reservatório (nível d'água mínimo permitido em operação normal),
+      armazenada como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - cota mínima
+      - nível mínimo
+      - cota mínima operacional
+      - nível mínimo operacional
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cotaminima AS DOUBLE)
+    - property: unit
+      value: m
+  - name: val_volmax
+    physicalType: VARCHAR
+    logicalType: string
+    description: Volume máximo do reservatório correspondente à cota máxima operacional, armazenado como
+      VARCHAR pelo formato de serialização.4
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_volmax AS DOUBLE)
+  - name: val_volmin
+    physicalType: VARCHAR
+    logicalType: string
+    description: Volume mínimo do reservatório correspondente à cota mínima operacional, armazenado como
+      VARCHAR pelo formato de serialização.4
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(val_volmin AS DOUBLE)
+  - name: val_volutiltot
+    physicalType: VARCHAR
+    logicalType: string
+    description: Volume útil total do reservatório, calculado como diferença entre volume máximo e mínimo
+      operacional, armazenado como VARCHAR pelo formato de serialização
+    customProperties:
+    - property: aliases
+      value:
+      - volume útil
+      - volume útil total
+      - vol util
+      - capacidade útil
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_volutiltot AS DOUBLE)
+    - property: unit
+      value: hm³
+  - name: val_produtibilidadeespecifica
+    physicalType: DOUBLE
+    logicalType: number
+    description: Produtibilidade específica do reservatório, expressa em MW por m³/s por metro de queda,
+      utilizada no cálculo de energia gerada
+    customProperties:
+    - property: aliases
+      value:
+      - produtibilidade específica
+      - produtibilidade
+      - fator de produtibilidade
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW/(m³/s·m)
+  - name: val_produtividade65volutil
+    physicalType: DOUBLE
+    logicalType: number
+    description: Produtividade do reservatório calculada a 65% do volume útil, utilizada como referência
+      nos modelos de planejamento energético
+    customProperties:
+    - property: aliases
+      value:
+      - produtividade 65%
+      - produtividade a 65 por cento do volume útil
+      - produtividade 65 vol util
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW/(m³/s)
+  - name: val_tipoperda
+    physicalType: VARCHAR
+    logicalType: string
+    description: Tipo de perda hidráulica do reservatório (coeficiente ou valor fixo), armazenado como
+      VARCHAR pelo formato de serialização.Poucos nulos
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de perda
+      - tipo perda hidráulica
+      - coeficiente de perda
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - '%'
+      - m
+  - name: val_perda
+    physicalType: DOUBLE
+    logicalType: number
+    description: Valor da perda hidráulica do reservatório, utilizado no cálculo da energia efetivamente
+      gerada descontando perdas no sistema
+    customProperties:
+    - property: aliases
+      value:
+      - perda hidráulica
+      - perda
+      - fator de perda
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_latitude
+    physicalType: DOUBLE
+    logicalType: number
+    description: Latitude geográfica da localização do reservatório em graus decimais (negativo = hemisfério
+      sul)
+    customProperties:
+    - property: aliases
+      value:
+      - latitude
+      - coordenada latitude
+      - lat
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: val_longitude
+    physicalType: DOUBLE
+    logicalType: number
+    description: Longitude geográfica da localização do reservatório em graus decimais (negativo = oeste
+      do meridiano de Greenwich)
+    customProperties:
+    - property: aliases
+      value:
+      - longitude
+      - coordenada longitude
+      - lon
+      - long
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: res_id
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único do reservatório no sistema ONS, utilizado como chave primária técnica
+      do cadastro
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - id do reservatório
+      - identificador reservatório
+      - res id
+    - property: semanticType
+      value: DIMENSION
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/reservatorio
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - cadastro dos reservatorios
+  - dados fisicos da represa
+  - cota maxima e minima
+  - caracteristicas do reservatorio
+  - onde fica o reservatorio
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver atributos físicos ou operacionais de reservatórios
+    hidrelétricos do SIN, como cotas, volumes, produtibilidade, perdas hidráulicas ou localização geográfica.
+    Também recuperar quando for necessário identificar a qual subsistema, bacia, rio ou REE um reservatório
+    pertence, ou quando se precisar de parâmetros de referência para modelos de planejamento energético
+    (NEWAVE, DECOMP) identificados por cod_resplanejamento ou cod_posto.
+- property: agentInstructions
+  value: '- [val_cotamaxima] Coluna numérica (cota máxima em metros) exportada como VARCHAR pelo formato
+    de serialização. Impede agregações diretas (SUM, AVG, MIN, MAX) sem conversão explícita de tipo.
+
+
+    - [val_cotaminima] Coluna numérica (cota mínima em metros) exportada como VARCHAR pelo formato de
+    serialização. Impede agregações diretas sem conversão explícita de tipo.
+
+
+    - [val_volmax] Coluna numérica (volume máximo em hm³) exportada como VARCHAR pelo formato de serialização.
+    Impede cálculos de capacidade total do sistema sem conversão explícita de tipo.
+
+
+    - [val_volmin] Coluna numérica (volume mínimo em hm³) exportada como VARCHAR pelo formato de serialização.
+    Impede cálculos de volume morto e útil sem conversão explícita de tipo.
+
+
+    - [val_volutiltot] Coluna numérica (volume útil total em hm³) exportada como VARCHAR pelo formato
+    de serialização. Impede cálculos de capacidade útil agregada do sistema sem conversão explícita de
+    tipo. É a coluna mais crítica para análises de energia armazenada (EAR%).
+
+
+    - [val_produtibilidadeespecifica] Possui poucos nulos. Reservatórios
+    sem produtibilidade específica cadastrada podem ser fio d''água ou ter dados incompletos.
+
+
+    - [val_produtividade65volutil] Possui poucos nulos. Reservatórios
+    sem produtividade a 65% do volume útil podem impactar modelos de planejamento que utilizam este parâmetro
+    como referência obrigatória.
+
+
+    - [val_perda] Possui poucos nulos. Ausência do percentual de
+    perda hidráulica pode afetar cálculos de energia disponível líquida para esses reservatórios.
+
+
+    - [dat_entrada] Data de entrada em operação armazenada como VARCHAR em vez de DATE. Pode conter formatos
+    variados (YYYY-MM-DD, DD/MM/YYYY) dependendo da origem dos dados. Requer TRY_CAST ou strptime para
+    uso em filtros e ordenações temporais.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais são os reservatórios com maior volume útil total no subsistema Sudeste/Centro-Oeste?
+  - Qual a cota máxima e mínima operacional do reservatório de Itaipu?
+  - Quais reservatórios pertencem à bacia do Paraná e ao REE PARANA?
+  - Quais reservatórios não possuem produtibilidade específica cadastrada no sistema ONS?
+  - Qual o volume útil total agregado por subsistema elétrico no SIN?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Me mostra os 10 maiores reservatorios por volume util total"
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/reservatorio/*.parquet', union_by_name=true)
+- property: temporalCoverageEnd
+  value: '2025-09-03'
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      temporal_column: dat_entrada
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_entrada
+      - id_subsistema
+      - ceg
+      - res_id
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: ceg
+      reservatorio: nom_reservatorio
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: cotamaxima
+      label: Cotamaxima
+      columns:
+      - val_cotamaxima
+      expression: TRY_CAST(val_cotamaxima AS DOUBLE)
+      quantity_kind: level
+      unit_native: m
+      default_aggregation: max
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        maximum:
+          sql: MAX(TRY_CAST(val_cotamaxima AS DOUBLE))
+          unit: m
+        minimum:
+          sql: MIN(TRY_CAST(val_cotamaxima AS DOUBLE))
+          unit: m
+        average:
+          sql: AVG(TRY_CAST(val_cotamaxima AS DOUBLE))
+          unit: m
+        time_series:
+          sql: AVG(TRY_CAST(val_cotamaxima AS DOUBLE))
+          unit: m
+        ranking:
+          sql: AVG(TRY_CAST(val_cotamaxima AS DOUBLE))
+          unit: m
+        comparison:
+          sql: AVG(TRY_CAST(val_cotamaxima AS DOUBLE))
+          unit: m
+      aliases:
+      - cota maxima
+      - nivel maximo
+      - cota maxima operacional
+      - nivel maximo operacional
+      - cota max
+      - cota superior
+    - id: cotaminima
+      label: Cotaminima
+      columns:
+      - val_cotaminima
+      expression: TRY_CAST(val_cotaminima AS DOUBLE)
+      quantity_kind: level
+      unit_native: m
+      default_aggregation: max
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        maximum:
+          sql: MAX(TRY_CAST(val_cotaminima AS DOUBLE))
+          unit: m
+        minimum:
+          sql: MIN(TRY_CAST(val_cotaminima AS DOUBLE))
+          unit: m
+        average:
+          sql: AVG(TRY_CAST(val_cotaminima AS DOUBLE))
+          unit: m
+        time_series:
+          sql: AVG(TRY_CAST(val_cotaminima AS DOUBLE))
+          unit: m
+        ranking:
+          sql: AVG(TRY_CAST(val_cotaminima AS DOUBLE))
+          unit: m
+        comparison:
+          sql: AVG(TRY_CAST(val_cotaminima AS DOUBLE))
+          unit: m
+      aliases:
+      - cota minima
+      - nivel minimo
+      - cota minima operacional
+      - nivel minimo operacional
+      - cota min
+      - cota inferior
+    - id: volmax
+      label: Volmax
+      columns:
+      - val_volmax
+      expression: TRY_CAST(val_volmax AS DOUBLE)
+      quantity_kind: volume
+      unit_native: hm3
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_volmax AS DOUBLE))
+          unit: hm3
+        maximum:
+          sql: MAX(TRY_CAST(val_volmax AS DOUBLE))
+          unit: hm3
+        average:
+          sql: AVG(TRY_CAST(val_volmax AS DOUBLE))
+          unit: hm3
+        time_series:
+          sql: AVG(TRY_CAST(val_volmax AS DOUBLE))
+          unit: hm3
+        ranking:
+          sql: AVG(TRY_CAST(val_volmax AS DOUBLE))
+          unit: hm3
+        comparison:
+          sql: AVG(TRY_CAST(val_volmax AS DOUBLE))
+          unit: hm3
+      aliases:
+      - volume maximo
+      - vol max
+      - volume maximo operacional
+      - capacidade maxima
+    - id: volmin
+      label: Volmin
+      columns:
+      - val_volmin
+      expression: TRY_CAST(val_volmin AS DOUBLE)
+      quantity_kind: volume
+      unit_native: hm3
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_volmin AS DOUBLE))
+          unit: hm3
+        maximum:
+          sql: MAX(TRY_CAST(val_volmin AS DOUBLE))
+          unit: hm3
+        average:
+          sql: AVG(TRY_CAST(val_volmin AS DOUBLE))
+          unit: hm3
+        time_series:
+          sql: AVG(TRY_CAST(val_volmin AS DOUBLE))
+          unit: hm3
+        ranking:
+          sql: AVG(TRY_CAST(val_volmin AS DOUBLE))
+          unit: hm3
+        comparison:
+          sql: AVG(TRY_CAST(val_volmin AS DOUBLE))
+          unit: hm3
+      aliases:
+      - volume minimo
+      - vol min
+      - volume minimo operacional
+      - volume morto
+    - id: volutiltot
+      label: Volutiltot
+      columns:
+      - val_volutiltot
+      expression: TRY_CAST(val_volutiltot AS DOUBLE)
+      quantity_kind: volume
+      unit_native: hm3
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_volutiltot AS DOUBLE))
+          unit: hm3
+        maximum:
+          sql: MAX(TRY_CAST(val_volutiltot AS DOUBLE))
+          unit: hm3
+        average:
+          sql: AVG(TRY_CAST(val_volutiltot AS DOUBLE))
+          unit: hm3
+        time_series:
+          sql: AVG(TRY_CAST(val_volutiltot AS DOUBLE))
+          unit: hm3
+        ranking:
+          sql: AVG(TRY_CAST(val_volutiltot AS DOUBLE))
+          unit: hm3
+        comparison:
+          sql: AVG(TRY_CAST(val_volutiltot AS DOUBLE))
+          unit: hm3
+      aliases:
+      - volume util
+      - volume util total
+      - vol util
+      - capacidade util
+      - capacidade de regularizacao
+    - id: produtibilidadeespecifica
+      label: Produtibilidade
+      columns:
+      - val_produtibilidadeespecifica
+      expression: val_produtibilidadeespecifica
+      quantity_kind: intensive
+      unit_native: MW/(m3/s.m)
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_produtibilidadeespecifica)
+          unit: MW/(m3/s.m)
+        maximum:
+          sql: MAX(val_produtibilidadeespecifica)
+          unit: MW/(m3/s.m)
+        time_series:
+          sql: AVG(val_produtibilidadeespecifica)
+          unit: MW/(m3/s.m)
+        ranking:
+          sql: AVG(val_produtibilidadeespecifica)
+          unit: MW/(m3/s.m)
+        comparison:
+          sql: AVG(val_produtibilidadeespecifica)
+          unit: MW/(m3/s.m)
+      aliases:
+      - produtibilidade especifica
+      - produtibilidade
+      - fator de produtibilidade
+    - id: produtividade65volutil
+      label: Produtividade65Volutil
+      columns:
+      - val_produtividade65volutil
+      expression: val_produtividade65volutil
+      quantity_kind: volume
+      unit_native: MW/(m3/s)
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_produtividade65volutil)
+          unit: MW/(m3/s)
+        maximum:
+          sql: MAX(val_produtividade65volutil)
+          unit: MW/(m3/s)
+        time_series:
+          sql: AVG(val_produtividade65volutil)
+          unit: MW/(m3/s)
+        ranking:
+          sql: AVG(val_produtividade65volutil)
+          unit: MW/(m3/s)
+        comparison:
+          sql: AVG(val_produtividade65volutil)
+          unit: MW/(m3/s)
+      aliases:
+      - produtividade 65
+      - produtividade a 65 por cento do volume util
+      - produtividade 65 vol util
+      - produtividade referencia planejamento
+    - id: perda
+      label: Perda
+      columns:
+      - val_perda
+      expression: val_perda
+      quantity_kind: ratio
+      unit_native: pct_or_m
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_perda)
+          unit: pct_or_m
+        maximum:
+          sql: MAX(val_perda)
+          unit: pct_or_m
+        minimum:
+          sql: MIN(val_perda)
+          unit: pct_or_m
+        time_series:
+          sql: AVG(val_perda)
+          unit: pct_or_m
+        ranking:
+          sql: AVG(val_perda)
+          unit: pct_or_m
+        comparison:
+          sql: AVG(val_perda)
+          unit: pct_or_m
+      aliases:
+      - perda hidraulica
+      - perda
+      - fator de perda
+      - coeficiente de perda
+    - id: tipoperda
+      label: Tipoperda
+      columns:
+      - val_tipoperda
+      expression: TRY_CAST(val_tipoperda AS DOUBLE)
+      quantity_kind: numeric
+      unit_native: adimensional
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_tipoperda AS DOUBLE))
+          unit: ''
+        average:
+          sql: AVG(TRY_CAST(val_tipoperda AS DOUBLE))
+          unit: ''
+        maximum:
+          sql: MAX(TRY_CAST(val_tipoperda AS DOUBLE))
+          unit: ''
+        time_series:
+          sql: SUM(TRY_CAST(val_tipoperda AS DOUBLE))
+          unit: ''
+        ranking:
+          sql: SUM(TRY_CAST(val_tipoperda AS DOUBLE))
+          unit: ''
+        comparison:
+          sql: SUM(TRY_CAST(val_tipoperda AS DOUBLE))
+          unit: ''
+      aliases:
+      - tipo de perda
+      - tipo perda hidráulica
+      - coeficiente de perda
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - SECOS
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      tip_reservatorio:
+        FIO DAGUA:
+          aliases:
+          - fio dagua
+          - fio d agua
+          - a fio dagua
+          filter: tip_reservatorio = 'FIO DAGUA'
+        RESERVATORIO COM USINA:
+          aliases:
+          - reservatorio com usina
+          - com usina
+          filter: tip_reservatorio = 'RESERVATÓRIO COM USINA'
+        RESERVATORIO COM USINA DE BOMBEAMENTO:
+          aliases:
+          - reservatorio com usina de bombeamento
+          - bombeamento
+          - usina reversivel
+          filter: tip_reservatorio = 'RESERVATÓRIO COM USINA DE BOMBEAMENTO'
+        RESERVATORIO SEM USINA:
+          aliases:
+          - reservatorio sem usina
+          - sem usina
+          filter: tip_reservatorio = 'RESERVATÓRIO SEM USINA'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          - NE
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          - N
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE/CENTRO-OESTE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - sudeste centro-oeste
+          - SE
+          filter: nom_subsistema = 'SUDESTE/CENTRO-OESTE'
+        SUL:
+          aliases:
+          - sul
+          - S
+          filter: nom_subsistema = 'SUL'
+      nom_bacia:
+        AMAZONAS:
+          aliases:
+          - amazonas
+          - bacia amazonica
+          filter: nom_bacia = 'AMAZONAS'
+        ARAGUARI:
+          aliases:
+          - araguari
+          filter: nom_bacia = 'ARAGUARI'
+        CAPIVARI:
+          aliases:
+          - capivari
+          filter: nom_bacia = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - doce
+          - rio doce
+          filter: nom_bacia = 'DOCE'
+        GRANDE:
+          aliases:
+          - grande
+          - rio grande
+          filter: nom_bacia = 'GRANDE'
+        IGUACU:
+          aliases:
+          - iguacu
+          - iguacu
+          filter: nom_bacia = 'IGUACU'
+        ITABAPOANA:
+          aliases:
+          - itabapoana
+          filter: nom_bacia = 'ITABAPOANA'
+        ITAJAI:
+          aliases:
+          - itajai
+          filter: nom_bacia = 'ITAJAI'
+        JACUI:
+          aliases:
+          - jacui
+          filter: nom_bacia = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - jequitinhonha
+          filter: nom_bacia = 'JEQUITINHONHA'
+        MUCURI:
+          aliases:
+          - mucuri
+          filter: nom_bacia = 'MUCURI'
+        PARAGUACU:
+          aliases:
+          - paraguacu
+          filter: nom_bacia = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - paraguai
+          filter: nom_bacia = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - paraiba do sul
+          filter: nom_bacia = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - parana
+          - rio parana
+          filter: nom_bacia = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - paranaiba
+          filter: nom_bacia = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: nom_bacia = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - parnaiba
+          filter: nom_bacia = 'PARNAIBA'
+        SANTA MARIA VIT:
+          aliases:
+          - santa maria vitoria
+          - santa maria vit
+          filter: nom_bacia = 'SANTA MARIA VIT'
+        SAO FRANCISCO:
+          aliases:
+          - sao francisco
+          - rio sao francisco
+          - velho chico
+          filter: nom_bacia = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - tiete
+          filter: nom_bacia = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - tocantins
+          filter: nom_bacia = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - uruguai
+          filter: nom_bacia = 'URUGUAI'
+      nom_ree:
+        BELO MONTE:
+          aliases:
+          - belo monte
+          filter: nom_ree = 'BELO MONTE'
+        IGUACU:
+          aliases:
+          - iguacu
+          filter: nom_ree = 'IGUACU'
+        ITAIPU:
+          aliases:
+          - itaipu
+          filter: nom_ree = 'ITAIPU'
+        MADEIRA:
+          aliases:
+          - madeira
+          filter: nom_ree = 'MADEIRA'
+        MANAUS-AMAPA:
+          aliases:
+          - manaus amapa
+          - manaus-amapa
+          filter: nom_ree = 'MANAUS-AMAPA'
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_ree = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_ree = 'NORTE'
+        PARANA:
+          aliases:
+          - parana
+          filter: nom_ree = 'PARANA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: nom_ree = 'PARANAPANEMA'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: nom_ree = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_ree = 'SUL'
+        TELES PIRES:
+          aliases:
+          - teles pires
+          filter: nom_ree = 'TELES PIRES'
+      val_tipoperda:
+        '%':
+          aliases:
+          - percentual
+          - porcentagem
+          - pct
+          filter: val_tipoperda = '%'
+        m:
+          aliases:
+          - metros
+          - valor fixo metros
+          filter: val_tipoperda = 'm'
+    sql_patterns:
+      cotamaxima_por_reservatorio:
+        template: "SELECT nom_reservatorio, id_subsistema,\n  MAX(TRY_CAST(val_cotamaxima AS DOUBLE))\
+          \ AS cota_maxima_m\nFROM {source}\nWHERE TRY_CAST(val_cotamaxima AS DOUBLE) IS NOT NULL\nGROUP\
+          \ BY 1, 2\nORDER BY cota_maxima_m DESC"
+        output_unit: m
+        matches:
+          output_modes:
+          - maximum
+          - ranking
+          metrics:
+          - cotamaxima
+      volume_util_por_subsistema:
+        template: "SELECT nom_subsistema,\n  SUM(TRY_CAST(val_volutiltot AS DOUBLE)) AS vol_util_total_hm3\n\
+          FROM {source}\nWHERE TRY_CAST(val_volutiltot AS DOUBLE) IS NOT NULL\nGROUP BY 1\nORDER BY vol_util_total_hm3\
+          \ DESC"
+        output_unit: hm3
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - volutiltot
+      reservatorios_sem_produtibilidade:
+        template: 'SELECT nom_reservatorio, nom_usina, tip_reservatorio, nom_subsistema
+
+          FROM {source}
+
+          WHERE val_produtibilidadeespecifica IS NULL
+
+          ORDER BY nom_reservatorio'
+        output_unit: null
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - produtibilidadeespecifica
+      parametros_por_ree:
+        template: "SELECT nom_ree,\n  COUNT(*) AS qtd_reservatorios,\n  SUM(TRY_CAST(val_volutiltot AS\
+          \ DOUBLE)) AS vol_util_total_hm3,\n  AVG(val_produtibilidadeespecifica) AS produtibilidade_media\n\
+          FROM {source}\nWHERE TRY_CAST(val_volutiltot AS DOUBLE) IS NOT NULL\nGROUP BY 1\nORDER BY vol_util_total_hm3\
+          \ DESC"
+        output_unit: hm3
+        matches:
+          output_modes:
+          - total
+          - average
+          metrics:
+          - volutiltot
+          - produtibilidadeespecifica
+- property: fewShotQueries
+  value:
+  - question: Qual é o volume útil total de armazenamento (hm³) dos reservatórios por subsistema elétrico?
+    sql: SELECT nom_subsistema, id_subsistema, COUNT(*) AS qtd_reservatorios, SUM(TRY_CAST(val_volutiltot
+      AS DOUBLE)) AS vol_util_total_hm3, SUM(TRY_CAST(val_volmax AS DOUBLE)) AS vol_max_total_hm3, SUM(TRY_CAST(val_volmin
+      AS DOUBLE)) AS vol_min_total_hm3 FROM read_parquet('s3://ons-aws-prod-opendata/dataset/reservatorio/*.parquet')
+      WHERE TRY_CAST(val_volutiltot AS DOUBLE) IS NOT NULL GROUP BY nom_subsistema, id_subsistema ORDER
+      BY vol_util_total_hm3 DESC
+  - question: Quais são os 20 reservatórios com maior volume útil total no Brasil?
+    sql: SELECT nom_reservatorio, nom_usina, nom_subsistema, nom_bacia, nom_ree, TRY_CAST(val_volutiltot
+      AS DOUBLE) AS vol_util_hm3, TRY_CAST(val_volmax AS DOUBLE) AS vol_max_hm3, TRY_CAST(val_cotamaxima
+      AS DOUBLE) AS cota_max_m, TRY_CAST(val_cotaminima AS DOUBLE) AS cota_min_m FROM read_parquet('s3://ons-aws-prod-opendata/dataset/reservatorio/*.parquet')
+      WHERE TRY_CAST(val_volutiltot AS DOUBLE) IS NOT NULL ORDER BY vol_util_hm3 DESC LIMIT 20
+  - question: Quais são os parâmetros de produtibilidade dos reservatórios agrupados por Reservatório
+      Equivalente de Energia?
+    sql: SELECT nom_ree, nom_subsistema, COUNT(*) AS qtd_reservatorios, AVG(val_produtibilidadeespecifica)
+      AS prod_especifica_media, MIN(val_produtibilidadeespecifica) AS prod_especifica_min, MAX(val_produtibilidadeespecifica)
+      AS prod_especifica_max, AVG(val_produtividade65volutil) AS prod_65_media, AVG(val_perda) AS perda_media_pct
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/reservatorio/*.parquet') WHERE val_produtibilidadeespecifica
+      IS NOT NULL AND val_produtividade65volutil IS NOT NULL GROUP BY nom_ree, nom_subsistema ORDER BY
+      nom_subsistema, nom_ree
+- property: license
+  value: CC-BY
+- property: temporalCoverageStart
+  value: '1924-03-01'

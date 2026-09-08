@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-tiago-dados-abertos"
+dynamic = ["version"]
+description = "MCP server que conecta agentes de IA aos dados abertos do ONS (Operador Nacional do Sistema)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.12"
+authors = [
+    {name = "Operador Nacional do Sistema Elétrico - ONS"},
+    {name = "Tadyêllo Bastos", email = "contato@tadyello.dev"},
+]
+maintainers = [{name = "Tadyêllo Bastos", email = "contato@tadyello.dev"}]
+keywords = ["mcp", "ons", "setor-eletrico", "energia", "brasil", "duckdb", "open-data", "text2sql"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    # PINADO na versao exata: o pacote no PyPI nao carrega o uv.lock, entao quem
+    # instala com pip resolvia a faixa e podia pegar qualquer coisa de 2.0.0 a
+    # 3.4.6 — inclusive a 2.x, de outra major. O servidor usa FastMCP(name,
+    # version=...) e o comportamento do handshake depende da versao.
+    "fastmcp==3.4.6",
+    "duckdb>=1.0.0",
+    "sqlglot>=30.1.0",
+    "pyyaml>=6.0",
+    "tabulate>=0.9.0",
+    # boto3: execucao/pruning.py lista o bucket publico do ONS (anonimo) para podar
+    # arquivos parquet por ano. E import de modulo, nao opcional.
+    "boto3>=1.34.0",
+    # zoneinfo precisa de uma base de fusos; Linux/macOS tem a do sistema, Windows nao.
+    # Sem isto, resolver MCP_DATA_TZ (America/Sao_Paulo) quebra o boot no Windows.
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4.0",
+    # o JSON Schema oficial do padrao, para o teste de conformidade ODCS.
+    # Vem do pacote e nao de uma copia no repo: copia envelhece calada.
+    "open-data-contract-standard>=3.2.0",
+    "jsonschema>=4.0",
+]
+
+[project.urls]
+Repository = "https://github.com/ONSBR/TIAGO-Dados-Abertos"
+Documentation = "https://github.com/ONSBR/TIAGO-Dados-Abertos/blob/main/README.md"
+Issues = "https://github.com/ONSBR/TIAGO-Dados-Abertos/issues"
+
+[project.scripts]
+mcp-tiago-dados-abertos = "mcp_tiago_dados_abertos.server:main"
+
+# O produto e' o corpus: o wheel carrega os contratos, senao `pip install` entrega um
+# servidor sem dataset. `contracts/` e' remapeado para dentro do pacote; o cache
+# pre-parseado e' artefato e fica de fora (com `include` + `sources` o `exclude` vale —
+# com `force-include` nao valeria).
+[tool.hatch.version]
+path = "src/mcp_tiago_dados_abertos/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+include = ["src/mcp_tiago_dados_abertos", "contracts"]
+exclude = ["contracts/contracts_cache.json"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+"contracts" = "mcp_tiago_dados_abertos/contracts"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "strict"
+markers = [
+    "network: tests that require network access (S3, HTTPS)",
+    "net: tests that require network access (alias)",
+]
+
+[tool.bandit]
+# B608: o servidor MONTA SQL por construcao (e o produto); a fronteira de seguranca e o
+#       validador (execucao/validator.py), coberto por tests/execucao/.
+# B104: 0.0.0.0 e o bind padrao do container; MCP_HOST muda.
+# B506: o loader e CSafeLoader (ou SafeLoader) escolhido por getattr; o Bandit nao ve.
+skips = ["B608", "B104", "B506"]
+exclude_dirs = ["tests", "scripts"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+# server.py: imports apos o setup de logging sao intencionais (E402)
+"src/mcp_tiago_dados_abertos/server.py" = ["E402"]
+# tests: linhas de dados/SQL longas (E501) e imports apos ajuste de sys.path (E402)
+"tests/**" = ["E501", "E402"]

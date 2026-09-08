@@ -1,0 +1,794 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:balanco_dessem_geral
+name: balanco_dessem_geral
+tenant: ons
+tags:
+- DESSEM
+- DESSEM geral
+- balanço DESSEM
+- balanço de energia
+- balanço energético semi-horário
+- demanda programada
+- despacho DESSEM
+- elevatórias
+- geração hidráulica
+- geração renovável
+- geração térmica
+- programação DESSEM
+- programação diária
+- semi-horário
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/balanco_dessem_geral/*.parquet
+  format: parquet
+description:
+  purpose: Suportar operadores do ONS, agentes do setor elétrico e analistas de planejamento na validação
+    e acompanhamento da programação diária da operação, permitindo verificar o balanço entre geração por
+    fonte e demanda por subsistema em cada patamar semi-horário. Subsidia decisões de despacho de curto
+    prazo, análise de adequação de oferta, monitoramento do mix de geração programado e verificação do
+    fechamento energético do SIN.
+  limitations: Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização . Coluna armazenada
+    como VARCHAR no Parquet devido ao formato de serialização . Coluna armazenada como VARCHAR no Parquet
+    devido ao formato de serialização .
+  usage: Recuperar este dataset quando a pergunta envolver programação diária da operação do sistema elétrico,
+    balanço de energia por subsistema em intervalos semi-horários ou mix de geração (hidráulica, térmica,
+    renovável) resultante do modelo DESSEM.
+domain: planejamento
+schema:
+- name: balanco_dessem_geral
+  physicalType: parquet
+  logicalType: object
+  physicalName: balanco_dessem_geral
+  properties:
+  - name: din_programacaodia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da programação DESSEM. Representa o dia para o qual a programação
+      eletro-energética foi gerada pelo modelo. Armazenada como VARCHAR no Parquet; recomenda-se CAST(...
+      AS DATE) para operações temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de programação
+      - dia de referência
+      - data DESSEM
+      - din_programacao
+      - data da programação
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_patamar
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Número do patamar semi-horário dentro do dia de programação. Varia de 1 a 48, representando
+      os 48 intervalos de 30 minutos que compõem um dia completo (patamar 1 = 00:00–00:30, patamar 48
+      = 23:30–24:00).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - patamar
+      - intervalo semi-horário
+      - meia hora
+      - slot temporal
+      - período
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+  - name: cod_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico do SIN ao qual o balanço de energia se refere.
+      Valores típicos incluem SE (Sudeste/Centro-Oeste), S (Sul), NE (Nordeste), N (Norte) e SIN (Sistema
+      Interligado Nacional — agregado).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - região elétrica
+      - sistema
+      - cod_sis
+      - submercado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: val_demanda
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Demanda de energia programada pelo DESSEM para o subsistema no patamar semi-horário
+      indicado. Representa a carga prevista a ser atendida. Armazenada como VARCHAR devido ao formato
+      de serialização; requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - demanda
+      - carga programada
+      - demanda prevista
+      - carga prevista
+      - consumo
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_demanda AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_geracao_renovavel
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração de energia por fontes renováveis (eólica, solar fotovoltaica e outras renováveis
+      não-hidráulicas) programada pelo DESSEM para o subsistema no patamar semi-horário. Armazenada como
+      VARCHAR devido ao formato de serialização.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração renovável
+      - geração eólica e solar
+      - renováveis
+      - geração não-convencional
+      - fontes renováveis
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracao_renovavel AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_geracao_hidraulica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração de energia hidráulica programada pelo DESSEM para o subsistema no patamar semi-horário.
+      Inclui usinas hidrelétricas de grande porte e PCHs despachadas centralizadamente. Armazenada como
+      VARCHAR devido ao formato de serialização.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração hidráulica
+      - geração hídrica
+      - hidráulica
+      - geração de hidrelétricas
+      - hidro
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_geracao_termica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração de energia térmica programada pelo DESSEM para o subsistema no patamar semi-horário.
+      Inclui usinas termelétricas a gás, carvão, óleo, nuclear e biomassa despachadas centralizadamente.
+      Armazenada como VARCHAR devido a formato de serialização; requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração térmica
+      - térmica
+      - geração termelétrica
+      - despacho térmico
+      - termelétricas
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracao_termica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_cons_elevatoria
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Consumo de energia pelas estações elevatórias (bombas de recalque) programado pelo DESSEM
+      para o subsistema no patamar semi-horário. Representa a parcela da demanda destinada ao bombeamento
+      de água em sistemas de transposição ou irrigação despachados centralizadamente. Armazenada como
+      VARCHAR devido ao formato de serialização; requer TRY_CAST para uso numérico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - consumo elevatória
+      - elevatória
+      - bombeamento
+      - consumo de bombeamento
+      - estação elevatória
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cons_elevatoria AS DOUBLE)
+    - property: unit
+      value: MWmed
+    - property: enum
+      value:
+      - '0.00'
+      - '108.03'
+      - '111.23'
+      - '24.43'
+      - '27.63'
+      - '49.40'
+      - '51.00'
+      - '62.81'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente com resultado do modelo DESSEM para o dia de referência; sujeito
+    a atualização retroativa por processo de consistência recorrente do ONS
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/balanco_dessem_geral
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - o que o dessem programou
+  - programacao do dessem
+  - balanco programado do dia
+  - saida do dessem por subsistema
+  - carga prevista
+  - previsao de carga
+  - demanda prevista
+  - quanto vai consumir amanha
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver programação diária da operação do sistema elétrico,
+    balanço de energia por subsistema em intervalos semi-horários ou mix de geração (hidráulica, térmica,
+    renovável) resultante do modelo DESSEM. Também relevante para perguntas sobre demanda programada,
+    despacho de curto prazo ou fechamento do balanço energético do SIN por subsistema.
+- property: agentInstructions
+  value: '- [din_programacaodia] Coluna armazenada como VARCHAR no Parquet em vez de DATE. Pode conter
+    variações de formato de data (YYYY-MM-DD, DD/MM/YYYY ou outros) dependendo da versão de exportação.
+    Requer CAST(din_programacaodia AS DATE) para filtros e ordenações temporais.
+
+
+    - [val_demanda] Coluna numérica armazenada como VARCHAR devido ao formato de serialização. Todas as
+    agregações (SUM, AVG, MIN, MAX) falharão silenciosamente ou retornarão erro sem TRY_CAST explícito.
+    Valores nulos mascarados como string vazia ou ''None'' são possíveis.
+
+
+    - [val_geracao_renovavel] Coluna numérica armazenada como VARCHAR devido ao formato de serialização.
+    Requer TRY_CAST(val_geracao_renovavel AS DOUBLE) em todas as operações aritméticas. Valores não numéricos
+    resultarão em NULL após o cast, podendo distorcer médias e somas.
+
+
+    - [val_geracao_hidraulica] Coluna numérica armazenada como VARCHAR devido ao formato de serialização.
+    Requer TRY_CAST(val_geracao_hidraulica AS DOUBLE) em todas as operações aritméticas. Componente dominante
+    do balanço energético brasileiro; erros de conversão impactam significativamente análises de despacho
+    hidráulico.
+
+
+    - [val_geracao_termica] Coluna numérica armazenada como VARCHAR devido ao formato de serialização.
+    Requer TRY_CAST(val_geracao_termica AS DOUBLE) em todas as operações aritméticas. Valores negativos
+    inesperados devem ser investigados, pois geração térmica não deve ser negativa em condições normais
+    de operação.
+
+
+    - [val_cons_elevatoria] Coluna numérica armazenada como VARCHAR devido ao formato de serialização.
+    Requer TRY_CAST(val_cons_elevatoria AS DOUBLE) em todas as operações aritméticas. Valores esperados
+    próximos de zero para subsistemas sem elevatórias; valores muito elevados podem indicar inconsistência
+    na programação DESSEM.
+
+
+    - [num_patamar] Para cada combinação (din_programacaodia, cod_subsistema), esperam-se exatamente 48
+    patamares (1 a 48). Dias com menos de 48 registros indicam dados incompletos ou falha na exportação
+    do DESSEM para aquela data/subsistema.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a geração hidráulica programada pelo DESSEM para o subsistema SE no dia 2025-06-01?
+  - Como se distribui o mix de geração (hidráulica, térmica, renovável) por subsistema em um dia típico?
+  - Qual a participação percentual das renováveis na geração total programada pelo DESSEM por subsistema?
+  - Em quais patamares do dia a demanda programada é mais elevada no subsistema NE?
+  - Qual o consumo total de elevatórias programado pelo DESSEM para o SIN em um dia de referência?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_geral/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2025-05-23'
+- property: semantics
+  value:
+    measure_terms:
+    - programacao
+    - programada
+    - programado
+    - dessem
+    family: balanco_dessem
+    family_default: false
+    temporal_perspective: programado
+    row_grain:
+      temporal: 30 min
+      temporal_column: din_programacaodia
+      spatial: subsistema
+      entity: fonte_agregada
+      one_row_per:
+      - din_programacaodia
+      - cod_subsistema
+      - num_patamar
+    dimension_columns:
+      subsistema: cod_subsistema
+      fonte: _pivot(val_geracao_hidraulica, val_geracao_termica)
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: num_patamar
+    metrics:
+    - id: geracao_total
+      label: Geracao Total
+      columns:
+      - val_geracao_renovavel
+      - val_geracao_hidraulica
+      - val_geracao_termica
+      expression: TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+        + TRY_CAST(val_geracao_termica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+            + TRY_CAST(val_geracao_termica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+            + TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+            + TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+            + TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+            + TRY_CAST(val_geracao_termica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+            + TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+    - id: demanda
+      label: Demanda
+      columns:
+      - val_demanda
+      expression: TRY_CAST(val_demanda AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_demanda AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_demanda AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_demanda AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - demanda
+      - carga programada
+      - demanda prevista
+      - carga prevista
+      - consumo
+    - id: geracao_renovavel
+      label: Geracao Renovavel
+      columns:
+      - val_geracao_renovavel
+      expression: TRY_CAST(val_geracao_renovavel AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracao_renovavel AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracao_renovavel AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracao_renovavel AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracao_renovavel AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracao_renovavel AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracao_renovavel AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao renovavel
+      - geracao eolica e solar
+      - renovaveis
+      - geracao nao-convencional
+      - fontes renovaveis
+    - id: geracao_hidraulica
+      label: Geracao Hidraulica
+      columns:
+      - val_geracao_hidraulica
+      expression: TRY_CAST(val_geracao_hidraulica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracao_hidraulica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracao_hidraulica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracao_hidraulica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracao_hidraulica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracao_hidraulica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracao_hidraulica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao hidraulica
+      - geracao hidrica
+      - hidraulica
+      - geracao de hidreletricas
+      - hidro
+      - hidreletrica
+      - hidrica
+      - uhe
+      - agua
+    - id: geracao_termica
+      label: Geracao Termica
+      columns:
+      - val_geracao_termica
+      expression: TRY_CAST(val_geracao_termica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracao_termica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracao_termica AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracao_termica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - geracao termica
+      - termica
+      - geracao termeletrica
+      - despacho termico
+      - termeletricas
+      - termeletrica
+      - ute
+    - id: cons_elevatoria
+      label: Cons Elevatoria
+      columns:
+      - val_cons_elevatoria
+      expression: TRY_CAST(val_cons_elevatoria AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_cons_elevatoria AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_cons_elevatoria AS DOUBLE)) * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cons_elevatoria AS DOUBLE))
+          unit: MWmed
+      interval_hours: 0.5
+      aliases:
+      - consumo elevatoria
+      - elevatoria
+      - bombeamento
+      - consumo de bombeamento
+      - estacao elevatoria
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: cod_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: cod_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: cod_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: cod_subsistema = 'N'
+      fonte:
+        hidraulica:
+          aliases:
+          - hidraulica
+          - hidreletrica
+          - hidrica
+          - uhe
+          - agua
+          - hidro
+          columns:
+          - val_geracao_hidraulica
+        termica:
+          aliases:
+          - termica
+          - termeletrica
+          - ute
+          - despacho termico
+          columns:
+          - val_geracao_termica
+        renovavel:
+          aliases:
+          - renovavel
+          - eolica e solar
+          - nao-convencional
+          - fontes renovaveis
+          columns:
+          - val_geracao_renovavel
+    sql_patterns:
+      geracao_total_mensal:
+        template: "SELECT DATE_TRUNC('month', CAST(din_programacaodia AS DATE)) AS mes, cod_subsistema,\n\
+          \  SUM((TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica AS DOUBLE)\
+          \ + TRY_CAST(val_geracao_termica AS DOUBLE)) * 0.5) / 1000 AS geracao_gwh\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM CAST(din_programacaodia AS DATE)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao_total
+          grain: month
+        validated_params:
+          year: '2025'
+      mix_geracao_diario:
+        template: "SELECT CAST(din_programacaodia AS DATE) AS dia, cod_subsistema,\n  SUM(TRY_CAST(val_geracao_hidraulica\
+          \ AS DOUBLE) * 0.5) / 1000 AS hidraulica_gwh,\n  SUM(TRY_CAST(val_geracao_termica AS DOUBLE)\
+          \ * 0.5) / 1000 AS termica_gwh,\n  SUM(TRY_CAST(val_geracao_renovavel AS DOUBLE) * 0.5) / 1000\
+          \ AS renovavel_gwh\nFROM {source}\nWHERE CAST(din_programacaodia AS DATE) = '{date}'\nGROUP\
+          \ BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao_hidraulica
+          - geracao_termica
+          - geracao_renovavel
+          grain: day
+        validated_params:
+          date: '2025-06-05'
+      participacao_renovavel:
+        template: "SELECT CAST(din_programacaodia AS DATE) AS dia, cod_subsistema,\n  AVG(\n    TRY_CAST(val_geracao_renovavel\
+          \ AS DOUBLE) /\n    NULLIF(TRY_CAST(val_geracao_renovavel AS DOUBLE) + TRY_CAST(val_geracao_hidraulica\
+          \ AS DOUBLE) + TRY_CAST(val_geracao_termica AS DOUBLE), 0)\n  ) * 100 AS participacao_renovavel_pct\n\
+          FROM {source}\nWHERE CAST(din_programacaodia AS DATE) BETWEEN '{start}' AND '{end}'\nGROUP BY\
+          \ 1, 2\nORDER BY 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - geracao_renovavel
+          grain: day
+        validated_params:
+          start: '2025-05-23'
+          end: '2026-07-09'
+      pico_demanda_patamar:
+        template: "SELECT num_patamar, cod_subsistema,\n  MAX(TRY_CAST(val_demanda AS DOUBLE)) AS pico_demanda_mwmed\n\
+          FROM {source}\nWHERE CAST(din_programacaodia AS DATE) BETWEEN '{start}' AND '{end}'\nGROUP BY\
+          \ 1, 2\nORDER BY 3 DESC"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - peak_power
+          metrics:
+          - demanda
+          grain: patamar
+        validated_params:
+          start: '2025-05-23'
+          end: '2026-07-09'
+      balanco_dessem_geral_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_cons_elevatoria AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1)\
+          \ AS val_cons_elevatoria_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_demanda AS VARCHAR) AS DOUBLE))\
+          \ * 0.5 / 1000, 1) AS val_demanda_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao_hidraulica\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracao_hidraulica_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao_renovavel\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracao_renovavel_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao_termica\
+          \ AS VARCHAR) AS DOUBLE)) * 0.5 / 1000, 1) AS val_geracao_termica_gwh\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(din_programacaodia AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY\
+          \ 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      balanco_dessem_geral_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_cons_elevatoria AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_cons_elevatoria_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_demanda\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS\
+          \ val_demanda_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao_hidraulica AS VARCHAR) AS DOUBLE))\
+          \ / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_geracao_hidraulica_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao_renovavel AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS val_geracao_renovavel_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao_termica\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_programacaodia AS TIMESTAMP)), 1) AS\
+          \ val_geracao_termica_mwmed\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_programacaodia\
+          \ AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+- property: fewShotQueries
+  value:
+  - question: Qual a composição da geração hidráulica, térmica e renovável programada pelo DESSEM para
+      cada subsistema em um dia específico?
+    sql: SELECT cod_subsistema, TRY_CAST(din_programacaodia AS DATE) AS data_programacao, SUM(TRY_CAST(val_geracao_hidraulica
+      AS DOUBLE)) AS total_hidraulica_mwmed, SUM(TRY_CAST(val_geracao_termica AS DOUBLE)) AS total_termica_mwmed,
+      SUM(TRY_CAST(val_geracao_renovavel AS DOUBLE)) AS total_renovavel_mwmed, SUM(TRY_CAST(val_demanda
+      AS DOUBLE)) AS total_demanda_mwmed, ROUND( 100.0 * SUM(TRY_CAST(val_geracao_hidraulica AS DOUBLE))
+      / NULLIF(SUM(TRY_CAST(val_geracao_hidraulica AS DOUBLE)) + SUM(TRY_CAST(val_geracao_termica AS DOUBLE))
+      + SUM(TRY_CAST(val_geracao_renovavel AS DOUBLE)), 0), 2 ) AS pct_hidraulica FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_geral/*.parquet')
+      WHERE TRY_CAST(din_programacaodia AS DATE) = '2025-06-01' AND cod_subsistema <> 'SIN' GROUP BY cod_subsistema,
+      TRY_CAST(din_programacaodia AS DATE) ORDER BY cod_subsistema;
+  - question: Como varia a demanda programada pelo DESSEM ao longo dos 48 patamares do dia para o subsistema
+      Sudeste?
+    sql: SELECT num_patamar, AVG(TRY_CAST(val_demanda AS DOUBLE)) AS demanda_media_mwmed, MIN(TRY_CAST(val_demanda
+      AS DOUBLE)) AS demanda_min_mwmed, MAX(TRY_CAST(val_demanda AS DOUBLE)) AS demanda_max_mwmed FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_geral/*.parquet') WHERE cod_subsistema
+      = 'SE' GROUP BY num_patamar ORDER BY num_patamar;
+  - question: Existem dias ou subsistemas com menos de 48 patamares no dataset DESSEM geral?
+    sql: SELECT TRY_CAST(din_programacaodia AS DATE) AS data_programacao, cod_subsistema, COUNT(DISTINCT
+      num_patamar) AS qtd_patamares, CASE WHEN COUNT(DISTINCT num_patamar) = 48 THEN 'COMPLETO' ELSE 'INCOMPLETO'
+      END AS status_completude FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_dessem_geral/*.parquet')
+      GROUP BY TRY_CAST(din_programacaodia AS DATE), cod_subsistema ORDER BY status_completude DESC, data_programacao,
+      cod_subsistema;
+- property: license
+  value: CC-BY

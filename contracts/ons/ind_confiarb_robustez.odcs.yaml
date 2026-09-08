@@ -1,0 +1,869 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_robustez
+name: ind_confiarb_robustez
+tenant: ons
+tags:
+- RMAL
+- RMCS
+- RRB
+- RRBCS
+- confiabilidade
+- corte de carga
+- perturbações
+- rede básica
+- robustez
+- robustez da malha sistêmica
+- robustez rede básica
+- transmissão
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_robustez/*.parquet
+  format: parquet
+description:
+  purpose: Suportar analistas de confiabilidade, planejadores do sistema elétrico e agentes regulados
+    no monitoramento da robustez da rede básica frente a perturbações e contingências simples, habilitando
+    decisões de planejamento de expansão da transmissão, avaliação de desempenho operacional por subsistema
+    e cumprimento de critérios regulatórios de confiabilidade definidos pelo ONS no Submódulo 9.1 dos
+    Procedimentos de Rede.
+  limitations: A soma das perturbações por faixa de MW (num_perturbacoescortecarga_0a50mw + num_perturbacoescortecarga_50a100mw
+    + num_perturbacoescortecarga_maior100mw) pode não ser igual a num_perturbacoescortecarga em todos
+    os registros, possivelmente devido a perturbações sem classificação de faixa ou critérios de categorização
+    distintos. Registros com val_indicador igual a 0. O dataset cobre o período de 2007-01-01 em diante
+    com granularidade mensal.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de robustez da rede básica de transmissão
+    (RMAL, RMCS, RRB, RRBCS), análise de perturbações com ou sem corte de carga por subsistema, região
+    ou estado, ou avaliação de confiabilidade da transmissão conforme Submódulo 9.
+domain: qualidade
+schema:
+- name: ind_confiarb_robustez
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_robustez
+  properties:
+  - name: cod_indicador
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do indicador de robustez. Representa um dos quatro indicadores
+      definidos no Submódulo 9.1 dos Procedimentos de Rede do ONS: RMAL (Robustez da Malha Sistêmica),
+      RMCS (Robustez da Malha Sistêmica para Contingências Simples), RRB (Robustez da Rede Básica) e RRBCS
+      (Robustez da Rede Básica para Contingências Simples).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - indicador
+      - tipo de indicador
+      - código do indicador
+      - indicador de robustez
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - RMAL
+      - RMCS
+      - RRB
+      - RRBCS
+  - name: dsc_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Descrição do nível de agregação geográfica ao qual o registro se refere. Indica se o
+      indicador é calculado para o Sistema Interligado Nacional (SIN), para um subsistema elétrico, para
+      uma região geográfica ou para um estado específico.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - nível de agregação
+      - agregação geográfica
+      - tipo de agregação
+      - escopo geográfico
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Estado
+      - Região Geográfica
+      - Sistema
+      - Subsistema
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código que identifica a característica geográfica específica dentro do nível de agregação
+      definido em dsc_agregacao. Para dsc_agregacao=''Subsistema'', contém códigos como ''SE'', ''S'',
+      ''NE'', ''N''; para dsc_agregacao=''SIN'', contém o código do sistema integrado; para estados, contém
+      a sigla do estado.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da característica
+      - código geográfico
+      - código do subsistema
+      - código da região
+      - código do estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - CO
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - N
+      - NE
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - S
+      - SBR
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: dsc_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Descrição textual da característica geográfica identificada por cod_caracteristica.
+      Complementa o código com o nome completo da entidade geográfica, como o nome do subsistema, da região
+      ou do estado.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - descrição da característica
+      - nome do subsistema
+      - nome da região
+      - nome do estado
+      - descrição geográfica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - Centro-Oeste
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - NORDESTE
+      - NORTE
+      - Nordeste
+      - Norte
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - SUDESTE
+      - SUL
+      - Sistema Brasileiro
+      - Sudeste
+      - Sul
+      - TOCANTINS
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do indicador calculado. Distingue se o valor de val_indicador
+      e as contagens de perturbações referem-se a um período mensal ou anual, permitindo separar as duas
+      granularidades temporais presentes no dataset.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - frequência
+      - tipo de período
+      - granularidade temporal
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do registro, representando o mês/ano ao qual o indicador se refere.
+      As datas são registradas no primeiro dia de cada mês (ex: 2024-01-01 00:00:00 para janeiro de 2024).
+      Para registros anuais (id_periodicidade=''Anual''), representa o primeiro mês do ano de referência.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - mês de referência
+      - ano de referência
+      - período
+      - competência
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_indicador
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor percentual do indicador de robustez calculado para o período e agregação geográfica
+      especificados. Representa a proporção de situações em que a rede básica atendeu aos critérios de
+      robustez definidos no Submódulo 9.1 dos Procedimentos de Rede do ONS. Varia de 0,0 (nenhuma robustez)
+      a 100,0 (robustez plena).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - valor do indicador
+      - indicador de robustez
+      - percentual de robustez
+      - RMAL
+      - RMCS
+      - RRB
+      - RRBCS
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: num_perturbacoes
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número total de perturbações registradas na rede básica no período e agregação geográfica
+      de referência, independentemente de terem causado corte de carga. Inclui todas as ocorrências de
+      contingências e distúrbios no sistema de transmissão. Valor máximo observado: 3844.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - número de perturbações
+      - total de perturbações
+      - quantidade de perturbações
+      - ocorrências
+      - distúrbios
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_perturbacoescortecarga
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número total de perturbações que resultaram em corte de carga (interrupção no fornecimento
+      de energia) no período e agregação geográfica de referência. É um subconjunto de num_perturbacoes.
+      Valor máximo observado: 347.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - perturbações com corte de carga
+      - cortes de carga
+      - interrupções
+      - perturbações com interrupção
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_perturbacoescortecarga_0a50mw
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de perturbações com corte de carga cuja magnitude de carga interrompida está
+      na faixa de 0 a 50 MW. Permite análise de severidade dos eventos por faixa de potência. Valor máximo
+      observado: 176.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - perturbações 0 a 50 MW
+      - cortes de carga até 50 MW
+      - perturbações leves
+      - cortes pequenos
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: MW
+  - name: num_perturbacoescortecarga_50a100mw
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de perturbações com corte de carga cuja magnitude de carga interrompida está
+      na faixa de 50 a 100 MW. Permite análise de severidade dos eventos por faixa de potência intermediária.
+      Valor máximo observado: 89.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - perturbações 50 a 100 MW
+      - cortes de carga entre 50 e 100 MW
+      - perturbações médias
+      - cortes médios
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 9.0
+      - 10.0
+      - 11.0
+      - 12.0
+      - 13.0
+      - 14.0
+      - 15.0
+      - 16.0
+      - 17.0
+      - 18.0
+      - 19.0
+      - 20.0
+      - 21.0
+      - 22.0
+      - 23.0
+      - 24.0
+      - 25.0
+      - 26.0
+      - 27.0
+      - 28.0
+      - 30.0
+      - 31.0
+      - 33.0
+      - 34.0
+      - 35.0
+      - 36.0
+      - 38.0
+      - 39.0
+      - 40.0
+      - 41.0
+      - 42.0
+      - 43.0
+      - 51.0
+      - 61.0
+      - 71.0
+      - 72.0
+      - 73.0
+      - 75.0
+      - 81.0
+      - 83.0
+      - 89.0
+  - name: num_perturbacoescortecarga_maior100mw
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de perturbações com corte de carga cuja magnitude de carga interrompida é superior
+      a 100 MW. Representa os eventos mais severos de interrupção no sistema de transmissão. Valor máximo
+      observado: 105.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - perturbações acima de 100 MW
+      - cortes de carga maiores que 100 MW
+      - perturbações severas
+      - grandes cortes
+      - blackouts parciais
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: MW
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_robustez
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quantas perturbacoes houve
+  - perturbacoes com corte de carga
+  - robustez da rede
+  - eventos na rede basica
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de robustez da rede básica de transmissão
+    (RMAL, RMCS, RRB, RRBCS), análise de perturbações com ou sem corte de carga por subsistema, região
+    ou estado, ou avaliação de confiabilidade da transmissão conforme Submódulo 9.1 dos Procedimentos
+    de Rede do ONS. Também relevante para perguntas sobre severidade de eventos de transmissão segmentados
+    por faixa de MW interrompido.
+- property: agentInstructions
+  value: '- [num_perturbacoescortecarga] A soma das perturbações por faixa de MW (num_perturbacoescortecarga_0a50mw
+    + num_perturbacoescortecarga_50a100mw + num_perturbacoescortecarga_maior100mw) pode não ser igual
+    a num_perturbacoescortecarga em todos os registros, pois registros de agregações superiores (SIN)
+    consolidam os valores das agregações inferiores. Verificar consistência aritmética antes de somar
+    faixas.
+
+
+    - [val_indicador] Existem registros com val_indicador igual a 0.0, o que representa ausência total
+    de robustez. Embora tecnicamente válido, valores zero podem indicar períodos críticos ou problemas
+    de apuração. O mínimo observado é 0.0 e o máximo é 100.0. Recomenda-se verificar contexto dos registros
+    com valor zero.
+
+
+    - [id_periodicidade] Registros mensais e anuais coexistem no dataset com a mesma din_referencia para
+    o primeiro mês de cada ano (ex: 2024-01-01 pode aparecer como registro mensal de janeiro e como registro
+    anual de 2024). Filtros sem id_periodicidade podem gerar duplicatas em análises temporais e distorcer
+    agregações.
+
+
+    - [num_perturbacoes] O valor máximo de num_perturbacoes é 3844, que ocorre em agregações de nível
+    superior (SIN ou subsistemas maiores) e/ou periodicidade anual. Ao filtrar apenas por periodicidade
+    mensal e agregação SIN, verificar se valores extremos são esperados ou indicam erro de consolidação.
+
+
+    - [din_referencia] O dataset cobre a partir de 2007-01-01. Podem existir lacunas temporais para combinações
+    específicas de cod_indicador, dsc_agregacao e cod_caracteristica, especialmente em agregações por
+    Estado que podem ter sido incorporadas ao monitoramento em datas posteriores a 2007.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a evolução do indicador RRB para o subsistema Sudeste/Centro-Oeste nos últimos 12 meses?
+  - Quais subsistemas apresentaram menor robustez da rede básica (RRBCS) em 2023?
+  - Quantas perturbações com corte de carga acima de 100 MW ocorreram no SIN em 2024?
+  - Como o indicador RMAL variou anualmente entre 2010 e 2025 para o subsistema Sul?
+  - Qual a proporção de perturbações com corte de carga em relação ao total de perturbações por subsistema
+    no último ano disponível?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Tem dado de robustez pro SIN de 2025?"
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_robustez/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2007-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - cod_indicador
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: indicador
+      label: Indicador de Robustez
+      columns:
+      - val_indicador
+      expression: val_indicador
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_indicador)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indicador)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indicador)
+          unit: '%'
+        time_series:
+          sql: AVG(val_indicador)
+          unit: '%'
+        ranking:
+          sql: AVG(val_indicador)
+          unit: '%'
+        comparison:
+          sql: AVG(val_indicador)
+          unit: '%'
+      interval_hours: 8760.0
+      aliases:
+      - valor do indicador
+      - indicador de robustez
+      - percentual de robustez
+      - RMAL
+      - RMCS
+      - RRB
+      - RRBCS
+    - id: num_perturbacoes
+      label: Total de Perturbacoes
+      columns:
+      - num_perturbacoes
+      expression: num_perturbacoes
+      quantity_kind: count
+      unit_native: ocorrencias
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_perturbacoes)
+          unit: ocorrencias
+        average:
+          sql: AVG(num_perturbacoes)
+          unit: ocorrencias
+        maximum:
+          sql: MAX(num_perturbacoes)
+          unit: ocorrencias
+        time_series:
+          sql: SUM(num_perturbacoes)
+          unit: ocorrencias
+        ranking:
+          sql: SUM(num_perturbacoes)
+          unit: ocorrencias
+        comparison:
+          sql: SUM(num_perturbacoes)
+          unit: ocorrencias
+      interval_hours: 8760.0
+      aliases:
+      - numero de perturbacoes
+      - total de perturbacoes
+      - ocorrencias na rede
+      - disturbios na transmissao
+    - id: num_perturbacoescortecarga
+      label: Perturbacoes com Corte de Carga
+      columns:
+      - num_perturbacoescortecarga
+      expression: num_perturbacoescortecarga
+      quantity_kind: count
+      unit_native: ocorrencias
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_perturbacoescortecarga)
+          unit: ocorrencias
+        average:
+          sql: AVG(num_perturbacoescortecarga)
+          unit: ocorrencias
+        maximum:
+          sql: MAX(num_perturbacoescortecarga)
+          unit: ocorrencias
+        time_series:
+          sql: SUM(num_perturbacoescortecarga)
+          unit: ocorrencias
+        ranking:
+          sql: SUM(num_perturbacoescortecarga)
+          unit: ocorrencias
+        comparison:
+          sql: SUM(num_perturbacoescortecarga)
+          unit: ocorrencias
+      interval_hours: 8760.0
+      aliases:
+      - perturbacoes com corte de carga
+      - cortes de carga
+      - interrupcoes no fornecimento
+      - perturbacoes com interrupcao
+    - id: num_perturbacoescortecarga_0a50mw
+      label: Perturbacoes com Corte de Carga 0 a 50 MW
+      columns:
+      - num_perturbacoescortecarga_0a50mw
+      expression: num_perturbacoescortecarga_0a50mw
+      quantity_kind: count
+      unit_native: ocorrencias
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_perturbacoescortecarga_0a50mw)
+          unit: ocorrencias
+        average:
+          sql: AVG(num_perturbacoescortecarga_0a50mw)
+          unit: ocorrencias
+        maximum:
+          sql: MAX(num_perturbacoescortecarga_0a50mw)
+          unit: ocorrencias
+        time_series:
+          sql: SUM(num_perturbacoescortecarga_0a50mw)
+          unit: ocorrencias
+        ranking:
+          sql: SUM(num_perturbacoescortecarga_0a50mw)
+          unit: ocorrencias
+        comparison:
+          sql: SUM(num_perturbacoescortecarga_0a50mw)
+          unit: ocorrencias
+      interval_hours: 8760.0
+      aliases:
+      - perturbacoes leves
+      - cortes ate 50 MW
+      - faixa 0 a 50 MW
+    - id: num_perturbacoescortecarga_50a100mw
+      label: Perturbacoes com Corte de Carga 50 a 100 MW
+      columns:
+      - num_perturbacoescortecarga_50a100mw
+      expression: num_perturbacoescortecarga_50a100mw
+      quantity_kind: count
+      unit_native: ocorrencias
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_perturbacoescortecarga_50a100mw)
+          unit: ocorrencias
+        average:
+          sql: AVG(num_perturbacoescortecarga_50a100mw)
+          unit: ocorrencias
+        maximum:
+          sql: MAX(num_perturbacoescortecarga_50a100mw)
+          unit: ocorrencias
+        time_series:
+          sql: SUM(num_perturbacoescortecarga_50a100mw)
+          unit: ocorrencias
+        ranking:
+          sql: SUM(num_perturbacoescortecarga_50a100mw)
+          unit: ocorrencias
+        comparison:
+          sql: SUM(num_perturbacoescortecarga_50a100mw)
+          unit: ocorrencias
+      interval_hours: 8760.0
+      aliases:
+      - perturbacoes medias
+      - cortes entre 50 e 100 MW
+      - faixa 50 a 100 MW
+    - id: num_perturbacoescortecarga_maior100mw
+      label: Perturbacoes com Corte de Carga Acima de 100 MW
+      columns:
+      - num_perturbacoescortecarga_maior100mw
+      expression: num_perturbacoescortecarga_maior100mw
+      quantity_kind: count
+      unit_native: ocorrencias
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_perturbacoescortecarga_maior100mw)
+          unit: ocorrencias
+        average:
+          sql: AVG(num_perturbacoescortecarga_maior100mw)
+          unit: ocorrencias
+        maximum:
+          sql: MAX(num_perturbacoescortecarga_maior100mw)
+          unit: ocorrencias
+        time_series:
+          sql: SUM(num_perturbacoescortecarga_maior100mw)
+          unit: ocorrencias
+        ranking:
+          sql: SUM(num_perturbacoescortecarga_maior100mw)
+          unit: ocorrencias
+        comparison:
+          sql: SUM(num_perturbacoescortecarga_maior100mw)
+          unit: ocorrencias
+      interval_hours: 8760.0
+      aliases:
+      - perturbacoes severas
+      - grandes cortes de carga
+      - cortes acima de 100 MW
+      - faixa maior 100 MW
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      cod_indicador:
+        RMAL:
+          aliases:
+          - RMAL
+          - robustez malha sistemica
+          - robustez da malha
+          filter: cod_indicador = 'RMAL'
+        RMCS:
+          aliases:
+          - RMCS
+          - robustez malha contingencia simples
+          - malha contingencia simples
+          filter: cod_indicador = 'RMCS'
+        RRB:
+          aliases:
+          - RRB
+          - robustez rede basica
+          - rede basica
+          filter: cod_indicador = 'RRB'
+        RRBCS:
+          aliases:
+          - RRBCS
+          - robustez rede basica contingencia simples
+          - rede basica contingencia simples
+          filter: cod_indicador = 'RRBCS'
+      dsc_agregacao:
+        Estado:
+          aliases:
+          - estado
+          - UF
+          - unidade federativa
+          filter: dsc_agregacao = 'Estado'
+        Regiao Geografica:
+          aliases:
+          - regiao geografica
+          - regiao
+          - norte
+          - sul
+          - nordeste
+          - sudeste
+          - centro-oeste
+          filter: dsc_agregacao = 'Região Geográfica'
+        Sistema:
+          aliases:
+          - sistema
+          - SIN
+          - sistema brasileiro
+          - sistema interligado nacional
+          filter: dsc_agregacao = 'Sistema'
+        Subsistema:
+          aliases:
+          - subsistema
+          - SE
+          - S
+          - NE
+          - N
+          filter: dsc_agregacao = 'Subsistema'
+      id_periodicidade:
+        AN:
+          aliases:
+          - anual
+          - AN
+          - por ano
+          - ano
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - mensal
+          - ME
+          - por mes
+          - mes
+          filter: id_periodicidade = 'ME'
+    sql_patterns:
+      indicador_serie_anual:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  cod_indicador,\n\
+          \  dsc_caracteristica,\n  AVG(val_indicador) AS indicador_medio_pct\nFROM {source}\nWHERE id_periodicidade\
+          \ = 'AN'\n  AND cod_indicador = '{cod_indicador}'\n  AND dsc_agregacao = '{dsc_agregacao}'\n\
+          GROUP BY 1, 2, 3\nORDER BY 1\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - indicador
+          grain: year
+        validated_params:
+          cod_indicador: RRB
+          dsc_agregacao: Estado
+      perturbacoes_corte_carga_sin:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  SUM(num_perturbacoescortecarga)\
+          \ AS total_cortes,\n  SUM(num_perturbacoescortecarga_0a50mw) AS cortes_0a50mw,\n  SUM(num_perturbacoescortecarga_50a100mw)\
+          \ AS cortes_50a100mw,\n  SUM(num_perturbacoescortecarga_maior100mw) AS cortes_maior100mw\nFROM\
+          \ {source}\nWHERE id_periodicidade = 'AN'\n  AND dsc_agregacao = 'Sistema'\nGROUP BY 1\nORDER\
+          \ BY 1\n"
+        output_unit: ocorrencias
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - num_perturbacoescortecarga
+          - num_perturbacoescortecarga_0a50mw
+          - num_perturbacoescortecarga_50a100mw
+          - num_perturbacoescortecarga_maior100mw
+          grain: year
+      proporcao_corte_vs_total:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  cod_caracteristica,\n\
+          \  SUM(num_perturbacoescortecarga) AS cortes,\n  SUM(num_perturbacoes) AS total,\n  ROUND(100.0\
+          \ * SUM(num_perturbacoescortecarga) / NULLIF(SUM(num_perturbacoes), 0), 2) AS pct_corte\nFROM\
+          \ {source}\nWHERE id_periodicidade = 'AN'\n  AND dsc_agregacao = 'Subsistema'\nGROUP BY 1, 2\n\
+          ORDER BY 1, 2\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - num_perturbacoes
+          - num_perturbacoescortecarga
+          grain: year
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o indicador RMAL mensalmente para cada subsistema nos últimos 3 anos?
+    sql: SELECT dsc_agregacao, DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes_referencia,
+      AVG(val_indicador) AS media_rmal, MIN(val_indicador) AS minimo_rmal, MAX(val_indicador) AS maximo_rmal
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_robustez/*.parquet') WHERE cod_indicador
+      = 'RMAL' AND id_periodicidade = 'ME' AND din_referencia >= TIMESTAMP '2023-01-01' AND dsc_agregacao
+      NOT IN ('SIN') GROUP BY dsc_agregacao, DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP))
+      ORDER BY dsc_agregacao, mes_referencia
+  - question: Quais subsistemas tiveram mais perturbações com corte de carga acima de 100 MW em 2023?
+    sql: SELECT dsc_agregacao, cod_indicador, SUM(num_perturbacoescortecarga_maior100mw) AS total_cortes_graves,
+      SUM(num_perturbacoescortecarga) AS total_cortes_carga, SUM(num_perturbacoes) AS total_perturbacoes,
+      ROUND( 100.0 * SUM(num_perturbacoescortecarga_maior100mw) / NULLIF(SUM(num_perturbacoes), 0), 2
+      ) AS pct_cortes_graves FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_robustez/*.parquet')
+      WHERE id_periodicidade = 'ME' AND din_referencia >= TIMESTAMP '2023-01-01' AND din_referencia <
+      TIMESTAMP '2024-01-01' AND dsc_agregacao NOT IN ('SIN') GROUP BY dsc_agregacao, cod_indicador ORDER
+      BY total_cortes_graves DESC LIMIT 20
+  - question: Em quais meses o indicador de robustez da rede básica atingiu zero no SIN?
+    sql: SELECT cod_indicador, cod_caracteristica, dsc_caracteristica, din_referencia, val_indicador,
+      num_perturbacoes, num_perturbacoescortecarga FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_robustez/*.parquet')
+      WHERE val_indicador = 0.0 AND dsc_agregacao = 'SIN' AND id_periodicidade = 'ME' ORDER BY cod_indicador,
+      din_referencia
+- property: license
+  value: CC-BY

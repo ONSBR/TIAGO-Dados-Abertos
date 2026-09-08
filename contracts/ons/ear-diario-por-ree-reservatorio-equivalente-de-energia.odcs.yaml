@@ -1,0 +1,643 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ear-diario-por-ree-reservatorio-equivalente-de-energia
+name: ear-diario-por-ree-reservatorio-equivalente-de-energia
+tenant: ons
+tags:
+- EAR
+- EAR diária
+- EAR diária REE
+- MWmês
+- ONS
+- REE
+- REE diário
+- SIN
+- armazenamento hídrico
+- diário
+- energia armazenada
+- energia armazenada reservatório
+- hidrologia
+- nível dos reservatórios
+- percentual de armazenamento
+- reservatório equivalente de energia
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ear_ree_di/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos geradores, comercializadores, planejadores e reguladores do setor elétrico brasileiro
+    a série histórica diária de energia armazenada por REE, permitindo o acompanhamento das condições
+    hidrológicas do SIN, a projeção do Custo Marginal de Operação (CMO), estudos de despacho hidrotérmico,
+    análise de risco hidrológico e suporte a decisões de contratação de energia no mercado de curto prazo
+    (PLD/CCEE).
+  limitations: A coluna ear_data está tipada como VARCHAR no schema físico Parquet do dataset ear-diario-por-ree-reservatorio-equivalente-de-energia,
+    embora contenha datas no formato YYYY-MM-DD. ear_verif_ree_mwmes no dataset ear-diario-por-ree-reservatorio-equivalente-de-energia
+    apresenta valor mínimo de -31. ear_verif_ree_percentual no dataset ear-diario-por-ree-reservatorio-equivalente-de-energia
+    apresenta valor mínimo de -10.
+  usage: Recuperar este dataset quando a pergunta envolver nível de armazenamento de reservatórios, energia
+    armazenada diária, percentual de capacidade dos REEs, condições hidrológicas do SIN ou análise de
+    risco hídrico em granularidade diária.
+domain: reservatório
+schema:
+- name: ear_diario_por_ree_reservatorio_equivalente_de_energia
+  physicalType: parquet
+  logicalType: object
+  physicalName: ear_diario_por_ree_reservatorio_equivalente_de_energia
+  properties:
+  - name: nom_ree
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do Reservatório Equivalente de Energia (REE), que representa uma agregação de usinas
+      hidrelétricas por bacia hidrográfica e subsistema do SIN. É a dimensão espacial principal do dataset,
+      equivalente conceitualmente a um subsistema/bacia.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - reservatório equivalente
+      - REE
+      - subsistema
+      - bacia
+      - nome do REE
+      - nome do reservatório equivalente
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BELO MONTE
+      - IGUACU
+      - ITAIPU
+      - MADEIRA
+      - MANAUS-AMAPA
+      - NORDESTE
+      - NORTE
+      - PARANA
+      - PARANAPANEMA
+      - SUDESTE
+      - SUL
+      - TELES PIRES
+  - name: ear_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição da energia armazenada, representando o dia em que o nível
+      dos reservatórios foi verificado. Armazenada como VARCHAR no Parquet (formato YYYY-MM-DD), devendo
+      ser convertida para DATE em consultas temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data de referência
+      - data da EAR
+      - data do reservatório
+      - dia
+    - property: semanticType
+      value: DIMENSION
+  - name: ear_max_ree
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Armazenada Máxima do REE em MWmês, representando a capacidade máxima de armazenamento
+      caso todos os reservatórios do sistema estivessem completamente cheios. Serve como denominador para
+      o cálculo do percentual de armazenamento.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_max_ree AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR máxima
+      - capacidade máxima
+      - armazenamento máximo
+      - ear max
+      - energia máxima do reservatório
+    - property: unit
+      value: MWmês
+    - property: enum
+      value:
+      - 0.0
+      - 22.0
+      - 28.109
+      - 290.0
+      - 313.73
+      - 785.737
+      - 900.655
+      - 10134.571
+      - 10324.672
+      - 11832.754
+      - 14488.55
+      - 15018.0
+      - 20100.0
+      - 50796.0
+      - 50972.214
+      - 51691.226
+      - 51809.0
+      - 140595.976
+      - 152257.0
+  - name: ear_verif_ree_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Armazenada Verificada no REE em MWmês, representando a energia associada ao
+      volume de água efetivamente disponível nos reservatórios na data de referência, considerando a geração
+      na própria usina e em todas as usinas à jusante na cascata. Pode assumir valores negativos em situações
+      de déficit ou ajustes de consistência.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_verif_ree_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR verificada
+      - energia armazenada verificada
+      - ear verificada em MWmês
+      - armazenamento verificado
+      - ear mwmes
+    - property: unit
+      value: MWmês
+  - name: ear_verif_ree_percentual
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Armazenada Verificada no REE expressa como percentual da capacidade máxima (ear_max_ree).
+      Indica o grau de enchimento dos reservatórios equivalentes em relação à sua capacidade total. Pode
+      assumir valores negativos consistentes com ear_verif_ree_mwmes negativo.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_verif_ree_percentual AS DOUBLE)
+    - property: aliases
+      value:
+      - EAR percentual
+      - percentual de armazenamento
+      - ear em percentual
+      - nível do reservatório em %
+      - ear %
+      - percentual da capacidade
+    - property: unit
+      value: '%'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ear-diario-por-ree-reservatorio-equivalente-de-energia
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - nivel dos reservatorios por ree
+  - armazenamento por reservatorio equivalente
+  - ear do ree
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver nível de armazenamento de reservatórios, energia
+    armazenada diária, percentual de capacidade dos REEs, condições hidrológicas do SIN ou análise de
+    risco hídrico em granularidade diária. Também relevante para perguntas sobre correlação entre armazenamento
+    e CMO/PLD ou balanço hídrico por bacia hidrográfica.
+- property: agentInstructions
+  value: '- [ear_data] Coluna ear_data está armazenada como VARCHAR no schema físico (Parquet S3), embora
+    represente datas diárias no formato YYYY-MM-DD. Operações de filtragem temporal, ordenação e extração
+    de componentes de data requerem conversão explícita via TRY_CAST para DATE. Comparações diretas como
+    strings podem produzir resultados incorretos para datas fora do formato ISO 8601.
+
+
+    - [ear_verif_ree_mwmes] ear_verif_ree_mwmes apresenta valores negativos (mín=-31.0 MWmês), o que fisicamente
+    representaria energia armazenada abaixo de zero — situação impossível em condições normais. Esses
+    valores podem indicar ajustes de consistência retroativa pelo ONS, déficits contábeis entre subsistemas
+    à jusante/montante, ou erros de medição. Devem ser tratados com cautela em cálculos de média e percentis.
+
+
+    - [ear_verif_ree_percentual] ear_verif_ree_percentual apresenta valores negativos (mín=-10.69%), consistente
+    com os valores negativos em ear_verif_ree_mwmes. Percentuais negativos indicam situações de déficit
+    contábil ou ajustes de consistência. Filtros de validação devem considerar o intervalo esperado de
+    0% a 100%, tratando valores fora desse range como casos especiais.
+
+
+    - [ear_max_ree] ear_max_ree apresenta valor mínimo de 0.0, indicando REEs com capacidade máxima de
+    armazenamento nula em determinados períodos. Isso pode representar REEs sem reservatórios de regularização
+    (fio d''água), inconsistências de cadastro ou períodos de transição operacional. Divisões por ear_max_ree
+    para cálculo de percentual devem proteger contra divisão por zero.
+
+
+    - [nom_ree] A chave primária natural é composta por (nom_ree, ear_data). Duplicatas nessa combinação
+    indicariam inconsistência no processo de publicação ou sobreposição de arquivos Parquet particionados.
+    Espera-se no maximo um registro por (nom_ree, ear_data); qualquer contagem superior deve ser investigada
+    como duplicata.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual é o percentual de armazenamento atual do reservatório equivalente SUDESTE?
+  - Como evoluiu a EAR do subsistema NORDESTE nos últimos 30 dias?
+  - Quais REEs estão abaixo de 30% de capacidade hoje?
+  - Qual foi o menor nível de armazenamento histórico do REE SUL e quando ocorreu?
+  - Como está o nível dos reservatórios do SIN comparado ao mesmo período do ano anterior?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ear_ree_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2016-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - armazenada
+    - armazenamento
+    - ear
+    family: ear
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ear_data
+      spatial: subsistema
+      entity: dataset_row
+      one_row_per:
+      - ear_data
+      - nom_ree
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ear_verif_ree_mwmes
+      label: Energia Armazenada
+      columns:
+      - ear_verif_ree_mwmes
+      expression: ear_verif_ree_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE))
+          unit: MWmes
+        ranking:
+          sql: AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR verificada
+      - energia armazenada verificada
+      - ear verificada em MWmês
+      - armazenamento verificado
+      - ear mwmes
+    - id: ear_verif_ree_percentual
+      label: Percentual de Armazenamento REE
+      columns:
+      - ear_verif_ree_percentual
+      expression: ear_verif_ree_percentual
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ear_verif_ree_percentual AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ear_verif_ree_percentual AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ear_verif_ree_percentual AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ear_verif_ree_percentual AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ear_verif_ree_percentual AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ear_verif_ree_percentual AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - EAR percentual
+      - percentual de armazenamento
+      - ear em percentual
+      - nivel do reservatorio em %
+      - ear %
+      - percentual da capacidade
+    - id: ear_max
+      label: Capacidade Maxima de Armazenamento REE
+      columns:
+      - ear_max_ree
+      expression: ear_max_ree
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_max_ree AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_max_ree AS DOUBLE))
+          unit: MWmes
+        maximum:
+          sql: MAX(TRY_CAST(ear_max_ree AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_max_ree AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR maxima
+      - capacidade maxima REE
+      - armazenamento maximo REE
+      - ear max
+      - energia maxima do reservatorio equivalente
+    - id: ear_percentual_calculado
+      label: Percentual de Armazenamento Calculado
+      columns:
+      - ear_verif_ree_mwmes
+      - ear_max_ree
+      expression: ear_verif_ree_mwmes / NULLIF(ear_max_ree, 0) * 100
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE) / NULLIF(ear_max_ree, 0) * 100)
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE) / NULLIF(ear_max_ree, 0) * 100)
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE) / NULLIF(ear_max_ree, 0) * 100)
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE) / NULLIF(ear_max_ree, 0) * 100)
+          unit: '%'
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      nom_ree:
+        BELO MONTE:
+          aliases:
+          - BELO MONTE
+          - Belo Monte
+          - belo monte
+          filter: nom_ree = 'BELO MONTE'
+        IGUACU:
+          aliases:
+          - IGUACU
+          - Iguacu
+          - Iguaçu
+          filter: nom_ree = 'IGUACU'
+        ITAIPU:
+          aliases:
+          - ITAIPU
+          - Itaipu
+          filter: nom_ree = 'ITAIPU'
+        MADEIRA:
+          aliases:
+          - MADEIRA
+          - Madeira
+          - rio madeira
+          filter: nom_ree = 'MADEIRA'
+        MANAUS-AMAPA:
+          aliases:
+          - MANAUS-AMAPA
+          - Manaus-Amapa
+          - Manaus Amapa
+          - manaus amapa
+          filter: nom_ree = 'MANAUS-AMAPA'
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          - Nordeste
+          - NE
+          filter: nom_ree = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          - Norte
+          - N
+          filter: nom_ree = 'NORTE'
+        PARANA:
+          aliases:
+          - PARANA
+          - Parana
+          - Paraná
+          - rio parana
+          filter: nom_ree = 'PARANA'
+        PARANAPANEMA:
+          aliases:
+          - PARANAPANEMA
+          - Paranapanema
+          - rio paranapanema
+          filter: nom_ree = 'PARANAPANEMA'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          - Sudeste
+          - SE
+          - sudeste centro-oeste
+          filter: nom_ree = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          - Sul
+          - S
+          filter: nom_ree = 'SUL'
+        TELES PIRES:
+          aliases:
+          - TELES PIRES
+          - Teles Pires
+          - teles pires
+          - rio teles pires
+          filter: nom_ree = 'TELES PIRES'
+      ear_max_ree:
+        '0.0':
+          aliases:
+          - '0.0'
+          filter: ear_max_ree = 0
+        '22.0':
+          aliases:
+          - '22.0'
+          filter: ear_max_ree = 22
+        '28.109':
+          aliases:
+          - '28.109'
+          filter: ear_max_ree = 28.109
+        '290.0':
+          aliases:
+          - '290.0'
+          filter: ear_max_ree = 290
+        '313.73':
+          aliases:
+          - '313.73'
+          filter: ear_max_ree = 313.73
+        '785.737':
+          aliases:
+          - '785.737'
+          filter: ear_max_ree = 785.737
+        '900.655':
+          aliases:
+          - '900.655'
+          filter: ear_max_ree = 900.655
+        '10134.571':
+          aliases:
+          - '10134.571'
+          filter: ear_max_ree = 10134.571
+        '10324.672':
+          aliases:
+          - '10324.672'
+          filter: ear_max_ree = 10324.672
+        '11832.754':
+          aliases:
+          - '11832.754'
+          filter: ear_max_ree = 11832.754
+        '14488.55':
+          aliases:
+          - '14488.55'
+          filter: ear_max_ree = 14488.55
+        '15018.0':
+          aliases:
+          - '15018.0'
+          filter: ear_max_ree = 15018
+        '20100.0':
+          aliases:
+          - '20100.0'
+          filter: ear_max_ree = 20100
+        '50796.0':
+          aliases:
+          - '50796.0'
+          filter: ear_max_ree = 50796
+        '50972.214':
+          aliases:
+          - '50972.214'
+          filter: ear_max_ree = 50972.214
+        '51691.226':
+          aliases:
+          - '51691.226'
+          filter: ear_max_ree = 51691.226
+        '51809.0':
+          aliases:
+          - '51809.0'
+          filter: ear_max_ree = 51809
+        '140595.976':
+          aliases:
+          - '140595.976'
+          filter: ear_max_ree = 140595.976
+        '152257.0':
+          aliases:
+          - '152257.0'
+          filter: ear_max_ree = 152257
+    sql_patterns:
+      ear_verif_ree_mwmes_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(ear_data AS DATE)) AS mes,\n  nom_ree,\n  AVG(TRY_CAST(ear_verif_ree_mwmes\
+          \ AS DOUBLE)) AS ear_media_mwmes\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(ear_data AS\
+          \ DATE)) = 2024\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MWmes
+        matches:
+          output_modes:
+          - last_value
+          - average
+          metrics:
+          - ear_verif_ree_mwmes
+          grain: month
+      ear_percentual_serie_diaria:
+        template: "SELECT TRY_CAST(ear_data AS DATE) AS data,\n  nom_ree,\n  ear_verif_ree_percentual\n\
+          FROM {source}\nWHERE nom_ree = '{nom_ree}'\n  AND TRY_CAST(ear_data AS DATE) BETWEEN '{data_inicio}'\
+          \ AND '{data_fim}'\nORDER BY 1\n"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ear_verif_ree_percentual
+          grain: day
+        validated_params:
+          nom_ree: BELO MONTE
+          data_inicio: '2026-01-01'
+          data_fim: '2026-07-18'
+      ear_abaixo_threshold:
+        template: "SELECT nom_ree,\n  TRY_CAST(ear_data AS DATE) AS data,\n  TRY_CAST(ear_verif_ree_percentual\
+          \ AS DOUBLE) AS ear_percentual\nFROM {source}\nWHERE TRY_CAST(ear_data AS DATE) >= CURRENT_DATE\
+          \ - INTERVAL '7 days'\n  AND TRY_CAST(ear_verif_ree_percentual AS DOUBLE) < 50\nORDER BY ear_percentual\
+          \ ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - ranking
+          - comparison
+          metrics:
+          - ear_verif_ree_percentual
+          grain: day
+      ear_percentual_calculado_auditoria:
+        template: "SELECT TRY_CAST(ear_data AS DATE) AS data,\n  nom_ree,\n  TRY_CAST(ear_verif_ree_percentual\
+          \ AS DOUBLE) AS percentual_publicado,\n  TRY_CAST(ear_verif_ree_mwmes AS DOUBLE) / NULLIF(TRY_CAST(ear_max_ree\
+          \ AS DOUBLE), 0) * 100 AS percentual_calculado\nFROM {source}\nWHERE TRY_CAST(ear_data AS DATE)\
+          \ >= CURRENT_DATE - INTERVAL '30 days'\nORDER BY data DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ear_percentual_calculado
+          - ear_verif_ree_percentual
+          grain: day
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o percentual de armazenamento de cada REE ao longo de 2024?
+    sql: SELECT nom_ree, TRY_CAST(ear_data AS DATE) AS ear_data_date, ear_verif_ree_percentual FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_ree_di/*.parquet')
+      WHERE TRY_CAST(ear_data AS DATE) >= DATE '2024-01-01' AND TRY_CAST(ear_data AS DATE) <= DATE '2024-12-31'
+      AND ear_verif_ree_percentual >= 0 ORDER BY nom_ree, ear_data_date LIMIT 2000
+  - question: Quais foram os 10 dias com menor percentual de armazenamento em cada REE desde 2016?
+    sql: WITH ranked AS ( SELECT nom_ree, TRY_CAST(ear_data AS DATE) AS ear_data_date, ear_verif_ree_mwmes,
+      ear_verif_ree_percentual, ROW_NUMBER() OVER ( PARTITION BY nom_ree ORDER BY ear_verif_ree_percentual
+      ASC ) AS rn FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_ree_di/*.parquet') WHERE ear_verif_ree_percentual
+      >= 0 ) SELECT nom_ree, ear_data_date, ear_verif_ree_mwmes, ear_verif_ree_percentual FROM ranked
+      WHERE rn <= 10 ORDER BY nom_ree, ear_verif_ree_percentual ASC
+  - question: Qual é a média mensal de armazenamento em MWmês por REE para identificar padrões sazonais?
+    sql: SELECT nom_ree, DATE_TRUNC('month', TRY_CAST(ear_data AS DATE)) AS mes_referencia, ROUND(AVG(TRY_CAST(ear_verif_ree_mwmes AS DOUBLE)),
+      2) AS ear_media_mwmes, ROUND(AVG(ear_verif_ree_percentual), 2) AS ear_media_percentual, ROUND(MIN(ear_verif_ree_percentual),
+      2) AS ear_min_percentual, ROUND(MAX(ear_verif_ree_percentual), 2) AS ear_max_percentual FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_ree_di/*.parquet')
+      WHERE TRY_CAST(ear_data AS DATE) IS NOT NULL AND ear_verif_ree_mwmes >= 0 GROUP BY nom_ree, DATE_TRUNC('month',
+      TRY_CAST(ear_data AS DATE)) ORDER BY nom_ree, mes_referencia
+- property: license
+  value: CC-BY

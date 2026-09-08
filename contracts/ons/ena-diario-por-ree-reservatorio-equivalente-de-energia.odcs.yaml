@@ -1,0 +1,574 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ena-diario-por-ree-reservatorio-equivalente-de-energia
+name: ena-diario-por-ree-reservatorio-equivalente-de-energia
+tenant: ons
+tags:
+- ENA
+- ENA bruta diária
+- ENA diária REE
+- ENA por reservatório equivalente
+- MLT
+- REE
+- SIN
+- afluência
+- afluência diária por REE
+- diário
+- energia natural afluente
+- energia natural afluente diária
+- hidrologia
+- média de longo termo
+- reservatório equivalente de energia
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ena_ree_di/*.parquet
+  format: parquet
+description:
+  purpose: Prover séries históricas diárias de Energia Natural Afluente por Reservatório Equivalente de
+    Energia para uso por geradores, comercializadores, agentes do mercado de energia e pesquisadores do
+    setor elétrico brasileiro. Suporta estudos energéticos, projeção do Custo Marginal de Operação (CMO),
+    acompanhamento das condições hidrológicas do SIN, análise de risco hidrológico, planejamento de despacho
+    hidrotérmico e monitoramento operativo das condições de afluência nos subsistemas do sistema elétrico
+    nacional.
+  limitations: Coluna armazenada como VARCHAR no Parquet, embora represente datas no formato YYYY-MM-DD.
+    Valores percentuais de ENA bruta variam de 12,56% a 408,62%, refletindo extremos hidrológicos reais
+    (seca severa a cheia excepcional). Valores percentuais de ENA armazenável variam de 9,37% a 398,77%,
+    com mínimo absoluto inferior ao da ENA bruta, indicando situações de estresse hídrico severo.
+  usage: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA) diária desagregada
+    por Reservatório Equivalente de Energia (REE) ou subsistema hidrológico do SIN, incluindo análises
+    de condições hidrológicas, comparação com a MLT, risco de seca, ou correlação entre afluência e Custo
+    Marginal de Operação em granularidade diária.
+domain: hidrologia
+schema:
+- name: ena_diario_por_ree_reservatorio_equivalente_de_energia
+  physicalType: parquet
+  logicalType: object
+  physicalName: ena_diario_por_ree_reservatorio_equivalente_de_energia
+  properties:
+  - name: nom_reservatorioee
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do Reservatório Equivalente de Energia (REE), que representa a agregação hidrológica
+      e energética de usinas hidrelétricas por região/subsistema do Sistema Interligado Nacional (SIN).
+      Funciona como identificador espacial equivalente ao subsistema para fins de estudos energéticos.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - reservatório equivalente
+      - REE
+      - subsistema
+      - região hidrológica
+      - bacia equivalente
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BELO MONTE
+      - IGUACU
+      - ITAIPU
+      - MADEIRA
+      - MANAUS-AMAPA
+      - NORDESTE
+      - NORTE
+      - PARANA
+      - PARANAPANEMA
+      - SUDESTE
+      - SUL
+      - TELES PIRES
+  - name: ena_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição da Energia Natural Afluente, armazenada como VARCHAR no
+      Parquet no formato YYYY-MM-DD. Representa o dia calendário ao qual os valores de ENA se referem.
+      Recomenda-se CAST para DATE nas queries para operações temporais corretas.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data da ENA
+      - data de referência
+      - dia
+      - data hidrológica
+    - property: semanticType
+      value: DIMENSION
+  - name: ena_bruta_ree_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Bruta do REE em MWmed (megawatts médios). Representa a energia
+      produzível calculada pelo produto das vazões naturais aos reservatórios com as produtividades a
+      65% dos volumes úteis. Inclui toda a energia afluente, independentemente da capacidade de armazenamento.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA bruta
+      - energia natural afluente bruta
+      - ENA bruta MWmed
+      - afluência bruta
+    - property: unit
+      value: MWmed
+  - name: ena_bruta_ree_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Bruta do REE expressa como percentual da Média de Longo Termo
+      (MLT). Indica o desvio da afluência bruta em relação à média histórica de longo prazo, sendo 100%
+      equivalente à MLT. Valores abaixo de 100% indicam condição hidrológica desfavorável; acima de 100%,
+      favorável.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA bruta percentual MLT
+      - ENA bruta % MLT
+      - percentual MLT bruta
+      - afluência bruta relativa
+      - ENA bruta normalizada
+    - property: unit
+      value: '%MLT'
+  - name: ena_armazenavel_ree_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Armazenável do REE em MWmed (megawatts médios). Considera as
+      vazões naturais descontadas das vazões vertidas nos reservatórios, representando a parcela da afluência
+      que pode efetivamente ser armazenada e utilizada para geração futura. Sempre menor ou igual à ENA
+      bruta.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA armazenável
+      - energia natural afluente armazenável
+      - ENA armazenável MWmed
+      - afluência armazenável
+    - property: unit
+      value: MWmed
+  - name: ena_armazenavel_ree_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Armazenável do REE expressa como percentual da Média de Longo
+      Termo (MLT). Indica o desvio da afluência armazenável em relação à média histórica de longo prazo.
+      Tende a ser menor que o percentual bruto em períodos de cheias, quando ocorre vertimento.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA armazenável percentual MLT
+      - ENA armazenável % MLT
+      - percentual MLT armazenável
+      - afluência armazenável relativa
+      - ENA armazenável normalizada
+    - property: unit
+      value: '%MLT'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ena-diario-por-ree-reservatorio-equivalente-de-energia
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - afluencia por ree
+  - ena do reservatorio equivalente
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA) diária desagregada
+    por Reservatório Equivalente de Energia (REE) ou subsistema hidrológico do SIN, incluindo análises
+    de condições hidrológicas, comparação com a MLT, risco de seca, ou correlação entre afluência e Custo
+    Marginal de Operação em granularidade diária. Preferir este dataset sobre o semanal quando a análise
+    exigir resolução temporal diária, e sobre o dataset por subsistema quando a granularidade espacial
+    de REE for necessária.
+- property: agentInstructions
+  value: '- [ena_data] Coluna ena_data representa datas no formato YYYY-MM-DD mas está tipada como VARCHAR
+    no schema físico DuckDB, caracterizando inconsistência de formato (pandas object→UTF8). Filtros temporais
+    e ordenações sem cast explícito produzirão resultados incorretos (ordenação lexicográfica em vez de
+    cronológica).
+
+
+    - [ena_bruta_ree_mwmed] Valor máximo de 43355.64 MWmed representa pico hidrológico extremo. Embora
+    fisicamente plausível para o REE Sudeste em períodos de cheia, recomenda-se verificar se valores acima
+    do percentil 99 correspondem a eventos reais ou a artefatos do processo de consistência recorrente
+    do ONS.
+
+
+    - [ena_bruta_ree_percentualmlt] Valor máximo de 408.62% da MLT indica condição hidrológica extremamente
+    acima da média histórica. Valores acima de 300% merecem atenção especial para verificar se representam
+    eventos reais (cheias excepcionais) ou inconsistências no processo de cálculo da MLT de referência.
+
+
+    - [ena_armazenavel_ree_percentualmlt] Valor mínimo de 9.37% da MLT para ENA armazenável indica condição
+    de seca severa. Valores abaixo de 20% da MLT são críticos para o planejamento da operação e devem
+    ser monitorados em conjunto com o nível dos reservatórios (EAR).
+
+
+    - [nom_reservatorioee] Verificação de duplicatas na chave primária composta (nom_reservatorioee, ena_data).
+    Dado que os dados passam por processo de consistência recorrente com possibilidade de reprocessamento,
+    podem existir registros duplicados para o mesmo REE e data em versões distintas dos arquivos Parquet.
+
+
+    - [ena_armazenavel_ree_mwmed] Conceitualmente, a ENA armazenável não deveria assumir valores negativos,
+    pois representa energia passível de armazenamento. O mínimo observado (132.08 MWmed) é positivo, mas
+    recomenda-se monitorar se futuras atualizações introduzem valores negativos, o que indicaria inconsistência
+    no desconto de vazões vertidas.
+
+
+    - [ena_bruta_ree_mwmed] Os metadados CKAN registram ultima atualizacao em 2024-01-02, porem a serie no S3 continua sendo
+    publicada bem depois disso, entao os metadados CKAN estao desatualizados e nao servem para decidir a
+    cobertura. Recomenda-se verificar
+    se há lacunas temporais (dias sem registro) na série para cada REE, o que poderia indicar falhas no
+    pipeline de ingestão diária.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a ENA bruta do subsistema Sudeste/Centro-Oeste nos últimos 30 dias?
+  - Em quais datas a ENA armazenável do Nordeste ficou abaixo de 30% da MLT em 2023?
+  - Como a ENA bruta do Sul se compara à média histórica (MLT) no primeiro semestre de 2024?
+  - Qual REE apresentou maior variação percentual de ENA bruta em relação à MLT no ano de 2022?
+  - Quais foram os períodos de seca mais severa (ENA < 50% MLT) por subsistema desde 2021?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ena_ree_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2021-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - afluente
+    - afluencia
+    - ena
+    family: ena
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ena_data
+      spatial: subsistema
+      entity: dataset_row
+      one_row_per:
+      - ena_data
+      - nom_reservatorioee
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ena_bruta_ree_mwmed
+      label: Energia Natural Afluente Bruta REE
+      columns:
+      - ena_bruta_ree_mwmed
+      expression: ena_bruta_ree_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ENA bruta
+      - energia natural afluente bruta
+      - ENA bruta MWmed
+      - afluencia bruta
+    - id: ena_bruta_ree_percentualmlt
+      label: ENA Bruta REE % MLT
+      columns:
+      - ena_bruta_ree_percentualmlt
+      expression: ena_bruta_ree_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ENA bruta percentual MLT
+      - ENA bruta % MLT
+      - percentual MLT bruta
+      - afluencia bruta relativa
+      - ENA bruta normalizada
+    - id: ena_armazenavel_ree_mwmed
+      label: ENA Armazenavel REE
+      columns:
+      - ena_armazenavel_ree_mwmed
+      expression: ena_armazenavel_ree_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ENA armazenavel
+      - energia natural afluente armazenavel
+      - ENA armazenavel MWmed
+      - afluencia armazenavel
+    - id: ena_armazenavel_ree_percentualmlt
+      label: ENA Armazenavel REE % MLT
+      columns:
+      - ena_armazenavel_ree_percentualmlt
+      expression: ena_armazenavel_ree_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_ree_percentualmlt AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ENA armazenavel percentual MLT
+      - ENA armazenavel % MLT
+      - percentual MLT armazenavel
+      - afluencia armazenavel relativa
+      - ENA armazenavel normalizada
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      nom_reservatorioee:
+        BELO MONTE:
+          aliases:
+          - BELO MONTE
+          - Belo Monte
+          - belo monte
+          filter: nom_reservatorioee = 'BELO MONTE'
+        IGUACU:
+          aliases:
+          - IGUACU
+          - Iguacu
+          - Iguaçu
+          filter: nom_reservatorioee = 'IGUACU'
+        ITAIPU:
+          aliases:
+          - ITAIPU
+          - Itaipu
+          filter: nom_reservatorioee = 'ITAIPU'
+        MADEIRA:
+          aliases:
+          - MADEIRA
+          - Madeira
+          - rio Madeira
+          filter: nom_reservatorioee = 'MADEIRA'
+        MANAUS-AMAPA:
+          aliases:
+          - MANAUS-AMAPA
+          - Manaus-Amapa
+          - Manaus Amapa
+          - Norte Isolado
+          filter: nom_reservatorioee = 'MANAUS-AMAPA'
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          - Nordeste
+          - NE
+          filter: nom_reservatorioee = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          - Norte
+          - N
+          filter: nom_reservatorioee = 'NORTE'
+        PARANA:
+          aliases:
+          - PARANA
+          - Parana
+          - Paraná
+          - rio Parana
+          filter: nom_reservatorioee = 'PARANA'
+        PARANAPANEMA:
+          aliases:
+          - PARANAPANEMA
+          - Paranapanema
+          - rio Paranapanema
+          filter: nom_reservatorioee = 'PARANAPANEMA'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          - Sudeste
+          - SE
+          - Sudeste/Centro-Oeste
+          - SE/CO
+          filter: nom_reservatorioee = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          - Sul
+          - S
+          filter: nom_reservatorioee = 'SUL'
+        TELES PIRES:
+          aliases:
+          - TELES PIRES
+          - Teles Pires
+          - rio Teles Pires
+          filter: nom_reservatorioee = 'TELES PIRES'
+    sql_patterns:
+      ena_bruta_ree_mwmed_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes,\n  nom_reservatorioee,\n\
+          \  SUM(TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE) * 24.0) / 1000 AS ena_bruta_gwh\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(ena_data AS DATE)) = 2024\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - ena_bruta_ree_mwmed
+          grain: month
+      ena_percentualmlt_abaixo_limiar:
+        template: "SELECT nom_reservatorioee,\n  TRY_CAST(ena_data AS DATE) AS data,\n  TRY_CAST(ena_armazenavel_ree_percentualmlt\
+          \ AS DOUBLE) AS percentual_mlt\nFROM {source}\nWHERE TRY_CAST(ena_armazenavel_ree_percentualmlt\
+          \ AS DOUBLE) < 50\n  AND TRY_CAST(ena_data AS DATE) >= CURRENT_DATE - INTERVAL '30 days'\nORDER\
+          \ BY data DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - minimum
+          metrics:
+          - ena_armazenavel_ree_percentualmlt
+          grain: day
+      ena_comparacao_entre_ree:
+        template: "SELECT nom_reservatorioee,\n  AVG(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE))\
+          \ AS media_percentual_mlt\nFROM {source}\nWHERE TRY_CAST(ena_data AS DATE) >= CURRENT_DATE -\
+          \ INTERVAL '30 days'\nGROUP BY nom_reservatorioee\nORDER BY media_percentual_mlt DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ena_bruta_ree_percentualmlt
+          grain: period
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o percentual da MLT da ENA bruta para cada REE ao longo de 2024?
+    sql: SELECT nom_reservatorioee, DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes, ROUND(AVG(TRY_CAST(ena_bruta_ree_percentualmlt AS DOUBLE)),
+      2) AS media_percentual_mlt, ROUND(MIN(ena_bruta_ree_percentualmlt), 2) AS min_percentual_mlt, ROUND(MAX(ena_bruta_ree_percentualmlt),
+      2) AS max_percentual_mlt FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_ree_di/*.parquet')
+      WHERE TRY_CAST(ena_data AS DATE) BETWEEN '2024-01-01' AND '2024-12-31' GROUP BY nom_reservatorioee,
+      DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) ORDER BY nom_reservatorioee, mes
+  - question: Quais dias tiveram ENA armazenável abaixo de 30% da MLT para cada REE?
+    sql: SELECT nom_reservatorioee, TRY_CAST(ena_data AS DATE) AS data, ROUND(ena_armazenavel_ree_percentualmlt,
+      2) AS pct_mlt_armazenavel, ROUND(ena_armazenavel_ree_mwmed, 2) AS ena_armazenavel_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_ree_di/*.parquet')
+      WHERE ena_armazenavel_ree_percentualmlt < 30 ORDER BY ena_armazenavel_ree_percentualmlt ASC, TRY_CAST(ena_data
+      AS DATE) ASC LIMIT 100
+  - question: Qual a diferença média entre ENA bruta e armazenável por REE nos últimos 90 dias?
+    sql: SELECT nom_reservatorioee, ROUND(AVG(TRY_CAST(ena_bruta_ree_mwmed AS DOUBLE)), 2) AS media_ena_bruta_mwmed, ROUND(AVG(TRY_CAST(ena_armazenavel_ree_mwmed AS DOUBLE)),
+      2) AS media_ena_armazenavel_mwmed, ROUND(AVG(ena_bruta_ree_mwmed - ena_armazenavel_ree_mwmed), 2)
+      AS media_diferenca_mwmed, ROUND(AVG(ena_bruta_ree_percentualmlt), 2) AS media_pct_mlt_bruta, ROUND(AVG(ena_armazenavel_ree_percentualmlt),
+      2) AS media_pct_mlt_armazenavel FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_ree_di/*.parquet')
+      WHERE TRY_CAST(ena_data AS DATE) >= ( SELECT MAX(TRY_CAST(ena_data AS DATE)) - INTERVAL '90 days'
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_ree_di/*.parquet') ) GROUP BY nom_reservatorioee
+      ORDER BY media_diferenca_mwmed DESC
+- property: license
+  value: CC-BY

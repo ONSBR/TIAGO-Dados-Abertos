@@ -1,0 +1,885 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_ciper
+name: ind_confiarb_ciper
+tenant: ons
+tags:
+- ANEEL
+- CIPER
+- ONS
+- Submódulo 9.1
+- carga interrompida
+- carga interrompida por perturbações
+- confiabilidade
+- confiabilidade rede básica
+- ind_confiarb_ciper
+- indicador de confiabilidade CIPER
+- indicadores regulatórios
+- perturbações
+- rede básica
+- transmissão
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_ciper/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar a carga interrompida em decorrência de perturbações no sistema elétrico brasileiro,
+    permitindo que analistas de confiabilidade, agentes de transmissão e reguladores da ANEEL avaliem
+    o desempenho da rede básica por subsistema e período, suportem decisões sobre manutenção preventiva,
+    apliquem penalidades regulatórias e planejem a expansão do sistema de transmissão com base em histórico
+    de perturbações desde 2007.
+  limitations: val_ciper1 apresenta range muito amplo (0 a 345 MW), com máximo significativamente superior
+    aos demais componentes CIPER (max 2 a 15 MW). val_ciper5 possui range máximo (15 MW) superior ao val_ciper2
+    (10 MW) e val_ciper3 (6 MW), apesar de ser o quinto componente. A coexistência de registros mensais
+    e anuais na mesma tabela pode gerar dupla contagem em agregações temporais.
+  usage: Recuperar este dataset quando a pergunta envolver carga interrompida por perturbações, confiabilidade
+    da rede básica de transmissão, indicadores regulatórios do Submódulo 9.
+domain: qualidade
+schema:
+- name: ind_confiarb_ciper
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_ciper
+  properties:
+  - name: dsc_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nível de agregação geográfica do indicador CIPER. Indica se o registro corresponde ao
+      Sistema Interligado Nacional (SIN), a um Subsistema elétrico, a uma Região geográfica ou a um Estado
+      brasileiro.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - agregacao
+      - nivel_geografico
+      - tipo_agregacao
+      - nivel_espacial
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Estado
+      - Região Geográfica
+      - Sistema
+      - Subsistema
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da entidade geográfica correspondente ao nível de agregação definido
+      em dsc_agregacao. Pode representar o código do SIN, do subsistema (SE, S, NE, N), da região geográfica
+      ou da sigla do estado.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_caracteristica
+      - cod_subsistema
+      - cod_regiao
+      - cod_estado
+      - codigo_entidade
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - CO
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - N
+      - NE
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - S
+      - SBR
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: dsc_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Descrição textual da entidade geográfica identificada por cod_caracteristica. Exemplos:
+      "Sudeste/Centro-Oeste", "Sul", "Nordeste", "Norte", nome do estado ou "Sistema Interligado Nacional".
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - descricao_caracteristica
+      - nome_subsistema
+      - nome_regiao
+      - nome_estado
+      - descricao_entidade
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - Centro-Oeste
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - NORDESTE
+      - NORTE
+      - Nordeste
+      - Norte
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - SUDESTE
+      - SUL
+      - Sistema Brasileiro
+      - Sudeste
+      - Sul
+      - TOCANTINS
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro. Indica se o valor CIPER corresponde a uma
+      apuração mensal ou anual, conforme previsto no Submódulo 9.1 dos Procedimentos de Rede do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - tipo_periodicidade
+      - frequencia
+      - periodo
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador CIPER, representada como timestamp no primeiro dia do
+      mês de apuração. Para registros anuais, corresponde ao primeiro dia do ano (01/01/AAAA). Cobre o
+      período de janeiro de 2007 em diante.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_referencia
+      - mes_referencia
+      - ano_referencia
+      - competencia
+      - data
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_ciper1
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Componente principal do Indicador de Carga Interrompida por Perturbações (CIPER), conforme
+      Submódulo 9.1 dos Procedimentos de Rede do ONS. Representa a carga interrompida total em decorrência
+      de perturbações no sistema elétrico. Possui o maior range de valores (0 a 345 MW), sendo o indicador
+      de maior abrangência.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ciper1
+      - carga_interrompida_1
+      - indicador_ciper_1
+      - ciper_principal
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_ciper2
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Segundo componente do Indicador CIPER, possivelmente representando um subcomponente
+      ou categoria específica de perturbação. Possui range reduzido (0 a 10 MW) em relação ao val_ciper1,
+      sugerindo menor magnitude ou escopo mais restrito.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ciper2
+      - carga_interrompida_2
+      - indicador_ciper_2
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 8.0
+      - 10.0
+  - name: val_ciper3
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Terceiro componente do Indicador CIPER, possivelmente representando outro subcomponente
+      ou categoria de perturbação. Possui range de 0 a 6 MW, o menor entre os cinco indicadores, indicando
+      eventos de menor magnitude ou frequência.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ciper3
+      - carga_interrompida_3
+      - indicador_ciper_3
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+  - name: val_ciper4
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Quarto componente do Indicador CIPER. Possui o segundo menor range (0 a 2 MW), possivelmente
+      representando perturbações de alta severidade mas baixa frequência, ou um subcomponente específico
+      do indicador regulatório.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ciper4
+      - carga_interrompida_4
+      - indicador_ciper_4
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+  - name: val_ciper5
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Quinto componente do Indicador CIPER. Possui range de 0 a 15 MW, ligeiramente superior
+      ao val_ciper2 e val_ciper3, podendo representar um subcomponente acumulado ou categoria distinta
+      de perturbação no sistema elétrico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ciper5
+      - carga_interrompida_5
+      - indicador_ciper_5
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 8.0
+      - 11.0
+      - 15.0
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_ciper
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - carga interrompida por perturbacao
+  - quanto de carga caiu em perturbacoes
+  - indicador de carga interrompida
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver carga interrompida por perturbações, confiabilidade
+    da rede básica de transmissão, indicadores regulatórios do Submódulo 9.1 do ONS ou desempenho do sistema
+    elétrico por subsistema em termos de interrupções. Também relevante para análises de penalidades regulatórias
+    da ANEEL relacionadas a perturbações no sistema de transmissão e comparações históricas de confiabilidade
+    entre subsistemas ou estados brasileiros.
+- property: agentInstructions
+  value: '- [val_ciper1] val_ciper1 apresenta amplitude muito elevada (0 a 345 MW) em comparação com val_ciper2
+    a val_ciper5 (máximos entre 2 e 15 MW). Valores extremos próximos a 345 MW podem representar eventos
+    de grande perturbação ou registros anuais acumulados do SIN. Recomenda-se filtrar por id_periodicidade
+    e dsc_agregacao antes de comparações diretas.
+
+
+    - [val_ciper2] val_ciper2 possui máximo de 10 MW, muito inferior ao máximo de val_ciper1 (345 MW).
+    Verificar se registros com val_ciper2 no máximo correspondem a eventos específicos ou agregações SIN/anuais
+    que possam distorcer análises por subsistema.
+
+
+    - [val_ciper3] val_ciper3 possui máximo de 6 MW. Verificar consistência entre val_ciper3 e demais
+    subindicadores para identificar registros onde val_ciper3 > val_ciper2, o que poderia indicar inversão
+    de categorias ou erro de classificação.
+
+
+    - [val_ciper4] val_ciper4 possui o menor máximo entre todos os subindicadores (2 MW). Verificar se
+    existem registros onde val_ciper4 > val_ciper3, o que poderia indicar inconsistência na ordenação
+    dos subcomponentes CIPER.
+
+
+    - [val_ciper5] val_ciper5 possui máximo de 15 MW, superior a val_ciper2 (10), val_ciper3 (6) e val_ciper4
+    (2), quebrando a ordenação decrescente esperada dos subcomponentes. Isso sugere que val_ciper5 pode
+    representar uma categoria distinta. Recomenda-se investigar a definição regulatória de cada subindicador
+    no Submódulo 9.1.
+
+
+    - [din_referencia] O período cobre a partir de 2007-01-01 com registros mensais e anuais coexistindo
+    via id_periodicidade. Verificar se há meses faltantes na série mensal para cada combinação de dsc_agregacao
+    e cod_caracteristica, o que poderia indicar descontinuidades na apuração do indicador CIPER.
+
+
+    - [id_periodicidade] Verificar se existem registros duplicados para a chave primária natural (dsc_agregacao,
+    cod_caracteristica, id_periodicidade, din_referencia). A coexistência de registros mensais e anuais
+    para o mesmo período pode gerar dupla contagem em análises que não filtrem por id_periodicidade.
+
+
+    - [dsc_agregacao] Verificar se os valores de dsc_agregacao estão padronizados e se não há variações
+    de grafia (ex: "Subsistema" vs "subsistema", "Região" vs "Regiao") que possam fragmentar filtros e
+    agrupamentos nas análises.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a evolução do CIPER no subsistema Sudeste/Centro-Oeste nos últimos 5 anos?
+  - Quais subsistemas apresentaram maior carga interrompida por perturbações em 2023?
+  - Como o CIPER anual do SIN variou entre 2010 e 2025?
+  - Qual o ranking de estados com maior val_ciper1 médio nos últimos 3 anos?
+  - Existe tendência de redução da carga interrompida por perturbações no subsistema Sul?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ciper/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2007-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ciper1
+      label: Ciper1
+      columns:
+      - val_ciper1
+      expression: val_ciper1
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_ciper1)
+          unit: MW
+        average:
+          sql: AVG(val_ciper1)
+          unit: MW
+        maximum:
+          sql: MAX(val_ciper1)
+          unit: MW
+        time_series:
+          sql: SUM(val_ciper1)
+          unit: MW
+        ranking:
+          sql: SUM(val_ciper1)
+          unit: MW
+        comparison:
+          sql: SUM(val_ciper1)
+          unit: MW
+      interval_hours: 8760.0
+      aliases:
+      - ciper1
+      - carga_interrompida_1
+      - indicador_ciper_1
+      - ciper_principal
+    - id: ciper2
+      label: Ciper2
+      columns:
+      - val_ciper2
+      expression: val_ciper2
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_ciper2)
+          unit: MW
+        average:
+          sql: AVG(val_ciper2)
+          unit: MW
+        maximum:
+          sql: MAX(val_ciper2)
+          unit: MW
+        time_series:
+          sql: SUM(val_ciper2)
+          unit: MW
+        ranking:
+          sql: SUM(val_ciper2)
+          unit: MW
+        comparison:
+          sql: SUM(val_ciper2)
+          unit: MW
+      interval_hours: 8760.0
+      aliases:
+      - ciper2
+      - carga_interrompida_2
+      - indicador_ciper_2
+    - id: ciper3
+      label: Ciper3
+      columns:
+      - val_ciper3
+      expression: val_ciper3
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_ciper3)
+          unit: MW
+        average:
+          sql: AVG(val_ciper3)
+          unit: MW
+        maximum:
+          sql: MAX(val_ciper3)
+          unit: MW
+        time_series:
+          sql: SUM(val_ciper3)
+          unit: MW
+        ranking:
+          sql: SUM(val_ciper3)
+          unit: MW
+        comparison:
+          sql: SUM(val_ciper3)
+          unit: MW
+      interval_hours: 8760.0
+      aliases:
+      - ciper3
+      - carga_interrompida_3
+      - indicador_ciper_3
+    - id: ciper4
+      label: Ciper4
+      columns:
+      - val_ciper4
+      expression: val_ciper4
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_ciper4)
+          unit: MW
+        average:
+          sql: AVG(val_ciper4)
+          unit: MW
+        maximum:
+          sql: MAX(val_ciper4)
+          unit: MW
+        time_series:
+          sql: SUM(val_ciper4)
+          unit: MW
+        ranking:
+          sql: SUM(val_ciper4)
+          unit: MW
+        comparison:
+          sql: SUM(val_ciper4)
+          unit: MW
+      interval_hours: 8760.0
+      aliases:
+      - ciper4
+      - carga_interrompida_4
+      - indicador_ciper_4
+    - id: ciper5
+      label: Ciper5
+      columns:
+      - val_ciper5
+      expression: val_ciper5
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_ciper5)
+          unit: MW
+        average:
+          sql: AVG(val_ciper5)
+          unit: MW
+        maximum:
+          sql: MAX(val_ciper5)
+          unit: MW
+        time_series:
+          sql: SUM(val_ciper5)
+          unit: MW
+        ranking:
+          sql: SUM(val_ciper5)
+          unit: MW
+        comparison:
+          sql: SUM(val_ciper5)
+          unit: MW
+      interval_hours: 8760.0
+      aliases:
+      - ciper5
+      - carga_interrompida_5
+      - indicador_ciper_5
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      dsc_agregacao:
+        Estado:
+          aliases:
+          - Estado
+          - estado
+          - UF
+          - unidade federativa
+          filter: dsc_agregacao = 'Estado'
+        Regiao Geografica:
+          aliases:
+          - Regiao Geografica
+          - regiao
+          - regiao geografica
+          - Região Geográfica
+          filter: dsc_agregacao = 'Região Geográfica'
+        Sistema:
+          aliases:
+          - Sistema
+          - SIN
+          - sistema interligado
+          - sistema brasileiro
+          - nacional
+          filter: dsc_agregacao = 'Sistema'
+        Subsistema:
+          aliases:
+          - Subsistema
+          - subsistema
+          filter: dsc_agregacao = 'Subsistema'
+      cod_caracteristica:
+        SBR:
+          aliases:
+          - SIN
+          - sistema interligado nacional
+          - brasil
+          - nacional
+          - SBR
+          filter: cod_caracteristica = 'SBR'
+        SE:
+          aliases:
+          - SE
+          - sudeste
+          - sudeste centro-oeste
+          - SE/CO
+          filter: cod_caracteristica = 'SE'
+        S:
+          aliases:
+          - S
+          - sul
+          filter: cod_caracteristica = 'S'
+        NE:
+          aliases:
+          - NE
+          - nordeste
+          filter: cod_caracteristica = 'NE'
+        N:
+          aliases:
+          - N
+          - norte
+          filter: cod_caracteristica = 'N'
+        CO:
+          aliases:
+          - CO
+          - centro-oeste
+          - centro oeste
+          filter: cod_caracteristica = 'CO'
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          - anual
+          - ano
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          filter: id_periodicidade = 'ME'
+      val_ciper2:
+        '0.0':
+          aliases:
+          - '0.0'
+          filter: val_ciper2 = 0
+        '1.0':
+          aliases:
+          - '1.0'
+          filter: val_ciper2 = 1
+        '2.0':
+          aliases:
+          - '2.0'
+          filter: val_ciper2 = 2
+        '3.0':
+          aliases:
+          - '3.0'
+          filter: val_ciper2 = 3
+        '4.0':
+          aliases:
+          - '4.0'
+          filter: val_ciper2 = 4
+        '5.0':
+          aliases:
+          - '5.0'
+          filter: val_ciper2 = 5
+        '8.0':
+          aliases:
+          - '8.0'
+          filter: val_ciper2 = 8
+        '10.0':
+          aliases:
+          - '10.0'
+          filter: val_ciper2 = 10
+      val_ciper3:
+        '0.0':
+          aliases:
+          - '0.0'
+          filter: val_ciper3 = 0
+        '1.0':
+          aliases:
+          - '1.0'
+          filter: val_ciper3 = 1
+        '2.0':
+          aliases:
+          - '2.0'
+          filter: val_ciper3 = 2
+        '3.0':
+          aliases:
+          - '3.0'
+          filter: val_ciper3 = 3
+        '4.0':
+          aliases:
+          - '4.0'
+          filter: val_ciper3 = 4
+        '5.0':
+          aliases:
+          - '5.0'
+          filter: val_ciper3 = 5
+        '6.0':
+          aliases:
+          - '6.0'
+          filter: val_ciper3 = 6
+      val_ciper4:
+        '0.0':
+          aliases:
+          - '0.0'
+          filter: val_ciper4 = 0
+        '1.0':
+          aliases:
+          - '1.0'
+          filter: val_ciper4 = 1
+        '2.0':
+          aliases:
+          - '2.0'
+          filter: val_ciper4 = 2
+      val_ciper5:
+        '0.0':
+          aliases:
+          - '0.0'
+          filter: val_ciper5 = 0
+        '1.0':
+          aliases:
+          - '1.0'
+          filter: val_ciper5 = 1
+        '2.0':
+          aliases:
+          - '2.0'
+          filter: val_ciper5 = 2
+        '3.0':
+          aliases:
+          - '3.0'
+          filter: val_ciper5 = 3
+        '4.0':
+          aliases:
+          - '4.0'
+          filter: val_ciper5 = 4
+        '5.0':
+          aliases:
+          - '5.0'
+          filter: val_ciper5 = 5
+        '6.0':
+          aliases:
+          - '6.0'
+          filter: val_ciper5 = 6
+        '8.0':
+          aliases:
+          - '8.0'
+          filter: val_ciper5 = 8
+        '11.0':
+          aliases:
+          - '11.0'
+          filter: val_ciper5 = 11
+        '15.0':
+          aliases:
+          - '15.0'
+          filter: val_ciper5 = 15
+    sql_patterns:
+      ciper1_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  SUM(val_ciper1)\
+          \ AS valor\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) =\
+          \ {year}\n  AND id_periodicidade = 'ME'\n  AND dsc_agregacao = 'Subsistema'\nGROUP BY 1\nORDER\
+          \ BY 1\n"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - ciper1
+          grain: month
+        validated_params:
+          year: '2026'
+      ciper1_anual_sin:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  SUM(val_ciper1)\
+          \ AS valor\nFROM {source}\nWHERE id_periodicidade = 'AN'\n  AND dsc_agregacao = 'Sistema'\n\
+          GROUP BY 1\nORDER BY 1\n"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          - time_series
+          metrics:
+          - ciper1
+          grain: year
+      ranking_estados_ciper1:
+        template: "SELECT cod_caracteristica AS estado,\n  dsc_caracteristica AS nome_estado,\n  AVG(val_ciper1)\
+          \ AS media_ciper1\nFROM {source}\nWHERE id_periodicidade = 'ME'\n  AND dsc_agregacao = 'Estado'\n\
+          \  AND din_referencia >= '{data_inicio}'\n  AND din_referencia <= '{data_fim}'\nGROUP BY 1,\
+          \ 2\nORDER BY media_ciper1 DESC\n"
+        output_unit: MW
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - ciper1
+          grain: period
+        validated_params:
+          data_inicio: '2026-01-01'
+          data_fim: '2026-05-01'
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o indicador CIPER 1 por subsistema ao longo dos anos?
+    sql: SELECT cod_caracteristica, dsc_caracteristica, DATE_TRUNC('year', din_referencia::DATE) AS ano,
+      AVG(val_ciper1) AS media_ciper1, MAX(val_ciper1) AS max_ciper1, MIN(val_ciper1) AS min_ciper1 FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ciper/*.parquet') WHERE dsc_agregacao
+      = 'Subsistema' AND id_periodicidade = 'ME' GROUP BY cod_caracteristica, dsc_caracteristica, DATE_TRUNC('year',
+      din_referencia::DATE) ORDER BY cod_caracteristica, ano;
+  - question: Quais estados tiveram maior carga interrompida por perturbações em 2023?
+    sql: SELECT cod_caracteristica, dsc_caracteristica, SUM(val_ciper1) AS total_ciper1, SUM(val_ciper2)
+      AS total_ciper2, SUM(val_ciper3) AS total_ciper3, SUM(val_ciper4) AS total_ciper4, SUM(val_ciper5)
+      AS total_ciper5, SUM(val_ciper1 + val_ciper2 + val_ciper3 + val_ciper4 + val_ciper5) AS total_ciper_geral
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ciper/*.parquet') WHERE dsc_agregacao
+      = 'Estado' AND id_periodicidade = 'ME' AND YEAR(din_referencia::DATE) = 2023 GROUP BY cod_caracteristica,
+      dsc_caracteristica ORDER BY total_ciper_geral DESC LIMIT 20;
+  - question: Como o CIPER anual do Sistema Interligado Nacional variou entre 2010 e 2025?
+    sql: SELECT YEAR(din_referencia::DATE) AS ano, val_ciper1, val_ciper2, val_ciper3, val_ciper4, val_ciper5,
+      val_ciper1 + val_ciper2 + val_ciper3 + val_ciper4 + val_ciper5 AS total_ciper FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ciper/*.parquet')
+      WHERE dsc_agregacao = 'SIN' AND id_periodicidade = 'AN' AND YEAR(din_referencia::DATE) BETWEEN 2010
+      AND 2025 ORDER BY ano;
+- property: license
+  value: CC-BY

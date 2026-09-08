@@ -1,0 +1,382 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:cmo-semi-horario
+name: cmo-semi-horario
+tenant: ons
+tags:
+- 30min
+- CMO
+- CMO DESSEM
+- CMO semi-horário
+- DESSEM
+- PLD
+- SIN
+- cmo_tm
+- custo marginal de operação 30 minutos
+- custo marginal semi-horário
+- custo-marginal-operacao
+- mercado-curto-prazo
+- preco-energia
+- semi-horario
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/cmo_tm/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos agentes do mercado de energia elétrica, operadores do sistema e reguladores o
+    sinal de preço intra-diário do CMO semi-horário por subsistema, permitindo precificação de energia
+    no mercado de curto prazo, suporte ao despacho econômico do DESSEM, análise de formação do PLD, monitoramento
+    de condições hidrológicas e tomada de decisão operacional em tempo quase real no âmbito do SIN.
+  limitations: O CMO pode assumir valores negativos em situações de excesso de geração renovável ou vertimento
+    turbinável, especialmente no subsistema Sul em períodos chuvosos. Possível ausência de intervalos
+    semi-horários esperados (48 por dia por subsistema). Verificação de duplicatas na chave primária composta
+    (din_instante, id_subsistema) do dataset cmo-semi-horario.
+  usage: Recuperar este dataset quando a pergunta envolver custo marginal de operação (CMO) em granularidade
+    intra-diária (30 minutos ou semi-horária), análise de perfil de preços ao longo do dia por subsistema,
+    ou comparação de CMO entre subsistemas do SIN em base temporal detalhada.
+domain: preço
+schema:
+- name: cmo_semi_horario
+  physicalType: parquet
+  logicalType: object
+  physicalName: cmo_semi_horario
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador alfanumérico do subsistema elétrico do SIN. Representa os quatro subsistemas
+      principais: SE/CO, S, NE e N. Chave de join com outros datasets de subsistema do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id_sub
+      - codigo_subsistema
+      - regiao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico do SIN correspondente ao id_subsistema. Identifica
+      textualmente cada uma das quatro regiões do sistema interligado. Pode apresentar variações históricas
+      de nomenclatura para o subsistema SE/CO.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - subsistema_nome
+      - regiao_nome
+      - nome_regiao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora do instante de início do intervalo semi-horário (30 minutos) ao qual o CMO
+      se refere. Gerado pelo modelo DESSEM com granularidade de 30 minutos, cobrindo 48 intervalos por
+      dia (00:00, 00:30, 01:00, ..., 23:30). Componente da chave primária composta junto com id_subsistema.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data_hora
+      - timestamp
+      - data_instante
+      - horario
+      - din
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_cmo
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Custo Marginal de Operação (CMO) estimado pelo modelo DESSEM para o subsistema no intervalo
+      semi-horário correspondente. Representa o custo por unidade de energia produzida para atender ao
+      incremento de uma unidade de carga no subsistema, calculado como média ponderada pela carga dos
+      CMOs nas barras pertencentes ao subsistema. Valores negativos são possíveis em situações de excesso
+      de geração ou vertimento.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - cmo
+      - custo_marginal
+      - custo_marginal_operacao
+      - preco_cmo
+      - valor_cmo
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_cmo AS DOUBLE)
+    - property: unit
+      value: R$/MWh
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/cmo-semi-horario
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - preco da energia por hora
+  - pld horario
+  - custo marginal ao longo do dia
+  - preco spot intradiario
+  - quanto custou a energia na hora
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver custo marginal de operação (CMO) em granularidade
+    intra-diária (30 minutos ou semi-horária), análise de perfil de preços ao longo do dia por subsistema,
+    ou comparação de CMO entre subsistemas do SIN em base temporal detalhada. Também relevante para perguntas
+    sobre formação do PLD, despacho econômico DESSEM, períodos de CMO negativo ou análise de volatilidade
+    de preços de energia no mercado de curto prazo brasileiro.
+- property: agentInstructions
+  value: |
+    - [val_cmo] O CMO pode assumir valores negativos em situações de excesso de geração renovável ou restrições de transmissão, bem como valores extremamente elevados em períodos de escassez hídrica. Recomenda-se verificar outliers fora do intervalo esperado (abaixo de 0 ou acima de 2000 R$/MWh) antes de utilizar em modelos de precificação. Dataset: cmo-semi-horario.
+
+    - [din_instante] Dado que o dataset cmo-semi-horario é atualizado duas vezes ao dia e pode ser revisado após publicação, podem existir lacunas temporais ou instantes duplicados em períodos de reprocessamento. Verificar continuidade dos intervalos de 30 minutos por subsistema é recomendado antes de análises de séries temporais.
+
+    - [id_subsistema] A chave primária natural do dataset cmo-semi-horario é (din_instante, id_subsistema). Reprocessamentos ou publicações duplas podem gerar registros duplicados para o mesmo instante e subsistema, distorcendo médias e agregações temporais.
+
+    - [tipos] As colunas `val_cmo` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi o CMO médio do subsistema Sudeste/Centro-Oeste em janeiro de 2024?
+  - Em quais períodos o CMO do subsistema Sul ficou negativo nos últimos 12 meses?
+  - Como o CMO variou ao longo do dia (perfil intra-diário) para cada subsistema em 2023?
+  - Qual subsistema apresentou o maior CMO médio no período de estiagem de 2021?
+  - Qual a diferença entre o CMO máximo e mínimo diário por subsistema em 2024?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "qual foi o CMO medio de setembro de 2025?"
+  - "tem dado de CMO do Nordeste em 2024?"
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_tm/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2020-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - cmo
+    - custo marginal
+    family: cmo
+    family_default: true
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 30 min
+      temporal_column: din_instante
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - din_instante
+      - id_subsistema
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: cmo
+      label: CMO
+      columns:
+      - val_cmo
+      expression: TRY_CAST(val_cmo AS DOUBLE)
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_cmo AS DOUBLE))
+          unit: R$/MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_cmo AS DOUBLE))
+          unit: R$/MWh
+        minimum:
+          sql: MIN(TRY_CAST(val_cmo AS DOUBLE))
+          unit: R$/MWh
+        time_series:
+          sql: AVG(TRY_CAST(val_cmo AS DOUBLE))
+          unit: R$/MWh
+        ranking:
+          sql: AVG(TRY_CAST(val_cmo AS DOUBLE))
+          unit: R$/MWh
+        comparison:
+          sql: AVG(TRY_CAST(val_cmo AS DOUBLE))
+          unit: R$/MWh
+      interval_hours: 0.5
+      aliases:
+      - cmo
+      - custo_marginal
+      - custo_marginal_operacao
+      - preco_cmo
+      - valor_cmo
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          - sudeste/centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - sudeste
+          - sudeste centro-oeste
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema = 'SUL'
+    sql_patterns:
+      cmo_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  AVG(TRY_CAST(val_cmo AS DOUBLE)) AS cmo_medio_r_mwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM\
+          \ TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - cmo
+          grain: month
+        validated_params:
+          year: '2021'
+      cmo_perfil_intradiario:
+        template: "SELECT DATE_TRUNC('hour', TRY_CAST(din_instante AS TIMESTAMP)) AS hora,\n  id_subsistema,\n\
+          \  AVG(TRY_CAST(val_cmo AS DOUBLE)) AS cmo_medio_r_mwh\nFROM {source}\nWHERE din_instante >=\
+          \ '{data_inicio}' AND din_instante < '{data_fim}'\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - cmo
+          grain: hour
+        validated_params:
+          data_inicio: '2020-01-01 00:00:00'
+          data_fim: '2021-06-05 19:30:00'
+      cmo_negativo:
+        template: "SELECT din_instante, id_subsistema,\n  TRY_CAST(val_cmo AS DOUBLE) AS cmo_r_mwh\nFROM\
+          \ {source}\nWHERE TRY_CAST(val_cmo AS DOUBLE) < 0\n  AND din_instante >= '{data_inicio}' AND\
+          \ din_instante < '{data_fim}'\nORDER BY din_instante, id_subsistema"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - cmo
+          grain: 30min
+        validated_params:
+          data_inicio: '2020-01-01 00:00:00'
+          data_fim: '2021-06-05 19:30:00'
+      cmo_comparacao_subsistemas:
+        template: "SELECT id_subsistema,\n  AVG(TRY_CAST(val_cmo AS DOUBLE)) AS cmo_medio_r_mwh,\n  MAX(TRY_CAST(val_cmo\
+          \ AS DOUBLE)) AS cmo_max_r_mwh,\n  MIN(TRY_CAST(val_cmo AS DOUBLE)) AS cmo_min_r_mwh\nFROM {source}\n\
+          WHERE din_instante >= '{data_inicio}' AND din_instante < '{data_fim}'\nGROUP BY 1\nORDER BY\
+          \ cmo_medio_r_mwh DESC"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - comparison
+          - ranking
+          metrics:
+          - cmo
+          grain: period
+        validated_params:
+          data_inicio: '2020-01-01 00:00:00'
+          data_fim: '2021-06-05 19:30:00'
+- property: fewShotQueries
+  value:
+  - question: Qual foi o CMO médio diário de cada subsistema ao longo de 2024?
+    sql: SELECT id_subsistema, nom_subsistema, CAST(din_instante AS DATE) AS data, AVG(TRY_CAST(val_cmo AS DOUBLE)) AS cmo_medio_diario,
+      MIN(val_cmo) AS cmo_minimo, MAX(val_cmo) AS cmo_maximo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_tm/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY id_subsistema, nom_subsistema,
+      CAST(din_instante AS DATE) ORDER BY data, id_subsistema
+  - question: Como o CMO varia ao longo do dia (perfil médio por hora) no subsistema Sudeste?
+    sql: SELECT id_subsistema, nom_subsistema, EXTRACT(HOUR FROM TRY_CAST(din_instante AS TIMESTAMP))
+      AS hora, EXTRACT(MINUTE FROM TRY_CAST(din_instante AS TIMESTAMP)) AS minuto, AVG(val_cmo) AS cmo_medio
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_tm/*.parquet') WHERE id_subsistema = 'SE'
+      AND din_instante >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY id_subsistema, nom_subsistema,
+      EXTRACT(HOUR FROM TRY_CAST(din_instante AS TIMESTAMP)), EXTRACT(MINUTE FROM TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY hora, minuto
+  - question: Qual subsistema teve o maior CMO médio em cada mês de 2023?
+    sql: SELECT id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
+      AS mes, AVG(val_cmo) AS cmo_medio_mensal, RANK() OVER ( PARTITION BY DATE_TRUNC('month', TRY_CAST(din_instante
+      AS TIMESTAMP)) ORDER BY AVG(val_cmo) DESC ) AS ranking FROM read_parquet('s3://ons-aws-prod-opendata/dataset/cmo_tm/*.parquet')
+      WHERE din_instante >= '2023-01-01' AND din_instante < '2024-01-01' GROUP BY id_subsistema, nom_subsistema,
+      DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY mes, ranking
+- property: license
+  value: CC-BY

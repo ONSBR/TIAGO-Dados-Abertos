@@ -1,0 +1,725 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:res_volumeespera
+name: res_volumeespera
+tenant: ons
+tags:
+- ONS
+- VE reservatório
+- amortecimento de cheias
+- amortecimento-de-cheias
+- bacia-hidrografica
+- despacho-hidreletrico
+- gestao-de-riscos-hidrologicos
+- hidrologia
+- limite máximo reservatório
+- programacao-hidraulica
+- reservatorio
+- restrição de armazenamento
+- usina-hidreletrica
+- volume de espera
+- volume-de-espera
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/res_volumeespera/*.parquet
+  format: parquet
+description:
+  purpose: Suportar operadores e planejadores do ONS na programação hidráulica diária, fornecendo o limite
+    máximo de armazenamento recomendado por reservatório para garantir capacidade de amortecimento de
+    cheias. Utilizado em decisões de despacho hidrelétrico, gestão de riscos hidrológicos e conformidade
+    operativa, permitindo comparar o nível real armazenado com o limite recomendado e identificar reservatórios
+    em situação de risco hidrológico.
+  limitations: Poucos registros possuem num_ordemcs nulo, correspondendo a reservatórios sem posição definida em cascata hidrológica. O valor mínimo de val_volumeespera é 21. Dado que o CKAN
+    informa publicação às 12h e 19h (duas vezes ao dia), mas o volume total de linhas (10.
+  usage: Recuperar este dataset quando a pergunta envolver limites máximos de armazenamento em reservatórios,
+    restrições operativas para amortecimento de cheias, conformidade do nível real com o volume de espera
+    recomendado pelo ONS, ou análise de risco hidrológico por usina, bacia ou subsistema elétrico.
+domain: hidrologia
+schema:
+- name: res_volumeespera
+  physicalType: parquet
+  logicalType: object
+  physicalName: res_volumeespera
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual o reservatório pertence (ex: SE, S, NE,
+      N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+      - submercado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico (ex: Sudeste/Centro-Oeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: tip_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo do reservatório, indicando sua característica operativa (ex: regularização, fio
+      d''água)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo reservatório
+      - tipo do reservatório
+      - classificação reservatório
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - FIC
+      - RCU
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da bacia hidrográfica à qual o reservatório pertence
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrográfica
+      - bacia hidrológica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - GRANDE
+      - IGUACU
+      - JACUI
+      - JEQUITINHONHA
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SAO FRANCISCO
+      - TIETE
+  - name: nom_ree
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do Reservatório Equivalente de Energia (REE) ao qual o reservatório está associado
+    customProperties:
+    - property: aliases
+      value:
+      - REE
+      - reservatório equivalente
+      - reservatório equivalente de energia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - IGUACU
+      - NORDESTE
+      - PARANA
+      - PARANAPANEMA
+      - SUDESTE
+      - SUL
+  - name: id_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único do reservatório no sistema ONS
+    customProperties:
+    - property: aliases
+      value:
+      - código reservatório
+      - id do reservatório
+      - identificador reservatório
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - GRAGVL
+      - GRCAMA
+      - GRFURN
+      - GRMARI
+      - GRMMOR
+      - IGSSAN
+      - JEIRAP
+      - JIPREA
+      - PBFUNI
+      - PBSTAB
+      - PDCACO
+      - PIBESP
+      - PNISOL
+      - PNTIRM
+      - PPCAPI
+      - PPCHAV
+      - PPJURU
+      - PREMBO
+      - PRITUM
+      - PRNPON
+      - PRSSIM
+      - SFLGON
+      - SFQMDO
+      - SFSOBR
+      - SFTMAR
+      - TIBONI
+      - TIPROM
+      - TITIRM
+  - name: nom_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do reservatório associado à usina hidrelétrica
+    customProperties:
+    - property: aliases
+      value:
+      - nome reservatório
+      - nome do reservatório
+      - reservatório
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - A. VERMELHA
+      - B. BONITA
+      - BOA ESPERANÇA
+      - CACONDE
+      - CAMARGOS
+      - CAPIVARA
+      - CHAVANTES
+      - EMBORCAÇÃO
+      - FUNIL
+      - FURNAS
+      - I. SOLTEIRA
+      - ILHA + T. IRMÃOS
+      - IRAPE
+      - ITUMBIARA
+      - JURUMIRIM
+      - LUIZ GONZAGA
+      - M. MORAES
+      - MARIMBONDO
+      - NOVA PONTE
+      - PASSO REAL
+      - PROMISSÃO
+      - QUEIMADO
+      - SALTO SANTIAGO
+      - SANTA BRANCA
+      - SOBRADINHO
+      - SÃO SIMÃO
+      - TRÊS IRMÃOS
+      - TRÊS MARIAS
+  - name: num_ordemcs
+    physicalType: DOUBLE
+    logicalType: integer
+    description: Número de ordem do reservatório na cascata hidrológica. Reservatórios sem cascata definida
+      podem apresentar valor nulo
+    customProperties:
+    - property: aliases
+      value:
+      - ordem cascata
+      - ordem na cascata
+      - posição cascata
+      - num ordem cs
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 31
+      - 32
+      - 34
+      - 35
+      - 36
+      - 41
+      - 42
+      - 44
+      - 45
+      - 46
+      - 52
+      - 53
+      - 66
+      - 67
+      - 69
+      - 70
+      - 79
+      - 81
+      - 83
+      - 85
+      - 106
+      - 109
+      - 110
+      - 113
+      - 114
+      - 117
+      - 119
+      - 121
+      - 123
+      - 129
+      - 132
+      - 133
+      - 136
+      - 138
+      - 142
+      - 143
+      - 147
+      - 174
+      - 175
+      - 176
+      - 177
+      - 178
+      - 179
+      - 180
+      - 181
+      - 189
+      - 192
+      - 193
+      - 196
+      - 198
+  - name: cod_usina
+    physicalType: BIGINT
+    logicalType: integer
+    description: Código numérico da usina hidrelétrica no cadastro ONS. Chave de join com datasets de
+      usinas
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código usina
+      - código da usina
+      - id usina
+      - usina
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1
+      - 6
+      - 7
+      - 14
+      - 17
+      - 18
+      - 24
+      - 25
+      - 31
+      - 33
+      - 34
+      - 37
+      - 40
+      - 43
+      - 44
+      - 47
+      - 49
+      - 61
+      - 77
+      - 111
+      - 122
+      - 123
+      - 148
+      - 156
+      - 162
+      - 169
+      - 172
+      - 190
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora de referência do registro do volume de espera recomendado. Publicado às 12h
+      e 19h conforme CKAN, mas granularidade efetiva é diária
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data instante
+      - instante
+      - data referência
+      - data hora
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_volumeespera
+    physicalType: DOUBLE
+    logicalType: number
+    description: Volume de espera recomendado para o reservatório, expresso em percentual do volume útil.
+      Representa o nível máximo que o reservatório deve atingir para garantir capacidade de amortecimento
+      de cheias
+    customProperties:
+    - property: aliases
+      value:
+      - volume espera
+      - volume de espera
+      - val volume espera
+      - percentual volume útil
+      - nível máximo reservatório
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/res_volumeespera
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - volume de espera do reservatorio
+  - limite para conter cheias
+  - quanto o reservatorio pode encher
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver limites máximos de armazenamento em reservatórios,
+    restrições operativas para amortecimento de cheias, conformidade do nível real com o volume de espera
+    recomendado pelo ONS, ou análise de risco hidrológico por usina, bacia ou subsistema elétrico. Também
+    relevante para perguntas sobre programação hidráulica diária e gestão de inundações a jusante de usinas
+    hidrelétricas.
+- property: agentInstructions
+  value: '- [num_ordemcs] Campo num_ordemcs possui poucos nulos (~311 registros).
+    Pode indicar reservatórios sem curva de segurança definida ou registros históricos anteriores à implementação
+    deste campo no sistema ONS. Nulos devem ser tratados antes de qualquer ordenação ou filtragem por
+    curva de segurança.
+
+
+    - [val_volumeespera] Valor mínimo de 21,13% pode representar reservatórios com restrições operativas
+    severas ou registros atípicos. Valores próximos a 100% indicam reservatórios sem restrição de espera
+    (capacidade plena permitida). Recomenda-se verificar distribuição por usina para identificar outliers
+    por reservatório específico.
+
+
+    - [din_instante] O dataset tem volume pequeno para o periodo coberto: nem todo reservatorio tem registro em todo ano.
+    Considerando múltiplos reservatórios e granularidade diária, o volume é baixo, sugerindo possíveis
+    lacunas temporais para determinadas usinas ou períodos sem publicação de volume de espera. Recomenda-se
+    verificar continuidade por usina.
+
+
+    - [cod_usina] A chave primária natural esperada é (cod_usina, din_instante). Dado que o CKAN informa
+    duas atualizações diárias (12h e 19h), podem existir dois registros por usina por dia, o que não seria
+    duplicata mas sim granularidade intradiária. Verificar se há registros duplicados exatos ou múltiplos
+    registros por (usina, data) que requeiram deduplicação antes de análises diárias.
+
+
+    - [id_subsistema] Valores com trailing spaces detectados em ''id_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_bacia] Valores com trailing spaces detectados em ''nom_bacia''. Use TRIM() em filtros WHERE
+    para evitar perda de registros.
+
+    - [nom_ree] Valores com trailing spaces detectados em ''nom_ree''. Use TRIM() em filtros WHERE para
+    evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais reservatórios estão acima do volume de espera recomendado hoje?
+  - Qual é o histórico do volume de espera recomendado para a usina de Itaipu nos últimos 12 meses?
+  - Quais reservatórios do subsistema Sudeste têm volume de espera abaixo de 50% do volume útil?
+  - Como o volume de espera recomendado variou durante períodos de cheia na bacia do Paraná?
+  - Quais usinas da bacia do São Francisco apresentaram volume de espera igual a 100% (sem restrição)
+    em 2023?
+- property: granularity
+  value: diária
+- property: temporalCoverageStart
+  value: '2006-10-28'
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/res_volumeespera/*.parquet', union_by_name=true)
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: din_instante
+      spatial: usina
+      entity: reservatorio
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - id_reservatorio
+      - cod_usina
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: nom_reservatorio
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: volumeespera
+      label: Volume de Espera Recomendado
+      columns:
+      - val_volumeespera
+      expression: val_volumeespera
+      quantity_kind: volume
+      unit_native: '%'
+      default_aggregation: last_or_avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        maximum:
+          sql: MAX(val_volumeespera)
+          unit: '%'
+        average:
+          sql: AVG(val_volumeespera)
+          unit: '%'
+        minimum:
+          sql: MIN(val_volumeespera)
+          unit: '%'
+        time_series:
+          sql: AVG(val_volumeespera)
+          unit: '%'
+        ranking:
+          sql: AVG(val_volumeespera)
+          unit: '%'
+        comparison:
+          sql: AVG(val_volumeespera)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - volume espera
+      - volume de espera
+      - val volume espera
+      - percentual volume util
+      - nivel maximo reservatorio
+      - limite armazenamento
+      - restricao operativa reservatorio
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: TRIM(id_subsistema) = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: TRIM(id_subsistema) = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: TRIM(id_subsistema) = 'NE'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - nordeste
+          filter: TRIM(nom_subsistema) = 'Nordeste'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - sudeste centro-oeste
+          filter: TRIM(nom_subsistema) = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - sul
+          filter: TRIM(nom_subsistema) = 'Sul'
+      tip_reservatorio:
+        FIC:
+          aliases:
+          - FIC
+          - fio dagua
+          - fio d'agua
+          filter: tip_reservatorio = 'FIC'
+        RCU:
+          aliases:
+          - RCU
+          - regularizacao
+          - regularizador
+          filter: tip_reservatorio = 'RCU'
+      nom_bacia:
+        GRANDE:
+          aliases:
+          - grande
+          - rio grande
+          filter: TRIM(nom_bacia) = 'GRANDE'
+        IGUACU:
+          aliases:
+          - iguacu
+          - iguaçu
+          filter: TRIM(nom_bacia) = 'IGUACU'
+        JACUI:
+          aliases:
+          - jacui
+          - jacuí
+          filter: TRIM(nom_bacia) = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - jequitinhonha
+          filter: TRIM(nom_bacia) = 'JEQUITINHONHA'
+        PARAIBA DO SUL:
+          aliases:
+          - paraiba do sul
+          - paraíba do sul
+          filter: TRIM(nom_bacia) = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - parana
+          - paraná
+          filter: TRIM(nom_bacia) = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - paranaiba
+          - paranaíba
+          filter: TRIM(nom_bacia) = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: TRIM(nom_bacia) = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - parnaiba
+          - parnaíba
+          filter: TRIM(nom_bacia) = 'PARNAIBA'
+        SAO FRANCISCO:
+          aliases:
+          - sao francisco
+          - são francisco
+          - sf
+          filter: TRIM(nom_bacia) = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - tiete
+          - tietê
+          filter: TRIM(nom_bacia) = 'TIETE'
+      nom_ree:
+        IGUACU:
+          aliases:
+          - iguacu
+          - iguaçu
+          filter: TRIM(nom_ree) = 'IGUACU'
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: TRIM(nom_ree) = 'NORDESTE'
+        PARANA:
+          aliases:
+          - parana
+          - paraná
+          filter: TRIM(nom_ree) = 'PARANA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: TRIM(nom_ree) = 'PARANAPANEMA'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: TRIM(nom_ree) = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: TRIM(nom_ree) = 'SUL'
+    sql_patterns:
+      volumeespera_serie_diaria:
+        template: "SELECT\n  CAST(din_instante AS DATE) AS data,\n  nom_reservatorio,\n  AVG(val_volumeespera)\
+          \ AS volume_espera_pct\nFROM {source}\nWHERE nom_reservatorio = '{reservatorio}'\n  AND din_instante\
+          \ BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1, 2\nORDER BY 1"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - volumeespera
+          grain: day
+        validated_params:
+          reservatorio: CHAVANTES
+          data_inicio: '2006-10-28 00:00:00'
+          data_fim: '2019-12-31 00:00:00'
+      volumeespera_por_reservatorio_periodo:
+        template: "SELECT\n  nom_reservatorio,\n  TRIM(id_subsistema) AS subsistema,\n  TRIM(nom_bacia)\
+          \ AS bacia,\n  AVG(val_volumeespera) AS volume_espera_medio_pct,\n  MAX(val_volumeespera) AS\
+          \ volume_espera_max_pct,\n  MIN(val_volumeespera) AS volume_espera_min_pct\nFROM {source}\n\
+          WHERE din_instante BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1, 2, 3\nORDER BY 4 DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - ranking
+          - comparison
+          metrics:
+          - volumeespera
+          grain: period
+        validated_params:
+          data_inicio: '2006-10-28 00:00:00'
+          data_fim: '2019-12-31 00:00:00'
+      volumeespera_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  nom_reservatorio,\n\
+          \  TRIM(id_subsistema) AS subsistema,\n  AVG(val_volumeespera) AS volume_espera_medio_pct\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1, 2, 3\nORDER BY 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - volumeespera
+          grain: month
+        validated_params:
+          year: '2019'
+      reservatorios_acima_limite:
+        template: "SELECT nom_reservatorio, \n       val_volumeesperaperc,\n       TRY_CAST(din_instante\
+          \ AS DATE) AS data\nFROM {source}\nWHERE TRY_CAST(val_volumeesperaperc AS DOUBLE) > 80\nORDER\
+          \ BY val_volumeesperaperc DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - volumeespera
+          grain: day
+        requires_join: dados-hidrologicos-res
+- property: fewShotQueries
+  value:
+  - question: Qual é o volume de espera recomendado mais recente para cada reservatório hidrelétrico?
+    sql: WITH ultimo_registro AS ( SELECT cod_usina, nom_reservatorio, nom_bacia, nom_ree, id_subsistema,
+      val_volumeespera, din_instante, ROW_NUMBER() OVER (PARTITION BY cod_usina ORDER BY din_instante
+      DESC) AS rn FROM read_parquet('s3://ons-aws-prod-opendata/dataset/res_volumeespera/*.parquet') )
+      SELECT cod_usina, nom_reservatorio, nom_bacia, nom_ree, id_subsistema, val_volumeespera, CAST(din_instante
+      AS DATE) AS data_referencia FROM ultimo_registro WHERE rn = 1 ORDER BY id_subsistema, nom_bacia,
+      nom_reservatorio
+  - question: Quais reservatórios têm volume de espera recomendado abaixo de 70% do volume útil no último
+      mês?
+    sql: SELECT cod_usina, nom_reservatorio, nom_bacia, nom_ree, id_subsistema, ROUND(AVG(val_volumeespera),
+      2) AS media_vol_espera, MIN(val_volumeespera) AS min_vol_espera, COUNT(*) AS dias_com_restricao
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/res_volumeespera/*.parquet') WHERE val_volumeespera
+      < 70.0 AND CAST(din_instante AS DATE) >= CURRENT_DATE - INTERVAL '30' DAY GROUP BY cod_usina, nom_reservatorio,
+      nom_bacia, nom_ree, id_subsistema ORDER BY min_vol_espera ASC
+  - question: Como evoluiu o volume de espera médio por bacia hidrográfica ao longo dos anos?
+    sql: SELECT nom_bacia, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia,
+      ROUND(AVG(val_volumeespera), 2) AS media_vol_espera, MIN(val_volumeespera) AS min_vol_espera, MAX(val_volumeespera)
+      AS max_vol_espera, COUNT(DISTINCT cod_usina) AS num_usinas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/res_volumeespera/*.parquet')
+      GROUP BY nom_bacia, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY nom_bacia,
+      mes_referencia
+- property: license
+  value: CC-BY

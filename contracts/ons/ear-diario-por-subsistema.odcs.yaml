@@ -1,0 +1,481 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ear-diario-por-subsistema
+name: ear-diario-por-subsistema
+tenant: ons
+tags:
+- EAR
+- EAR diário
+- MWmês
+- ONS
+- SIN
+- armazenamento hídrico
+- diário
+- energia armazenada
+- energia armazenada diária
+- hidrelétrica
+- nível dos reservatórios
+- percentual armazenamento
+- reservatório
+- reservatório equivalente de energia
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ear_subsistema_di/*.parquet
+  format: parquet
+description:
+  purpose: Prover aos geradores, comercializadores, planejadores e reguladores do setor elétrico brasileiro
+    a série histórica diária de energia armazenada nos reservatórios hidrelétricos por subsistema, expressa
+    em MWmês e percentual da capacidade máxima, para suportar estudos de segurança energética, projeção
+    do Custo Marginal de Operação (CMO), monitoramento de risco de déficit hídrico, despacho hidrotérmico
+    e análise de balanço hídrico-energético no âmbito do planejamento da operação do SIN.
+  limitations: A coluna ear_data é tipada como VARCHAR no schema físico (DuckDB), embora represente datas
+    no formato YYYY-MM-DD. O percentual de energia armazenada deve estar teoricamente entre 0% e 100%.
+    Energia armazenada verificada em MWmês não deve assumir valores negativos, pois representa volume
+    físico de água disponível.
+  usage: Recuperar este dataset quando a pergunta envolver energia armazenada em reservatórios, nível
+    de armazenamento hídrico, percentual de EAR, capacidade de reservatórios hidrelétricos ou monitoramento
+    de segurança energética por subsistema do SIN em granularidade diária.
+domain: reservatório
+schema:
+- name: ear_diario_por_subsistema
+  physicalType: parquet
+  logicalType: object
+  physicalName: ear_diario_por_subsistema
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador alfanumérico do subsistema elétrico (ex. SE, S, NE, N)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - cod_subsistema
+      - sigla_subsistema
+      - id_sub
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico correspondente ao id_subsistema
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - subsistema_nome
+      - regiao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: ear_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição da energia armazenada, no formato YYYY-MM-DD. Tipada como
+      VARCHAR no schema físico — recomenda-se CAST explícito para DATE em consultas e filtros temporais
+      para garantir ordenação cronológica correta.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data_ear
+      - data_referencia
+      - dat_referencia
+      - din_instante
+    - property: semanticType
+      value: DIMENSION
+  - name: ear_max_subsistema
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada máxima do subsistema, representando a capacidade total de armazenamento
+      caso todos os reservatórios do subsistema estivessem completamente cheios. Expressa em MWmês.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_max_subsistema AS DOUBLE)
+    - property: aliases
+      value:
+      - ear_maxima
+      - capacidade_maxima
+      - ear_max
+      - energia_maxima_reservatorio
+    - property: unit
+      value: MWmês
+    - property: enum
+      value:
+      - 12311.0
+      - 13976.0
+      - 14176.0
+      - 15302.396
+      - 155759.0
+      - 159081.0
+      - 20459.242
+      - 204615.328
+      - 49967.0
+      - 51691.226
+  - name: ear_verif_subsistema_mwmes
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada verificada no subsistema na data de referência, expressa em MWmês.
+      Representa a energia associada ao volume de água efetivamente disponível nos reservatórios, considerando
+      também a contribuição para usinas à jusante em subsistemas diferentes.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE)
+    - property: aliases
+      value:
+      - ear_verificada
+      - ear_mwmes
+      - energia_armazenada_mwmes
+      - ear_verif_mwmes
+    - property: unit
+      value: MWmês
+  - name: ear_verif_subsistema_percentual
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia armazenada verificada no subsistema na data de referência, expressa como percentual
+      da capacidade máxima (ear_max_subsistema). Calculada como (ear_verif_subsistema_mwmes / ear_max_subsistema)
+      × 100.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE)
+    - property: aliases
+      value:
+      - ear_percentual
+      - ear_pct
+      - percentual_ear
+      - ear_verif_pct
+      - nivel_reservatorio_percentual
+    - property: unit
+      value: '%'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ear-diario-por-subsistema
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - nivel dos reservatorios do sin
+  - quanto de agua tem armazenado
+  - armazenamento por subsistema
+  - earm do sin
+  - energia estocada no sistema
+  - situacao dos reservatorios por regiao
+  - percentual dos reservatorios
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver energia armazenada em reservatórios, nível
+    de armazenamento hídrico, percentual de EAR, capacidade de reservatórios hidrelétricos ou monitoramento
+    de segurança energética por subsistema do SIN em granularidade diária. Também relevante para perguntas
+    sobre risco de déficit hídrico, correlação entre armazenamento e CMO, ou balanço hídrico-energético
+    diário.
+- property: agentInstructions
+  value: |
+    - [ear_data] Coluna ear_data está armazenada como VARCHAR no schema físico DuckDB, embora represente datas no formato YYYY-MM-DD. Filtros temporais e ordenações sem cast podem produzir resultados incorretos por ordenação lexicográfica em vez de cronológica.
+
+    - [ear_verif_subsistema_percentual] O percentual de energia armazenada pode ultrapassar 100% em situações de vertimento ou inconsistências de consistência recorrente. Valores abaixo de 0% são fisicamente impossíveis e indicam erro de dados.
+
+    - [ear_verif_subsistema_mwmes] Energia armazenada verificada em MWmês não deve assumir valores negativos, pois representa volume físico de água nos reservatórios. Valores negativos indicam inconsistência no processo de consistência recorrente do ONS.
+
+    - [ear_max_subsistema] A capacidade máxima de armazenamento pode variar ao longo do tempo por revisões de inventário, desativação de usinas ou incorporação de novos reservatórios. Variações abruptas entre datas consecutivas para o mesmo subsistema merecem investigação.
+
+    - [id_subsistema] A chave primária natural é composta por (ear_data, id_subsistema). Duplicatas nessa combinação indicam registros redundantes ou erro de ingestão, pois cada subsistema deve ter exatamente um registro por data.
+
+    - [tipos] As colunas `ear_max_subsistema`, `ear_verif_subsistema_mwmes`, `ear_verif_subsistema_percentual` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual é o nível atual de energia armazenada nos reservatórios do subsistema Sudeste?
+  - Como evoluiu o percentual de armazenamento do subsistema Nordeste nos últimos 12 meses?
+  - Em quais datas o subsistema Sul atingiu percentual de EAR abaixo de 30%?
+  - Qual subsistema apresentou menor energia armazenada em MWmês no verão de 2021?
+  - Qual a média histórica de EAR percentual por subsistema para o mês de outubro?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Evolução mensal do EAR no Sudeste em 2024"
+  - "Tá na fria o EAR de algum subsistema?"
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ear_subsistema_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - armazenada
+    - armazenamento
+    - ear
+    family: ear
+    family_default: true
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ear_data
+      spatial: subsistema
+      entity: subsistema
+      one_row_per:
+      - ear_data
+      - id_subsistema
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ear_verif_subsistema_mwmes
+      label: Energia Armazenada
+      columns:
+      - ear_verif_subsistema_mwmes
+      expression: ear_verif_subsistema_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE))
+          unit: MWmes
+        time_series:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE))
+          unit: MWmes
+        ranking:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - ear_verificada
+      - ear_mwmes
+      - energia_armazenada_mwmes
+      - ear_verif_mwmes
+    - id: ear_verif_subsistema_percentual
+      label: Percentual de Energia Armazenada
+      columns:
+      - ear_verif_subsistema_percentual
+      expression: ear_verif_subsistema_percentual
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ear_percentual
+      - ear_pct
+      - percentual_ear
+      - ear_verif_pct
+      - nivel_reservatorio_percentual
+    - id: ear_max_mwmes
+      label: Capacidade Maxima de Armazenamento
+      columns:
+      - ear_max_subsistema
+      expression: TRY_CAST(ear_max_subsistema AS DOUBLE)
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(TRY_CAST(ear_max_subsistema AS DOUBLE))
+          unit: MWmes
+        average:
+          sql: AVG(TRY_CAST(ear_max_subsistema AS DOUBLE))
+          unit: MWmes
+        maximum:
+          sql: MAX(TRY_CAST(ear_max_subsistema AS DOUBLE))
+          unit: MWmes
+        comparison:
+          sql: AVG(TRY_CAST(ear_max_subsistema AS DOUBLE))
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - ear_maxima
+      - capacidade_maxima
+      - ear_max
+      - energia_maxima_reservatorio
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema = 'SUL'
+    sql_patterns:
+      ear_verif_percentual_serie_diaria:
+        template: "SELECT TRY_CAST(ear_data AS DATE) AS data,\n  id_subsistema,\n  TRY_CAST(ear_verif_subsistema_percentual\
+          \ AS DOUBLE) AS ear_pct\nFROM {source}\nWHERE id_subsistema = '{subsistema}'\n  AND TRY_CAST(ear_data\
+          \ AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nORDER BY 1"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ear_verif_subsistema_percentual
+          grain: day
+      ear_verif_mwmes_media_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(ear_data AS DATE)) AS mes,\n  id_subsistema,\n\
+          \  AVG(TRY_CAST(ear_verif_subsistema_mwmes AS DOUBLE)) AS ear_media_mwmes\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(ear_data AS DATE)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MWmes
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - ear_verif_subsistema_mwmes
+          grain: month
+        validated_params:
+          year: '2026'
+      ear_verif_percentual_abaixo_limiar:
+        template: "SELECT TRY_CAST(ear_data AS DATE) AS data,\n  id_subsistema,\n  TRY_CAST(ear_verif_subsistema_percentual\
+          \ AS DOUBLE) AS ear_pct\nFROM {source}\nWHERE id_subsistema = '{subsistema}'\n  AND TRY_CAST(ear_verif_subsistema_percentual\
+          \ AS DOUBLE) < {limiar}\nORDER BY 1"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - filter
+          metrics:
+          - ear_verif_subsistema_percentual
+          grain: day
+        validated_params:
+          subsistema: NE
+          limiar: '103.66000366'
+      ear_comparacao_subsistemas:
+        template: "SELECT id_subsistema,\n  AVG(TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE)) AS\
+          \ ear_pct_medio\nFROM {source}\nWHERE DATE_TRUNC('month', TRY_CAST(ear_data AS DATE)) = DATE_TRUNC('month',\
+          \ DATE '{data_ref}')\nGROUP BY 1\nORDER BY 2 DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ear_verif_subsistema_percentual
+          grain: month
+        validated_params:
+          data_ref: '2026-07-18'
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o percentual de armazenamento de cada subsistema nos últimos 90 dias?
+    sql: SELECT TRY_CAST(ear_data AS DATE) AS data_ref, id_subsistema, nom_subsistema, ear_verif_subsistema_percentual
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_subsistema_di/*.parquet') WHERE TRY_CAST(ear_data
+      AS DATE) >= CURRENT_DATE - INTERVAL '90' DAY ORDER BY data_ref, id_subsistema;
+  - question: Qual foi o menor percentual de armazenamento já registrado em cada subsistema e em que data
+      ocorreu?
+    sql: "WITH ranked AS (\n  SELECT\n    TRY_CAST(ear_data AS DATE) AS data_ref,\n    id_subsistema,\n\
+      \    nom_subsistema,\n    TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE) AS ear_verif_subsistema_percentual,\n\
+      \    ROW_NUMBER() OVER (\n      PARTITION BY id_subsistema\n      ORDER BY TRY_CAST(ear_verif_subsistema_percentual\
+      \ AS DOUBLE) ASC\n    ) AS rn\n  FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_subsistema_di/*.parquet',\
+      \ union_by_name=true)\n  WHERE TRY_CAST(ear_verif_subsistema_percentual AS DOUBLE) >= 0.0\n)\nSELECT\n\
+      \  data_ref,\n  id_subsistema,\n  nom_subsistema,\n  ear_verif_subsistema_percentual AS minimo_historico_pct\n\
+      FROM ranked\nWHERE rn = 1\nORDER BY id_subsistema\nLIMIT 100"
+  - question: Qual foi a média mensal de energia armazenada em MWmês para cada subsistema nos últimos
+      2 anos?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(ear_data AS DATE)) AS mes_ref, id_subsistema, nom_subsistema,
+      ROUND(AVG(ear_verif_subsistema_mwmes), 2) AS media_ear_mwmes, ROUND(AVG(ear_verif_subsistema_percentual),
+      2) AS media_ear_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_subsistema_di/*.parquet')
+      WHERE TRY_CAST(ear_data AS DATE) >= CURRENT_DATE - INTERVAL '2' YEAR GROUP BY DATE_TRUNC('month',
+      TRY_CAST(ear_data AS DATE)), id_subsistema, nom_subsistema ORDER BY mes_ref, id_subsistema;
+- property: license
+  value: CC-BY

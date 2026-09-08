@@ -1,0 +1,518 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:intercambio-nacional
+name: intercambio-nacional
+tenant: ons
+tags:
+- MWmed
+- Nordeste
+- Norte
+- SE
+- SIN
+- Sul
+- exportacao importacao subsistema
+- fluxo inter-regional
+- fluxo-energia
+- horario
+- intercambio
+- intercambio entre subsistemas
+- intercambio nacional
+- intercâmbio subsistemas
+- subsistemas
+- troca de energia entre regioes
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/intercambio_nacional_ho/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que operadores do ONS, analistas de planejamento energético e agentes do mercado de
+    energia monitorem e avaliem os fluxos de energia entre regiões do SIN, suportem decisões de despacho
+    inter-regional, verifiquem o cumprimento de programações de intercâmbio e analisem o balanço energético
+    entre subsistemas em base horária.
+  limitations: Coluna armazenada como VARCHAR no Parquet pelo formato de serialização (dtype object→UTF8).
+    val_intercambioprogmwmed tem nulos na maior parte das linhas, indicando que o intercâmbio programado não está disponível para a
+    maior parte do período histórico coberto (desde 2023). Além do alto percentual de nulos, a coluna val_intercambioprogmwmed
+    é armazenada como VARCHAR pelo formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver fluxos de energia entre regiões ou subsistemas
+    do SIN (SE, S, NE, N), análise de balanço energético inter-regional, despacho entre subsistemas, exportação/importação
+    de energia entre regiões, ou comparação entre intercâmbio realizado e programado em base horária.
+domain: intercâmbio
+schema:
+- name: intercambio_nacional
+  physicalType: parquet
+  logicalType: object
+  physicalName: intercambio_nacional
+  properties:
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora do registro de intercâmbio, com granularidade horária. Representa o instante
+      de referência da medição do fluxo de potência ativa entre os subsistemas.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - hora
+      - instante
+      - timestamp
+      - data_hora
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: id_subsistema_origem
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador/sigla do subsistema elétrico de origem do fluxo de intercâmbio. Representa
+      o subsistema que exporta energia para o subsistema destino.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema_origem
+      - origem
+      - id_origem
+      - sigla_origem
+      - subsistema_de
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema_origem
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico de origem do fluxo de intercâmbio. Complementa
+      id_subsistema_origem com a descrição textual do subsistema exportador.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema_origem
+      - nome_origem
+      - regiao_origem
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: id_subsistema_destino
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador/sigla do subsistema elétrico de destino do fluxo de intercâmbio. Representa
+      o subsistema que recebe energia proveniente do subsistema origem.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema_destino
+      - destino
+      - id_destino
+      - sigla_destino
+      - subsistema_para
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema_destino
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico de destino do fluxo de intercâmbio. Complementa
+      id_subsistema_destino com a descrição textual do subsistema receptor.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema_destino
+      - nome_destino
+      - regiao_destino
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: val_intercambiomwmed
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor medido do intercâmbio de energia entre o subsistema origem e o subsistema destino,
+      expresso em MWmed (megawatts médios). Representa a soma das medidas de fluxo de potência ativa nas
+      linhas de transmissão de fronteira entre os subsistemas no intervalo horário. Valores positivos
+      indicam fluxo no sentido origem→destino; valores negativos indicam fluxo reverso.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio
+      - val_intercambio
+      - fluxo
+      - potencia_intercambio
+      - intercambio_mwmed
+      - energia_intercambiada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_intercambiomwmed AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_intercambioprogmwmed
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor programado do intercâmbio de energia entre o subsistema origem e o subsistema
+      destino, expresso em MWmed. Representa o intercâmbio previsto/programado pelo ONS para o intervalo
+      horário, permitindo comparação entre o realizado e o programado. Possui nulos na maior parte das linhas, indicando
+      disponibilidade restrita — possivelmente preenchido apenas para períodos mais recentes ou para horizontes
+      futuros de programação. Armazenado como VARCHAR no Parquet pelo formato de serialização.
+
+      '
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - intercambio_programado
+      - val_programado
+      - programado_mwmed
+      - intercambio_prog
+      - desvio_programacao
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_intercambioprogmwmed AS DOUBLE)
+    - property: unit
+      value: MWmed
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/intercambio-nacional
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - energia trocada entre regioes
+  - quanto o sul exportou para o sudeste
+  - fluxo entre subsistemas
+  - quanto uma regiao mandou para outra
+  - intercambio entre submercados
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: 'Recuperar este dataset quando a pergunta envolver fluxos de energia entre regiões ou subsistemas
+    do SIN (SE, S, NE, N), análise de balanço energético inter-regional, despacho entre subsistemas, exportação/importação
+    de energia entre regiões, ou comparação entre intercâmbio realizado e programado em base horária.
+    Termos relacionados: MWmed, Nordeste, Norte, Sul, exportacao importacao subsistema.'
+- property: agentInstructions
+  value: |
+    - [val_intercambiomwmed] Coluna armazenada como VARCHAR no Parquet pelo formato de serialização object→UTF8. Contém valores numéricos de ponto flutuante representando MWmed. A coluna nao possui nulos no periodo apurado, mas qualquer operação aritmética ou de agregação direta falhará sem conversão explícita de tipo via TRY_CAST.
+
+    - [val_intercambioprogmwmed] A maior parte dos registros possuem valor nulo nesta coluna. A ausência é sistemática e provavelmente reflete indisponibilidade do campo programado para dados históricos anteriores à implantação do campo ou registros fora do horizonte de programação operacional do ONS.
+
+    - [val_intercambioprogmwmed] Além dos nulos frequentes, a coluna é armazenada como VARCHAR pelo formato de serialização. Os valores não nulos são strings numéricas de ponto flutuante e requerem TRY_CAST para uso em cálculos de desvio entre realizado e programado.
+
+    - [val_intercambiomwmed] Valores negativos são esperados e semanticamente válidos: indicam inversão do sentido real do fluxo em relação ao par origem→destino declarado (o subsistema "origem" está na verdade importando energia do subsistema "destino"). Deve-se verificar se há valores negativos inesperadamente extremos que possam indicar erros de medição.
+
+    - [din_instante] Possíveis lacunas horárias na série temporal a partir de 2023-01-01. Descontinuidades podem indicar falhas de coleta, manutenção do sistema ou períodos sem transmissão entre determinados pares de subsistemas. Deve-se verificar a completude da série para cada par origem→destino.
+
+    - [nom_subsistema_origem] Valores com trailing spaces detectados em 'nom_subsistema_origem'. Use TRIM() em filtros WHERE para evitar perda de registros.
+    - [nom_subsistema_destino] Valores com trailing spaces detectados em 'nom_subsistema_destino'. Use TRIM() em filtros WHERE para evitar perda de registros.
+    - [val_intercambioprogmwmed] Coluna 'val_intercambioprogmwmed' ausente em arquivos históricos (ex: INTERCAMBIO_NACIONAL_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_NACIONAL_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [tipos] As colunas `val_intercambiomwmed` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+    - [SALDO LÍQUIDO POR SUBSISTEMA — semântica obrigatória] O dado é um FLUXO COM SINAL por par origem→destino (negativo = sentido invertido; a direção JÁ está no sinal). Saldo líquido de X = SUM(v onde X é origem) − SUM(v onde X é destino), SEMPRE com o valor assinado. PROIBIDO separar por sinal (WHERE v>0 no ramo da origem e v<0 com -SUM no ramo do destino): isso soma só as EXPORTAÇÕES dos dois sentidos, nunca subtrai importação, e TODOS os subsistemas saem "exportadores" — fisicamente impossível (comportamento observado, 13/08/2026). CHEQUE OBRIGATÓRIO antes de afirmar: a soma dos saldos dos 4 subsistemas internos ≈ 0 (soma zero; desvio pequeno = fluxos internacionais do Sul). Padrão validado (2025, motor vivo: NE +6.263,50 / N +2.169,39 / S −2.793,01 / SE −5.639,88 MWmed médios): SELECT subsistema, ROUND(SUM(v_dir)/8760.0,2) AS saldo_medio_mwmed FROM (SELECT id_subsistema_origem AS subsistema, TRY_CAST(val_intercambiomwmed AS DOUBLE) AS v_dir FROM {source} WHERE <periodo> UNION ALL SELECT id_subsistema_destino, -TRY_CAST(val_intercambiomwmed AS DOUBLE) FROM {source} WHERE <periodo>) GROUP BY subsistema. Saldo negativo = importador líquido — preserve e REPORTE o sinal.
+
+    - [UNIDADES do saldo] Dado HORÁRIO em MWmed: média do período → AVG (reporte em MWmed); total de energia → SUM das linhas horárias ≈ MWh (reporte em GWh/TWh). "MWmed-hora" NÃO EXISTE (aconteceu: "58,2 bilhões de MWmed-hora", errado ~1.000×). Cheque de sanidade: média_MWmed × horas_do_período ≈ total_MWh — se não fechar, não afirme.
+- property: typicalQuestions
+  value:
+  - Qual foi o intercâmbio médio de energia do subsistema Sudeste para o Nordeste em 2024?
+  - Em quais horas do dia o fluxo de intercâmbio SE→NE é mais intenso?
+  - Qual subsistema foi o maior exportador líquido de energia no primeiro trimestre de 2025?
+  - Qual o desvio médio entre intercâmbio realizado e programado por par de subsistemas?
+  - Houve reversão de fluxo no intercâmbio Sul→Sudeste em algum período de 2023?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "ó o fluxo de energia entre as regioes hoje"
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_nacional_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - intercambio
+    - fluxo
+    - importou
+    - exportou
+    family: intercambio
+    family_default: true
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: subsistema
+      entity: dataset_row
+      one_row_per:
+      - din_instante
+      - id_subsistema_origem
+      - id_subsistema_destino
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: intercambiomwmed
+      label: Intercâmbio Realizado
+      columns:
+      - val_intercambiomwmed
+      expression: TRY_CAST(val_intercambiomwmed AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_intercambiomwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_intercambiomwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - intercambio
+      - val_intercambio
+      - fluxo
+      - potencia_intercambio
+      - intercambio_mwmed
+      - energia_intercambiada
+    - id: intercambioprogmwmed
+      label: Intercâmbio Programado
+      columns:
+      - val_intercambioprogmwmed
+      expression: TRY_CAST(val_intercambioprogmwmed AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_intercambioprogmwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_intercambioprogmwmed AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - intercambio_programado
+      - val_programado
+      - programado_mwmed
+      - intercambio_prog
+      - desvio_programacao
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      id_subsistema_origem:
+        N:
+          aliases:
+          - N
+          - norte
+          filter: id_subsistema_origem = 'N'
+        NE:
+          aliases:
+          - NE
+          - nordeste
+          filter: id_subsistema_origem = 'NE'
+        S:
+          aliases:
+          - S
+          - sul
+          filter: id_subsistema_origem = 'S'
+        SE:
+          aliases:
+          - SE
+          - sudeste
+          - sudeste/centro-oeste
+          - SE/CO
+          filter: id_subsistema_origem = 'SE'
+      nom_subsistema_origem:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          - nordeste
+          - NE
+          filter: TRIM(nom_subsistema_origem) = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          - norte
+          - N
+          filter: TRIM(nom_subsistema_origem) = 'NORTE'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          - sudeste
+          - SE
+          - sudeste centro-oeste
+          filter: TRIM(nom_subsistema_origem) = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          - sul
+          - S
+          filter: TRIM(nom_subsistema_origem) = 'SUL'
+      id_subsistema_destino:
+        N:
+          aliases:
+          - N
+          - norte
+          filter: id_subsistema_destino = 'N'
+        NE:
+          aliases:
+          - NE
+          - nordeste
+          filter: id_subsistema_destino = 'NE'
+        S:
+          aliases:
+          - S
+          - sul
+          filter: id_subsistema_destino = 'S'
+        SE:
+          aliases:
+          - SE
+          - sudeste
+          - sudeste/centro-oeste
+          - SE/CO
+          filter: id_subsistema_destino = 'SE'
+      nom_subsistema_destino:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          - nordeste
+          - NE
+          filter: TRIM(nom_subsistema_destino) = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          - norte
+          - N
+          filter: TRIM(nom_subsistema_destino) = 'NORTE'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          - sudeste
+          - SE
+          - sudeste centro-oeste
+          filter: TRIM(nom_subsistema_destino) = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          - sul
+          - S
+          filter: TRIM(nom_subsistema_destino) = 'SUL'
+    sql_patterns: {}
+- property: fewShotQueries
+  value:
+  - question: Qual foi o intercâmbio médio de energia (MWmed) entre cada par de subsistemas ao longo de
+      2024?
+    sql: SELECT id_subsistema_origem, nom_subsistema_origem, id_subsistema_destino, nom_subsistema_destino,
+      ROUND(AVG(TRY_CAST(val_intercambiomwmed AS DOUBLE)), 2) AS intercambio_medio_mwmed, ROUND(MIN(TRY_CAST(val_intercambiomwmed
+      AS DOUBLE)), 2) AS intercambio_minimo_mwmed, ROUND(MAX(TRY_CAST(val_intercambiomwmed AS DOUBLE)),
+      2) AS intercambio_maximo_mwmed, COUNT(*) AS total_horas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_nacional_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY id_subsistema_origem,
+      nom_subsistema_origem, id_subsistema_destino, nom_subsistema_destino ORDER BY intercambio_medio_mwmed
+      DESC;
+  - question: Qual subsistema foi exportador líquido de energia em cada mês de 2024 e 2025?
+    sql: WITH exportacoes AS ( SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,
+      id_subsistema_origem AS subsistema, SUM((TRY_CAST(val_intercambiomwmed AS DOUBLE)) * 1.0) / 1000
+      AS total_exportado FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_nacional_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2026-01-01' AND TRY_CAST(val_intercambiomwmed
+      AS DOUBLE) > 0 GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)), id_subsistema_origem
+      ), importacoes AS ( SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema_destino
+      AS subsistema, SUM((TRY_CAST(val_intercambiomwmed AS DOUBLE)) * 1.0) / 1000 AS total_importado FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_nacional_ho/*.parquet') WHERE din_instante
+      >= '2024-01-01' AND din_instante < '2026-01-01' AND TRY_CAST(val_intercambiomwmed AS DOUBLE) > 0
+      GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)), id_subsistema_destino ) SELECT
+      COALESCE(e.mes, i.mes) AS mes, COALESCE(e.subsistema, i.subsistema) AS subsistema, COALESCE(e.total_exportado,
+      0) AS total_exportado_mwmed, COALESCE(i.total_importado, 0) AS total_importado_mwmed, COALESCE(e.total_exportado,
+      0) - COALESCE(i.total_importado, 0) AS saldo_liquido_mwmed FROM exportacoes e FULL OUTER JOIN importacoes
+      i ON e.mes = i.mes AND e.subsistema = i.subsistema ORDER BY mes, saldo_liquido_mwmed DESC;
+  - question: Qual o desvio médio entre o intercâmbio realizado e o programado por par de subsistemas?
+    sql: SELECT id_subsistema_origem, id_subsistema_destino, COUNT(*) AS horas_com_programado, ROUND(AVG(TRY_CAST(val_intercambiomwmed
+      AS DOUBLE)), 2) AS media_realizado_mwmed, ROUND(AVG(TRY_CAST(val_intercambioprogmwmed AS DOUBLE)),
+      2) AS media_programado_mwmed, ROUND( AVG( TRY_CAST(val_intercambiomwmed AS DOUBLE) - TRY_CAST(val_intercambioprogmwmed
+      AS DOUBLE) ), 2 ) AS desvio_medio_mwmed, ROUND( STDDEV( TRY_CAST(val_intercambiomwmed AS DOUBLE)
+      - TRY_CAST(val_intercambioprogmwmed AS DOUBLE) ), 2 ) AS desvio_padrao_mwmed FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_nacional_ho/*.parquet')
+      WHERE val_intercambioprogmwmed IS NOT NULL AND TRY_CAST(val_intercambiomwmed AS DOUBLE) IS NOT NULL
+      AND TRY_CAST(val_intercambioprogmwmed AS DOUBLE) IS NOT NULL GROUP BY id_subsistema_origem, id_subsistema_destino
+      ORDER BY ABS( AVG( TRY_CAST(val_intercambiomwmed AS DOUBLE) - TRY_CAST(val_intercambioprogmwmed
+      AS DOUBLE) ) ) DESC;
+- property: license
+  value: CC-BY

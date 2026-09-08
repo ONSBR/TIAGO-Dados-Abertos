@@ -1,0 +1,366 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_disponibilidade_ft_reativo
+name: ind_disponibilidade_ft_reativo
+tenant: ons
+tags:
+- DISP
+- DISP reativo
+- ONS
+- Submódulo-9.2
+- controle-de-reativo
+- disponibilidade
+- disponibilidade FT reativo
+- disponibilidade equipamentos controle reativo transmissão
+- disponibilidade equipamentos reativos ONS
+- equipamentos-reativos
+- função-transmissão
+- ind_disp_ft_reativo
+- indicador disponibilidade reativo
+- indicadores-operacionais
+- mensal
+- transmissão
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_reativo_me/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar agentes de transmissão, reguladores (ANEEL) e o próprio ONS no monitoramento do desempenho
+    operacional mensal dos equipamentos de controle de reativo da rede básica brasileira, permitindo identificar
+    categorias com baixa disponibilidade, fundamentar decisões de manutenção preventiva e corretiva, calcular
+    penalidades contratuais previstas no Submódulo 9.2 dos Procedimentos de Rede, e apoiar o planejamento
+    da expansão e modernização da infraestrutura de transmissão de energia elétrica.
+  limitations: 'A coluna é do tipo TIMESTAMP, porém os dados têm granularidade mensal e as datas correspondem
+    sempre ao primeiro dia do mês (ex: 2023-01-01 00:00:00). O valor mínimo de val_dispf é 0. Não há dicionário
+    de dados publicado no CKAN para este dataset.'
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de disponibilidade (DISP) de equipamentos
+    de controle de reativo (reatores, capacitores, compensadores estáticos) da rede de transmissão brasileira
+    em base mensal.
+domain: transmissão
+schema:
+- name: ind_disponibilidade_ft_reativo
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_disponibilidade_ft_reativo
+  properties:
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da característica da Função Transmissão, representando a combinação
+      de tipo de equipamento de controle de reativo e nível de tensão conforme classificação do Submódulo
+      9.2 dos Procedimentos de Rede do ONS. Não representa localização geográfica, mas sim uma categoria
+      técnica agregada em nível nacional.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - caracteristica
+      - funcao_transmissao
+      - tipo_equipamento_reativo
+      - nivel_tensao
+      - cod_ft
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - FTBC - 13.8
+      - FTBC - 23
+      - FTBC - 230
+      - FTBC - 345
+      - FTBS - 230
+      - FTBS - 500
+      - FTBS - 765
+      - FTCE - 10.5
+      - FTCE - 12.3
+      - FTCE - 13
+      - FTCE - 13.5
+      - FTCE - 13.8
+      - FTCE - 13.9
+      - FTCE - 14.5
+      - FTCE - 15
+      - FTCE - 15.5
+      - FTCE - 15.7
+      - FTCE - 16
+      - FTCE - 17
+      - FTCE - 17.1
+      - FTCE - 17.5
+      - FTCE - 18.3
+      - FTCE - 18.5
+      - FTCE - 19
+      - FTCE - 19.9
+      - FTCE - 20
+      - FTCE - 22
+      - FTCE - 23
+      - FTCE - 24
+      - FTCE - 26
+      - FTCE - 30
+      - FTCE - 6.6
+      - FTCE - 8
+      - FTCS - 11
+      - FTCS - 13.8
+      - FTCS - 15
+      - FTCS - 16
+      - FTCS - 20
+      - FTCS - 9
+      - FTRT - 13.8
+      - FTRT - 230
+      - FTRT - 34.5
+      - FTRT - 345
+      - FTRT - 440
+      - FTRT - 500
+      - FTRT - 69
+      - FTRT - 765
+  - name: dat_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador mensal, armazenada como TIMESTAMP mas sempre correspondendo
+      ao primeiro dia do mês (ex: 2023-01-01 00:00:00). Representa o mês de competência do indicador de
+      disponibilidade calculado conforme Submódulo 9.2 dos Procedimentos de Rede. A componente de hora
+      é irrelevante para a granularidade dos dados.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_referencia
+      - mes_referencia
+      - competencia
+      - periodo
+      - data
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_dispf
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador de Disponibilidade (DISP) da Função Transmissão para equipamentos de controle
+      de reativo, expresso em percentual (0,0 a 100,0). Representa a fração do tempo em que o equipamento
+      esteve disponível para operação no período de referência mensal, conforme metodologia do Submódulo
+      9.2 dos Procedimentos de Rede do ONS. Valor 100,0 indica disponibilidade plena; valor 0,0 indica
+      indisponibilidade total no mês.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade
+      - disp
+      - indicador_disponibilidade
+      - disponibilidade_funcao_transmissao
+      - val_disp
+      - percentual_disponibilidade
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_disponibilidade_ft_reativo
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - disponibilidade dos equipamentos de reativo
+  - capacitores e reatores disponiveis
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de disponibilidade (DISP) de equipamentos
+    de controle de reativo (reatores, capacitores, compensadores estáticos) da rede de transmissão brasileira
+    em base mensal. Também relevante quando a análise requer comparação de desempenho entre categorias
+    técnicas de equipamentos reativos por nível de tensão, cálculo de penalidades contratuais do Submódulo
+    9.2, ou monitoramento de metas de disponibilidade de Funções Transmissão para equipamentos reativos.
+- property: agentInstructions
+  value: '- [val_dispf] O valor mínimo registrado é 0.0, indicando indisponibilidade total de alguma característica
+    de equipamento de reativo em determinado mês. Embora tecnicamente válido, valores iguais a 0.0 podem
+    representar ausência de equipamentos daquela característica no período ou falha de reporte.
+
+
+    - [dat_referencia] Verificar se há meses faltantes na série temporal a partir de 2023-01-01
+    para cada cod_caracteristica. Com 774 linhas e aproximadamente 19 características, a cobertura média
+    é de 40 meses por característica, mas pode haver lacunas para características específicas introduzidas
+    ou descontinuadas ao longo do período.
+
+
+    - [cod_caracteristica] Verificar a existência de variações de grafia, espaços extras ou inconsistências
+    de capitalização nos valores de cod_caracteristica, que poderiam gerar duplicatas lógicas na chave
+    primária composta e distorcer análises de séries temporais por tipo de equipamento.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a disponibilidade média dos equipamentos de controle de reativo por característica nos últimos
+    12 meses?
+  - Quais características de equipamentos reativos apresentaram disponibilidade abaixo de 90% em algum
+    mês?
+  - Como evoluiu o indicador DISP dos equipamentos reativos de 500 kV ao longo do tempo?
+  - Quais meses registraram indisponibilidade total (val_dispf = 0) para alguma categoria de equipamento
+    reativo?
+  - Como comparar a disponibilidade de equipamentos reativos com a disponibilidade de transformadores
+    no mesmo período?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_reativo_me/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    family: ind_disponibilidade_ft
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 mes
+      temporal_column: dat_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - dat_referencia
+      - cod_caracteristica
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dispf
+      label: Disponibilidade Funcao Transmissao Reativo
+      columns:
+      - val_dispf
+      expression: val_dispf
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_dispf AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(val_dispf AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(val_dispf AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(val_dispf AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(val_dispf AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(val_dispf AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - disponibilidade
+      - disp
+      - indicador_disponibilidade
+      - disponibilidade_funcao_transmissao
+      - val_disp
+      - percentual_disponibilidade
+      - disponibilidade_reativo
+      - disp_ft_reativo
+    query_routing:
+      supports_listing: true
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal_por_caracteristica
+    sql_patterns:
+      dispf_media_por_caracteristica_mensal:
+        template: "SELECT\n  cod_caracteristica,\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP))\
+          \ AS mes,\n  AVG(TRY_CAST(val_dispf AS DOUBLE)) AS disponibilidade_media_pct\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(dat_referencia AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER\
+          \ BY 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          - time_series
+          metrics:
+          - dispf
+          grain: month
+        validated_params:
+          year: '2026'
+      dispf_abaixo_threshold:
+        template: "SELECT\n  cod_caracteristica,\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP))\
+          \ AS mes,\n  TRY_CAST(val_dispf AS DOUBLE) AS disponibilidade_pct\nFROM {source}\nWHERE TRY_CAST(val_dispf\
+          \ AS DOUBLE) < {threshold}\n  AND dat_referencia BETWEEN '{start_date}' AND '{end_date}'\nORDER\
+          \ BY disponibilidade_pct ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          - ranking
+          metrics:
+          - dispf
+          grain: month
+        validated_params:
+          threshold: '103.853'
+          start_date: '2023-01-01 00:00:00'
+          end_date: '2026-05-01 00:00:00'
+      dispf_indisponibilidade_total:
+        template: "SELECT\n  cod_caracteristica,\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP))\
+          \ AS mes\nFROM {source}\nWHERE TRY_CAST(val_dispf AS DOUBLE) = 0.0\nORDER BY mes, cod_caracteristica"
+        output_unit: null
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - dispf
+          grain: month
+      dispf_serie_temporal_tipo:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,\n  AVG(TRY_CAST(val_dispf\
+          \ AS DOUBLE)) AS disponibilidade_media_pct\nFROM {source}\nWHERE cod_caracteristica LIKE '{tipo_prefix}%'\n\
+          \  AND dat_referencia BETWEEN '{start_date}' AND '{end_date}'\nGROUP BY 1\nORDER BY 1"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          - average
+          metrics:
+          - dispf
+          grain: month
+- property: fewShotQueries
+  value:
+  - question: Qual foi a disponibilidade média de cada tipo de equipamento de reativo por mês em 2024?
+    sql: SELECT cod_caracteristica, DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,
+      ROUND(AVG(val_dispf), 2) AS disponibilidade_media_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_reativo_me/*.parquet')
+      WHERE dat_referencia >= TIMESTAMP '2024-01-01' AND dat_referencia < TIMESTAMP '2025-01-01' GROUP
+      BY cod_caracteristica, DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) ORDER BY mes,
+      cod_caracteristica;
+  - question: Quais tipos de equipamentos de reativo apresentaram os menores índices de disponibilidade
+      no período?
+    sql: SELECT cod_caracteristica, ROUND(AVG(val_dispf), 2) AS disponibilidade_media_pct, ROUND(MIN(val_dispf),
+      2) AS disponibilidade_minima_pct, COUNT(*) AS total_meses FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_reativo_me/*.parquet')
+      GROUP BY cod_caracteristica ORDER BY disponibilidade_media_pct ASC LIMIT 10;
+  - question: Existem equipamentos de reativo com disponibilidade abaixo de 90% em algum mês?
+    sql: SELECT cod_caracteristica, DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,
+      val_dispf AS disponibilidade_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_reativo_me/*.parquet')
+      WHERE val_dispf < 90.0 ORDER BY val_dispf ASC, mes, cod_caracteristica;
+- property: license
+  value: CC-BY

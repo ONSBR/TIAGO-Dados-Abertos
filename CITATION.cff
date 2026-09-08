@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "MCP TIAGO Dados Abertos — ONS"
+message: "Se você usar este software, cite-o conforme os metadados abaixo."
+type: software
+authors:
+  - name: "Operador Nacional do Sistema Elétrico - ONS"
+    website: "https://www.ons.org.br"
+  - given-names: "Tadyêllo"
+    family-names: "Bastos"
+    email: "contato@tadyello.dev"
+    affiliation: "Operador Nacional do Sistema Elétrico - ONS"
+repository-code: "https://github.com/ONSBR/TIAGO-Dados-Abertos"
+url: "https://dados.ons.org.br"
+abstract: >-
+  Servidor MCP que dá a modelos de linguagem acesso aos dados abertos do
+  Operador Nacional do Sistema Elétrico. Uma camada semântica em YAML (padrão
+  ODCS) declara schema, unidades e agregações válidas de cada dataset; o
+  servidor roteia, valida e executa o SQL, e cada resposta traz unidade e fonte
+  provadas pelo contrato.
+keywords:
+  - model-context-protocol
+  - open-data
+  - electricity-sector
+  - data-contracts
+  - duckdb
+  - text-to-sql
+license: Apache-2.0
+version: 1.0.1
+date-released: "2026-09-08"

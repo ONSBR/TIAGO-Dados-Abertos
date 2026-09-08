@@ -1,0 +1,679 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_providencia_ecpa_pcpa
+name: ind_providencia_ecpa_pcpa
+tenant: ons
+tags:
+- ECPA
+- ECPA PCPA cumprimento providências manutenção
+- PCPA
+- Procedimentos de Rede ONS
+- Submodulo 9.5
+- agentes distribuidores
+- agentes transmissores
+- conformidade operacional
+- cumprimento de providencias
+- indicadores de manutencao ONS
+- indicadores de qualidade
+- pontualidade de manutencao
+- pontualidade de providencias
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar o grau de atendimento às providências de manutenção programadas pelos agentes do
+    setor elétrico brasileiro (transmissores e distribuidores), suportando decisões de gestão de conformidade
+    operacional pelo ONS, ANEEL e pelos próprios agentes. Utilizado por fiscalizadores regulatórios para
+    acompanhamento de desempenho, por gestores de manutenção para identificação de desvios e por analistas
+    de qualidade operacional para correlacionar cumprimento de manutenções com disponibilidade e confiabilidade
+    do sistema elétrico nacional.
+  limitations: O valor máximo de num_nprp_programadas (2291. val_ecpa pode assumir valor 1. val_pcpa pode
+    assumir valor 1.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de cumprimento ou pontualidade
+    de providências de manutenção (ECPA, PCPA), desempenho de agentes transmissores ou distribuidores
+    no atendimento a obrigações de manutenção, ou análise de conformidade operacional conforme Submódulo
+    9.
+domain: qualidade
+schema:
+- name: ind_providencia_ecpa_pcpa
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_providencia_ecpa_pcpa
+  properties:
+  - name: dsc_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nível de agregação dos indicadores ECPA e PCPA. Indica se os dados se referem ao SIN
+      (Sistema Interligado Nacional), a um Agente específico, à Área de Atuação do Agente ou ao Gestor
+      responsável pelas providências de manutenção.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - agregacao
+      - nivel de agregacao
+      - tipo de agregacao
+      - escopo
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Agente
+      - Gestor de providências
+      - Sistema
+      - Área de atuação do agente
+  - name: dsc_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificação da entidade dentro do nível de agregação definido em dsc_agregacao. Pode
+      conter o nome do agente, da área de atuação ou do gestor. Quando dsc_agregacao é "SIN", este campo
+      representa o sistema como um todo.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - caracteristica
+      - entidade
+      - agente
+      - gestor
+      - area de atuacao
+      - nome do agente
+    - property: semanticType
+      value: DIMENSION
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência mensal dos indicadores ECPA e PCPA. Representa o mês de competência
+      ao qual os valores calculados se referem. Sempre no primeiro dia do mês (ex: 2022-01-01 00:00:00).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referencia
+      - mes de referencia
+      - competencia
+      - periodo
+      - data
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_nprc_concluidas
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de providências de manutenção concluídas no período de referência, independentemente
+      de terem sido concluídas dentro ou fora do prazo programado. Corresponde ao numerador parcial do
+      cálculo do indicador ECPA.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - providencias concluidas
+      - nprc
+      - numero de providencias concluidas
+      - concluidas
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidade (contagem)
+  - name: num_nprp_programadas
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de providências de manutenção programadas para o período de referência. Representa
+      o total de providências que deveriam ser executadas conforme o planejamento de manutenção do agente.
+      Denominador do indicador ECPA.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - providencias programadas
+      - nprp
+      - numero de providencias programadas
+      - programadas
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidade (contagem)
+  - name: num_nprat_atrasadas
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de providências de manutenção concluídas com atraso em relação ao prazo programado.
+      Indica o volume de providências que não foram cumpridas pontualmente, impactando negativamente o
+      indicador PCPA.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - providencias atrasadas
+      - nprat
+      - numero de providencias atrasadas
+      - atrasadas
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidade (contagem)
+  - name: num_npra_antecipadas
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de providências de manutenção concluídas de forma antecipada, ou seja, antes
+      do prazo programado. Contribui positivamente para o indicador PCPA, demonstrando eficiência na execução
+      das manutenções.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - providencias antecipadas
+      - npra
+      - numero de providencias antecipadas
+      - antecipadas
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidade (contagem)
+  - name: num_nprcp_concluidas_prazo
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de providências de manutenção concluídas dentro do prazo programado. Representa
+      as providências cumpridas pontualmente, sendo o numerador do indicador PCPA (Pontualidade do Cumprimento
+      às Providências).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - providencias concluidas no prazo
+      - nprcp
+      - concluidas no prazo
+      - cumpridas no prazo
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidade (contagem)
+  - name: val_ecpa
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador de Evolução do Cumprimento às Providências (ECPA), calculado conforme o Submódulo
+      9.5 dos Procedimentos de Rede do ONS. Representa a razão entre o número de providências concluídas
+      (num_nprc_concluidas) e o número de providências programadas (num_nprp_programadas). Varia entre
+      0.0 e 1.0, onde 1.0 indica cumprimento integral de todas as providências programadas.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ecpa
+      - evolucao do cumprimento
+      - indice ecpa
+      - cumprimento de providencias
+      - taxa de cumprimento
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: índice normalizado [0,1]
+  - name: val_pcpa
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador de Pontualidade do Cumprimento às Providências (PCPA), calculado conforme
+      o Submódulo 9.5 dos Procedimentos de Rede do ONS. Representa a razão entre o número de providências
+      concluídas no prazo (num_nprcp_concluidas_prazo) e o número de providências concluídas (num_nprc_concluidas).
+      Varia entre 0.0 e 1.0, onde 1.0 indica que todas as providências concluídas foram cumpridas pontualmente.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - pcpa
+      - pontualidade do cumprimento
+      - indice pcpa
+      - pontualidade de providencias
+      - taxa de pontualidade
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: índice normalizado [0,1]
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_providencia_ecpa_pcpa
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - cumprimento de providencias de manutencao
+  - agentes cumpriram a manutencao
+  - pontualidade da manutencao
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de cumprimento ou pontualidade
+    de providências de manutenção (ECPA, PCPA), desempenho de agentes transmissores ou distribuidores
+    no atendimento a obrigações de manutenção, ou análise de conformidade operacional conforme Submódulo
+    9.5 dos Procedimentos de Rede do ONS. Também relevante para perguntas sobre ranking de agentes por
+    qualidade de manutenção ou evolução temporal do cumprimento de providências.
+- property: agentInstructions
+  value: '- [num_nprp_programadas] Existem registros com num_nprp_programadas igual a 0.0, o que pode
+    gerar divisão por zero ao calcular manualmente os indicadores ECPA e PCPA. Verificar se nesses casos
+    os indicadores val_ecpa e val_pcpa também são 0.0.
+
+
+    - [num_nprc_concluidas] num_nprc_concluidas pode ser maior que num_nprp_programadas em alguns registros,
+    indicando que mais providências foram concluídas do que as originalmente programadas no mês. Possível
+    por reprogramações, mas deve ser monitorado como anomalia.
+
+
+    - [val_ecpa] Verificar consistência entre val_ecpa e as contagens brutas: val_ecpa deve ser aproximadamente
+    num_nprc_concluidas / num_nprp_programadas quando num_nprp_programadas > 0. Divergências acima de
+    0.01 podem indicar metodologia de cálculo diferente da esperada ou erros de exportação.
+
+
+    - [val_pcpa] Verificar consistência entre val_pcpa e as contagens brutas: val_pcpa deve ser aproximadamente
+    num_nprcp_concluidas_prazo / num_nprc_concluidas quando num_nprc_concluidas > 0. Divergências acima
+    de 0.01 podem indicar metodologia diferente ou erros de exportação.
+
+
+    - [dsc_caracteristica] A chave primária natural é (dsc_agregacao, dsc_caracteristica, din_referencia).
+    Verificar se existem duplicatas nessa combinação, o que indicaria inconsistência no processo de carga
+    ou múltiplas versões do mesmo indicador para o mesmo período.
+
+
+    - [din_referencia] Verificar se há meses faltantes na série temporal para cada combinação de dsc_agregacao
+    e dsc_caracteristica. O periodo cobre de 2022-01-01 em diante, em base mensal. Lacunas podem indicar ausência
+    de dados ou agentes que entraram/saíram do sistema no período.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o ECPA médio do SIN nos últimos 12 meses?
+  - Quais agentes apresentaram menor PCPA em 2024?
+  - Como evoluiu o índice de cumprimento de providências da CHESF entre 2022 e 2025?
+  - Qual a proporção de providências atrasadas versus antecipadas por agente no último ano?
+  - Quais agentes tiveram mais providências programadas não concluídas em 2023?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2022-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - dsc_agregacao
+      - dsc_caracteristica
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ecpa
+      label: Ecpa
+      columns:
+      - val_ecpa
+      expression: val_ecpa
+      quantity_kind: ratio
+      unit_native: indice normalizado [0,1]
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_ecpa)
+          unit: indice [0,1]
+        maximum:
+          sql: MAX(val_ecpa)
+          unit: indice [0,1]
+        minimum:
+          sql: MIN(val_ecpa)
+          unit: indice [0,1]
+        time_series:
+          sql: AVG(val_ecpa)
+          unit: indice [0,1]
+        ranking:
+          sql: AVG(val_ecpa)
+          unit: indice [0,1]
+        comparison:
+          sql: AVG(val_ecpa)
+          unit: indice [0,1]
+      interval_hours: 8760.0
+      aliases:
+      - ecpa
+      - evolucao do cumprimento
+      - indice ecpa
+      - cumprimento de providencias
+      - taxa de cumprimento
+    - id: pcpa
+      label: Pcpa
+      columns:
+      - val_pcpa
+      expression: val_pcpa
+      quantity_kind: ratio
+      unit_native: indice normalizado [0,1]
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_pcpa)
+          unit: indice [0,1]
+        maximum:
+          sql: MAX(val_pcpa)
+          unit: indice [0,1]
+        minimum:
+          sql: MIN(val_pcpa)
+          unit: indice [0,1]
+        time_series:
+          sql: AVG(val_pcpa)
+          unit: indice [0,1]
+        ranking:
+          sql: AVG(val_pcpa)
+          unit: indice [0,1]
+        comparison:
+          sql: AVG(val_pcpa)
+          unit: indice [0,1]
+      interval_hours: 8760.0
+      aliases:
+      - pcpa
+      - pontualidade do cumprimento
+      - indice pcpa
+      - pontualidade de providencias
+      - taxa de pontualidade
+    - id: num_nprc_concluidas
+      label: Providencias Concluidas
+      columns:
+      - num_nprc_concluidas
+      expression: num_nprc_concluidas
+      quantity_kind: count
+      unit_native: unidade (contagem)
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_nprc_concluidas)
+          unit: providencias
+        average:
+          sql: AVG(num_nprc_concluidas)
+          unit: providencias
+        maximum:
+          sql: MAX(num_nprc_concluidas)
+          unit: providencias
+        time_series:
+          sql: SUM(num_nprc_concluidas)
+          unit: providencias
+        ranking:
+          sql: SUM(num_nprc_concluidas)
+          unit: providencias
+      interval_hours: 8760.0
+      aliases:
+      - providencias concluidas
+      - nprc
+      - concluidas
+    - id: num_nprp_programadas
+      label: Providencias Programadas
+      columns:
+      - num_nprp_programadas
+      expression: num_nprp_programadas
+      quantity_kind: count
+      unit_native: unidade (contagem)
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_nprp_programadas)
+          unit: providencias
+        average:
+          sql: AVG(num_nprp_programadas)
+          unit: providencias
+        maximum:
+          sql: MAX(num_nprp_programadas)
+          unit: providencias
+        time_series:
+          sql: SUM(num_nprp_programadas)
+          unit: providencias
+        ranking:
+          sql: SUM(num_nprp_programadas)
+          unit: providencias
+      interval_hours: 8760.0
+      aliases:
+      - providencias programadas
+      - nprp
+      - programadas
+    - id: num_nprat_atrasadas
+      label: Providencias Atrasadas
+      columns:
+      - num_nprat_atrasadas
+      expression: num_nprat_atrasadas
+      quantity_kind: count
+      unit_native: unidade (contagem)
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_nprat_atrasadas)
+          unit: providencias
+        average:
+          sql: AVG(num_nprat_atrasadas)
+          unit: providencias
+        maximum:
+          sql: MAX(num_nprat_atrasadas)
+          unit: providencias
+        time_series:
+          sql: SUM(num_nprat_atrasadas)
+          unit: providencias
+        ranking:
+          sql: SUM(num_nprat_atrasadas)
+          unit: providencias
+      interval_hours: 8760.0
+      aliases:
+      - providencias atrasadas
+      - nprat
+      - atrasadas
+    - id: num_npra_antecipadas
+      label: Providencias Antecipadas
+      columns:
+      - num_npra_antecipadas
+      expression: num_npra_antecipadas
+      quantity_kind: count
+      unit_native: unidade (contagem)
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_npra_antecipadas)
+          unit: providencias
+        average:
+          sql: AVG(num_npra_antecipadas)
+          unit: providencias
+        maximum:
+          sql: MAX(num_npra_antecipadas)
+          unit: providencias
+        time_series:
+          sql: SUM(num_npra_antecipadas)
+          unit: providencias
+        ranking:
+          sql: SUM(num_npra_antecipadas)
+          unit: providencias
+      interval_hours: 8760.0
+      aliases:
+      - providencias antecipadas
+      - npra
+      - antecipadas
+    - id: num_nprcp_concluidas_prazo
+      label: Providencias Concluidas no Prazo
+      columns:
+      - num_nprcp_concluidas_prazo
+      expression: num_nprcp_concluidas_prazo
+      quantity_kind: count
+      unit_native: unidade (contagem)
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_nprcp_concluidas_prazo)
+          unit: providencias
+        average:
+          sql: AVG(num_nprcp_concluidas_prazo)
+          unit: providencias
+        maximum:
+          sql: MAX(num_nprcp_concluidas_prazo)
+          unit: providencias
+        time_series:
+          sql: SUM(num_nprcp_concluidas_prazo)
+          unit: providencias
+        ranking:
+          sql: SUM(num_nprcp_concluidas_prazo)
+          unit: providencias
+      interval_hours: 8760.0
+      aliases:
+      - providencias concluidas no prazo
+      - nprcp
+      - concluidas no prazo
+      - cumpridas no prazo
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      dsc_agregacao:
+        Agente:
+          aliases:
+          - agente
+          - Agente
+          - por agente
+          - nivel agente
+          filter: dsc_agregacao = 'Agente'
+        Gestor de providencias:
+          aliases:
+          - gestor
+          - gestor de providencias
+          - Gestor de providências
+          - responsavel manutencao
+          filter: dsc_agregacao = 'Gestor de providências'
+        Sistema:
+          aliases:
+          - sistema
+          - SIN
+          - Sistema
+          - nacional
+          - total
+          filter: dsc_agregacao = 'Sistema'
+        Area de atuacao do agente:
+          aliases:
+          - area de atuacao
+          - area
+          - Área de atuação do agente
+          - area do agente
+          filter: dsc_agregacao = 'Área de atuação do agente'
+    sql_patterns:
+      ecpa_medio_sin_ultimos_12_meses:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  AVG(val_ecpa)\
+          \ AS ecpa_medio\nFROM {source}\nWHERE dsc_agregacao = 'Sistema'\n  AND din_referencia >= CURRENT_DATE\
+          \ - INTERVAL '12 months'\nGROUP BY 1\nORDER BY 1"
+        output_unit: indice [0,1]
+        matches:
+          output_modes:
+          - time_series
+          - average
+          metrics:
+          - ecpa
+          grain: month
+      ranking_agentes_pcpa_ano:
+        template: "SELECT dsc_caracteristica AS agente,\n  AVG(val_pcpa) AS pcpa_medio\nFROM {source}\n\
+          WHERE dsc_agregacao = 'Agente'\n  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP))\
+          \ = {year}\nGROUP BY 1\nORDER BY pcpa_medio ASC"
+        output_unit: indice [0,1]
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - pcpa
+          grain: year
+        validated_params:
+          year: '2026'
+      providencias_atrasadas_vs_antecipadas_agente:
+        template: "SELECT dsc_caracteristica AS agente,\n  SUM(num_nprat_atrasadas) AS atrasadas,\n  SUM(num_npra_antecipadas)\
+          \ AS antecipadas,\n  SUM(num_nprc_concluidas) AS concluidas\nFROM {source}\nWHERE dsc_agregacao\
+          \ = 'Agente'\n  AND EXTRACT(YEAR FROM din_referencia) = {year}\nGROUP BY 1\nORDER BY atrasadas\
+          \ DESC"
+        output_unit: providencias
+        matches:
+          output_modes:
+          - comparison
+          - ranking
+          metrics:
+          - num_nprat_atrasadas
+          - num_npra_antecipadas
+          - num_nprc_concluidas
+          grain: year
+        validated_params:
+          year: '2026'
+      ecpa_calculado_manual:
+        template: "SELECT dsc_caracteristica,\n  din_referencia,\n  num_nprc_concluidas,\n  num_nprp_programadas,\n\
+          \  CASE\n    WHEN num_nprp_programadas > 0\n    THEN num_nprc_concluidas / num_nprp_programadas\n\
+          \    ELSE NULL\n  END AS ecpa_calculado,\n  val_ecpa AS ecpa_oficial\nFROM {source}\nWHERE dsc_agregacao\
+          \ = 'Agente'\nORDER BY din_referencia DESC"
+        output_unit: indice [0,1]
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ecpa
+          - num_nprc_concluidas
+          - num_nprp_programadas
+          grain: month
+- property: fewShotQueries
+  value:
+  - question: Como evoluíram os indicadores ECPA e PCPA do SIN ao longo do tempo?
+    sql: SELECT din_referencia, val_ecpa, val_pcpa, num_nprc_concluidas, num_nprp_programadas, num_nprat_atrasadas,
+      num_npra_antecipadas, num_nprcp_concluidas_prazo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet')
+      WHERE dsc_agregacao = 'SIN' AND dsc_caracteristica = 'SIN' ORDER BY din_referencia ASC;
+  - question: Quais agentes tiveram menor pontualidade no cumprimento de providências no mês mais recente?
+    sql: SELECT dsc_caracteristica AS agente, din_referencia, val_pcpa, val_ecpa, num_nprc_concluidas,
+      num_nprat_atrasadas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet')
+      WHERE dsc_agregacao = 'Agente' AND din_referencia = ( SELECT MAX(din_referencia) FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet')
+      WHERE dsc_agregacao = 'Agente' ) ORDER BY val_pcpa ASC LIMIT 20;
+  - question: Quais agentes melhoraram ou pioraram o índice ECPA entre 2023 e 2024?
+    sql: WITH ecpa_2023 AS ( SELECT dsc_caracteristica AS agente, AVG(val_ecpa) AS ecpa_medio_2023 FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet') WHERE dsc_agregacao
+      = 'Agente' AND din_referencia >= TIMESTAMP '2023-01-01' AND din_referencia < TIMESTAMP '2024-01-01'
+      GROUP BY dsc_caracteristica ), ecpa_2024 AS ( SELECT dsc_caracteristica AS agente, AVG(val_ecpa)
+      AS ecpa_medio_2024 FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_providencia_ecpa_pcpa/*.parquet')
+      WHERE dsc_agregacao = 'Agente' AND din_referencia >= TIMESTAMP '2024-01-01' AND din_referencia <
+      TIMESTAMP '2025-01-01' GROUP BY dsc_caracteristica ) SELECT a.agente, a.ecpa_medio_2023, b.ecpa_medio_2024,
+      (b.ecpa_medio_2024 - a.ecpa_medio_2023) AS variacao_ecpa FROM ecpa_2023 a INNER JOIN ecpa_2024 b
+      ON a.agente = b.agente ORDER BY variacao_ecpa ASC LIMIT 30;
+- property: license
+  value: CC-BY

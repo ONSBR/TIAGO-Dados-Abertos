@@ -1,0 +1,884 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_disponibilidade_fgeracao_uge_anual
+name: ind_disponibilidade_fgeracao_uge_anual
+tenant: ons
+tags:
+- ANEEL
+- DMDFF
+- FDFF
+- ONS
+- confiabilidade
+- disponibilidade
+- disponibilidade forçada anual
+- disponibilidade unidade geradora anual
+- falhas-forcadas
+- indicadores de disponibilidade UG
+- indicadores-desempenho
+- indisponibilidade
+- indisponibilidade programada UG
+- manutencao-programada
+- submodulo-9.2
+- unidade-geradora
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_fgeracao_uge_an/*.parquet
+  format: parquet
+description:
+  purpose: Prover indicadores anuais de confiabilidade e desempenho operacional das unidades geradoras
+    do SIN para uso por agentes do setor elétrico, reguladores (ANEEL) e o ONS, suportando decisões de
+    planejamento da operação, programação de manutenção, avaliação de conformidade regulatória com o Submódulo
+    9.2, benchmarking entre usinas e subsistemas, e análise de tendências de disponibilidade ao longo
+    do tempo para garantir a segurança do suprimento energético.
+  limitations: O ano maximo pode ultrapassar o ano corrente, indicando presenca de dados futuros ou projetados. Valor máximo de
+    178. Valor máximo de 735 horas de duração média de falhas forçadas no dataset ind_disponibilidade_fgeracao_uge_anual
+    equivale a ~30 dias contínuos, podendo indicar longas paradas não programadas ou inconsistências de
+    classificação.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores anuais de desempenho, disponibilidade,
+    indisponibilidade (programada ou forçada), confiabilidade ou falhas de unidades geradoras do SIN,
+    especialmente quando o horizonte temporal for anual e a granularidade for por unidade geradora ou
+    usina.
+domain: geração
+schema:
+- name: ind_disponibilidade_fgeracao_uge_anual
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_disponibilidade_fgeracao_uge_anual
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a unidade geradora pertence (ex: SE, S,
+      NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - id_subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - PY
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico (ex: Sudeste/Centro-Oeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - nom_subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Paraguai
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: estad_id
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado brasileiro onde a unidade geradora está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - id_estado
+      - estado
+      - uf
+      - sigla estado
+      - id_estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - I
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado brasileiro onde a unidade geradora está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome estado
+      - nome do estado
+      - nom_estado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Alagoas
+      - Amapá
+      - Amazonas
+      - Bahia
+      - Ceará
+      - Distrito Federal
+      - Espírito Santo
+      - Goiás
+      - Maranhão
+      - Mato Grosso
+      - Mato Grosso do Sul
+      - Minas Gerais
+      - Paraná
+      - Paraíba
+      - Pará
+      - Pernambuco
+      - Piauí
+      - Rio Grande do Norte
+      - Rio Grande do Sul
+      - Rio de Janeiro
+      - Rondônia
+      - Roraima
+      - Santa Catarina
+      - Sergipe
+      - São Paulo
+      - Tocantins
+  - name: nom_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da modalidade de operação da unidade geradora (ex: Despachada Centralizadamente,
+      Não Despachada Centralizadamente)'
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade operacao
+      - modalidade de operação
+      - nom_modalidadeoperacao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Tipo I
+      - Tipo II-A
+  - name: nom_agenteproprietario
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente proprietário (empresa) responsável pela unidade geradora
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - proprietario
+      - empresa
+      - agente proprietario
+      - nom_agenteproprietario
+    - property: semanticType
+      value: DIMENSION
+  - name: id_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do tipo de usina geradora (ex: UHE, UTE, EOL, UFV, PCH)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo usina
+      - tipo de usina
+      - id_tipousina
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - UHE
+      - UTE
+      - UTN
+  - name: id_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único da usina no sistema ONS
+    customProperties:
+    - property: aliases
+      value:
+      - id usina
+      - codigo usina
+      - id_usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo da usina geradora
+    customProperties:
+    - property: aliases
+      value:
+      - nome usina
+      - nome da usina
+      - nom_usina
+    - property: semanticType
+      value: DIMENSION
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) atribuído pela ANEEL, identificador regulatório
+      único da usina
+    customProperties:
+    - property: aliases
+      value:
+      - ceg
+      - codigo empreendimento
+      - codigo aneel
+      - ceg aneel
+    - property: semanticType
+      value: IDENTIFIER
+  - name: cod_equipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código do equipamento (unidade geradora) no sistema de cadastro do ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo equipamento
+      - cod equipamento
+      - cod_equipamento
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_unidadegeradora
+    physicalType: VARCHAR
+    logicalType: string
+    description: Número identificador da unidade geradora dentro da usina
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - numero unidade geradora
+      - num ug
+      - unidade geradora
+      - num_unidadegeradora
+    - property: semanticType
+      value: IDENTIFIER
+    - property: castExpression
+      value: TRY_CAST(num_unidadegeradora AS INTEGER)
+  - name: nom_unidadegeradora
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da unidade geradora, geralmente composto pelo nome da usina e número da unidade
+    customProperties:
+    - property: aliases
+      value:
+      - nome unidade geradora
+      - nome ug
+      - nom_unidadegeradora
+    - property: semanticType
+      value: DIMENSION
+  - name: val_potencia
+    physicalType: DOUBLE
+    logicalType: number
+    description: Potência instalada da unidade geradora em megawatts (MW)
+    customProperties:
+    - property: aliases
+      value:
+      - potencia
+      - potencia instalada
+      - capacidade instalada
+      - val_potencia
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: din_ano
+    physicalType: BIGINT
+    logicalType: integer
+    description: Ano de referência dos indicadores de desempenho (série temporal anual de 2011 em diante)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - ano
+      - ano referencia
+      - ano de referencia
+      - din_ano
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_dispf
+    physicalType: DOUBLE
+    logicalType: number
+    description: Disponibilidade forçada da unidade geradora no ano, expressa em percentual (0-100%).
+      Representa a fração do tempo em que a unidade esteve disponível para geração, excluindo indisponibilidades
+      programadas.
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade forcada
+      - disponibilidade
+      - fator disponibilidade
+      - val_dispf
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_indisppf
+    physicalType: DOUBLE
+    logicalType: number
+    description: Indisponibilidade programada da unidade geradora no ano, expressa em percentual (0-100%).
+      Representa a fração do tempo em que a unidade esteve indisponível por manutenção programada.
+    customProperties:
+    - property: aliases
+      value:
+      - indisponibilidade programada
+      - indisponibilidade manutencao
+      - val_indisppf
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_indispff
+    physicalType: DOUBLE
+    logicalType: number
+    description: Indisponibilidade forçada da unidade geradora no ano, expressa em percentual (0-100%).
+      Representa a fração do tempo em que a unidade esteve indisponível por falhas não programadas.
+    customProperties:
+    - property: aliases
+      value:
+      - indisponibilidade forcada
+      - indisponibilidade falha
+      - val_indispff
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_dmdff
+    physicalType: DOUBLE
+    logicalType: number
+    description: Duração média das falhas forçadas da unidade geradora no ano, em horas. Representa o
+      tempo médio de cada ocorrência de falha forçada.
+    customProperties:
+    - property: aliases
+      value:
+      - duracao media falha forcada
+      - dmdff
+      - tempo medio falha
+      - val_dmdff
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: h
+  - name: val_fdff
+    physicalType: DOUBLE
+    logicalType: number
+    description: Frequência de falhas forçadas da unidade geradora no ano (número de falhas por hora de
+      operação). Valores entre 0 e aproximadamente 0.037.
+    customProperties:
+    - property: aliases
+      value:
+      - frequencia falha forcada
+      - taxa falha
+      - fdff
+      - val_fdff
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: falhas/h
+  - name: val_tdff
+    physicalType: DOUBLE
+    logicalType: number
+    description: Tempo total de falhas forçadas da unidade geradora no ano, em horas. Representa a soma
+      de todas as horas em que a unidade esteve indisponível por falhas forçadas.
+    customProperties:
+    - property: aliases
+      value:
+      - tempo total falha forcada
+      - horas falha
+      - tdff
+      - val_tdff
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: h
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_disponibilidade_fgeracao_uge_anual
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - disponibilidade anual das unidades geradoras
+  - indisponibilidade das maquinas no ano
+  - falhas das unidades geradoras por ano
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores anuais de desempenho, disponibilidade,
+    indisponibilidade (programada ou forçada), confiabilidade ou falhas de unidades geradoras do SIN,
+    especialmente quando o horizonte temporal for anual e a granularidade for por unidade geradora ou
+    usina. Também relevante para perguntas sobre conformidade com o Submódulo 9.2 dos Procedimentos de
+    Rede do ONS, benchmarking de desempenho entre agentes, tipos de usina ou subsistemas, e análise de
+    tendências históricas de confiabilidade do parque gerador brasileiro.
+- property: agentInstructions
+  value: '- [val_tdff] O valor máximo de val_tdff é 178.560 horas, superando as 8.760 horas de um ano.
+    Pode representar acumulado histórico multi-anual por unidade geradora em vez do total anual de referência
+    din_ano. Requer validação contra a definição do Submódulo 9.2.
+
+    - [val_dispf] Registros com val_dispf = 0.0 indicam unidades geradoras com disponibilidade forçada
+    nula no ano inteiro, possivelmente em descomissionamento, reforma total ou com erro de registro.
+
+    - [val_indisppf] Registros com val_indisppf = 100.0 indicam unidade geradora com 100% do tempo em
+    indisponibilidade programada no ano, podendo representar unidades em reforma completa ou dados inconsistentes.
+
+    - [val_indispff] Registros com val_indispff = 100.0 indicam unidade geradora com 100% do tempo em
+    indisponibilidade forçada no ano, situação extrema que pode indicar unidade desativada ou erro de
+    dados.
+
+    - [val_dmdff] O valor máximo de val_dmdff é 735.99 horas (~30,6 dias). Valores acima de 720 horas
+    merecem validação para distinguir falhas forçadas de manutenções programadas mal classificadas no
+    Submódulo 9.2.
+
+    - [din_ano] Unidades geradoras que entraram em operacao depois do inicio da serie ou ja foram desativadas terao
+    series temporais incompletas. Verificar se todas as UGs ativas têm registros contínuos para
+    todos os anos do período.
+
+    - [num_unidadegeradora] A chave primária natural é (din_ano, cod_equipamento, num_unidadegeradora).
+    Duplicatas podem indicar registros duplicados por reprocessamento do processo de consistência recorrente
+    do ONS.
+
+    - [val_potencia] val_potencia varia de 3.4 MW a 1350.0 MW. Valores abaixo de 1 MW podem indicar erro
+    de unidade (kW registrado como MW), distorcendo análises ponderadas por capacidade instalada.'
+- property: typicalQuestions
+  value:
+  - Qual foi a disponibilidade média das usinas hidrelétricas no subsistema Sudeste em 2023?
+  - Quais unidades geradoras tiveram maior indisponibilidade forçada nos últimos 5 anos?
+  - Como evoluiu a duração média de falhas forçadas das termelétricas entre 2015 e 2023?
+  - Qual agente proprietário apresentou pior desempenho de disponibilidade em 2022?
+  - Quais usinas eólicas tiveram frequência de falhas forçadas acima de 0.005 falhas/hora em 2023?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_fgeracao_uge_an/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2011-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - disponibilidade
+    - disponivel
+    - indisponibilidade
+    - indisponivel
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: din_ano
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_ano
+      - id_subsistema
+      - ceg
+      - cod_equipamento
+      - num_unidadegeradora
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: potencia
+      label: Potencia Instalada UG
+      columns:
+      - val_potencia
+      expression: val_potencia
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_potencia)
+          unit: MW
+        maximum:
+          sql: MAX(val_potencia)
+          unit: MW
+        time_series:
+          sql: SUM(val_potencia)
+          unit: MW
+        ranking:
+          sql: SUM(val_potencia)
+          unit: MW
+        comparison:
+          sql: SUM(val_potencia)
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - potencia
+      - potencia instalada
+      - capacidade instalada
+      - val_potencia
+    - id: dispf
+      label: Disponibilidade Forcada (%)
+      columns:
+      - val_dispf
+      expression: val_dispf
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_dispf)
+          unit: '%'
+        maximum:
+          sql: MAX(val_dispf)
+          unit: '%'
+        minimum:
+          sql: MIN(val_dispf)
+          unit: '%'
+        time_series:
+          sql: AVG(val_dispf)
+          unit: '%'
+        ranking:
+          sql: AVG(val_dispf)
+          unit: '%'
+        comparison:
+          sql: AVG(val_dispf)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - disponibilidade forcada
+      - disponibilidade
+      - fator disponibilidade
+      - val_dispf
+    - id: indisppf
+      label: Indisponibilidade Programada (%)
+      columns:
+      - val_indisppf
+      expression: val_indisppf
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indisppf)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indisppf)
+          unit: '%'
+        time_series:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        ranking:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        comparison:
+          sql: AVG(val_indisppf)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - indisponibilidade programada
+      - indisponibilidade manutencao
+      - val_indisppf
+    - id: indispff
+      label: Indisponibilidade Forcada (%)
+      columns:
+      - val_indispff
+      expression: val_indispff
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_indispff)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indispff)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indispff)
+          unit: '%'
+        time_series:
+          sql: AVG(val_indispff)
+          unit: '%'
+        ranking:
+          sql: AVG(val_indispff)
+          unit: '%'
+        comparison:
+          sql: AVG(val_indispff)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - indisponibilidade forcada
+      - indisponibilidade falha
+      - val_indispff
+    - id: dmdff
+      label: Duracao Media Falha Forcada (h)
+      columns:
+      - val_dmdff
+      expression: val_dmdff
+      quantity_kind: intensive
+      unit_native: h
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_dmdff)
+          unit: h
+        maximum:
+          sql: MAX(val_dmdff)
+          unit: h
+        minimum:
+          sql: MIN(val_dmdff)
+          unit: h
+        time_series:
+          sql: AVG(val_dmdff)
+          unit: h
+        ranking:
+          sql: AVG(val_dmdff)
+          unit: h
+        comparison:
+          sql: AVG(val_dmdff)
+          unit: h
+      interval_hours: 24.0
+      aliases:
+      - duracao media falha forcada
+      - dmdff
+      - tempo medio falha
+      - val_dmdff
+    - id: fdff
+      label: Frequencia Falha Forcada (falhas/h)
+      columns:
+      - val_fdff
+      expression: val_fdff
+      quantity_kind: intensive
+      unit_native: falhas/h
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_fdff)
+          unit: falhas/h
+        maximum:
+          sql: MAX(val_fdff)
+          unit: falhas/h
+        minimum:
+          sql: MIN(val_fdff)
+          unit: falhas/h
+        time_series:
+          sql: AVG(val_fdff)
+          unit: falhas/h
+        ranking:
+          sql: AVG(val_fdff)
+          unit: falhas/h
+        comparison:
+          sql: AVG(val_fdff)
+          unit: falhas/h
+      interval_hours: 24.0
+      aliases:
+      - frequencia falha forcada
+      - taxa falha
+      - fdff
+      - val_fdff
+    - id: tdff
+      label: Tempo Total Falha Forcada (h)
+      columns:
+      - val_tdff
+      expression: val_tdff
+      quantity_kind: intensive
+      unit_native: h
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        total:
+          sql: SUM(val_tdff)
+          unit: h
+        average:
+          sql: AVG(val_tdff)
+          unit: h
+        maximum:
+          sql: MAX(val_tdff)
+          unit: h
+        time_series:
+          sql: SUM(val_tdff)
+          unit: h
+        ranking:
+          sql: SUM(val_tdff)
+          unit: h
+        comparison:
+          sql: AVG(val_tdff)
+          unit: h
+      interval_hours: 24.0
+      aliases:
+      - tempo total falha forcada
+      - horas falha
+      - tdff
+      - val_tdff
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+        PY:
+          aliases:
+          - paraguai
+          filter: id_subsistema = 'PY'
+      nom_modalidadeoperacao:
+        Tipo I:
+          aliases:
+          - tipo i
+          - despachada centralizadamente
+          - DCE
+          filter: nom_modalidadeoperacao = 'Tipo I'
+        Tipo II-A:
+          aliases:
+          - tipo ii-a
+          - nao despachada centralizadamente
+          - NDCE
+          filter: nom_modalidadeoperacao = 'Tipo II-A'
+      id_tipousina:
+        UHE:
+          aliases:
+          - UHE
+          - hidreletrica
+          - hidreletrico
+          filter: id_tipousina = 'UHE'
+        UTE:
+          aliases:
+          - UTE
+          - termeletrica
+          - termico
+          filter: id_tipousina = 'UTE'
+        UTN:
+          aliases:
+          - UTN
+          - nuclear
+          - usina nuclear
+          filter: id_tipousina = 'UTN'
+    sql_patterns:
+      disponibilidade_media_por_tipo_ano:
+        template: "SELECT din_ano, id_tipousina,\n  AVG(val_dispf) AS dispf_media_pct,\n  AVG(val_indispff)\
+          \ AS indispff_media_pct,\n  AVG(val_indisppf) AS indisppf_media_pct\nFROM {source}\nWHERE TRY_CAST(din_ano\
+          \ AS INTEGER) BETWEEN {ano_inicio} AND {ano_fim}\nGROUP BY din_ano, id_tipousina\nORDER BY din_ano,\
+          \ id_tipousina"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - dispf
+          - indispff
+          - indisppf
+          grain: year
+      ranking_agente_disponibilidade:
+        template: "SELECT nom_agenteproprietario,\n  AVG(val_dispf) AS dispf_media_pct,\n  COUNT(DISTINCT\
+          \ ceg || '-' || num_unidadegeradora) AS num_ugs\nFROM {source}\nWHERE TRY_CAST(din_ano AS INTEGER)\
+          \ = {ano}\nGROUP BY nom_agenteproprietario\nORDER BY dispf_media_pct ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - dispf
+          grain: year
+      dmdff_serie_historica:
+        template: "SELECT din_ano, id_tipousina,\n  AVG(val_dmdff) AS dmdff_media_h,\n  MAX(val_dmdff)\
+          \ AS dmdff_max_h\nFROM {source}\nWHERE TRY_CAST(din_ano AS INTEGER) BETWEEN {ano_inicio} AND\
+          \ {ano_fim}\nGROUP BY din_ano, id_tipousina\nORDER BY din_ano, id_tipousina"
+        output_unit: h
+        matches:
+          output_modes:
+          - average
+          - maximum
+          metrics:
+          - dmdff
+          grain: year
+- property: fewShotQueries
+  value:
+  - question: Qual foi a disponibilidade forçada média por tipo de usina em 2023, ordenada da maior para
+      a menor?
+    sql: SELECT id_tipousina, COUNT(DISTINCT cod_equipamento) AS qtd_unidades, ROUND(AVG(val_dispf), 2)
+      AS dispf_media_pct, ROUND(AVG(val_indispff), 2) AS indispff_media_pct, ROUND(AVG(val_indisppf),
+      2) AS indisppf_media_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_fgeracao_uge_an/*.parquet')
+      WHERE din_ano = 2023 GROUP BY id_tipousina ORDER BY dispf_media_pct DESC
+  - question: Como evoluiu a indisponibilidade forçada média das unidades geradoras por subsistema entre
+      2015 e 2023?
+    sql: SELECT din_ano, id_subsistema, nom_subsistema, ROUND(AVG(val_indispff), 3) AS indispff_media_pct,
+      COUNT(DISTINCT cod_equipamento) AS qtd_unidades FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_fgeracao_uge_an/*.parquet')
+      WHERE din_ano BETWEEN 2015 AND 2023 AND id_subsistema NOT IN ('SIN') GROUP BY din_ano, id_subsistema,
+      nom_subsistema ORDER BY din_ano, id_subsistema
+  - question: Quais unidades geradoras acumularam mais horas de falhas forçadas em 2022?
+    sql: SELECT cod_equipamento, nom_unidadegeradora, id_tipousina, nom_agenteproprietario, id_subsistema,
+      val_potencia, val_tdff, val_fdff, val_dmdff, val_indispff FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_fgeracao_uge_an/*.parquet')
+      WHERE din_ano = 2022 AND val_tdff <= 8760 ORDER BY val_tdff DESC LIMIT 20
+- property: license
+  value: CC-BY

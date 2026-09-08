@@ -1,0 +1,83 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    name: Lint e testes
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Instalar uv
+        run: pip install uv
+      - name: Instalar dependências travadas pelo lockfile
+        run: uv sync --frozen --all-extras
+      - name: Lint
+        run: uv run ruff check src/ tests/ scripts/
+      - name: Testes
+        # Sem internet a suite continua segura: os testes marcados network/net sao filtrados,
+        # e os demais que leem o bucket do ONS chamam pytest.skip quando a leitura falha.
+        run: uv run pytest -q -m "not network and not net"
+
+  dependency-scan:
+    name: Dependências (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Instalar uv e pip-audit
+        run: pip install uv pip-audit
+      - name: Exportar o lockfile como requirements
+        run: uv export --frozen --no-dev --no-emit-project -o requirements-lock.txt
+      - name: Auditar (bloqueia em vulnerabilidade conhecida)
+        run: pip-audit --progress-spinner off -r requirements-lock.txt
+
+  sast:
+    name: Análise estática (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Instalar Bandit
+        run: pip install "bandit[toml]"
+      - name: Relatório completo (não bloqueia)
+        run: bandit -c pyproject.toml -r src/ -f json -o bandit-report.json --severity-level medium || true
+      - name: Bloqueia em severidade alta com confiança alta
+        run: bandit -c pyproject.toml -r src/ --severity-level high --confidence-level high -f screen
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  secrets-scan:
+    name: Segredos (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Instalar gitleaks 8.21.2 (checksum conferido)
+        run: |
+          curl -sSL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz
+          echo "5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+      - name: Varrer o histórico inteiro
+        run: ./gitleaks detect --source . --no-banner --redact

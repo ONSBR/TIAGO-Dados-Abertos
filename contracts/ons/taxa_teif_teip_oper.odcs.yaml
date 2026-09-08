@@ -1,0 +1,534 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:taxa_teif_teip_oper
+name: taxa_teif_teip_oper
+tenant: ons
+tags:
+- ONS
+- TEIFa
+- TEIFa_Oper
+- TEIP_Oper
+- confiabilidade
+- desempenho operativo
+- despacho centralizado
+- disponibilidade
+- geração
+- indisponibilidade
+- taxa de indisponibilidade forçada operativa
+- taxa de indisponibilidade programada operativa
+- usinas geradoras
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar analistas de confiabilidade, planejadores da operação e gestores de desempenho de
+    geração no monitoramento da disponibilidade operativa das usinas despachadas centralizadamente pelo
+    ONS, permitindo avaliar o cumprimento de requisitos regulatórios de desempenho, identificar usinas
+    com elevada indisponibilidade forçada ou programada, e suportar decisões de despacho centralizado
+    e planejamento da operação do Sistema Interligado Nacional.
+  limitations: Poucos registros possuem cod_ceg nulo, indicando usinas sem Código de Empreendimento de Geração cadastrado no sistema ONS/ANEEL. O campo num_versao varia de 1 a 21, indicando múltiplas
+    revisões para a mesma combinação usina/mês/taxa. O valor máximo de val_taxa é ~0.
+  usage: Recuperar este dataset quando o analista perguntar sobre indisponibilidade operativa, confiabilidade
+    ou desempenho de usinas geradoras despachadas pelo ONS, especialmente quando mencionar TEIFa, TEIP,
+    taxa de indisponibilidade forçada ou programada, ou quando buscar indicadores mensais de disponibilidade
+    por usina para fins de monitoramento regulatório ou planejamento da operação.
+domain: geração
+schema:
+- name: taxa_teif_teip_oper
+  physicalType: parquet
+  logicalType: object
+  physicalName: taxa_teif_teip_oper
+  properties:
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina geradora despachada centralizadamente pelo ONS (Tipo I ou Tipo II-A).
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome da usina
+      - planta geradora
+      - unidade geradora
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da usina, identificador único no cadastro ANEEL/ONS.
+      Possui poucos nulos para usinas sem CEG cadastrado.
+    customProperties:
+    - property: aliases
+      value:
+      - ceg
+      - código ceg
+      - código de empreendimento
+      - código da usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: tip_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo ou fonte de geração da usina (ex.: UHE para hidrelétrica, UTE para termelétrica,
+      EOL para eólica, UFV para solar, UTN para nuclear).'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de usina
+      - fonte geradora
+      - tecnologia de geração
+      - modalidade da usina
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Hidroelétrica
+      - Nuclear
+      - Térmica
+  - name: din_mes
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data de referência do período de apuração das taxas, sempre no primeiro dia do mês (granularidade
+      mensal). Representa o mês/ano ao qual os valores de TEIFa_Oper e TEIP_Oper se referem.
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - mês de referência
+      - período
+      - competência
+      - mês de apuração
+      - data de referência
+    - property: semanticType
+      value: TIMESTAMP
+  - name: nom_taxa
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da taxa de indisponibilidade calculada. Assume dois valores possíveis: ''TEIFa_Oper''
+      (Taxa Equivalente de Indisponibilidade Forçada Operativa) ou ''TEIP_Oper'' (Taxa de Indisponibilidade
+      Programada Operativa). Define o formato longo do dataset.'
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - taxa
+      - tipo de taxa
+      - indicador de indisponibilidade
+      - nome do indicador
+      - TEIFa
+      - TEIP
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - TEIFa_oper
+      - TEIP_oper
+  - name: val_taxa
+    physicalType: DOUBLE
+    logicalType: number
+    description: Valor da taxa de indisponibilidade operativa (TEIFa_Oper ou TEIP_Oper) expressa como
+      fração decimal entre 0 e 1 (não percentual). Valor 0.0 indica plena disponibilidade; valor próximo
+      a 1.0 indica indisponibilidade total no período.
+    customProperties:
+    - property: aliases
+      value:
+      - valor da taxa
+      - taxa de indisponibilidade
+      - TEIFa
+      - TEIP
+      - indisponibilidade
+      - percentual de indisponibilidade
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: fração (0 a 1)
+  - name: num_versao
+    physicalType: DOUBLE
+    logicalType: number
+    description: Número da versão do cálculo para a combinação usina/mês/taxa, variando de 1 a 21. Reflete
+      o processo de consistência recorrente do ONS. Para análises definitivas, filtrar pela versão máxima
+      por grupo (usina, mês, taxa).
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - versão
+      - número de versão
+      - revisão
+      - versão do cálculo
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 9.0
+      - 10.0
+      - 11.0
+      - 16.0
+      - 17.0
+      - 18.0
+      - 19.0
+      - 20.0
+      - 21.0
+  - name: din_calculo
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora em que o cálculo/publicação da taxa foi realizado pelo ONS. Distinta de din_mes
+      (período de referência); permite rastrear quando cada versão foi gerada e identificar a publicação
+      mais recente.
+    customProperties:
+    - property: aliases
+      value:
+      - data de cálculo
+      - data de publicação
+      - data de processamento
+      - data de geração
+    - property: semanticType
+      value: TIMESTAMP
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/taxa_teif_teip_oper
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - indisponibilidade operativa da usina
+  - desempenho operativo das usinas
+- property: aiContext
+  value: 'Recuperar este dataset quando o analista perguntar sobre indisponibilidade operativa, confiabilidade
+    ou desempenho de usinas geradoras despachadas pelo ONS, especialmente quando mencionar TEIFa, TEIP,
+    taxa de indisponibilidade forçada ou programada, ou quando buscar indicadores mensais de disponibilidade
+    por usina para fins de monitoramento regulatório ou planejamento da operação. Termos relacionados:
+    TEIFa_Oper, TEIP_Oper, desempenho operativo, despacho centralizado.'
+- property: agentInstructions
+  value: '- [cod_ceg] Poucos registros possuem cod_ceg nulo, indicando usinas sem código
+    CEG cadastrado. Isso pode impedir joins com datasets de cadastro de empreendimentos ANEEL/ONS. Nesses
+    casos, nom_usina deve ser usada como chave alternativa de join.
+
+
+    - [num_versao] O campo num_versao indica múltiplas revisões (1 a 21) para o mesmo par (nom_usina,
+    din_mes, nom_taxa). Consultas que não filtram pela versão máxima retornarão linhas duplicadas para
+    o mesmo período/usina/taxa, inflando agregações como SUM e AVG.
+
+
+    - [val_taxa] val_taxa atinge valor máximo de ~0.8195 (81,95%), representando indisponibilidade muito
+    elevada para uma usina em determinado mês. Embora tecnicamente possível (usina em manutenção prolongada),
+    valores acima de 0,5 merecem verificação para distinguir eventos reais de possíveis erros de consistência
+    em versões intermediárias.
+
+
+    - [din_mes] Verificar se todos os meses do período a partir de 2021-05 estão presentes para cada usina,
+    pois ausências podem indicar usinas que entraram ou saíram do despacho centralizado, ou falhas no
+    processo de consistência para determinados períodos.
+
+
+    - [tip_usina] Valores com trailing spaces detectados em ''tip_usina''. Use TRIM() em filtros WHERE
+    para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais usinas tiveram maior TEIFa_Oper nos últimos 12 meses?
+  - Qual a evolução mensal da TEIP_Oper das usinas hidrelétricas no subsistema Sudeste?
+  - Quais usinas termelétricas apresentaram indisponibilidade forçada acima de 30% em algum mês de 2024?
+  - Como comparar a TEIFa_Oper média por tipo de usina (UHE, UTE, EOL) no ano de 2023?
+  - Qual a versão mais recente disponível para cada usina no mês de março de 2025?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2021-06-01'
+- property: semantics
+  value:
+    measure_terms:
+    - teif
+    - teip
+    - taxa de indisponibilidade
+    family: taxa_teif
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_mes
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_mes
+      - nom_usina
+      - nom_taxa
+      - num_versao
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: nom_usina
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: taxa
+      label: Taxa de Indisponibilidade Operativa
+      columns:
+      - val_taxa
+      expression: val_taxa
+      quantity_kind: ratio
+      unit_native: fracao_decimal
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_taxa)
+          unit: fracao_decimal
+        maximum:
+          sql: MAX(val_taxa)
+          unit: fracao_decimal
+        minimum:
+          sql: MIN(val_taxa)
+          unit: fracao_decimal
+        time_series:
+          sql: AVG(val_taxa)
+          unit: fracao_decimal
+        ranking:
+          sql: AVG(val_taxa)
+          unit: fracao_decimal
+        comparison:
+          sql: AVG(val_taxa)
+          unit: fracao_decimal
+      interval_hours: 8760.0
+      aliases:
+      - valor da taxa
+      - taxa de indisponibilidade
+      - TEIFa
+      - TEIP
+      - indisponibilidade
+      - percentual de indisponibilidade
+      - taxa operativa
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      tip_usina:
+        Hidroelétrica:
+          aliases:
+          - Hidroelétrica
+          - hidreletrica
+          - UHE
+          - hidro
+          - usina hidraulica
+          filter: TRIM(tip_usina) = 'Hidroelétrica'
+        Nuclear:
+          aliases:
+          - Nuclear
+          - nuclear
+          - UTN
+          - usina nuclear
+          filter: TRIM(tip_usina) = 'Nuclear'
+        Térmica:
+          aliases:
+          - Térmica
+          - termica
+          - UTE
+          - termeletrica
+          - usina termica
+          filter: TRIM(tip_usina) = 'Térmica'
+      nom_taxa:
+        TEIFa_oper:
+          aliases:
+          - TEIFa_oper
+          - TEIFa_Oper
+          - TEIFa
+          - taxa forcada operativa
+          - indisponibilidade forcada operativa
+          - forcada
+          filter: nom_taxa = 'TEIFa_oper'
+        TEIP_oper:
+          aliases:
+          - TEIP_oper
+          - TEIP_Oper
+          - TEIP
+          - taxa programada operativa
+          - indisponibilidade programada operativa
+          - programada
+          filter: nom_taxa = 'TEIP_oper'
+      num_versao:
+        versao_maxima:
+          aliases:
+          - versao mais recente
+          - ultima versao
+          - versao definitiva
+          - versao final
+          - versao atual
+          filter: num_versao = MAX(num_versao) OVER (PARTITION BY nom_usina, din_mes, nom_taxa)
+          note: Use esta expressao como subquery ou CTE para evitar duplicatas em agregacoes.
+        '1.0':
+          aliases:
+          - '1.0'
+          filter: num_versao = 1
+        '2.0':
+          aliases:
+          - '2.0'
+          filter: num_versao = 2
+        '3.0':
+          aliases:
+          - '3.0'
+          filter: num_versao = 3
+        '4.0':
+          aliases:
+          - '4.0'
+          filter: num_versao = 4
+        '5.0':
+          aliases:
+          - '5.0'
+          filter: num_versao = 5
+        '6.0':
+          aliases:
+          - '6.0'
+          filter: num_versao = 6
+        '7.0':
+          aliases:
+          - '7.0'
+          filter: num_versao = 7
+        '8.0':
+          aliases:
+          - '8.0'
+          filter: num_versao = 8
+        '9.0':
+          aliases:
+          - '9.0'
+          filter: num_versao = 9
+        '10.0':
+          aliases:
+          - '10.0'
+          filter: num_versao = 10
+        '11.0':
+          aliases:
+          - '11.0'
+          filter: num_versao = 11
+        '16.0':
+          aliases:
+          - '16.0'
+          filter: num_versao = 16
+        '17.0':
+          aliases:
+          - '17.0'
+          filter: num_versao = 17
+        '18.0':
+          aliases:
+          - '18.0'
+          filter: num_versao = 18
+        '19.0':
+          aliases:
+          - '19.0'
+          filter: num_versao = 19
+        '20.0':
+          aliases:
+          - '20.0'
+          filter: num_versao = 20
+        '21.0':
+          aliases:
+          - '21.0'
+          filter: num_versao = 21
+    sql_patterns:
+      taxa_mensal_versao_maxima:
+        template: "WITH versao_max AS (\n  SELECT nom_usina, din_mes, nom_taxa,\n         MAX(num_versao)\
+          \ AS max_versao\n  FROM {source}\n  GROUP BY nom_usina, din_mes, nom_taxa\n)\nSELECT\n  DATE_TRUNC('month',\
+          \ t.din_mes) AS mes,\n  t.nom_usina,\n  t.nom_taxa,\n  AVG(t.val_taxa) AS taxa_media,\n  MAX(t.val_taxa)\
+          \ AS taxa_maxima\nFROM {source} t\nJOIN versao_max v\n  ON t.nom_usina = v.nom_usina\n  AND\
+          \ t.din_mes = v.din_mes\n  AND t.nom_taxa = v.nom_taxa\n  AND t.num_versao = v.max_versao\n\
+          WHERE EXTRACT(YEAR FROM t.din_mes) = {year}\nGROUP BY 1, 2, 3\nORDER BY 1, 2, 3\n"
+        output_unit: fracao_decimal
+        matches:
+          output_modes:
+          - average
+          - maximum
+          metrics:
+          - taxa
+          grain: month
+        note: Sempre use versao maxima para evitar duplicatas. val_taxa e fracao (0-1); multiplique por
+          100 para percentual.
+        validated_params:
+          year: '2026'
+      ranking_usinas_taxa:
+        template: "WITH versao_max AS (\n  SELECT nom_usina, din_mes, nom_taxa,\n         MAX(num_versao)\
+          \ AS max_versao\n  FROM {source}\n  GROUP BY nom_usina, din_mes, nom_taxa\n)\nSELECT\n  t.nom_usina,\n\
+          \  TRIM(t.tip_usina) AS tipo_usina,\n  t.nom_taxa,\n  AVG(t.val_taxa) AS taxa_media,\n  MAX(t.val_taxa)\
+          \ AS taxa_maxima\nFROM {source} t\nJOIN versao_max v\n  ON t.nom_usina = v.nom_usina\n  AND\
+          \ t.din_mes = v.din_mes\n  AND t.nom_taxa = v.nom_taxa\n  AND t.num_versao = v.max_versao\n\
+          WHERE t.din_mes BETWEEN '{start_date}' AND '{end_date}'\n  AND t.nom_taxa = '{nom_taxa}'\nGROUP\
+          \ BY t.nom_usina, tipo_usina, t.nom_taxa\nORDER BY taxa_media DESC\nLIMIT {top_n}\n"
+        output_unit: fracao_decimal
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - taxa
+          grain: period
+        note: Use TRIM(tip_usina) para evitar perda de registros por trailing spaces. Ranking por AVG,
+          nunca SUM.
+        validated_params:
+          start_date: '2021-05-01 00:00:00'
+          end_date: '2026-05-01 00:00:00'
+          nom_taxa: TEIFa_oper
+- property: fewShotQueries
+  value:
+  - question: Quais usinas tiveram a maior taxa de indisponibilidade forçada operativa média no último
+      ano?
+    sql: "WITH versao_max AS (\n  SELECT nom_usina, din_mes, nom_taxa,\n         MAX(num_versao) AS max_versao\n\
+      \  FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet')\n  GROUP\
+      \ BY nom_usina, din_mes, nom_taxa\n),\ndados_filtrados AS (\n  SELECT t.nom_usina, t.tip_usina,\
+      \ t.din_mes, t.val_taxa\n  FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet')\
+      \ t\n  INNER JOIN versao_max v\n    ON t.nom_usina = v.nom_usina\n   AND t.din_mes = v.din_mes\n\
+      \   AND t.nom_taxa = v.nom_taxa\n   AND t.num_versao = v.max_versao\n  WHERE t.nom_taxa = 'TEIFa_oper'\n\
+      \    AND t.din_mes >= (SELECT MAX(din_mes) - INTERVAL '12 months' FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet'))\n\
+      )\nSELECT nom_usina,\n       tip_usina,\n       ROUND(AVG(val_taxa) * 100, 2) AS teifa_oper_media_pct,\n\
+      \       COUNT(DISTINCT din_mes) AS meses_com_dados\nFROM dados_filtrados\nGROUP BY nom_usina, tip_usina\n\
+      ORDER BY teifa_oper_media_pct DESC\nLIMIT 20;"
+  - question: Como evoluiu a taxa de indisponibilidade programada operativa de Itaipu nos últimos 60 meses?
+    sql: "WITH versao_max AS (\n  SELECT nom_usina, din_mes, nom_taxa,\n         MAX(num_versao) AS max_versao\n\
+      \  FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet')\n  GROUP\
+      \ BY nom_usina, din_mes, nom_taxa\n)\nSELECT t.din_mes,\n       t.nom_usina,\n       t.nom_taxa,\n\
+      \       ROUND(t.val_taxa * 100, 2) AS teip_oper_pct,\n       t.num_versao,\n       t.din_calculo\n\
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet') t\nINNER JOIN\
+      \ versao_max v\n  ON t.nom_usina = v.nom_usina\n AND t.din_mes = v.din_mes\n AND t.nom_taxa = v.nom_taxa\n\
+      \ AND t.num_versao = v.max_versao\nWHERE t.nom_usina = 'ITAIPU'\n  AND t.nom_taxa = 'TEIP_oper'\n\
+      ORDER BY t.din_mes;"
+  - question: Qual é a média de TEIFa_Oper e TEIP_Oper por tipo de usina no período disponível?
+    sql: "WITH versao_max AS (\n  SELECT nom_usina, din_mes, nom_taxa,\n         MAX(num_versao) AS max_versao\n\
+      \  FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet')\n  GROUP\
+      \ BY nom_usina, din_mes, nom_taxa\n)\nSELECT t.tip_usina,\n       t.nom_taxa,\n       ROUND(AVG(t.val_taxa)\
+      \ * 100, 2) AS taxa_media_pct,\n       ROUND(MIN(t.val_taxa) * 100, 2) AS taxa_min_pct,\n      \
+      \ ROUND(MAX(t.val_taxa) * 100, 2) AS taxa_max_pct,\n       COUNT(DISTINCT t.nom_usina) AS qtd_usinas,\n\
+      \       COUNT(*) AS qtd_registros\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_oper/*.parquet')\
+      \ t\nINNER JOIN versao_max v\n  ON t.nom_usina = v.nom_usina\n AND t.din_mes = v.din_mes\n AND t.nom_taxa\
+      \ = v.nom_taxa\n AND t.num_versao = v.max_versao\nGROUP BY t.tip_usina, t.nom_taxa\nORDER BY t.tip_usina,\
+      \ t.nom_taxa;"
+- property: license
+  value: CC-BY

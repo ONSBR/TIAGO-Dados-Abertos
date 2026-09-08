@@ -1,0 +1,588 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:grandezas_fluviometricas
+name: grandezas_fluviometricas
+tenant: ons
+tags:
+- ENA
+- ONS
+- bacia hidrográfica
+- disponibilidade hídrica
+- energia natural afluente
+- fluviometria
+- geração hidrelétrica
+- grandezas fluviométricas
+- hidrologia
+- medições de vazão
+- posto fluviométrico
+- postos fluviométricos ONS
+- vazão
+- vazão diária por bacia
+- vazão fluviométrica
+- vazão fluviométrica ONS
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/grandezas_fluviometricas_di/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer séries históricas diárias de vazão para analistas de hidrologia, operadores do sistema
+    elétrico e planejadores energéticos que necessitam acompanhar a disponibilidade hídrica nas bacias
+    hidrográficas brasileiras, subsidiar o despacho hidrelétrico, alimentar modelos de previsão de Energia
+    Natural Afluente (ENA) e suportar decisões de operação e planejamento do Sistema Interligado Nacional
+    (SIN).
+  limitations: Coluna de data tipada como VARCHAR no schema físico DuckDB, quando deveria ser DATE. Quase todos os registros possuem val_vazaomediaincr nulo. val_vazaomedia possui valor mínimo igual a 0.
+  usage: Recuperar este dataset quando a pergunta envolver vazão de rios, medições em postos fluviométricos,
+    disponibilidade hídrica por bacia hidrográfica ou séries temporais diárias de grandezas hidrológicas
+    no contexto do sistema elétrico brasileiro.
+domain: hidrologia
+schema:
+- name: grandezas_fluviometricas
+  physicalType: parquet
+  logicalType: object
+  physicalName: grandezas_fluviometricas
+  properties:
+  - name: id_postofluv
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único do posto fluviométrico cadastrado pelo ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código do posto
+      - id posto
+      - identificador posto fluviométrico
+      - código fluviométrico
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_postofluviometrico
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome descritivo do posto fluviométrico onde a medição foi realizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome do posto
+      - posto fluviométrico
+      - estação fluviométrica
+      - nome estação
+    - property: semanticType
+      value: DIMENSION
+  - name: val_latitude
+    physicalType: DOUBLE
+    logicalType: number
+    description: Latitude geográfica do posto fluviométrico em graus decimais (negativo = hemisfério sul)
+    customProperties:
+    - property: aliases
+      value:
+      - latitude
+      - coordenada latitude
+      - lat
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: val_longitude
+    physicalType: DOUBLE
+    logicalType: number
+    description: Longitude geográfica do posto fluviométrico em graus decimais (negativo = oeste de Greenwich)
+    customProperties:
+    - property: aliases
+      value:
+      - longitude
+      - coordenada longitude
+      - lon
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: nom_rio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do rio onde o posto fluviométrico está localizado
+    customProperties:
+    - property: aliases
+      value:
+      - rio
+      - nome do rio
+      - curso d'água
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da bacia hidrográfica à qual o posto fluviométrico pertence, principal atributo
+      de agrupamento geográfico
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrográfica
+      - nome da bacia
+      - bacia fluviométrica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BACIA DO RIO AMAZONAS
+      - BACIA DO RIO ARAGUARI
+      - BACIA DO RIO CAPIVARI
+      - BACIA DO RIO DOCE
+      - BACIA DO RIO GRANDE
+      - BACIA DO RIO IGUACU
+      - BACIA DO RIO ITABAPOANA
+      - BACIA DO RIO ITAJAI
+      - BACIA DO RIO JACUI
+      - BACIA DO RIO MUCURI
+      - BACIA DO RIO PARAGUACU
+      - BACIA DO RIO PARAGUAI
+      - BACIA DO RIO PARAIBA DO SUL
+      - BACIA DO RIO PARANA
+      - BACIA DO RIO PARANAIBA
+      - BACIA DO RIO PARANAPANEMA
+      - BACIA DO RIO PARNAIBA
+      - BACIA DO RIO SAO FRANCISCO
+      - BACIA DO RIO TIETE
+      - BACIA DO RIO TOCANTINS
+      - BACIA DO RIO URUGUAI
+  - name: din_medicao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data da medição fluviométrica. Tipado como VARCHAR no schema físico (característica
+      do formato de origem); deve ser convertido para DATE via TRY_CAST ou STRPTIME no pipeline antes
+      de uso temporal. Período real coberto: a partir de 2023-01-01.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de medição
+      - data
+      - data da leitura
+      - din medicao
+      - data fluviométrica
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_vazaomedia
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão média diária medida no posto fluviométrico em m³/s. Representa o volume de água
+      por unidade de tempo passando pela seção transversal do rio. Valor mínimo registrado é 0.0, podendo
+      indicar período de seca extrema ou erro de medição — requer validação contextual.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão média
+      - vazão
+      - vazão diária
+      - val vazao media
+      - Q médio
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaomediaincr
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão média incremental diária no posto fluviométrico em m³/s. Representa a contribuição
+      hídrica incremental entre postos consecutivos de uma mesma bacia, calculada apenas para postos de
+      referência de usinas com reservatório. Possui nulos em quase todas as linhas por design do sistema ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão incremental
+      - vazão média incremental
+      - val vazao media incremental
+      - Q incremental
+      - vazão afluente incremental
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/grandezas_fluviometricas
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - vazao do rio
+  - quanta agua passou no posto
+  - medicao fluviometrica
+  - vazao natural do rio
+  - vazao afluente media
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver vazão de rios, medições em postos fluviométricos,
+    disponibilidade hídrica por bacia hidrográfica ou séries temporais diárias de grandezas hidrológicas
+    no contexto do sistema elétrico brasileiro. Também relevante quando a análise requer correlação entre
+    condições hidrológicas e geração hidrelétrica ou Energia Natural Afluente (ENA).
+- property: agentInstructions
+  value: '- [val_vazaomediaincr] Quase todos os registros possuem val_vazaomediaincr nulo. A vazão incremental
+    é calculada apenas para postos com contribuição incremental relevante ao SIN, tornando este campo
+    esparso por design. Filtros sem tratamento de nulos em agregações produzirão resultados enviesados
+    ou incorretos.
+
+
+    - [val_latitude] Poucos registros possuem val_latitude nulo, indicando postos fluviométricos sem
+    coordenadas georreferenciadas cadastradas no dataset grandezas_fluviometricas. Análises espaciais
+    devem filtrar ou tratar esses registros para evitar erros em joins geoespaciais.
+
+
+    - [val_longitude] Poucos registros possuem val_longitude nulo, coincidindo com os mesmos postos
+    sem val_latitude no dataset grandezas_fluviometricas. Postos sem coordenadas completas não podem ser
+    utilizados em análises geoespaciais ou mapas de distribuição de vazões.
+
+
+    - [din_medicao] Coluna din_medicao está tipada como VARCHAR no schema físico DuckDB do dataset grandezas_fluviometricas,
+    embora represente datas no formato YYYY-MM-DD. Operações de filtro temporal, ordenação cronológica
+    e agregações por período requerem cast explícito para DATE.
+
+
+    - [val_vazaomedia] val_vazaomedia no dataset grandezas_fluviometricas possui valor máximo de 37181.93
+    m³/s, compatível com grandes rios como o Paraná próximo a Itaipu, mas requer validação contextual
+    por posto. Valor mínimo de 0.0 m³/s pode indicar períodos de seca extrema, postos em rios intermitentes
+    ou erros de medição/registro.
+
+
+    - [nom_rio] Valores têm ACENTO e prefixo "RIO " (ex.: ''RIO SÃO FRANCISCO'', ''RIO PARANÁ''). Igualdade
+    exata sem acento retorna ZERO linhas, e LIKE simples também falha com acento (''RIO PARANÁ'' NÃO casa
+    com LIKE ''%PARANA%''). Na PRIMEIRA consulta normalize os dois lados: strip_accents(upper(nom_rio))
+    LIKE ''%PARANA%'' (fragmento maiúsculo sem acento; strip_accents é nativo do DuckDB). NÃO gaste consultas
+    separadas sondando cobertura de datas: a cobertura temporal varia POR POSTO — traga MAX(TRY_CAST(din_medicao
+    AS DATE)) por posto junto com a vazão mais recente na mesma consulta (window function ou GROUP BY)
+    e declare a data real dos dados na resposta.
+
+
+    - [val_vazaomedia] DIA MAIS RECENTE NÃO CONSOLIDADO: o último dia da série pode chegar com val_vazaomedia
+    = 0.0 em TODOS os postos (artefato de ingestão D-1; provado em 2026-08-12: 17/17 postos do São Francisco
+    em 0.0, contra 4/20 zeros crônicos localizados em dias normais). O descarte automático da borda só
+    vale quando o recorte tem VÁRIOS postos e TODOS zeram juntos no último dia — nesse caso descarte o
+    dia, use o anterior como "mais recente" e declare a data. Com UM posto só ou em recorte histórico
+    pedido pelo usuário, NÃO descarte: zero isolado pode ser seca real (a própria coluna registra secas
+    extremas) — reporte e marque como "a confirmar (borda da série)". ATENÇÃO aos padrões prontos deste
+    contrato que contam ou agregam zeros (vazao_zero_por_posto, médias mensais): eles NÃO excluem a borda
+    zerada — exclua o último dia não consolidado antes de contar/mediar, senão o artefato contamina o
+    resultado.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a vazão média diária na bacia do Paraná nos últimos 30 dias?
+  - Quais postos fluviométricos registraram vazão zero em 2024?
+  - Como evoluiu a vazão média no rio Paraná ao longo de 2023 e 2024?
+  - Quais bacias hidrográficas apresentaram maior variabilidade de vazão no período seco?
+  - Quais postos possuem dados de vazão incremental disponíveis?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: bacia
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/grandezas_fluviometricas_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: din_medicao
+      spatial: bacia
+      entity: bacia
+      one_row_per:
+      - din_medicao
+      - id_postofluv
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: vazaomedia
+      label: Vazaomedia
+      columns:
+      - val_vazaomedia
+      expression: val_vazaomedia
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaomedia)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaomedia)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaomedia)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaomedia)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaomedia)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaomedia)
+          unit: m³/s
+      interval_hours: 24.0
+      aliases:
+      - vazão média
+      - vazão
+      - vazão diária
+      - val vazao media
+      - Q médio
+    - id: vazaomediaincr
+      label: Vazaomediaincr
+      columns:
+      - val_vazaomediaincr
+      expression: val_vazaomediaincr
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaomediaincr)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaomediaincr)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaomediaincr)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaomediaincr)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaomediaincr)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaomediaincr)
+          unit: m³/s
+      interval_hours: 24.0
+      aliases:
+      - vazão incremental
+      - vazão média incremental
+      - val vazao media incremental
+      - Q incremental
+      - vazão afluente incremental
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      nom_bacia:
+        BACIA DO RIO AMAZONAS:
+          aliases:
+          - BACIA DO RIO AMAZONAS
+          - Amazonas
+          - bacia amazonica
+          filter: nom_bacia = 'BACIA DO RIO AMAZONAS'
+        BACIA DO RIO ARAGUARI:
+          aliases:
+          - BACIA DO RIO ARAGUARI
+          - Araguari
+          filter: nom_bacia = 'BACIA DO RIO ARAGUARI'
+        BACIA DO RIO CAPIVARI:
+          aliases:
+          - BACIA DO RIO CAPIVARI
+          - Capivari
+          filter: nom_bacia = 'BACIA DO RIO CAPIVARI'
+        BACIA DO RIO DOCE:
+          aliases:
+          - BACIA DO RIO DOCE
+          - Rio Doce
+          filter: nom_bacia = 'BACIA DO RIO DOCE'
+        BACIA DO RIO GRANDE:
+          aliases:
+          - BACIA DO RIO GRANDE
+          - Rio Grande
+          filter: nom_bacia = 'BACIA DO RIO GRANDE'
+        BACIA DO RIO IGUACU:
+          aliases:
+          - BACIA DO RIO IGUACU
+          - Iguacu
+          - Iguaçu
+          filter: nom_bacia = 'BACIA DO RIO IGUACU'
+        BACIA DO RIO ITABAPOANA:
+          aliases:
+          - BACIA DO RIO ITABAPOANA
+          - Itabapoana
+          filter: nom_bacia = 'BACIA DO RIO ITABAPOANA'
+        BACIA DO RIO ITAJAI:
+          aliases:
+          - BACIA DO RIO ITAJAI
+          - Itajai
+          - Itajaí
+          filter: nom_bacia = 'BACIA DO RIO ITAJAI'
+        BACIA DO RIO JACUI:
+          aliases:
+          - BACIA DO RIO JACUI
+          - Jacui
+          - Jacuí
+          filter: nom_bacia = 'BACIA DO RIO JACUI'
+        BACIA DO RIO MUCURI:
+          aliases:
+          - BACIA DO RIO MUCURI
+          - Mucuri
+          filter: nom_bacia = 'BACIA DO RIO MUCURI'
+        BACIA DO RIO PARAGUACU:
+          aliases:
+          - BACIA DO RIO PARAGUACU
+          - Paraguacu
+          - Paraguaçu
+          filter: nom_bacia = 'BACIA DO RIO PARAGUACU'
+        BACIA DO RIO PARAGUAI:
+          aliases:
+          - BACIA DO RIO PARAGUAI
+          - Paraguai
+          filter: nom_bacia = 'BACIA DO RIO PARAGUAI'
+        BACIA DO RIO PARAIBA DO SUL:
+          aliases:
+          - BACIA DO RIO PARAIBA DO SUL
+          - Paraiba do Sul
+          - Paraíba do Sul
+          filter: nom_bacia = 'BACIA DO RIO PARAIBA DO SUL'
+        BACIA DO RIO PARANA:
+          aliases:
+          - BACIA DO RIO PARANA
+          - Parana
+          - Paraná
+          filter: nom_bacia = 'BACIA DO RIO PARANA'
+        BACIA DO RIO PARANAIBA:
+          aliases:
+          - BACIA DO RIO PARANAIBA
+          - Paranaiba
+          - Paranaíba
+          filter: nom_bacia = 'BACIA DO RIO PARANAIBA'
+        BACIA DO RIO PARANAPANEMA:
+          aliases:
+          - BACIA DO RIO PARANAPANEMA
+          - Paranapanema
+          filter: nom_bacia = 'BACIA DO RIO PARANAPANEMA'
+        BACIA DO RIO PARNAIBA:
+          aliases:
+          - BACIA DO RIO PARNAIBA
+          - Parnaiba
+          - Parnaíba
+          filter: nom_bacia = 'BACIA DO RIO PARNAIBA'
+        BACIA DO RIO SAO FRANCISCO:
+          aliases:
+          - BACIA DO RIO SAO FRANCISCO
+          - Sao Francisco
+          - São Francisco
+          - Velho Chico
+          filter: nom_bacia = 'BACIA DO RIO SAO FRANCISCO'
+        BACIA DO RIO TIETE:
+          aliases:
+          - BACIA DO RIO TIETE
+          - Tiete
+          - Tietê
+          filter: nom_bacia = 'BACIA DO RIO TIETE'
+        BACIA DO RIO TOCANTINS:
+          aliases:
+          - BACIA DO RIO TOCANTINS
+          - Tocantins
+          filter: nom_bacia = 'BACIA DO RIO TOCANTINS'
+        BACIA DO RIO URUGUAI:
+          aliases:
+          - BACIA DO RIO URUGUAI
+          - Uruguai
+          filter: nom_bacia = 'BACIA DO RIO URUGUAI'
+    sql_patterns:
+      vazaomedia_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_medicao AS DATE)) AS mes,\n  AVG(val_vazaomedia)\
+          \ AS vazao_media_m3s\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_medicao AS DATE))\
+          \ = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: m³/s
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - vazaomedia
+          grain: month
+        validated_params:
+          year: '2026'
+      vazaomedia_por_bacia:
+        template: "SELECT nom_bacia,\n  AVG(val_vazaomedia) AS vazao_media_m3s\nFROM {source}\nWHERE TRY_CAST(din_medicao\
+          \ AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY nom_bacia\nORDER BY vazao_media_m3s\
+          \ DESC"
+        output_unit: m³/s
+        matches:
+          output_modes:
+          - average
+          - ranking
+          metrics:
+          - vazaomedia
+          grain: bacia
+        validated_params:
+          data_inicio: '2026-01-01'
+          data_fim: '2026-07-19'
+      vazaomediaincr_postos_disponiveis:
+        template: "SELECT id_postofluv, nom_postofluviometrico, nom_rio, nom_bacia,\n  COUNT(*) AS dias_com_dado,\n\
+          \  AVG(val_vazaomediaincr) AS vazao_incr_media_m3s\nFROM {source}\nWHERE val_vazaomediaincr\
+          \ IS NOT NULL\nGROUP BY 1, 2, 3, 4\nORDER BY dias_com_dado DESC"
+        output_unit: m³/s
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - vazaomediaincr
+          grain: posto
+      vazao_zero_por_posto:
+        template: "SELECT id_postofluv, nom_postofluviometrico, nom_rio, nom_bacia,\n  COUNT(*) AS dias_vazao_zero\n\
+          FROM {source}\nWHERE val_vazaomedia = 0.0\nGROUP BY 1, 2, 3, 4\nORDER BY dias_vazao_zero DESC"
+        output_unit: contagem
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - vazaomedia
+          grain: posto
+- property: fewShotQueries
+  value:
+  - question: Qual foi a evolução da vazão média diária por bacia hidrográfica nos últimos 30 dias disponíveis?
+    sql: SELECT nom_bacia, TRY_CAST(din_medicao AS DATE) AS data_medicao, AVG(val_vazaomedia) AS vazao_media_m3s,
+      COUNT(DISTINCT id_postofluv) AS num_postos FROM read_parquet('s3://ons-aws-prod-opendata/dataset/grandezas_fluviometricas_di/*.parquet')
+      WHERE TRY_CAST(din_medicao AS DATE) >= ( SELECT MAX(TRY_CAST(din_medicao AS DATE)) - INTERVAL '30'
+      DAY FROM read_parquet('s3://ons-aws-prod-opendata/dataset/grandezas_fluviometricas_di/*.parquet')
+      ) GROUP BY nom_bacia, TRY_CAST(din_medicao AS DATE) ORDER BY data_medicao DESC, nom_bacia
+  - question: Quais postos fluviométricos registraram vazão zero e em quais datas?
+    sql: SELECT id_postofluv, nom_postofluviometrico, nom_rio, nom_bacia, TRY_CAST(din_medicao AS DATE)
+      AS data_medicao, val_vazaomedia FROM read_parquet('s3://ons-aws-prod-opendata/dataset/grandezas_fluviometricas_di/*.parquet')
+      WHERE val_vazaomedia = 0.0 ORDER BY nom_bacia, nom_postofluviometrico, data_medicao
+  - question: Quais são os 10 postos fluviométricos com maior vazão média histórica no período disponível?
+    sql: SELECT id_postofluv, nom_postofluviometrico, nom_rio, nom_bacia, AVG(val_vazaomedia) AS vazao_media_historica_m3s,
+      MAX(val_vazaomedia) AS vazao_maxima_m3s, MIN(val_vazaomedia) AS vazao_minima_m3s, COUNT(*) AS dias_com_medicao
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/grandezas_fluviometricas_di/*.parquet') GROUP
+      BY id_postofluv, nom_postofluviometrico, nom_rio, nom_bacia ORDER BY vazao_media_historica_m3s DESC
+      LIMIT 10
+- property: license
+  value: CC-BY

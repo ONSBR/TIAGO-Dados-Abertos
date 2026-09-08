@@ -1,0 +1,554 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_ccat
+name: ind_confiarb_ccat
+tenant: ons
+tags:
+- ANEEL
+- CCAT
+- ONS
+- Submódulo 9.1
+- carregamento
+- confiabilidade
+- confiabilidade de transformadores
+- controle de carregamento de transformadores
+- ind_confiarb_ccat
+- indicador de carregamento de transformadores
+- indicador regulatório
+- rede básica
+- transformadores
+- transmissão
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccat/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar o desempenho operacional dos transformadores da rede básica de transmissão, permitindo
+    que agentes de transmissão, ONS e ANEEL avaliem conformidade regulatória com os limites de carregamento
+    estabelecidos no Submódulo 9.1. Suporta decisões de manutenção preventiva, planejamento de reforços
+    na rede de transmissão, avaliação de penalidades por violação de limites operativos e elaboração de
+    relatórios regulatórios de desempenho por agente e área de controle.
+  limitations: O dataset mistura registros mensais e anuais na mesma tabela. Existem registros com val_ccat
+    = 0. O valor máximo de 70 transformadores violados simultaneamente é significativamente elevado e
+    provavelmente corresponde ao nível SIN ou grandes áreas de controle.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de confiabilidade ou desempenho
+    operacional de transformadores da rede básica de transmissão, violações de limites de carregamento,
+    avaliação regulatória de agentes de transmissão conforme Submódulo 9.
+domain: qualidade
+schema:
+- name: ind_confiarb_ccat
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_ccat
+  properties:
+  - name: cod_tipoagregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código que identifica o tipo de agregação espacial do registro. Indica se o dado corresponde
+      ao SIN (sistema interligado nacional), Área de Controle (subsistema/região) ou Agente (empresa de
+      transmissão).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de agregação
+      - nível de agregação
+      - tipo agregação
+      - cod_tipo_agregacao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - Agente
+      - COSR
+      - SIN
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro. Indica se o valor calculado refere-se a
+      um período mensal ou anual. O mesmo arquivo contém registros de ambas as periodicidades.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - frequência
+      - tipo de período
+      - granularidade temporal
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: nom_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome descritivo da entidade agregada. Pode ser o nome do SIN, da Área de Controle (ex:
+      região SE/CO, S, NE, N) ou do Agente de transmissão (empresa concessionária). Complementa cod_tipoagregacao
+      identificando qual entidade específica o registro representa.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - nome da agregação
+      - nome do agente
+      - nome da área de controle
+      - agente
+      - área de controle
+      - nom_agente
+    - property: semanticType
+      value: DIMENSION
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador CCAT. Para registros mensais, corresponde ao primeiro
+      dia do mês de apuração. Para registros anuais, corresponde ao primeiro dia do ano. Cobre o período
+      de 2016-01-01 em diante.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - mês de referência
+      - período
+      - data
+      - competência
+      - din_ref
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_transformadoresoperacao
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número total de transformadores da rede básica em operação no período de referência,
+      considerando a agregação espacial do registro. Representa o denominador do cálculo do índice CCAT.
+      Varia de 1 (agente com único transformador) a 1722 (SIN consolidado).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - transformadores em operação
+      - total de transformadores
+      - transformadores operando
+      - num_transf_operacao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidades
+  - name: num_transformadoresviolados
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número de transformadores da rede básica que operaram em violação dos limites de carregamento
+      permitidos no período de referência. Representa o numerador complementar do cálculo do CCAT. Varia
+      de 0 (sem violações) a 70 transformadores violados.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - transformadores violados
+      - violações de carregamento
+      - transformadores em violação
+      - num_transf_violados
+    - property: semanticType
+      value: IDENTIFIER
+    - property: unit
+      value: unidades
+    - property: enum
+      value:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 38
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+      - 50
+      - 58
+      - 66
+      - 69
+      - 70
+  - name: val_ccat
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Controle de Carregamento de Transformadores (CCAT), expresso como
+      proporção normalizada entre 0,0 e 1,0. Representa a fração de transformadores que operaram dentro
+      dos limites de carregamento permitidos. Valor 1,0 indica ausência total de violações; valores próximos
+      a 0,0 indicam alta proporção de violações. Calculado conforme Submódulo 9.1 dos Procedimentos de
+      Rede do ONS.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - CCAT
+      - índice CCAT
+      - indicador CCAT
+      - valor CCAT
+      - controle de carregamento de transformadores
+      - val_indicador
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: índice (0 a 1)
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_ccat
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - transformadores sobrecarregados
+  - carregamento dos transformadores
+  - transformadores acima do limite
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de confiabilidade ou desempenho
+    operacional de transformadores da rede básica de transmissão, violações de limites de carregamento,
+    avaliação regulatória de agentes de transmissão conforme Submódulo 9.1, ou comparação de desempenho
+    entre agentes, áreas de controle e o SIN em séries temporais mensais ou anuais.
+- property: agentInstructions
+  value: '- [id_periodicidade] O dataset contém registros mensais e anuais coexistentes para a mesma entidade
+    (nom_agregacao) e período (din_referencia). Ao agregar séries temporais sem filtrar id_periodicidade,
+    ocorre dupla contagem: registros anuais somam valores já contabilizados nos mensais. Sempre filtrar
+    id_periodicidade=''MENSAL'' ou id_periodicidade=''ANUAL'' antes de qualquer agregação temporal.
+
+
+    - [val_ccat] val_ccat=0.0 indica que 100% dos transformadores da entidade estavam violados no período,
+    o que pode representar dado real de evento crítico ou erro de apuração. Verificar registros com val_ccat=0.0
+    para validar consistência com num_transformadoresviolados = num_transformadoresoperacao. val_ccat
+    < 0.0 é matematicamente impossível e indica erro de cálculo.
+
+
+    - [num_transformadoresviolados] Verificar se num_transformadoresviolados excede num_transformadoresoperacao
+    em algum registro, o que seria matematicamente inconsistente e resultaria em val_ccat negativo. As
+    estatísticas indicam max=70 violados vs max=1729 em operação, mas a verificação por linha é necessária
+    para garantir integridade.
+
+
+    - [din_referencia] Verificar lacunas temporais na série mensal por entidade. O período cobre a partir de 2016-01, mas entidades individuais (agentes/áreas) podem ter entradas/saídas ao longo do tempo,
+    gerando meses ausentes que não representam erro mas devem ser documentados para análises de séries
+    temporais completas.
+
+
+    - [cod_tipoagregacao] Verificar se existem variações de grafia ou valores inesperados em cod_tipoagregacao
+    além dos três valores esperados (SIN, AREA_CONTROLE, AGENTE). Variações de case ou abreviações alternativas
+    podem causar falhas em filtros e joins com outros datasets de confiabilidade.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o CCAT médio por agente de transmissão em 2024?
+  - Quais agentes apresentaram mais violações de carregamento de transformadores nos últimos 12 meses?
+  - Como evoluiu o indicador CCAT do SIN entre 2016 e 2025?
+  - Qual área de controle teve o pior desempenho de carregamento de transformadores em 2023?
+  - Quantos transformadores da rede básica estiveram em violação de carregamento no ano de 2022?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccat/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2016-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 ano
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - cod_tipoagregacao
+      - id_periodicidade
+      - nom_agregacao
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ccat
+      label: Indicador CCAT
+      columns:
+      - val_ccat
+      expression: val_ccat
+      quantity_kind: ratio
+      unit_native: indice_0_1
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_ccat)
+          unit: indice (0 a 1)
+        maximum:
+          sql: MAX(val_ccat)
+          unit: indice (0 a 1)
+        minimum:
+          sql: MIN(val_ccat)
+          unit: indice (0 a 1)
+        time_series:
+          sql: AVG(val_ccat)
+          unit: indice (0 a 1)
+        ranking:
+          sql: AVG(val_ccat)
+          unit: indice (0 a 1)
+        comparison:
+          sql: AVG(val_ccat)
+          unit: indice (0 a 1)
+      interval_hours: 8760.0
+      aliases:
+      - CCAT
+      - indice CCAT
+      - indicador CCAT
+      - valor CCAT
+      - controle de carregamento de transformadores
+      - val_indicador
+    - id: transformadores_operacao
+      label: Transformadores em Operacao
+      columns:
+      - num_transformadoresoperacao
+      expression: num_transformadoresoperacao
+      quantity_kind: count
+      unit_native: unidades
+      default_aggregation: average
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(num_transformadoresoperacao)
+          unit: unidades
+        maximum:
+          sql: MAX(num_transformadoresoperacao)
+          unit: unidades
+        minimum:
+          sql: MIN(num_transformadoresoperacao)
+          unit: unidades
+        time_series:
+          sql: AVG(num_transformadoresoperacao)
+          unit: unidades
+        ranking:
+          sql: AVG(num_transformadoresoperacao)
+          unit: unidades
+      interval_hours: 8760.0
+      aliases:
+      - transformadores em operacao
+      - total de transformadores
+      - transformadores operando
+      - num_transf_operacao
+    - id: transformadores_violados
+      label: Transformadores Violados
+      columns:
+      - num_transformadoresviolados
+      expression: num_transformadoresviolados
+      quantity_kind: count
+      unit_native: unidades
+      default_aggregation: average
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(num_transformadoresviolados)
+          unit: unidades
+        maximum:
+          sql: MAX(num_transformadoresviolados)
+          unit: unidades
+        minimum:
+          sql: MIN(num_transformadoresviolados)
+          unit: unidades
+        time_series:
+          sql: AVG(num_transformadoresviolados)
+          unit: unidades
+        ranking:
+          sql: AVG(num_transformadoresviolados)
+          unit: unidades
+      interval_hours: 8760.0
+      aliases:
+      - transformadores violados
+      - violacoes de carregamento
+      - transformadores em violacao
+      - num_transf_violados
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      cod_tipoagregacao:
+        Agente:
+          aliases:
+          - Agente
+          - agente de transmissao
+          - empresa de transmissao
+          - concessionaria
+          filter: cod_tipoagregacao = 'Agente'
+        COSR:
+          aliases:
+          - COSR
+          - area de controle
+          - regiao
+          - subsistema
+          filter: cod_tipoagregacao = 'COSR'
+        SIN:
+          aliases:
+          - SIN
+          - sistema interligado nacional
+          - nacional
+          - brasil
+          - total
+          filter: cod_tipoagregacao = 'SIN'
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          - anual
+          - ano
+          - yearly
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          - monthly
+          filter: id_periodicidade = 'ME'
+    sql_patterns:
+      ccat_mensal_por_entidade:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  nom_agregacao,\n\
+          \  AVG(val_ccat) AS ccat_medio\nFROM {source}\nWHERE id_periodicidade = 'ME'\n  AND cod_tipoagregacao\
+          \ = '{tipo_agregacao}'\n  AND EXTRACT(YEAR FROM din_referencia) = {year}\nGROUP BY 1, 2\nORDER\
+          \ BY 1, 2"
+        output_unit: indice (0 a 1)
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ccat
+          grain: month
+        validated_params:
+          tipo_agregacao: Agente
+          year: '2026'
+      ccat_anual_sin:
+        template: "SELECT\n  EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  AVG(val_ccat)\
+          \ AS ccat_medio\nFROM {source}\nWHERE id_periodicidade = 'AN'\n  AND cod_tipoagregacao = 'SIN'\n\
+          GROUP BY 1\nORDER BY 1"
+        output_unit: indice (0 a 1)
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ccat
+          grain: year
+      ranking_agentes_ccat:
+        template: "SELECT\n  nom_agregacao,\n  AVG(val_ccat) AS ccat_medio,\n  AVG(num_transformadoresviolados)\
+          \ AS media_violados\nFROM {source}\nWHERE id_periodicidade = 'ME'\n  AND cod_tipoagregacao =\
+          \ 'Agente'\n  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\nGROUP BY\
+          \ 1\nORDER BY ccat_medio ASC\nLIMIT 10"
+        output_unit: indice (0 a 1)
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - ccat
+          grain: year
+        validated_params:
+          year: '2026'
+      violacoes_por_area:
+        template: "SELECT\n  nom_agregacao,\n  SUM(num_transformadoresviolados) AS total_violados,\n \
+          \ AVG(num_transformadoresoperacao) AS media_operacao\nFROM {source}\nWHERE id_periodicidade\
+          \ = 'ME'\n  AND cod_tipoagregacao = 'COSR'\n  AND EXTRACT(YEAR FROM TRY_CAST(din_referencia\
+          \ AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY total_violados DESC"
+        output_unit: unidades
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - transformadores_violados
+          grain: year
+        validated_params:
+          year: '2026'
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o indicador CCAT do Sistema Interligado Nacional mês a mês desde 2016?
+    sql: SELECT CAST(din_referencia AS DATE) AS mes_referencia, val_ccat, num_transformadoresoperacao,
+      num_transformadoresviolados FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccat/*.parquet')
+      WHERE cod_tipoagregacao = 'SIN' AND id_periodicidade = 'ME' ORDER BY mes_referencia;
+  - question: Quais agentes de transmissão tiveram o pior desempenho médio no CCAT em 2023?
+    sql: SELECT nom_agregacao AS agente, ROUND(AVG(val_ccat), 4) AS ccat_medio, SUM(num_transformadoresviolados)
+      AS total_violacoes, MAX(num_transformadoresoperacao) AS max_transformadores_operacao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccat/*.parquet')
+      WHERE cod_tipoagregacao = 'Agente' AND id_periodicidade = 'ME' AND YEAR(din_referencia) = 2023 GROUP
+      BY nom_agregacao ORDER BY ccat_medio ASC LIMIT 20;
+  - question: Em quais meses e para quais entidades o indicador CCAT ficou abaixo de 0.99?
+    sql: SELECT cod_tipoagregacao, nom_agregacao, CAST(din_referencia AS DATE) AS mes_referencia, val_ccat,
+      num_transformadoresviolados, num_transformadoresoperacao, ROUND((num_transformadoresviolados * 100.0)
+      / NULLIF(num_transformadoresoperacao, 0), 2) AS pct_violados FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_ccat/*.parquet')
+      WHERE id_periodicidade = 'ME' AND val_ccat < 0.99 ORDER BY val_ccat ASC, mes_referencia DESC LIMIT
+      100;
+- property: license
+  value: CC-BY

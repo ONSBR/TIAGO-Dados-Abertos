@@ -1,0 +1,907 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ena-diario-por-reservatorio
+name: ena-diario-por-reservatorio
+tenant: ons
+tags:
+- ENA
+- ENA bruta reservatório
+- ENA diária
+- ENA diária reservatório
+- ENA por reservatório
+- MLT
+- ONS
+- REE
+- afluência energética diária
+- diário
+- energia natural afluente
+- energia natural afluente diária
+- hidrologia
+- média de longo termo
+- reservatório
+- subsistema
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ena_reservatorio_di/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer aos geradores hidrelétricos, comercializadores de energia, pesquisadores e ao próprio
+    ONS a série diária de disponibilidade hídrica por reservatório, permitindo acompanhar a produtividade
+    energética de cada aproveitamento, calcular desvios em relação à média histórica (MLT), subsidiar
+    estudos de planejamento da operação hidrotérmica, projeção do Custo Marginal de Operação (CMO) e análise
+    de risco hidrológico no mercado de energia elétrica brasileiro.
+  limitations: Coluna de data armazenada como VARCHAR no Parquet em vez de DATE; filtros temporais diretos
+    podem falhar ou retornar resultados incorretos sem cast explícito. Aproximadamente 0. Aproximadamente
+    0.
+  usage: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA) com granularidade
+    diária e nível de detalhe por reservatório ou usina hidrelétrica individual.
+domain: hidrologia
+schema:
+- name: ena_diario_por_reservatorio
+  physicalType: parquet
+  logicalType: object
+  physicalName: ena_diario_por_reservatorio
+  properties:
+  - name: nom_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do reservatório hidrelétrico ao qual os dados de ENA se referem
+    customProperties:
+    - property: aliases
+      value:
+      - nome do reservatório
+      - reservatório
+      - usina
+      - nome da usina
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_resplanejamento
+    physicalType: DOUBLE
+    logicalType: number
+    description: Código numérico do reservatório utilizado no planejamento energético do ONS; identifica
+      unicamente cada aproveitamento hidrelétrico
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código do reservatório
+      - código de planejamento
+      - cod reservatório
+      - id reservatório
+    - property: semanticType
+      value: IDENTIFIER
+  - name: tip_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Tipo do reservatório, indicando sua característica operativa (reservatório de acumulação
+      ou fio d'água)
+    customProperties:
+    - property: aliases
+      value:
+      - tipo do reservatório
+      - tipo de reservatório
+      - classificação do reservatório
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Fio dagua
+      - Reservatório com Usina
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da bacia hidrográfica à qual o reservatório pertence; permite agregações por bacia
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrográfica
+      - nome da bacia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - ARAGUARI
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - ITABAPOANA
+      - ITAJAI
+      - JACUI
+      - JEQUITINHONHA
+      - MUCURI
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SANTA MARIA VIT
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: nom_ree
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do Reservatório Equivalente de Energia (REE) ao qual o reservatório está associado;
+      nível intermediário de agregação entre usina e subsistema
+    customProperties:
+    - property: aliases
+      value:
+      - REE
+      - reservatório equivalente
+      - nome do REE
+      - reservatório equivalente de energia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BELO MONTE
+      - IGUACU
+      - ITAIPU
+      - MADEIRA
+      - MANAUS-AMAPA
+      - NORDESTE
+      - NORTE
+      - PARANA
+      - PARANAPANEMA
+      - SUDESTE
+      - SUL
+      - TELES PIRES
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla identificadora do subsistema elétrico ao qual o reservatório pertence (SE, S, NE,
+      N)
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sigla do subsistema
+      - id subsistema
+      - código do subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual o reservatório pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome do subsistema
+      - região
+      - subsistema por extenso
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: ena_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de referência da medição de ENA no formato YYYY-MM-DD; armazenada como VARCHAR no
+      Parquet — recomenda-se cast para DATE nas queries
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data da ENA
+      - data de referência
+      - data da medição
+    - property: semanticType
+      value: DIMENSION
+  - name: ena_bruta_res_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: Energia Natural Afluente (ENA) Bruta do reservatório em MWmed; calculada pelo produto
+      das vazões naturais afluentes pela produtividade da usina a 65% do volume útil
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_res_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA bruta
+      - energia natural afluente bruta
+      - ENA bruta em MWmed
+      - energia afluente bruta
+    - property: unit
+      value: MWmed
+  - name: ena_bruta_res_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: ENA Bruta do reservatório expressa como percentual da Média de Longo Termo (MLT); indica
+      o desvio da afluência em relação à média histórica
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA bruta percentual MLT
+      - ENA bruta % MLT
+      - percentual da MLT bruta
+      - ENA bruta relativa
+    - property: unit
+      value: '%MLT'
+  - name: ena_armazenavel_res_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: Energia Natural Afluente Armazenável do reservatório em MWmed; considera as vazões naturais
+      descontadas das vazões vertidas, representando a parcela efetivamente aproveitável para armazenamento
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA armazenável
+      - energia armazenável
+      - ENA armazenável em MWmed
+      - energia natural armazenável
+    - property: unit
+      value: MWmed
+  - name: ena_armazenavel_res_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: ENA Armazenável do reservatório expressa como percentual da MLT; indica a disponibilidade
+      hídrica armazenável em relação à média histórica
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA armazenável percentual MLT
+      - ENA armazenável % MLT
+      - percentual da MLT armazenável
+      - ENA armazenável relativa
+    - property: unit
+      value: '%MLT'
+  - name: ena_queda_bruta
+    physicalType: VARCHAR
+    logicalType: number
+    description: Queda bruta do reservatório em metros, utilizada no cálculo da produtividade hidráulica
+      da usina; representa a diferença de nível entre montante e jusante
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_queda_bruta AS DOUBLE)
+    - property: aliases
+      value:
+      - queda bruta
+      - queda
+      - altura de queda
+      - queda hidráulica bruta
+    - property: unit
+      value: m
+  - name: mlt_ena
+    physicalType: VARCHAR
+    logicalType: number
+    description: Média de Longo Termo (MLT) da ENA do reservatório em MWmed; valor de referência histórico
+      utilizado para calcular os percentuais de ENA bruta e armazenável
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(mlt_ena AS DOUBLE)
+    - property: aliases
+      value:
+      - MLT
+      - média de longo termo
+      - MLT da ENA
+      - média histórica ENA
+    - property: unit
+      value: MWmed
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ena-diario-por-reservatorio
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - afluencia de cada usina
+  - ena por usina
+  - quanta agua chegou na represa
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA) com granularidade
+    diária e nível de detalhe por reservatório ou usina hidrelétrica individual. Também relevante para
+    análises de desvio em relação à MLT, comparação de produtividade entre aproveitamentos, ou quando
+    o usuário mencionar termos como ENA bruta, ENA armazenável, queda bruta, MLT por reservatório ou afluência
+    diária de usinas específicas do SIN.
+- property: agentInstructions
+  value: |
+    - [ena_data] Coluna de data armazenada como VARCHAR no Parquet S3 em vez de DATE. Filtros temporais e ordenações diretas podem produzir resultados incorretos sem conversão explícita. Padrão YYYY-MM-DD inferido pelo período a partir de 2021-01-01.
+
+    - [ena_bruta_res_mwmed] Poucos registros apresentam valor nulo. Provavelmente corresponde a reservatórios sem operação ou sem dados consistidos em determinadas datas. Deve ser tratado antes de agregações e médias.
+
+    - [ena_bruta_res_percentualmlt] Poucos registros apresentam valor nulo, coincidindo com os nulos de ena_bruta_res_mwmed. Indica ausência de dado de ENA bruta para o cálculo do percentual MLT nessas datas/reservatórios.
+
+    - [ena_bruta_res_percentualmlt] Percentuais de ENA bruta em relação à MLT podem apresentar valores extremamente elevados (acima de 500%) em eventos de cheia excepcional ou valores negativos em secas severas. Recomenda-se verificar outliers para identificar possíveis erros de consistência.
+
+    - [ena_armazenavel_res_mwmed] Poucos registros apresentam valor nulo. Reservatórios fio d'água podem não ter ENA armazenável definida, contribuindo para esta fração de nulos.
+
+    - [ena_armazenavel_res_percentualmlt] Poucos registros apresentam valor nulo, alinhado com os nulos de ena_armazenavel_res_mwmed. Ausência do percentual MLT armazenável nas mesmas datas/reservatórios sem dado de ENA armazenável.
+
+    - [ena_queda_bruta] Poucos registros apresentam valor nulo para a queda bruta. Pode indicar reservatórios sem modelagem de queda ou dados não disponíveis para o período.
+
+    - [mlt_ena] Poucos registros apresentam valor nulo para a MLT da ENA. Sem a MLT, os percentuais em relação à média histórica não podem ser calculados para esses registros.
+
+    - [cod_resplanejamento] A chave primária natural é (cod_resplanejamento, ena_data). Verificar se existem múltiplos registros para o mesmo reservatório na mesma data, o que indicaria duplicatas ou inconsistência de carga dos arquivos Parquet.
+
+    - [tipos] As colunas `ena_armazenavel_res_mwmed`, `ena_armazenavel_res_percentualmlt`, `ena_bruta_res_mwmed`, `ena_bruta_res_percentualmlt`, `ena_queda_bruta`, `mlt_ena` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi a ENA bruta diária do reservatório de Furnas em janeiro de 2024?
+  - Quais reservatórios do subsistema Sudeste apresentaram ENA abaixo de 50% da MLT nos últimos 30 dias?
+  - Como evoluiu a ENA armazenável do REE Paraná Médio ao longo de 2023?
+  - Qual é a participação percentual de cada reservatório na ENA total do subsistema Sul?
+  - Quais reservatórios fio d'água tiveram ENA armazenável negativa em 2022?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ena_reservatorio_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2021-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - afluente
+    - afluencia
+    - ena
+    family: ena
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ena_data
+      spatial: usina
+      entity: reservatorio
+      one_row_per:
+      - ena_data
+      - id_subsistema
+      - cod_resplanejamento
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: nom_reservatorio
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ena_bruta_res_mwmed
+      label: ENA Bruta por Reservatorio
+      columns:
+      - ena_bruta_res_mwmed
+      expression: ena_bruta_res_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_bruta_res_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_bruta_res_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_bruta_res_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_res_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_bruta_res_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_res_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ENA bruta
+      - energia natural afluente bruta
+      - ENA bruta em MWmed
+      - energia afluente bruta
+    - id: ena_bruta_res_percentualmlt
+      label: ENA Bruta Percentual MLT
+      columns:
+      - ena_bruta_res_percentualmlt
+      expression: ena_bruta_res_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ENA bruta percentual MLT
+      - ENA bruta % MLT
+      - percentual da MLT bruta
+      - ENA bruta relativa
+      - desvio ENA bruta MLT
+    - id: ena_armazenavel_res_mwmed
+      label: ENA Armazenavel por Reservatorio
+      columns:
+      - ena_armazenavel_res_mwmed
+      expression: ena_armazenavel_res_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ENA armazenavel
+      - energia armazenavel
+      - ENA armazenavel em MWmed
+      - energia natural armazenavel
+      - afluencia armazenavel
+    - id: ena_armazenavel_res_percentualmlt
+      label: ENA Armazenavel Percentual MLT
+      columns:
+      - ena_armazenavel_res_percentualmlt
+      expression: ena_armazenavel_res_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ENA armazenavel percentual MLT
+      - ENA armazenavel % MLT
+      - percentual da MLT armazenavel
+      - ENA armazenavel relativa
+      - desvio ENA armazenavel MLT
+    - id: ena_queda_bruta
+      label: Queda Bruta do Reservatorio
+      columns:
+      - ena_queda_bruta
+      expression: TRY_CAST(ena_queda_bruta AS DOUBLE)
+      quantity_kind: level
+      unit_native: m
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_queda_bruta AS DOUBLE))
+          unit: m
+        maximum:
+          sql: MAX(TRY_CAST(ena_queda_bruta AS DOUBLE))
+          unit: m
+        minimum:
+          sql: MIN(TRY_CAST(ena_queda_bruta AS DOUBLE))
+          unit: m
+        time_series:
+          sql: AVG(TRY_CAST(ena_queda_bruta AS DOUBLE))
+          unit: m
+        comparison:
+          sql: AVG(TRY_CAST(ena_queda_bruta AS DOUBLE))
+          unit: m
+      interval_hours: 24.0
+      aliases:
+      - queda bruta
+      - queda hidraulica
+      - altura de queda
+      - queda hidraulica bruta
+      - diferenca nivel montante jusante
+    - id: mlt_ena
+      label: Media de Longo Termo da ENA
+      columns:
+      - mlt_ena
+      expression: TRY_CAST(mlt_ena AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(mlt_ena AS DOUBLE))
+          unit: MWmed
+        average:
+          sql: AVG(TRY_CAST(mlt_ena AS DOUBLE))
+          unit: MWmed
+        maximum:
+          sql: MAX(TRY_CAST(mlt_ena AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: SUM(TRY_CAST(mlt_ena AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM(TRY_CAST(mlt_ena AS DOUBLE))
+          unit: MWmed
+        comparison:
+          sql: SUM(TRY_CAST(mlt_ena AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - MLT
+      - media de longo termo
+      - MLT da ENA
+      - media historica ENA
+      - referencia historica afluencia
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      tip_reservatorio:
+        Fio dagua:
+          aliases:
+          - fio dagua
+          - fio d agua
+          - a fio dagua
+          - run of river
+          filter: tip_reservatorio = 'Fio dagua'
+        Reservatorio com Usina:
+          aliases:
+          - reservatorio com usina
+          - acumulacao
+          - reservatorio de acumulacao
+          filter: tip_reservatorio = 'Reservatório com Usina'
+      nom_bacia:
+        AMAZONAS:
+          aliases:
+          - amazonas
+          - bacia do amazonas
+          filter: nom_bacia = 'AMAZONAS'
+        ARAGUARI:
+          aliases:
+          - araguari
+          filter: nom_bacia = 'ARAGUARI'
+        CAPIVARI:
+          aliases:
+          - capivari
+          filter: nom_bacia = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - doce
+          - rio doce
+          filter: nom_bacia = 'DOCE'
+        GRANDE:
+          aliases:
+          - grande
+          - rio grande
+          filter: nom_bacia = 'GRANDE'
+        IGUACU:
+          aliases:
+          - iguacu
+          - rio iguacu
+          filter: nom_bacia = 'IGUACU'
+        ITABAPOANA:
+          aliases:
+          - itabapoana
+          filter: nom_bacia = 'ITABAPOANA'
+        ITAJAI:
+          aliases:
+          - itajai
+          filter: nom_bacia = 'ITAJAI'
+        JACUI:
+          aliases:
+          - jacui
+          filter: nom_bacia = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - jequitinhonha
+          filter: nom_bacia = 'JEQUITINHONHA'
+        MUCURI:
+          aliases:
+          - mucuri
+          filter: nom_bacia = 'MUCURI'
+        PARAGUACU:
+          aliases:
+          - paraguacu
+          filter: nom_bacia = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - paraguai
+          filter: nom_bacia = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - paraiba do sul
+          filter: nom_bacia = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - parana
+          - rio parana
+          filter: nom_bacia = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - paranaiba
+          filter: nom_bacia = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          filter: nom_bacia = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - parnaiba
+          filter: nom_bacia = 'PARNAIBA'
+        SANTA MARIA VIT:
+          aliases:
+          - santa maria vitoria
+          - santa maria vit
+          filter: nom_bacia = 'SANTA MARIA VIT'
+        SAO FRANCISCO:
+          aliases:
+          - sao francisco
+          - rio sao francisco
+          filter: nom_bacia = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - tiete
+          - rio tiete
+          filter: nom_bacia = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - tocantins
+          - rio tocantins
+          filter: nom_bacia = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - uruguai
+          - rio uruguai
+          filter: nom_bacia = 'URUGUAI'
+      nom_ree:
+        BELO MONTE:
+          aliases:
+          - belo monte
+          - REE belo monte
+          filter: nom_ree = 'BELO MONTE'
+        IGUACU:
+          aliases:
+          - iguacu
+          - REE iguacu
+          filter: nom_ree = 'IGUACU'
+        ITAIPU:
+          aliases:
+          - itaipu
+          - REE itaipu
+          filter: nom_ree = 'ITAIPU'
+        MADEIRA:
+          aliases:
+          - madeira
+          - REE madeira
+          filter: nom_ree = 'MADEIRA'
+        MANAUS-AMAPA:
+          aliases:
+          - manaus amapa
+          - manaus-amapa
+          filter: nom_ree = 'MANAUS-AMAPA'
+        NORDESTE:
+          aliases:
+          - nordeste
+          - REE nordeste
+          filter: nom_ree = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          - REE norte
+          filter: nom_ree = 'NORTE'
+        PARANA:
+          aliases:
+          - parana
+          - REE parana
+          filter: nom_ree = 'PARANA'
+        PARANAPANEMA:
+          aliases:
+          - paranapanema
+          - REE paranapanema
+          filter: nom_ree = 'PARANAPANEMA'
+        SUDESTE:
+          aliases:
+          - sudeste
+          - REE sudeste
+          filter: nom_ree = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          - REE sul
+          filter: nom_ree = 'SUL'
+        TELES PIRES:
+          aliases:
+          - teles pires
+          - REE teles pires
+          filter: nom_ree = 'TELES PIRES'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - nordeste
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - norte
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - sudeste
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - sul
+          filter: nom_subsistema = 'SUL'
+    sql_patterns:
+      ena_bruta_res_mwmed_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes,\n  id_subsistema,\n\
+          \  SUM((TRY_CAST(ena_bruta_res_mwmed AS DOUBLE)) * 24.0) / 1000 AS ena_bruta_gwh\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(ena_data AS DATE)) = {year}\n  AND ena_bruta_res_mwmed IS NOT\
+          \ NULL\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - ena_bruta_res_mwmed
+          grain: month
+        validated_params:
+          year: '2021'
+      ena_percentual_mlt_por_reservatorio:
+        template: "SELECT nom_reservatorio,\n  AVG(TRY_CAST(ena_bruta_res_percentualmlt AS DOUBLE)) AS\
+          \ ena_bruta_pct_mlt_media,\n  AVG(TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE)) AS\
+          \ ena_arm_pct_mlt_media\nFROM {source}\nWHERE TRY_CAST(ena_data AS DATE) BETWEEN '{data_inicio}'\
+          \ AND '{data_fim}'\n  AND ena_bruta_res_percentualmlt IS NOT NULL\nGROUP BY 1\nORDER BY 2 ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - ena_bruta_res_percentualmlt
+          - ena_armazenavel_res_percentualmlt
+          grain: period
+        validated_params:
+          data_inicio: '2021-01-01'
+          data_fim: '2022-10-27'
+      ena_armazenavel_fio_dagua:
+        template: "SELECT nom_reservatorio,\n  TRY_CAST(ena_data AS DATE) AS data,\n  TRY_CAST(ena_armazenavel_res_mwmed\
+          \ AS DOUBLE) AS ena_armazenavel_mwmed\nFROM {source}\nWHERE tip_reservatorio = 'Fio dagua'\n\
+          \  AND TRY_CAST(ena_data AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\n  AND ena_armazenavel_res_mwmed\
+          \ IS NOT NULL\nORDER BY 1, 2"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ena_armazenavel_res_mwmed
+          grain: day
+        validated_params:
+          data_inicio: '2021-01-01'
+          data_fim: '2022-10-27'
+      mlt_referencia_por_reservatorio:
+        template: "SELECT nom_reservatorio, nom_ree, id_subsistema,\n  AVG(TRY_CAST(mlt_ena AS DOUBLE))\
+          \ AS mlt_mwmed\nFROM {source}\nWHERE mlt_ena IS NOT NULL\nGROUP BY 1, 2, 3\nORDER BY 4 DESC"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - mlt_ena
+          grain: static
+- property: fewShotQueries
+  value:
+  - question: Qual foi a ENA bruta diária do reservatório de Furnas em 2023?
+    sql: SELECT TRY_CAST(ena_data AS DATE) AS data, nom_reservatorio, ena_bruta_res_mwmed, ena_bruta_res_percentualmlt
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_reservatorio_di/*.parquet') WHERE nom_reservatorio
+      = 'FURNAS' AND TRY_CAST(ena_data AS DATE) BETWEEN DATE '2023-01-01' AND DATE '2023-12-31' ORDER
+      BY data
+  - question: Quais reservatórios estiveram com ENA armazenável abaixo de 30% da MLT nos últimos 30 dias?
+    sql: SELECT nom_reservatorio, id_subsistema, nom_bacia, TRY_CAST(ena_data AS DATE) AS data, TRY_CAST(ena_armazenavel_res_percentualmlt
+      AS DOUBLE) AS ena_armazenavel_res_percentualmlt FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_reservatorio_di/*.parquet',
+      union_by_name=true) WHERE TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE) < 30.0 AND TRY_CAST(ena_armazenavel_res_percentualmlt
+      AS DOUBLE) IS NOT NULL AND TRY_CAST(ena_data AS DATE) >= (CURRENT_DATE - INTERVAL '30' DAY) ORDER
+      BY TRY_CAST(ena_armazenavel_res_percentualmlt AS DOUBLE) ASC LIMIT 100
+  - question: Qual foi a ENA bruta média mensal por subsistema em 2023, somando todos os reservatórios?
+    sql: SELECT id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes,
+      SUM(ena_bruta_res_mwmed) AS ena_bruta_total_mwmed, AVG(ena_bruta_res_percentualmlt) AS ena_bruta_media_pct_mlt
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_reservatorio_di/*.parquet') WHERE TRY_CAST(ena_data
+      AS DATE) BETWEEN DATE '2023-01-01' AND DATE '2023-12-31' AND ena_bruta_res_mwmed IS NOT NULL GROUP
+      BY id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) ORDER BY id_subsistema,
+      mes
+- property: license
+  value: CC-BY

@@ -1,0 +1,637 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ena-diario-por-bacia
+name: ena-diario-por-bacia
+tenant: ons
+tags:
+- ENA
+- ENA bruta bacia
+- ENA diária bacia
+- ENA diária por bacia
+- ENA por bacia
+- MLT
+- MWmed
+- ONS
+- SIN
+- afluência
+- afluência diária por bacia
+- bacia hidro energética
+- energia natural afluente
+- energia natural afluente bacia
+- hidrologia
+- média de longo termo
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ena_bacia_di/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer a geradores, comercializadores de energia, planejadores do setor elétrico e pesquisadores
+    os valores diários de ENA por bacia hidro energética, permitindo o monitoramento da disponibilidade
+    hídrica para geração, a avaliação de risco hidrológico, a projeção do Custo Marginal de Operação (CMO)
+    e o suporte a decisões de despacho hidrotérmico e planejamento energético de curto, médio e longo
+    prazo no SIN.
+  limitations: Coluna armazenada como VARCHAR no schema DuckDB em vez de DATE. Valores de ENA Bruta em
+    MWmed podem ocasionalmente ser negativos ou próximos de zero em períodos de seca extrema ou inconsistências
+    no processo de consistência recorrente do ONS. Valores de ENA Armazenável em MWmed podem ser negativos
+    quando as vazões vertidas superam as vazões naturais afluentes.
+  usage: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA) com granularidade
+    diária e desagregação por bacia hidro energética, incluindo análises de afluência bruta ou armazenável
+    em MWmed ou percentual da MLT.
+domain: hidrologia
+schema:
+- name: ena_diario_por_bacia
+  physicalType: parquet
+  logicalType: object
+  physicalName: ena_diario_por_bacia
+  properties:
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da Bacia Hidro Energética do Sistema Interligado Nacional à qual os valores de
+      ENA se referem. Identifica unicamente a bacia dentro do SIN e compõe a chave primária do dataset
+      junto com ena_data.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrográfica
+      - bacia hidro energética
+      - nome da bacia
+      - bacia hidrológica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - ARAGUARI
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - ITABAPOANA
+      - ITAJAI
+      - JACUI
+      - JEQUITINHONHA
+      - MUCURI
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SANTA MARIA VIT
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: ena_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição de ENA, armazenada como VARCHAR no formato YYYY-MM-DD.
+      Representa o dia ao qual os valores de energia natural afluente se referem. Requer conversão explícita
+      para DATE em filtros temporais e ordenações cronológicas.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data de referência
+      - data da ENA
+      - dia
+      - data de medição
+    - property: semanticType
+      value: DIMENSION
+  - name: ena_bruta_bacia_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Bruta da bacia em MWmed, calculada pelo produto das vazões
+      naturais aos reservatórios com as produtividades a 65% dos volumes úteis. Representa a energia produzível
+      total pela bacia sem desconto de vertimentos.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA bruta
+      - energia natural afluente bruta
+      - ENA bruta em MWmed
+      - afluência bruta
+      - energia bruta da bacia
+    - property: unit
+      value: MWmed
+  - name: ena_bruta_bacia_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Bruta da bacia expressa como percentual da Média de Longo Termo
+      (MLT). Indica o nível de afluência bruta em relação à média histórica de longo prazo da bacia.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA bruta percentual MLT
+      - ENA bruta % MLT
+      - percentual da média de longo termo bruta
+      - afluência bruta em relação à MLT
+      - ENA bruta normalizada
+    - property: unit
+      value: '% MLT'
+  - name: ena_armazenavel_bacia_mwmed
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Armazenável da bacia em MWmed, calculada considerando as vazões
+      naturais descontadas das vazões vertidas nos reservatórios. Representa a parcela da afluência que
+      pode ser efetivamente armazenada para geração futura.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA armazenável
+      - energia natural afluente armazenável
+      - ENA armazenável em MWmed
+      - afluência armazenável
+      - energia armazenável da bacia
+    - property: unit
+      value: MWmed
+  - name: ena_armazenavel_bacia_percentualmlt
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Energia Natural Afluente Armazenável da bacia expressa como percentual da Média de Longo
+      Termo (MLT). Indica o nível de afluência armazenável em relação à média histórica de longo prazo
+      da bacia.
+
+      '
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE)
+    - property: aliases
+      value:
+      - ENA armazenável percentual MLT
+      - ENA armazenável % MLT
+      - percentual da média de longo termo armazenável
+      - afluência armazenável em relação à MLT
+      - ENA armazenável normalizada
+    - property: unit
+      value: '% MLT'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ena-diario-por-bacia
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanta chuva chegou por bacia
+  - afluencia por bacia
+  - ena da bacia
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver Energia Natural Afluente (ENA) com granularidade
+    diária e desagregação por bacia hidro energética, incluindo análises de afluência bruta ou armazenável
+    em MWmed ou percentual da MLT. Também recuperar quando o analista precisar monitorar condições hidrológicas
+    diárias de bacias específicas do SIN, avaliar risco de déficit hídrico por bacia ou comparar afluência
+    atual com a média histórica de longo prazo.
+- property: agentInstructions
+  value: |
+    - [ena_data] A coluna ena_data é armazenada como VARCHAR no schema físico DuckDB, embora represente datas no formato YYYY-MM-DD. Operações de filtro temporal, ordenação cronológica e joins com outros datasets temporais requerem conversão explícita. Comparações diretas como VARCHAR podem produzir resultados incorretos.
+
+    - [ena_armazenavel_bacia_mwmed] A ENA Armazenável pode assumir valores negativos em situações de vertimento elevado nos reservatórios, quando as vazões vertidas superam as vazões naturais afluentes. Embora fisicamente possível, valores muito negativos podem indicar inconsistências no processo de consistência recorrente do ONS.
+
+    - [ena_bruta_bacia_percentualmlt] Valores percentuais de ENA Bruta em relação à MLT podem apresentar outliers extremos em eventos hidrológicos excepcionais (cheias ou secas severas). Valores acima de 500% ou abaixo de 5% da MLT merecem verificação, pois podem indicar erros de consistência ou eventos extremos que impactam modelos de despacho.
+
+    - [ena_armazenavel_bacia_percentualmlt] Valores percentuais de ENA Armazenável em relação à MLT podem ser mais extremos que os da ENA Bruta, pois o desconto do vertimento amplifica desvios. Valores negativos expressivos (abaixo de -50% da MLT) ou acima de 600% indicam condições hidrológicas excepcionais ou possíveis inconsistências no processo de cálculo do ONS.
+
+    - [nom_bacia] A chave primária natural do dataset é composta por (nom_bacia, ena_data). Dado que os dados passam por processo de consistência recorrente e podem ser atualizados após publicação, é possível que existam registros duplicados para a mesma bacia e data em versões intermediárias dos arquivos parquet, especialmente em datas recentes próximas à última modificação S3.
+
+    - [tipos] As colunas `ena_armazenavel_bacia_mwmed`, `ena_armazenavel_bacia_percentualmlt`, `ena_bruta_bacia_mwmed`, `ena_bruta_bacia_percentualmlt` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi a ENA bruta da bacia do Paraná nos últimos 30 dias?
+  - Quais bacias estão com ENA abaixo de 50% da MLT hoje?
+  - Como evoluiu a ENA armazenável da bacia do São Francisco em 2024?
+  - Qual a média histórica de ENA bruta por bacia no período de chuvas (novembro a março)?
+  - Quais foram os 10 dias com menor ENA armazenável no SIN considerando todas as bacias?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_bacia
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ena_bacia_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2021-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - afluente
+    - afluencia
+    - ena
+    family: ena
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ena_data
+      spatial: por_bacia
+      entity: dataset_row
+      one_row_per:
+      - ena_data
+      - nom_bacia
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ena_bruta_bacia_mwmed
+      label: Energia Natural Afluente Bruta por Bacia
+      columns:
+      - ena_bruta_bacia_mwmed
+      expression: ena_bruta_bacia_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ENA bruta
+      - energia natural afluente bruta
+      - ENA bruta em MWmed
+      - afluencia bruta
+      - energia bruta da bacia
+    - id: ena_bruta_bacia_percentualmlt
+      label: ENA Bruta por Bacia (% MLT)
+      columns:
+      - ena_bruta_bacia_percentualmlt
+      expression: ena_bruta_bacia_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ENA bruta percentual MLT
+      - ENA bruta % MLT
+      - percentual MLT bruta
+      - afluencia bruta vs MLT
+      - ENA bruta normalizada
+    - id: ena_armazenavel_bacia_mwmed
+      label: ENA Armazenavel por Bacia (MWmed)
+      columns:
+      - ena_armazenavel_bacia_mwmed
+      expression: ena_armazenavel_bacia_mwmed
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - ENA armazenavel
+      - energia natural afluente armazenavel
+      - ENA armazenavel em MWmed
+      - afluencia armazenavel
+      - energia armazenavel da bacia
+    - id: ena_armazenavel_bacia_percentualmlt
+      label: ENA Armazenavel por Bacia (% MLT)
+      columns:
+      - ena_armazenavel_bacia_percentualmlt
+      expression: ena_armazenavel_bacia_percentualmlt
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        maximum:
+          sql: MAX(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        minimum:
+          sql: MIN(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        time_series:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        ranking:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+        comparison:
+          sql: AVG(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE))
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - ENA armazenavel percentual MLT
+      - ENA armazenavel % MLT
+      - percentual MLT armazenavel
+      - afluencia armazenavel vs MLT
+      - ENA armazenavel normalizada
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      nom_bacia:
+        AMAZONAS:
+          aliases:
+          - AMAZONAS
+          - Amazonas
+          - bacia do Amazonas
+          filter: nom_bacia = 'AMAZONAS'
+        ARAGUARI:
+          aliases:
+          - ARAGUARI
+          - Araguari
+          - bacia do Araguari
+          filter: nom_bacia = 'ARAGUARI'
+        CAPIVARI:
+          aliases:
+          - CAPIVARI
+          - Capivari
+          - bacia do Capivari
+          filter: nom_bacia = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - DOCE
+          - Doce
+          - bacia do Doce
+          - rio Doce
+          filter: nom_bacia = 'DOCE'
+        GRANDE:
+          aliases:
+          - GRANDE
+          - Grande
+          - bacia do Grande
+          - rio Grande
+          filter: nom_bacia = 'GRANDE'
+        IGUACU:
+          aliases:
+          - IGUACU
+          - Iguacu
+          - Iguacu
+          - bacia do Iguacu
+          filter: nom_bacia = 'IGUACU'
+        ITABAPOANA:
+          aliases:
+          - ITABAPOANA
+          - Itabapoana
+          - bacia do Itabapoana
+          filter: nom_bacia = 'ITABAPOANA'
+        ITAJAI:
+          aliases:
+          - ITAJAI
+          - Itajai
+          - bacia do Itajai
+          filter: nom_bacia = 'ITAJAI'
+        JACUI:
+          aliases:
+          - JACUI
+          - Jacui
+          - bacia do Jacui
+          filter: nom_bacia = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - JEQUITINHONHA
+          - Jequitinhonha
+          - bacia do Jequitinhonha
+          filter: nom_bacia = 'JEQUITINHONHA'
+        MUCURI:
+          aliases:
+          - MUCURI
+          - Mucuri
+          - bacia do Mucuri
+          filter: nom_bacia = 'MUCURI'
+        PARAGUACU:
+          aliases:
+          - PARAGUACU
+          - Paraguacu
+          - bacia do Paraguacu
+          filter: nom_bacia = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - PARAGUAI
+          - Paraguai
+          - bacia do Paraguai
+          filter: nom_bacia = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - PARAIBA DO SUL
+          - Paraiba do Sul
+          - bacia do Paraiba do Sul
+          filter: nom_bacia = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - PARANA
+          - Parana
+          - bacia do Parana
+          - rio Parana
+          filter: nom_bacia = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - PARANAIBA
+          - Paranaiba
+          - bacia do Paranaiba
+          filter: nom_bacia = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - PARANAPANEMA
+          - Paranapanema
+          - bacia do Paranapanema
+          filter: nom_bacia = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - PARNAIBA
+          - Parnaiba
+          - bacia do Parnaiba
+          filter: nom_bacia = 'PARNAIBA'
+        SANTA MARIA VIT:
+          aliases:
+          - SANTA MARIA VIT
+          - Santa Maria Vitoria
+          - bacia Santa Maria
+          filter: nom_bacia = 'SANTA MARIA VIT'
+        SAO FRANCISCO:
+          aliases:
+          - SAO FRANCISCO
+          - Sao Francisco
+          - bacia do Sao Francisco
+          - rio Sao Francisco
+          - Velho Chico
+          filter: nom_bacia = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - TIETE
+          - Tiete
+          - bacia do Tiete
+          filter: nom_bacia = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - TOCANTINS
+          - Tocantins
+          - bacia do Tocantins
+          filter: nom_bacia = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - URUGUAI
+          - Uruguai
+          - bacia do Uruguai
+          filter: nom_bacia = 'URUGUAI'
+    sql_patterns:
+      ena_bruta_bacia_mwmed_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes,\n  SUM((TRY_CAST(ena_bruta_bacia_mwmed\
+          \ AS DOUBLE)) * 24.0) / 1000 AS valor_gwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(ena_data\
+          \ AS DATE)) = {year}\n  AND nom_bacia = '{bacia}'\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - ena_bruta_bacia_mwmed
+          grain: month
+        validated_params:
+          year: '2024'
+          bacia: URUGUAI
+      ena_abaixo_limiar_mlt:
+        template: "SELECT nom_bacia, TRY_CAST(ena_data AS DATE) AS data,\n  TRY_CAST(ena_armazenavel_bacia_percentualmlt\
+          \ AS DOUBLE) AS pct_mlt\nFROM {source}\nWHERE TRY_CAST(ena_data AS DATE) = (SELECT MAX(TRY_CAST(ena_data\
+          \ AS DATE)) FROM {source})\n  AND TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE) <\
+          \ {limiar}\nORDER BY pct_mlt ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - minimum
+          metrics:
+          - ena_armazenavel_bacia_percentualmlt
+          grain: day
+        validated_params:
+          limiar: '1756.67163086'
+      serie_temporal_bacia:
+        template: "SELECT TRY_CAST(ena_data AS DATE) AS data,\n  AVG(TRY_CAST(ena_armazenavel_bacia_mwmed\
+          \ AS DOUBLE)) AS ena_armazenavel_mwmed,\n  AVG(TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE)) AS\
+          \ ena_bruta_mwmed\nFROM {source}\nWHERE nom_bacia = '{bacia}'\n  AND TRY_CAST(ena_data AS DATE)\
+          \ BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ena_armazenavel_bacia_mwmed
+          - ena_bruta_bacia_mwmed
+          grain: day
+        validated_params:
+          bacia: URUGUAI
+          data_inicio: '2021-01-01'
+          data_fim: '2026-07-07'
+- property: fewShotQueries
+  value:
+  - question: Quais bacias apresentaram ENA armazenável abaixo de 50% da MLT com maior frequência nos
+      últimos 12 meses?
+    sql: SELECT nom_bacia, COUNT(*) AS dias_abaixo_50pct_mlt, ROUND(AVG(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE)),
+      2) AS media_percentual_mlt, ROUND(MIN(ena_armazenavel_bacia_percentualmlt), 2) AS minimo_percentual_mlt
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_bacia_di/*.parquet') WHERE TRY_CAST(ena_data
+      AS DATE) >= (DATE '2026-06-13' - INTERVAL '365 days') AND ena_armazenavel_bacia_percentualmlt <
+      50 GROUP BY nom_bacia ORDER BY dias_abaixo_50pct_mlt DESC LIMIT 20
+  - question: Qual foi a média mensal de ENA bruta em MWmed para cada bacia em 2024?
+    sql: SELECT nom_bacia, DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) AS mes_referencia, ROUND(AVG(TRY_CAST(ena_bruta_bacia_mwmed AS DOUBLE)),
+      2) AS media_ena_bruta_mwmed, ROUND(AVG(ena_bruta_bacia_percentualmlt), 2) AS media_ena_bruta_pct_mlt,
+      COUNT(*) AS dias_com_dado FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_bacia_di/*.parquet')
+      WHERE TRY_CAST(ena_data AS DATE) BETWEEN DATE '2024-01-01' AND DATE '2024-12-31' GROUP BY nom_bacia,
+      DATE_TRUNC('month', TRY_CAST(ena_data AS DATE)) ORDER BY nom_bacia, mes_referencia
+  - question: Em quais datas e bacias ocorreram eventos de ENA armazenável acima de 300% da MLT?
+    sql: SELECT nom_bacia, ena_data, ROUND(TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE), 2)
+      AS ena_arm_pct_mlt, ROUND(TRY_CAST(ena_armazenavel_bacia_mwmed AS DOUBLE), 2) AS ena_arm_mwmed,
+      ROUND(TRY_CAST(ena_bruta_bacia_percentualmlt AS DOUBLE), 2) AS ena_bruta_pct_mlt FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ena_bacia_di/*.parquet',
+      union_by_name=true) WHERE TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE) > 300 ORDER BY
+      TRY_CAST(ena_armazenavel_bacia_percentualmlt AS DOUBLE) DESC LIMIT 100
+- property: license
+  value: CC-BY

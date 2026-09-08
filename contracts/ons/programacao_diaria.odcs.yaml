@@ -1,0 +1,1408 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:programacao_diaria
+name: programacao_diaria
+tenant: ons
+tags:
+- ONS
+- PD
+- SIN
+- despacho
+- despacho programado
+- geracao
+- geração programada semi-horária
+- inflexibilidade
+- ordem-de-merito
+- programacao-diaria
+- programação diária
+- programação diária geração
+- programação operativa diária
+- semi-horario
+- subsistema
+- usina
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/programacao_diaria/*.parquet
+  format: parquet
+description:
+  purpose: Suportar operadores do ONS, agentes de geração e analistas de mercado no acompanhamento, auditoria
+    e análise da programação operativa diária do SIN, permitindo decisões de despacho, verificação de
+    ordem de mérito, identificação de inflexibilidades, análise de equilíbrio carga-geração por subsistema
+    e avaliação de restrições operativas por usina e patamar semi-horário.
+  limitations: Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8).
+    Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização. Coluna armazenada como
+    VARCHAR no Parquet devido a formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver valores programados de geração, disponibilidade
+    ou despacho de usinas do SIN em base semi-horária (patamares de 30 minutos).
+domain: geração
+schema:
+- name: programacao_diaria
+  physicalType: parquet
+  logicalType: object
+  physicalName: programacao_diaria
+  properties:
+  - name: din_programacaodia
+    physicalType: VARCHAR
+    logicalType: timestamp
+    description: 'Data e hora de referência do dia de programação. Representa o dia para o qual a programação
+      diária foi elaborada. Combinada com num_patamar, identifica univocamente o intervalo semi-horário
+      programado.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: castExpression
+      value: TRY_CAST(din_programacaodia AS TIMESTAMP)
+    - property: aliases
+      value:
+      - data de programação
+      - dia de programação
+      - data do despacho
+      - din_programacao
+    - property: semanticType
+      value: TIMESTAMP
+  - name: num_patamar
+    physicalType: BIGINT
+    logicalType: integer
+    description: 'Número do patamar semi-horário dentro do dia de programação. Varia de 1 a 48, onde 1
+      representa o intervalo 00:00–00:30 e 48 representa o intervalo 23:30–24:00. Cada patamar corresponde
+      a um bloco de 30 minutos.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - patamar
+      - intervalo semi-horário
+      - bloco de 30 minutos
+      - half-hour period
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
+      - 36
+      - 37
+      - 38
+      - 39
+      - 40
+      - 41
+      - 42
+      - 43
+      - 44
+      - 45
+      - 46
+      - 47
+      - 48
+  - name: cod_exibicaousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código de exibição da usina, utilizado como identificador textual da usina no contexto
+      da programação diária do ONS. Equivale ao código de cadastro da usina para fins de exibição em relatórios
+      e sistemas operativos.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da usina
+      - cod_usina
+      - código de exibição
+      - sigla da usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo da usina geradora conforme cadastro do ONS. Utilizado para identificação
+      legível da usina na programação diária.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome da usina
+      - usina
+      - nome do gerador
+    - property: semanticType
+      value: DIMENSION
+  - name: tip_geracao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo de geração da usina, indicando a fonte energética primária utilizada para geração
+      de energia elétrica (ex: hidráulica, térmica, eólica, solar, nuclear, etc.).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de geração
+      - fonte de geração
+      - tipo de usina
+      - fonte energética
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - EÓLICA
+      - HIDRÁULICA
+      - SOLAR
+      - TÉRMICA
+  - name: nom_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome da modalidade de operação da usina no contexto da programação diária. Indica como
+      a usina está sendo despachada ou operada (ex: ordem de mérito, inflexível, fio d''água). Possui
+      poucos nulos, aceitável para usinas sem modalidade definida no período.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade de operação
+      - modalidade operativa
+      - modo de despacho
+      - modalidade
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - TIPO I
+      - TIPO II-A
+      - TIPO II-B
+      - TIPO II-C
+      - TIPO III
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico (submercado) ao qual a usina pertence. Valores
+      típicos: SE (Sudeste/Centro-Oeste), S (Sul), NE (Nordeste), N (Norte).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - submercado
+      - id_submercado
+      - cod_subsistema
+      - região elétrica
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico (submercado) ao qual a usina pertence. Complementa
+      id_subsistema com descrição legível.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome do subsistema
+      - nome do submercado
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - SUBSISTEMA NORDESTE
+      - SUBSISTEMA NORTE
+      - SUBSISTEMA SUDESTE
+      - SUBSISTEMA SUL
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Sigla do estado brasileiro onde a usina está localizada. Possui nulos em parte das linhas, esperado para usinas sem localização estadual definida no cadastro ONS (ex: usinas offshore,
+      interligações internacionais ou cadastros incompletos).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - sigla do estado
+      - cod_estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - AR
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - PY
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+      - UY
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do estado brasileiro onde a usina está localizada. Possui nulos em parte das linhas, alinhado com id_estado — ambos nulos para as mesmas usinas sem localização estadual
+      definida.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome do estado
+      - estado
+      - localização estadual
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DADOS REF. ARGENTINA
+      - DADOS REF. PARAGUAI
+      - DADOS REF. URUGUAI
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+  - name: val_geracaoprogramada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração programada da usina para o patamar semi-horário, em MW. Representa
+      a potência ativa programada no fechamento da programação diária. Armazenado como VARCHAR no Parquet
+      devido ao formato de serialização; requer TRY_CAST para uso analítico.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração programada
+      - geração
+      - potência programada
+      - despacho programado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaoprogramada AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_disponibilidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de disponibilidade declarada da usina para o patamar semi-horário, em MW. Representa
+      a capacidade máxima disponível para geração considerada na programação. Armazenado como VARCHAR
+      no Parquet devido ao formato de serialização.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade
+      - capacidade disponível
+      - potência disponível
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_disponibilidade AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_ordemmerito
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração na ordem de mérito para o patamar semi-horário, em MW. Representa a
+      parcela de geração despachada por critério de ordem de mérito econômico no processo de programação
+      diária. Armazenado como VARCHAR no Parquet devido ao formato de serialização.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - ordem de mérito
+      - despacho por mérito
+      - val_ordem_merito
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_ordemmerito AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_inflexibilidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração inflexível da usina para o patamar semi-horário, em MW. Representa
+      a parcela de geração que não pode ser reduzida abaixo deste patamar por restrições técnicas, contratuais
+      ou operativas. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - inflexibilidade
+      - geração inflexível
+      - mínimo técnico
+      - val_inflexivel
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_inflexibilidade AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - '0.00'
+      - '10.00'
+      - '100.00'
+      - '110.00'
+      - '124.00'
+      - '1350.00'
+      - '139.00'
+      - '15.00'
+      - '17.00'
+      - '170.00'
+      - '18.00'
+      - '180.00'
+      - '20.00'
+      - '219.00'
+      - '24.00'
+      - '26.00'
+      - '264.00'
+      - '270.00'
+      - '285.00'
+      - '3.00'
+      - '30.00'
+      - '300.00'
+      - '31.00'
+      - '32.00'
+      - '320.00'
+      - '328.00'
+      - '33.00'
+      - '365.00'
+      - '4.00'
+      - '40.00'
+      - '45.00'
+      - '490.00'
+      - '5.00'
+      - '50.00'
+      - '55.00'
+      - '56.00'
+      - '57.00'
+      - '6.00'
+      - '60.00'
+      - '62.00'
+      - '63.00'
+      - '64.00'
+      - '640.00'
+      - '70.00'
+      - '72.00'
+      - '75.00'
+      - '8.00'
+      - '80.00'
+      - '9.00'
+  - name: val_uc
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração por Usina Controlada (UC) para o patamar semi-horário, em MW. Representa
+      a parcela de geração associada ao mecanismo de controle de usinas no despacho centralizado do ONS.
+      Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - UC
+      - usina controlada
+      - geração UC
+      - val_usina_controlada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_uc AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - '0.00'
+      - '1.00'
+      - '10.00'
+      - '104.00'
+      - '124.00'
+      - '130.00'
+      - '1338.00'
+      - '14.00'
+      - '180.00'
+      - '20.00'
+      - '220.00'
+      - '235.00'
+      - '240.00'
+      - '27.00'
+      - '280.00'
+      - '281.00'
+      - '290.00'
+      - '30.00'
+      - '360.00'
+      - '38.00'
+      - '441.00'
+      - '45.00'
+      - '465.00'
+      - '480.00'
+      - '5.00'
+      - '50.00'
+      - '54.00'
+      - '540.00'
+      - '60.00'
+      - '8.00'
+      - '80.00'
+      - '9.00'
+      - '90.00'
+      - '95.00'
+  - name: val_razaoeletrica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor da razão elétrica da usina para o patamar semi-horário. Representa a relação entre
+      geração elétrica e capacidade instalada ou outro indicador de eficiência elétrica utilizado na programação
+      diária. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - razão elétrica
+      - fator elétrico
+      - val_razao_eletrica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_razaoeletrica AS DOUBLE)
+  - name: val_geracaoenergetica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração energética da usina para o patamar semi-horário, em MWh. Representa
+      a energia gerada no intervalo de 30 minutos, derivada da potência programada multiplicada pela duração
+      do patamar. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração energética
+      - energia gerada
+      - energia programada
+      - val_geracao_energetica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaoenergetica AS DOUBLE)
+    - property: unit
+      value: MWh
+    - property: enum
+      value:
+      - '0.00'
+  - name: val_gesubgsub
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de geração de subsistema para subsistema (GE_SUB→G_SUB) para o patamar semi-horário,
+      em MW. Representa intercâmbios ou transferências de geração entre subsistemas elétricos considerados
+      na programação diária. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - GE SUB G SUB
+      - geração subsistema a subsistema
+      - intercâmbio subsistema
+      - val_gesub_gsub
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_gesubgsub AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - '0.00'
+      - '140.00'
+      - '15.00'
+      - '25.00'
+      - '35.00'
+      - '45.00'
+      - '5.00'
+      - '50.00'
+      - '60.00'
+      - '70.00'
+      - '80.00'
+  - name: val_exportacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de exportação de energia da usina para o patamar semi-horário, em MW. Representa
+      a parcela de geração destinada à exportação (ex: para países vizinhos ou outros sistemas interligados)
+      considerada na programação diária. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - exportação
+      - geração exportada
+      - exportação de energia
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_exportacao AS DOUBLE)
+    - property: unit
+      value: MW
+    examples:
+    - '0.00'
+    - '132.00'
+    - '134.00'
+    - '140.00'
+    - '150.00'
+    - '174.00'
+    - '195.00'
+    - '210.00'
+    - '220.00'
+    - '23.00'
+    - '245.00'
+    - '260.00'
+    - '320.00'
+    - '342.00'
+    - '357.00'
+    - '360.00'
+    - '401.00'
+    - '460.00'
+    - '75.00'
+    - '80.00'
+  - name: val_reposicaoexportacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de reposição de exportação para o patamar semi-horário, em MW. Representa a geração
+      adicional programada para repor energia exportada, garantindo o equilíbrio do sistema após compromissos
+      de exportação. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - reposição de exportação
+      - reposição exportação
+      - val_reposicao_exportacao
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_reposicaoexportacao AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - '0.00'
+  - name: val_faltacombustivel
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Valor de restrição por falta de combustível para o patamar semi-horário, em MW. Representa
+      a redução de disponibilidade de usinas térmicas decorrente de indisponibilidade ou restrição de
+      suprimento de combustível considerada na programação diária. Armazenado como VARCHAR no Parquet.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - falta de combustível
+      - restrição de combustível
+      - indisponibilidade por combustível
+      - val_falta_combustivel
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_faltacombustivel AS DOUBLE)
+    - property: unit
+      value: MW
+    - property: enum
+      value:
+      - '0.00'
+      - '25.00'
+      - '280.00'
+      - '35.00'
+      - '5.00'
+      - '50.00'
+      - '70.00'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente pelo ONS após fechamento da programação diária; dados são recorrentemente
+    revisados após publicação inicial no processo de consistência operativa.
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/programacao_diaria
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto foi programado para gerar
+  - geracao programada do dia
+  - despacho programado das usinas
+  - o que o ons programou
+  - previsao de geracao
+  - quanto vai gerar amanha
+  - geracao prevista das usinas
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver valores programados de geração, disponibilidade
+    ou despacho de usinas do SIN em base semi-horária (patamares de 30 minutos). Também relevante para
+    consultas sobre ordem de mérito, inflexibilidade, geração por Usina Controlada, exportação programada
+    ou restrições por falta de combustível no contexto da programação operativa diária do ONS.
+- property: agentInstructions
+  value: '- [nom_modalidadeoperacao] Poucos registros possuem nom_modalidadeoperacao nulo. Provavelmente
+    corresponde a usinas ou patamares sem modalidade operativa classificada no sistema de programação
+    diária do ONS.
+
+
+    - [id_estado] Parte dos registros possuem id_estado nulo. Indica que aproximadamente metade das usinas
+    no dataset não possui localização estadual definida, o que é esperado para usinas virtuais, agregados
+    de subsistema ou usinas com cadastro incompleto no ONS.
+
+
+    - [nom_estado] Parte dos registros possuem nom_estado nulo, alinhado com id_estado. Confirma que a
+    ausência de estado é estrutural para determinadas usinas, não um problema isolado de uma das colunas.
+
+
+    - [val_geracaoprogramada] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém
+    valores numéricos representando geração programada em MW. Qualquer agregação requer TRY_CAST para
+    DOUBLE.
+
+
+    - [val_disponibilidade] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores
+    numéricos representando disponibilidade em MW. Requer TRY_CAST para uso em agregações analíticas.
+
+
+    - [val_ordemmerito] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores
+    numéricos representando despacho por ordem de mérito em MW. Requer TRY_CAST para uso em agregações
+    analíticas.
+
+
+    - [val_inflexibilidade] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores
+    numéricos representando inflexibilidade em MW. Requer TRY_CAST para uso em agregações analíticas.
+
+
+    - [val_uc] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores numéricos
+    representando Uso de Capacidade em MW. Requer TRY_CAST para uso em agregações analíticas.
+
+
+    - [val_razaoeletrica] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores
+    numéricos representando razão elétrica (adimensional). Requer TRY_CAST para uso em agregações analíticas.
+
+
+    - [val_geracaoenergetica] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém
+    valores numéricos representando geração energética em MWmed. Requer TRY_CAST para uso em agregações
+    analíticas.
+
+
+    - [val_gesubgsub] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores
+    numéricos representando geração subsistema→subsistema em MW. Requer TRY_CAST para uso em agregações
+    analíticas.
+
+
+    - [val_exportacao] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém valores
+    numéricos representando exportação programada em MW. Requer TRY_CAST para uso em agregações analíticas.
+
+
+    - [val_reposicaoexportacao] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém
+    valores numéricos representando reposição de exportação em MW. Requer TRY_CAST para uso em agregações
+    analíticas.
+
+
+    - [val_faltacombustivel] Coluna armazenada como VARCHAR devido ao formato de serialização. Contém
+    valores numéricos representando falta de combustível em MW. Requer TRY_CAST para uso em agregações
+    analíticas.
+
+
+    - [din_programacaodia] Dataset iniciado em 2024-10-01 e ativo, um arquivo parquet por dia programado. Considerando
+    granularidade diária de arquivos, o período esperado seria ~334 dias. Verificar se há dias sem arquivo
+    ou com registros faltantes, especialmente considerando que os dados são atualizados recorrentemente
+    após publicação (processo de consistência).
+
+
+    - [num_patamar] num_patamar deve variar estritamente entre 1 e 48 para granularidade semi-horária.
+    Verificar existência de registros fora deste intervalo que indicariam corrupção de dados ou mudança
+    de granularidade.
+
+
+    - [id_subsistema] Valores com trailing spaces detectados em ''id_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_subsistema] Valores com trailing spaces detectados em ''nom_subsistema''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [nom_estado] Valores com trailing spaces detectados em ''nom_estado''. Use TRIM() em filtros WHERE
+    para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Qual foi a geração programada total por subsistema no dia 2025-01-15 em cada patamar semi-horário?
+  - Quais usinas térmicas apresentaram maior inflexibilidade programada no mês de janeiro de 2025?
+  - Qual a diferença entre disponibilidade declarada e geração programada por tipo de geração em fevereiro
+    de 2025?
+  - Quais usinas tiveram restrição por falta de combustível registrada na programação diária?
+  - Como evoluiu a participação da geração eólica na programação diária do subsistema Nordeste ao longo
+    de 2024-2025?
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_diaria/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-10-01'
+- property: semantics
+  value:
+    temporal_perspective: programado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: din_programacaodia
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_programacaodia
+      - id_subsistema
+      - num_patamar
+      - cod_exibicaousina
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: nom_usina
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: num_patamar
+    metrics:
+    - id: geracaoprogramada
+      label: Geracaoprogramada
+      columns:
+      - val_geracaoprogramada
+      expression: TRY_CAST(val_geracaoprogramada AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaoprogramada AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaoprogramada AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - geração programada
+      - geração
+      - potência programada
+      - despacho programado
+    - id: disponibilidade
+      label: Disponibilidade
+      columns:
+      - val_disponibilidade
+      expression: TRY_CAST(val_disponibilidade AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_disponibilidade AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_disponibilidade AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_disponibilidade AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - disponibilidade
+      - capacidade disponível
+      - potência disponível
+    - id: ordemmerito
+      label: Ordemmerito
+      columns:
+      - val_ordemmerito
+      expression: TRY_CAST(val_ordemmerito AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_ordemmerito AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_ordemmerito AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_ordemmerito AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_ordemmerito AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_ordemmerito AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_ordemmerito AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - ordem de mérito
+      - despacho por mérito
+      - val_ordem_merito
+    - id: inflexibilidade
+      label: Inflexibilidade
+      columns:
+      - val_inflexibilidade
+      expression: TRY_CAST(val_inflexibilidade AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_inflexibilidade AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_inflexibilidade AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_inflexibilidade AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_inflexibilidade AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_inflexibilidade AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_inflexibilidade AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - inflexibilidade
+      - geração inflexível
+      - mínimo técnico
+      - val_inflexivel
+    - id: uc
+      label: Uc
+      columns:
+      - val_uc
+      expression: TRY_CAST(val_uc AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_uc AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_uc AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_uc AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_uc AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_uc AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_uc AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - UC
+      - usina controlada
+      - geração UC
+      - val_usina_controlada
+    - id: razaoeletrica
+      label: Razaoeletrica
+      columns:
+      - val_razaoeletrica
+      expression: TRY_CAST(val_razaoeletrica AS DOUBLE)
+      quantity_kind: ratio
+      unit_native: adimensional
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_razaoeletrica AS DOUBLE))
+          unit: adimensional
+        maximum:
+          sql: MAX(TRY_CAST(val_razaoeletrica AS DOUBLE))
+          unit: adimensional
+        minimum:
+          sql: MIN(TRY_CAST(val_razaoeletrica AS DOUBLE))
+          unit: adimensional
+        time_series:
+          sql: AVG(TRY_CAST(val_razaoeletrica AS DOUBLE))
+          unit: adimensional
+        comparison:
+          sql: AVG(TRY_CAST(val_razaoeletrica AS DOUBLE))
+          unit: adimensional
+      interval_hours: 24.0
+      aliases:
+      - razão elétrica
+      - fator elétrico
+      - val_razao_eletrica
+    - id: geracaoenergetica
+      label: Geracaoenergetica
+      columns:
+      - val_geracaoenergetica
+      expression: TRY_CAST(val_geracaoenergetica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaoenergetica AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaoenergetica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaoenergetica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaoenergetica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaoenergetica AS DOUBLE)) * 24.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaoenergetica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 24.0
+      aliases:
+      - geração energética
+      - energia gerada
+      - energia programada
+      - val_geracao_energetica
+    - id: gesubgsub
+      label: Gesubgsub
+      columns:
+      - val_gesubgsub
+      expression: TRY_CAST(val_gesubgsub AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_gesubgsub AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_gesubgsub AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_gesubgsub AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_gesubgsub AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_gesubgsub AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_gesubgsub AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - GE SUB G SUB
+      - geração subsistema a subsistema
+      - intercâmbio subsistema
+      - val_gesub_gsub
+    - id: exportacao
+      label: Exportacao
+      columns:
+      - val_exportacao
+      expression: TRY_CAST(val_exportacao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_exportacao AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_exportacao AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_exportacao AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_exportacao AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_exportacao AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_exportacao AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - exportação
+      - geração exportada
+      - exportação de energia
+    - id: reposicaoexportacao
+      label: Reposicaoexportacao
+      columns:
+      - val_reposicaoexportacao
+      expression: TRY_CAST(val_reposicaoexportacao AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_reposicaoexportacao AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_reposicaoexportacao AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_reposicaoexportacao AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_reposicaoexportacao AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_reposicaoexportacao AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_reposicaoexportacao AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - reposição de exportação
+      - reposição exportação
+      - val_reposicao_exportacao
+    - id: faltacombustivel
+      label: Faltacombustivel
+      columns:
+      - val_faltacombustivel
+      expression: TRY_CAST(val_faltacombustivel AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_faltacombustivel AS DOUBLE))
+          unit: MW
+        average:
+          sql: AVG(TRY_CAST(val_faltacombustivel AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_faltacombustivel AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_faltacombustivel AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_faltacombustivel AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_faltacombustivel AS DOUBLE))
+          unit: MW
+      interval_hours: 24.0
+      aliases:
+      - falta de combustível
+      - restrição de combustível
+      - indisponibilidade por combustível
+      - val_falta_combustivel
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: TRIM(id_subsistema) = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: TRIM(id_subsistema) = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: TRIM(id_subsistema) = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: TRIM(id_subsistema) = 'N'
+      tip_geracao:
+        EOLICA:
+          aliases:
+          - eolica
+          - eólica
+          - vento
+          - aeolica
+          filter: tip_geracao = 'EÓLICA'
+        HIDRAULICA:
+          aliases:
+          - hidraulica
+          - hidráulica
+          - hidro
+          - hidroeletrica
+          filter: tip_geracao = 'HIDRÁULICA'
+        SOLAR:
+          aliases:
+          - solar
+          - fotovoltaica
+          - FV
+          filter: tip_geracao = 'SOLAR'
+        TERMICA:
+          aliases:
+          - termica
+          - térmica
+          - termeletrica
+          filter: tip_geracao = 'TÉRMICA'
+      nom_modalidadeoperacao:
+        TIPO I:
+          aliases:
+          - tipo i
+          - tipo 1
+          - modalidade i
+          filter: nom_modalidadeoperacao = 'TIPO I'
+        TIPO II-A:
+          aliases:
+          - tipo ii-a
+          - tipo 2a
+          - modalidade ii-a
+          filter: nom_modalidadeoperacao = 'TIPO II-A'
+        TIPO II-B:
+          aliases:
+          - tipo ii-b
+          - tipo 2b
+          - modalidade ii-b
+          filter: nom_modalidadeoperacao = 'TIPO II-B'
+        TIPO II-C:
+          aliases:
+          - tipo ii-c
+          - tipo 2c
+          - modalidade ii-c
+          filter: nom_modalidadeoperacao = 'TIPO II-C'
+        TIPO III:
+          aliases:
+          - tipo iii
+          - tipo 3
+          - modalidade iii
+          - GPQ
+          filter: nom_modalidadeoperacao = 'TIPO III'
+      nom_subsistema:
+        SUBSISTEMA NORDESTE:
+          aliases:
+          - subsistema nordeste
+          - nordeste
+          filter: TRIM(nom_subsistema) = 'SUBSISTEMA NORDESTE'
+        SUBSISTEMA NORTE:
+          aliases:
+          - subsistema norte
+          - norte
+          filter: TRIM(nom_subsistema) = 'SUBSISTEMA NORTE'
+        SUBSISTEMA SUDESTE:
+          aliases:
+          - subsistema sudeste
+          - sudeste
+          filter: TRIM(nom_subsistema) = 'SUBSISTEMA SUDESTE'
+        SUBSISTEMA SUL:
+          aliases:
+          - subsistema sul
+          - sul
+          filter: TRIM(nom_subsistema) = 'SUBSISTEMA SUL'
+    sql_patterns:
+      geracaoprogramada_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes,\n  TRIM(id_subsistema)\
+          \ AS id_subsistema,\n  SUM(TRY_CAST(val_geracaoprogramada AS DOUBLE) * 24.0) / 1000 AS energia_gwh\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_programacaodia AS TIMESTAMP)) = {year}\n\
+          GROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaoprogramada
+          grain: month
+      inflexibilidade_por_usina:
+        template: "SELECT nom_usina, tip_geracao,\n  SUM(TRY_CAST(val_inflexibilidade AS DOUBLE)) AS inflexibilidade_total_mw\n\
+          FROM {source}\nWHERE din_programacaodia BETWEEN '{start_date}' AND '{end_date}'\n  AND tip_geracao\
+          \ = 'TÉRMICA'\nGROUP BY 1, 2\nORDER BY 3 DESC\nLIMIT 20"
+        output_unit: MW
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - inflexibilidade
+          grain: usina
+        validated_params:
+          start_date: '2026-01-01'
+          end_date: '2026-07-20'
+      disponibilidade_vs_programada:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_programacaodia AS TIMESTAMP)) AS mes,\n  tip_geracao,\n\
+          \  AVG(TRY_CAST(val_disponibilidade AS DOUBLE)) AS disponibilidade_media_mwmed,\n  AVG(TRY_CAST(val_geracaoprogramada\
+          \ AS DOUBLE)) AS programada_media_mwmed\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_programacaodia\
+          \ AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - disponibilidade
+          - geracaoprogramada
+          grain: month
+- property: fewShotQueries
+  value:
+  - question: Qual foi a geração programada total (em MW médio) por subsistema e tipo de geração em cada
+      dia disponível?
+    sql: "SELECT\n  din_programacaodia::DATE AS data_programacao,\n  id_subsistema,\n  tip_geracao,\n\
+      \  AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE)) AS media_geracao_mw,\n  SUM(TRY_CAST(val_geracaoprogramada\
+      \ AS DOUBLE)) AS soma_geracao_mw\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_diaria/*.parquet')\n\
+      WHERE id_subsistema != 'SIN'\nGROUP BY din_programacaodia::DATE, id_subsistema, tip_geracao\nORDER\
+      \ BY data_programacao DESC, id_subsistema, tip_geracao\nLIMIT 100;"
+  - question: Como se distribui a inflexibilidade programada ao longo dos 48 patamares do dia para cada
+      tipo de geração?
+    sql: "SELECT\n  num_patamar,\n  tip_geracao,\n  AVG(TRY_CAST(val_inflexibilidade AS DOUBLE)) AS media_inflexibilidade_mw,\n\
+      \  MAX(TRY_CAST(val_inflexibilidade AS DOUBLE)) AS max_inflexibilidade_mw,\n  COUNT(DISTINCT cod_exibicaousina)\
+      \ AS qtd_usinas\nFROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_diaria/*.parquet')\n\
+      WHERE TRY_CAST(val_inflexibilidade AS DOUBLE) > 0\n  AND id_subsistema != 'SIN'\nGROUP BY num_patamar,\
+      \ tip_geracao\nORDER BY num_patamar, tip_geracao\nLIMIT 100;"
+  - question: Quais usinas termelétricas declararam maior falta de combustível na programação diária e
+      em quais períodos?
+    sql: "SELECT\n  cod_exibicaousina,\n  nom_usina,\n  id_subsistema,\n  din_programacaodia::DATE AS\
+      \ data_programacao,\n  SUM(TRY_CAST(val_faltacombustivel AS DOUBLE)) AS soma_falta_combustivel_mw,\n\
+      \  AVG(TRY_CAST(val_faltacombustivel AS DOUBLE)) AS media_falta_combustivel_mw,\n  COUNT(*) AS qtd_patamares_afetados\n\
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/programacao_diaria/*.parquet')\nWHERE TRY_CAST(val_faltacombustivel\
+      \ AS DOUBLE) > 0\n  AND tip_geracao = 'TERMICA'\nGROUP BY cod_exibicaousina, nom_usina, id_subsistema,\
+      \ din_programacaodia::DATE\nORDER BY soma_falta_combustivel_mw DESC\nLIMIT 50;"
+- property: license
+  value: CC-BY

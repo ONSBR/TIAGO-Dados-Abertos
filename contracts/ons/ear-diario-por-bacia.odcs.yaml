@@ -1,0 +1,599 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ear-diario-por-bacia
+name: ear-diario-por-bacia
+tenant: ons
+tags:
+- CMO
+- EAR
+- EAR bacia
+- EAR diária bacia
+- ONS
+- SIN
+- armazenamento reservatórios por bacia
+- bacia hidro energética
+- despacho hidrotérmico
+- energia armazenada
+- energia armazenada bacia
+- hidrologia
+- nível dos reservatórios por bacia
+- reservatórios
+- série temporal diária
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ear_bacia_di/*.parquet
+  format: parquet
+description:
+  purpose: Disponibilizar aos geradores, comercializadores, agentes do mercado de energia elétrica, pesquisadores
+    e reguladores a evolução diária do nível de armazenamento dos reservatórios hidrelétricos por bacia,
+    permitindo o acompanhamento das condições hídricas do SIN, a projeção do Custo Marginal de Operação
+    (CMO), estudos de despacho hidrotérmico, análise de risco hidrológico e suporte à tomada de decisão
+    em comercialização de energia.
+  limitations: Coluna ear_data está armazenada como VARCHAR no Parquet em vez de DATE. Valor máximo de
+    154,43% ultrapassa o limite esperado de 100% para um percentual de capacidade. Valor mínimo de 0.
+  usage: Recuperar este dataset quando a pergunta envolver nível de armazenamento de reservatórios hidrelétricos
+    por bacia, percentual de capacidade dos reservatórios, evolução histórica da EAR diária ou análise
+    de risco hidrológico por bacia do SIN.
+domain: reservatório
+schema:
+- name: ear_diario_por_bacia
+  physicalType: parquet
+  logicalType: object
+  physicalName: ear_diario_por_bacia
+  properties:
+  - name: nomecurto
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome curto identificador da bacia hidro energética. Representa a bacia à qual pertencem
+      os reservatórios agregados (ex: SUDESTE, SUL, NORDESTE, NORTE). Utilizado como chave de agrupamento
+      espacial nas análises de EAR.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - nome da bacia
+      - bacia hidro energética
+      - região
+      - subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - JACUI
+      - JEQUITINHONHA
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: ear_data
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência da medição da energia armazenada, armazenada como VARCHAR no Parquet.
+      Representa o dia em que o nível verificado dos reservatórios foi registrado. Requer CAST explícito
+      para DATE em operações temporais e filtros por período.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - data de referência
+      - data da medição
+      - dia
+      - data EAR
+    - property: semanticType
+      value: DIMENSION
+  - name: ear_max_bacia
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Energia armazenada máxima da bacia hidro energética, expressa em MWmês. Representa a
+      capacidade total de armazenamento caso todos os reservatórios da bacia estivessem no nível máximo
+      operacional. Serve como denominador para o cálculo do percentual de armazenamento.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - EAR máxima
+      - capacidade máxima de armazenamento
+      - armazenamento máximo da bacia
+      - EAR max
+    - property: unit
+      value: MWmês
+    - property: enum
+      value:
+      - 0.0
+      - 12.899
+      - 22.0
+      - 264.0
+      - 264.178
+      - 335.383
+      - 374.956
+      - 385.0
+      - 555.798
+      - 1187.0
+      - 2028.231
+      - 2547.0
+      - 2728.0
+      - 2967.788
+      - 3029.354
+      - 3691.575
+      - 4211.0
+      - 5480.0
+      - 6730.261
+      - 6879.0
+      - 7050.0
+      - 7360.0
+      - 7554.897
+      - 9725.246
+      - 9856.0
+      - 9877.0
+      - 10062.935
+      - 11099.0
+      - 12094.491
+      - 28155.0
+      - 49377.0
+      - 49880.606
+      - 51531.44
+      - 52017.0
+      - 52727.21
+      - 60533.0
+      - 78500.946
+  - name: ear_verif_bacia_mwmes
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Energia armazenada verificada na bacia hidro energética na data de referência, expressa
+      em MWmês. Representa a energia associada ao volume de água efetivamente disponível nos reservatórios
+      da bacia, considerando o nível verificado e a capacidade de geração em cascata.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - EAR verificada
+      - energia armazenada verificada
+      - armazenamento atual
+      - EAR em MWmês
+      - volume armazenado em energia
+    - property: unit
+      value: MWmês
+  - name: ear_verif_bacia_percentual
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Energia armazenada verificada na bacia hidro energética expressa como percentual da
+      capacidade máxima (ear_verif_bacia_mwmes / ear_max_bacia × 100). Pode ultrapassar 100% em situações
+      de superenchimento ou quando o critério de cálculo considera volumes acima do nível máximo operacional
+      normal. Valor máximo observado: 154,43%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - EAR percentual
+      - percentual de armazenamento
+      - nível dos reservatórios
+      - armazenamento em percentual
+      - EAR %
+      - porcentagem de armazenamento
+    - property: unit
+      value: '%'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ear-diario-por-bacia
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - nivel dos reservatorios por bacia
+  - armazenamento por bacia
+  - quanto de energia estocada por bacia
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver nível de armazenamento de reservatórios hidrelétricos
+    por bacia, percentual de capacidade dos reservatórios, evolução histórica da EAR diária ou análise
+    de risco hidrológico por bacia do SIN. Também relevante para perguntas sobre CMO, despacho hidrotérmico
+    e condições hídricas que requerem granularidade diária e desagregação por bacia.
+- property: agentInstructions
+  value: '- [ear_data] Coluna ear_data está armazenada como VARCHAR no Parquet em vez de DATE. Operações
+    de filtro temporal, ordenação e extração de componentes de data falharão sem conversão explícita.
+    O formato observado é YYYY-MM-DD (ISO 8601), mas a ausência de tipagem nativa exige cuidado em joins
+    temporais.
+
+
+    - [ear_max_bacia] Valor mínimo de 0.0 em ear_max_bacia pode indicar bacias sem capacidade de regularização
+    em períodos históricos específicos ou registros de bacias a fio d''água. Divisões por ear_max_bacia
+    para recalcular percentual resultarão em erro de divisão por zero nesses casos.
+
+
+    - [ear_verif_bacia_percentual] Valor máximo de 154.43% ultrapassa 100%, indicando situações de volume
+    acima da capacidade nominal dos reservatórios (vertimento ou cheias extraordinárias). Não é anomalia
+    de dados — é comportamento físico real. Sistemas de monitoramento que alertem para valores acima de
+    100% devem considerar esse limiar estendido (até ~160%) como válido para este dataset.
+
+
+    - [ear_verif_bacia_mwmes] Valor mínimo de 0.0 em ear_verif_bacia_mwmes pode representar situações
+    de reservatórios completamente vazios (volume morto atingido) ou bacias sem armazenamento regularizável.
+    Embora fisicamente possível, valores zero merecem verificação contextual para distinguir dado real
+    de possível falha de coleta.
+
+
+    - [nomecurto] A chave primária natural é (nomecurto, ear_data). Duplicatas nessa combinação indicariam
+    inconsistência no processo de carga dos 27 arquivos Parquet, possivelmente por sobreposição de partições
+    ou reprocessamento parcial. Deve ser verificado antes de agregações que assumam unicidade por bacia/data.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual é o percentual de armazenamento atual de cada bacia hidro energética?
+  - Como evoluiu a EAR da bacia Sudeste nos últimos 12 meses?
+  - Quais foram os períodos históricos de menor armazenamento na bacia Nordeste?
+  - Qual bacia apresentou maior variação de EAR percentual no último trimestre?
+  - Como comparar a EAR atual com a média histórica para o mesmo período do ano?
+- property: granularity
+  value: diária
+- property: spatialGranularity
+  value: por_bacia
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ear_bacia_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - armazenada
+    - armazenamento
+    - ear
+    family: ear
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: ear_data
+      spatial: por_bacia
+      entity: dataset_row
+      one_row_per:
+      - ear_data
+      - nomecurto
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: nomecurto
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: ear_verif_bacia_mwmes
+      label: Energia Armazenada Verificada (MWmes)
+      columns:
+      - ear_verif_bacia_mwmes
+      expression: ear_verif_bacia_mwmes
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(ear_verif_bacia_mwmes)
+          unit: MWmes
+        average:
+          sql: AVG(ear_verif_bacia_mwmes)
+          unit: MWmes
+        time_series:
+          sql: AVG(ear_verif_bacia_mwmes)
+          unit: MWmes
+        ranking:
+          sql: AVG(ear_verif_bacia_mwmes)
+          unit: MWmes
+        comparison:
+          sql: AVG(ear_verif_bacia_mwmes)
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR verificada
+      - energia armazenada verificada
+      - armazenamento atual
+      - EAR em MWmês
+      - volume armazenado em energia
+    - id: ear_verif_bacia_percentual
+      label: Energia Armazenada Verificada (%)
+      columns:
+      - ear_verif_bacia_percentual
+      expression: ear_verif_bacia_percentual
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(ear_verif_bacia_percentual)
+          unit: '%'
+        maximum:
+          sql: MAX(ear_verif_bacia_percentual)
+          unit: '%'
+        minimum:
+          sql: MIN(ear_verif_bacia_percentual)
+          unit: '%'
+        time_series:
+          sql: AVG(ear_verif_bacia_percentual)
+          unit: '%'
+        ranking:
+          sql: AVG(ear_verif_bacia_percentual)
+          unit: '%'
+        comparison:
+          sql: AVG(ear_verif_bacia_percentual)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - EAR percentual
+      - percentual de armazenamento
+      - nivel dos reservatorios
+      - armazenamento em percentual
+      - EAR %
+      - porcentagem de armazenamento
+    - id: ear_max_bacia
+      label: EAR Maxima da Bacia (MWmes)
+      columns:
+      - ear_max_bacia
+      expression: ear_max_bacia
+      quantity_kind: energy_stock
+      unit_native: MWmes
+      default_aggregation: last_or_avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        last_value:
+          sql: LAST_VALUE(ear_max_bacia)
+          unit: MWmes
+        average:
+          sql: AVG(ear_max_bacia)
+          unit: MWmes
+        maximum:
+          sql: MAX(ear_max_bacia)
+          unit: MWmes
+        comparison:
+          sql: AVG(ear_max_bacia)
+          unit: MWmes
+      interval_hours: 24.0
+      aliases:
+      - EAR maxima
+      - capacidade maxima de armazenamento
+      - armazenamento maximo da bacia
+      - EAR max
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      nomecurto:
+        AMAZONAS:
+          aliases:
+          - AMAZONAS
+          - bacia amazonas
+          - amazonas
+          filter: nomecurto = 'AMAZONAS'
+        CAPIVARI:
+          aliases:
+          - CAPIVARI
+          - bacia capivari
+          filter: nomecurto = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - DOCE
+          - bacia doce
+          - rio doce
+          filter: nomecurto = 'DOCE'
+        GRANDE:
+          aliases:
+          - GRANDE
+          - bacia grande
+          - rio grande
+          filter: nomecurto = 'GRANDE'
+        IGUACU:
+          aliases:
+          - IGUACU
+          - bacia iguacu
+          - rio iguacu
+          filter: nomecurto = 'IGUACU'
+        JACUI:
+          aliases:
+          - JACUI
+          - bacia jacui
+          - rio jacui
+          filter: nomecurto = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - JEQUITINHONHA
+          - bacia jequitinhonha
+          - rio jequitinhonha
+          filter: nomecurto = 'JEQUITINHONHA'
+        PARAGUACU:
+          aliases:
+          - PARAGUACU
+          - bacia paraguacu
+          filter: nomecurto = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - PARAGUAI
+          - bacia paraguai
+          - rio paraguai
+          filter: nomecurto = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - PARAIBA DO SUL
+          - bacia paraiba do sul
+          - rio paraiba do sul
+          - paraiba sul
+          filter: nomecurto = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - PARANA
+          - bacia parana
+          - rio parana
+          filter: nomecurto = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - PARANAIBA
+          - bacia paranaiba
+          - rio paranaiba
+          filter: nomecurto = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - PARANAPANEMA
+          - bacia paranapanema
+          - rio paranapanema
+          filter: nomecurto = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - PARNAIBA
+          - bacia parnaiba
+          - rio parnaiba
+          filter: nomecurto = 'PARNAIBA'
+        SAO FRANCISCO:
+          aliases:
+          - SAO FRANCISCO
+          - bacia sao francisco
+          - rio sao francisco
+          - sao chico
+          - velho chico
+          filter: nomecurto = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - TIETE
+          - bacia tiete
+          - rio tiete
+          filter: nomecurto = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - TOCANTINS
+          - bacia tocantins
+          - rio tocantins
+          filter: nomecurto = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - URUGUAI
+          - bacia uruguai
+          - rio uruguai
+          filter: nomecurto = 'URUGUAI'
+    sql_patterns:
+      ear_verif_percentual_bacia_serie:
+        template: "SELECT TRY_CAST(ear_data AS DATE) AS data,\n  nomecurto AS bacia,\n  AVG(ear_verif_bacia_percentual)\
+          \ AS ear_percentual\nFROM {source}\nWHERE nomecurto = '{bacia}'\n  AND TRY_CAST(ear_data AS\
+          \ DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1, 2\nORDER BY 1"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - ear_verif_bacia_percentual
+          grain: day
+        validated_params:
+          bacia: GRANDE
+          data_inicio: '2000-01-01'
+          data_fim: '2015-03-18'
+      ear_verif_mwmes_mensal_bacia:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(ear_data AS DATE)) AS mes,\n  nomecurto AS bacia,\n\
+          \  AVG(ear_verif_bacia_mwmes) AS ear_media_mwmes\nFROM {source}\nWHERE nomecurto = '{bacia}'\n\
+          \  AND TRY_CAST(ear_data AS DATE) BETWEEN '{data_inicio}' AND '{data_fim}'\nGROUP BY 1, 2\n\
+          ORDER BY 1"
+        output_unit: MWmes
+        matches:
+          output_modes:
+          - time_series
+          - average
+          metrics:
+          - ear_verif_bacia_mwmes
+          grain: month
+        validated_params:
+          bacia: DOCE
+          data_inicio: '2000-01-01'
+          data_fim: '2015-03-18'
+      ear_comparacao_bacias_data:
+        template: "SELECT nomecurto AS bacia,\n  ear_verif_bacia_mwmes,\n  ear_verif_bacia_percentual,\n\
+          \  ear_max_bacia\nFROM {source}\nWHERE TRY_CAST(ear_data AS DATE) = '{data}'\nORDER BY ear_verif_bacia_percentual\
+          \ DESC"
+        output_unit: MWmes e '%'
+        matches:
+          output_modes:
+          - comparison
+          - ranking
+          metrics:
+          - ear_verif_bacia_mwmes
+          - ear_verif_bacia_percentual
+          grain: day
+        validated_params:
+          data: '2003-05-24'
+      ear_percentual_recalculado:
+        template: "SELECT TRY_CAST(ear_data AS DATE) AS data,\n  nomecurto AS bacia,\n  ear_verif_bacia_mwmes,\n\
+          \  ear_max_bacia,\n  CASE\n    WHEN NULLIF(ear_max_bacia, 0) IS NULL THEN NULL\n    ELSE ROUND(ear_verif_bacia_mwmes\
+          \ / NULLIF(ear_max_bacia, 0) * 100, 2)\n  END AS ear_percentual_calculado\nFROM {source}\nWHERE\
+          \ nomecurto = '{bacia}'\n  AND TRY_CAST(ear_data AS DATE) = '{data}'"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - ear_max_bacia
+          - ear_verif_bacia_mwmes
+          grain: day
+        validated_params:
+          bacia: GRANDE
+          data: '2003-05-24'
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o percentual de armazenamento de cada bacia nos últimos 12 meses?
+    sql: SELECT nomecurto, TRY_CAST(ear_data AS DATE) AS ear_data_date, ear_verif_bacia_percentual FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/ear_bacia_di/*.parquet') WHERE TRY_CAST(ear_data
+      AS DATE) >= CURRENT_DATE - INTERVAL 365 DAY AND TRY_CAST(ear_data AS DATE) IS NOT NULL ORDER BY
+      nomecurto, ear_data_date
+  - question: Quais bacias estão com armazenamento abaixo de 30% da capacidade máxima na data mais recente
+      disponível?
+    sql: WITH ultima_data AS ( SELECT MAX(TRY_CAST(ear_data AS DATE)) AS max_data FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_bacia_di/*.parquet')
+      ) SELECT b.nomecurto, TRY_CAST(b.ear_data AS DATE) AS ear_data_date, b.ear_verif_bacia_mwmes, b.ear_max_bacia,
+      b.ear_verif_bacia_percentual FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_bacia_di/*.parquet')
+      AS b INNER JOIN ultima_data AS u ON TRY_CAST(b.ear_data AS DATE) = u.max_data WHERE b.ear_verif_bacia_percentual
+      < 30.0 AND b.ear_max_bacia > 0.0 ORDER BY b.ear_verif_bacia_percentual ASC
+  - question: Qual foi o menor nível de armazenamento histórico de cada bacia e em que data ocorreu?
+    sql: WITH ranked AS ( SELECT nomecurto, TRY_CAST(ear_data AS DATE) AS ear_data_date, ear_verif_bacia_percentual,
+      ear_verif_bacia_mwmes, ROW_NUMBER() OVER ( PARTITION BY nomecurto ORDER BY ear_verif_bacia_percentual
+      ASC ) AS rn FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ear_bacia_di/*.parquet') WHERE
+      ear_max_bacia > 0.0 AND TRY_CAST(ear_data AS DATE) IS NOT NULL ) SELECT nomecurto, ear_data_date,
+      ear_verif_bacia_percentual, ear_verif_bacia_mwmes FROM ranked WHERE rn = 1 ORDER BY ear_verif_bacia_percentual
+      ASC
+- property: license
+  value: CC-BY

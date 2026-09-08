@@ -1,0 +1,579 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:subestacao
+name: subestacao
+tenant: ons
+tags:
+- ONS
+- SE
+- SIN
+- alta-tensao
+- barra elétrica
+- cadastro
+- extra-alta-tensao
+- nó da rede
+- ponto de conexão
+- rede-basica
+- rede-complementar
+- referencia
+- subestacao
+- subestação
+- subestação de transmissão
+- transmissao
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/subestacao/*.parquet
+  format: parquet
+description:
+  purpose: Prover referência cadastral autoritativa das subestações da rede de transmissão brasileira
+    para analistas de transmissão, planejadores do sistema elétrico e equipes de operação do ONS, suportando
+    decisões de despacho, análise de contingências, planejamento da expansão da rede e estudos de fluxo
+    de potência, além de servir como tabela de dimensão em joins com datasets operativos de restrições,
+    intercâmbio e equipamentos de transmissão.
+  limitations: Aproximadamente 0. val_latitude é armazenada como VARCHAR no Parquet devido ao formato
+    de serialização. val_longitude é armazenada como VARCHAR no Parquet devido ao formato de serialização.
+  usage: Recuperar este dataset quando a pergunta envolver identificação, localização ou caracterização
+    de subestações da rede de transmissão brasileira, incluindo consultas por nível de tensão, agente
+    responsável, estado ou subsistema elétrico.
+domain: transmissão
+schema:
+- name: subestacao
+  physicalType: parquet
+  logicalType: object
+  physicalName: subestacao
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a subestação pertence (ex: SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - código do subsistema
+      - id subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual a subestação pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome do subsistema
+      - subsistema elétrico
+      - região elétrica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado (UF) onde a subestação está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - UF
+      - estado
+      - sigla do estado
+      - unidade federativa
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do estado onde a subestação está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome do estado
+      - estado
+      - unidade federativa
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Acre
+      - Alagoas
+      - Amapá
+      - Amazonas
+      - Bahia
+      - Ceará
+      - Distrito Federal
+      - Espírito Santo
+      - Goiás
+      - Maranhão
+      - Mato Grosso
+      - Mato Grosso do Sul
+      - Minas Gerais
+      - Paraná
+      - Paraíba
+      - Pará
+      - Pernambuco
+      - Piauí
+      - Rio Grande do Norte
+      - Rio Grande do Sul
+      - Rio de Janeiro
+      - Rondônia
+      - Roraima
+      - Santa Catarina
+      - Sergipe
+      - São Paulo
+      - Tocantins
+  - name: nom_agente_principal
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente (empresa) responsável pela operação ou propriedade da subestação
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - empresa responsável
+      - transmissora
+      - proprietário
+      - concessionária
+    - property: semanticType
+      value: DIMENSION
+  - name: id_subestacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único da subestação no sistema ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da subestação
+      - id SE
+      - identificador da subestação
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_subestacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo da subestação conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - nome da subestação
+      - subestação
+      - SE
+    - property: semanticType
+      value: DIMENSION
+  - name: val_niveltensao
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Nível de tensão base da subestação em quilovolts (kV), variando de 69 kV a 800 kV conforme
+      a rede básica brasileira. Tipo semântico DOUBLE; tipo físico no Parquet pode ser VARCHAR devido
+      ao formato de serialização.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - tensão
+      - nível de tensão
+      - tensão base
+      - kV
+      - voltagem
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: kV
+    - property: enum
+      value:
+      - 69.0
+      - 88.0
+      - 122.0
+      - 127.0
+      - 138.0
+      - 140.0
+      - 161.0
+      - 230.0
+      - 289.0
+      - 345.0
+      - 440.0
+      - 500.0
+      - 600.0
+      - 765.0
+      - 800.0
+  - name: id_estacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador da estação associada à subestação, utilizado como referência interna no
+      sistema ONS
+    customProperties:
+    - property: aliases
+      value:
+      - código da estação
+      - id estação
+      - estação
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_barra
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Número da barra elétrica associada à subestação no modelo computacional do sistema elétrico,
+      utilizado em estudos de fluxo de potência e análise de contingências
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - barra
+      - número de barra
+      - barra elétrica
+      - bus number
+    - property: semanticType
+      value: IDENTIFIER
+  - name: val_latitude
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Latitude geográfica da subestação em graus decimais. Tipo semântico DOUBLE; armazenada
+      como VARCHAR no Parquet devido ao formato de serialização. Requer TRY_CAST(val_latitude AS DOUBLE)
+      para uso numérico em cálculos geoespaciais.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - latitude
+      - coordenada latitude
+      - lat
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_latitude AS DOUBLE)
+    - property: unit
+      value: graus decimais
+  - name: val_longitude
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Longitude geográfica da subestação em graus decimais. Tipo semântico DOUBLE; armazenada
+      como VARCHAR no Parquet devido ao formato de serialização. Requer TRY_CAST(val_longitude AS DOUBLE)
+      para uso numérico em cálculos geoespaciais.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - longitude
+      - coordenada longitude
+      - lon
+      - lng
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_longitude AS DOUBLE)
+    - property: unit
+      value: graus decimais
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/subestacao
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quantas subestacoes existem
+  - lista de subestacoes
+  - onde fica a subestacao
+  - subestacoes por estado
+  - subestacoes de 500 kv
+  - cadastro de subestacoes
+  - barras da rede
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver identificação, localização ou caracterização
+    de subestações da rede de transmissão brasileira, incluindo consultas por nível de tensão, agente
+    responsável, estado ou subsistema elétrico. Também recuperar quando for necessária uma tabela de dimensão
+    cadastral para enriquecer joins com datasets operativos de restrições, equipamentos ou intercâmbio
+    de energia. Não recuperar para consultas exclusivamente sobre geração, consumo ou preços de energia.
+- property: agentInstructions
+  value: '- [val_latitude] Campo armazenado como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos de latitude em graus decimais. Sem nulos, mas incompatível com funções numéricas
+    e geoespaciais sem conversão explícita via TRY_CAST.
+
+
+    - [val_longitude] Campo armazenado como VARCHAR no Parquet devido ao formato de serialização. Contém
+    valores numéricos de longitude em graus decimais. Sem nulos, mas incompatível com funções numéricas
+    e geoespaciais sem conversão explícita via TRY_CAST.
+
+
+    - [num_barra] Poucos registros (≈2 subestações) possuem num_barra nulo. Isso pode
+    impedir joins com datasets que referenciam barras do modelo de rede elétrica do ONS.
+
+
+    - [val_latitude] Coordenadas de latitude devem estar no intervalo aproximado de -33,75 a +5,27 graus
+    para o território brasileiro. Valores fora desse intervalo indicam erro de cadastro geográfico no
+    dataset subestacao.
+
+
+    - [val_longitude] Coordenadas de longitude devem estar no intervalo aproximado de -73,99 a -34,79
+    graus para o território brasileiro. Valores fora desse intervalo indicam erro de cadastro geográfico
+    no dataset subestacao.
+
+
+    - [id_subestacao] id_subestacao é declarada como chave primária natural do dataset subestacao. A presença
+    de duplicatas indicaria inconsistência cadastral, possivelmente por subestações com múltiplos níveis
+    de tensão registradas sob o mesmo identificador.
+
+
+    - [val_niveltensao] Valores de val_niveltensao devem estar entre 69 kV e 800 kV, conforme escopo da
+    Rede de Operação (tensão base ≥ 69 kV). Valores fora desse intervalo indicam erro de cadastro no dataset
+    subestacao.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais subestações de 500 kV existem no subsistema Nordeste?
+  - Quantas subestações cada agente transmissor opera no Brasil?
+  - Quais subestações estão localizadas no estado de Minas Gerais?
+  - Qual é a distribuição de subestações por nível de tensão no SIN?
+  - Quais subestações da CTEEP operam em 230 kV ou acima?
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_subestacao
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/subestacao/*.parquet', union_by_name=true)
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      spatial: subestacao
+      entity: subestacao
+      one_row_per:
+      - id_subsistema
+      - id_subestacao
+      - val_niveltensao
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: nom_subestacao
+      patamar: null
+    metrics: []
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          filter: nom_subsistema = 'Sul'
+      val_niveltensao:
+        '69':
+          aliases:
+          - 69 kV
+          - 69kV
+          - '69'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 69
+        '88':
+          aliases:
+          - 88 kV
+          - 88kV
+          - '88'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 88
+        '122':
+          aliases:
+          - 122 kV
+          - 122kV
+          - '122'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 122
+        '127':
+          aliases:
+          - 127 kV
+          - 127kV
+          - '127'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 127
+        '138':
+          aliases:
+          - 138 kV
+          - 138kV
+          - '138'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 138
+        '140':
+          aliases:
+          - 140 kV
+          - 140kV
+          - '140'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 140
+        '161':
+          aliases:
+          - 161 kV
+          - 161kV
+          - '161'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 161
+        '230':
+          aliases:
+          - 230 kV
+          - 230kV
+          - '230'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 230
+        '289':
+          aliases:
+          - 289 kV
+          - 289kV
+          - '289'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 289
+        '345':
+          aliases:
+          - 345 kV
+          - 345kV
+          - '345'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 345
+        '440':
+          aliases:
+          - 440 kV
+          - 440kV
+          - '440'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 440
+        '500':
+          aliases:
+          - 500 kV
+          - 500kV
+          - '500'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 500
+        '600':
+          aliases:
+          - 600 kV
+          - 600kV
+          - '600'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 600
+        '765':
+          aliases:
+          - 765 kV
+          - 765kV
+          - '765'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 765
+        '800':
+          aliases:
+          - 800 kV
+          - 800kV
+          - '800'
+          filter: TRY_CAST(val_niveltensao AS DOUBLE) = 800
+    sql_patterns:
+      list_by_tensao:
+        template: SELECT nom_subestacao, nom_subsistema, nom_estado, nom_agente_principal, TRY_CAST(val_niveltensao
+          AS DOUBLE) AS tensao_kv FROM {source} WHERE TRY_CAST(val_niveltensao AS DOUBLE) = {tensao} ORDER
+          BY nom_subestacao
+      count_by_agente:
+        template: SELECT nom_agente_principal, COUNT(*) AS qtd_subestacoes FROM {source} GROUP BY nom_agente_principal
+          ORDER BY qtd_subestacoes DESC
+      list_by_estado:
+        template: SELECT nom_subestacao, nom_subsistema, nom_agente_principal, TRY_CAST(val_niveltensao
+          AS DOUBLE) AS tensao_kv FROM {source} WHERE id_estado = '{uf}' ORDER BY nom_subestacao
+      distribuicao_por_tensao:
+        template: SELECT TRY_CAST(val_niveltensao AS DOUBLE) AS tensao_kv, COUNT(*) AS qtd_subestacoes
+          FROM {source} GROUP BY tensao_kv ORDER BY tensao_kv
+- property: fewShotQueries
+  value:
+  - question: Qual a distribuição de subestações por subsistema elétrico e nível de tensão base?
+    sql: SELECT id_subsistema, nom_subsistema, val_niveltensao, COUNT(*) AS qtd_subestacoes FROM read_parquet('s3://ons-aws-prod-opendata/dataset/subestacao/*.parquet')
+      GROUP BY id_subsistema, nom_subsistema, val_niveltensao ORDER BY id_subsistema, val_niveltensao
+      DESC;
+  - question: Quantas subestações cada agente de transmissão opera e em quais subsistemas?
+    sql: SELECT nom_agente_principal, id_subsistema, nom_subsistema, COUNT(*) AS qtd_subestacoes, MIN(val_niveltensao)
+      AS tensao_min_kv, MAX(val_niveltensao) AS tensao_max_kv FROM read_parquet('s3://ons-aws-prod-opendata/dataset/subestacao/*.parquet')
+      GROUP BY nom_agente_principal, id_subsistema, nom_subsistema ORDER BY qtd_subestacoes DESC;
+  - question: Quais são as coordenadas geográficas das subestações de 500 kV ou superior?
+    sql: SELECT id_subestacao, nom_subestacao, nom_agente_principal, id_estado, nom_estado, id_subsistema,
+      val_niveltensao, TRY_CAST(val_latitude AS DOUBLE) AS lat, TRY_CAST(val_longitude AS DOUBLE) AS lon
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/subestacao/*.parquet') WHERE val_niveltensao
+      >= 500 AND TRY_CAST(val_latitude AS DOUBLE) BETWEEN -33.75 AND 5.27 AND TRY_CAST(val_longitude AS
+      DOUBLE) BETWEEN -73.99 AND -34.79 ORDER BY val_niveltensao DESC, nom_subestacao;
+- property: license
+  value: CC-BY

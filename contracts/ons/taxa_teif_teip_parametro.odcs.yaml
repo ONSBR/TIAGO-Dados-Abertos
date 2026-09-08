@@ -1,0 +1,511 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:taxa_teif_teip_parametro
+name: taxa_teif_teip_parametro
+tenant: ons
+tags:
+- CEG
+- TEIFa
+- TEIFa TEIP parâmetros horas operação unidade geradora
+- TEIFa parâmetros
+- TEIP
+- TEIP parâmetros
+- confiabilidade
+- disponibilidade
+- horas de operação
+- horas de operação unidade geradora
+- indisponibilidade forçada
+- indisponibilidade programada
+- insumos TEIFa
+- insumos TEIP
+- unidade geradora
+- usina
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet
+  format: parquet
+description:
+  purpose: Fornecer os insumos de horas de operação que fundamentam o cálculo dos indicadores de confiabilidade
+    TEIFa e TEIP de unidades geradoras do SIN. É utilizado por analistas de confiabilidade e operadores
+    do ONS para monitorar o desempenho operacional de usinas, rastrear revisões de parâmetros por versão,
+    e suportar decisões regulatórias relacionadas à avaliação de disponibilidade de geração e cumprimento
+    de requisitos de confiabilidade estabelecidos pelo ONS e ANEEL.
+  limitations: Coluna din_parametro apresenta nulos na maior parte das linhas. Coluna dat_periodo é armazenada
+    como VARCHAR no schema físico, apesar de representar datas mensais no formato YYYY-MM-DD. A existência
+    de versões múltiplas (1 a 4) para o mesmo conjunto (cod_ceg, dat_periodo, nom_tpinsumo) pode gerar
+    duplicatas em análises que não filtram pela versão mais recente.
+  usage: Recuperar este dataset quando a pergunta envolver parâmetros de horas de operação, horas disponíveis
+    ou indisponíveis utilizados no cálculo das taxas TEIFa e TEIP de unidades geradoras do SIN.
+domain: geração
+schema:
+- name: taxa_teif_teip_parametro
+  physicalType: parquet
+  logicalType: object
+  physicalName: taxa_teif_teip_parametro
+  properties:
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina geradora à qual a unidade geradora pertence.
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome da usina
+      - planta geradora
+    - property: semanticType
+      value: DIMENSION
+  - name: id_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do tipo de usina geradora (ex: UHE, UTE, EOL, UFV).'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de usina
+      - tipo usina
+      - categoria de usina
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - Hidroelétrica
+      - Nuclear
+      - Térmica
+  - name: nom_unidadegeradora
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da unidade geradora individual dentro da usina, identificando a máquina específica.
+    customProperties:
+    - property: aliases
+      value:
+      - unidade geradora
+      - unidade
+      - máquina
+      - gerador
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL, identificador único da unidade geradora
+      no sistema regulatório.
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - CEG
+      - código CEG
+      - código de empreendimento
+      - código ANEEL
+    - property: semanticType
+      value: IDENTIFIER
+  - name: dat_periodo
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de referência do período de apuração dos parâmetros TEIFa/TEIP, armazenada como
+      VARCHAR no formato YYYY-MM-DD. Representa o primeiro dia do mês de apuração, confirmando granularidade
+      mensal. Requer conversão explícita para DATE em operações temporais.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - período
+      - data de referência
+      - mês de apuração
+      - competência
+      - data período
+    - property: semanticType
+      value: TIMESTAMP
+  - name: din_parametro
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Timestamp de registro ou atualização do parâmetro no sistema. Apresenta nulos na maior parte das linhas, indicando que o registro temporal do parâmetro frequentemente não é preenchido. Não deve
+      ser utilizado como coluna temporal primária para filtragem ou ordenação da série.
+
+      '
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 7 periodos da serie, que comeca em 2020). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - data do parâmetro
+      - timestamp do parâmetro
+      - data de registro
+    - property: semanticType
+      value: TIMESTAMP
+  - name: nom_tpinsumo
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome do tipo de insumo ou parâmetro utilizado no cálculo das taxas TEIFa e TEIP. Classifica
+      a natureza das horas de operação registradas (ex: horas disponíveis, horas indisponíveis forçadas,
+      horas indisponíveis programadas, horas de operação).
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de insumo
+      - tipo insumo
+      - tipo de parâmetro
+      - categoria do parâmetro
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - HDCE
+      - HDF
+      - HDP
+      - HEDF
+      - HEDP
+      - HP
+      - HRD
+      - HS
+  - name: val_parametro
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor numérico do parâmetro de horas de operação utilizado no cálculo das taxas TEIFa
+      e TEIP. Representa horas no período de apuração mensal, variando de 0 a aproximadamente 992,67 horas.
+      Zero indica ausência de operação no período.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - valor do parâmetro
+      - horas
+      - horas de operação
+      - valor
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: horas
+  - name: num_versao
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Número de versão do registro do parâmetro para o período de apuração. Indica que um
+      mesmo período pode ter múltiplas versões (1 a 4), refletindo revisões ou reprocessamentos dos dados
+      de disponibilidade. A versão mais alta representa geralmente o valor mais atualizado.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - versão
+      - número de versão
+      - revisão
+      - versao
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/taxa_teif_teip_parametro
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - horas de operacao da unidade geradora
+  - horas disponiveis e indisponiveis
+  - horimetro da unidade geradora
+  - horimetro
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver parâmetros de horas de operação, horas disponíveis
+    ou indisponíveis utilizados no cálculo das taxas TEIFa e TEIP de unidades geradoras do SIN. Também
+    relevante quando o analista precisar rastrear os insumos de cálculo de indicadores de confiabilidade,
+    verificar revisões de parâmetros por versão, ou comparar horas de operação entre usinas e períodos
+    mensais.
+- property: agentInstructions
+  value: '- [din_parametro] A maior parte dos registros possuem din_parametro nulo. O campo parece
+    ser preenchido apenas em versões revisadas (num_versao > 1) ou em parametrizações específicas, não
+    sendo populado na versão inicial de cada registro.
+
+
+    - [dat_periodo] dat_periodo é armazenado como VARCHAR em vez de DATE ou TIMESTAMP no dataset taxa_teif_teip_parametro,
+    exigindo conversão explícita para operações temporais. Risco de registros com formatos inconsistentes
+    (ex: DD/MM/YYYY ou YYYY-MM) que falhariam em TRY_CAST silenciosamente.
+
+
+    - [num_versao] num_versao é armazenado como DOUBLE (ex: 1.0, 2.0) em vez de INTEGER no dataset taxa_teif_teip_parametro,
+    o que pode causar comparações inesperadas em filtros (ex: num_versao = 1 vs num_versao = 1.0). Recomenda-se
+    usar CAST(num_versao AS INTEGER) em queries de filtragem.
+
+
+    - [val_parametro] val_parametro pode atingir ~992,67 horas no dataset taxa_teif_teip_parametro, valor
+    superior ao máximo teórico mensal (~744 horas em meses de 31 dias). Valores acima de 744 podem indicar
+    acumulação de múltiplos períodos, erro de parametrização ou metodologia específica de apuração que
+    extrapola o mês calendário.
+
+
+    - [cod_ceg] A combinação (cod_ceg, dat_periodo, nom_tpinsumo, num_versao) deve ser única por registro
+    no dataset taxa_teif_teip_parametro. Duplicatas nessa chave indicariam inconsistência nos dados de
+    parametrização, podendo distorcer cálculos de TEIFa e TEIP.
+
+
+    - [id_tipousina] Valores com trailing spaces detectados em ''id_tipousina''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.
+
+    - [din_parametro] Coluna ''din_parametro'' ausente em arquivos históricos (ex: TAXA_TEIF_TEIP_PARAM_2020.parquet).
+    Presente apenas a partir de versões recentes (ex: TAXA_TEIF_TEIP_PARAM_2026.parquet). Queries históricas
+    retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.'
+- property: typicalQuestions
+  value:
+  - Quais são as horas de operação registradas para a usina Itaipu no primeiro semestre de 2024?
+  - Qual unidade geradora apresentou maior número de horas indisponíveis forçadas em 2023?
+  - Como evoluíram os parâmetros de horas disponíveis das usinas hidrelétricas ao longo de 2022?
+  - Existem revisões (versões múltiplas) nos parâmetros de TEIFa para determinada usina em 2024?
+  - Quais tipos de insumo (nom_tpinsumo) estão registrados para as usinas termelétricas no último mês
+    disponível?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2020-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - teif
+    - teip
+    - taxa de indisponibilidade
+    family: taxa_teif
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: dat_periodo
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - dat_periodo
+      - cod_ceg
+      - nom_tpinsumo
+      - num_versao
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: nom_usina
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: parametro
+      label: Parametro de Horas TEIFa/TEIP
+      columns:
+      - val_parametro
+      expression: val_parametro
+      quantity_kind: numeric
+      unit_native: horas
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_parametro)
+          unit: horas
+        average:
+          sql: AVG(val_parametro)
+          unit: horas
+        maximum:
+          sql: MAX(val_parametro)
+          unit: horas
+        time_series:
+          sql: SUM(val_parametro)
+          unit: horas
+        ranking:
+          sql: SUM(val_parametro)
+          unit: horas
+        comparison:
+          sql: SUM(val_parametro)
+          unit: horas
+      interval_hours: 1.0
+      aliases:
+      - valor do parametro
+      - horas
+      - horas de operacao
+      - horas disponiveis
+      - horas indisponiveis forcadas
+      - horas indisponiveis programadas
+      - insumo TEIFa
+      - insumo TEIP
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      id_tipousina:
+        Hidroeletrica:
+          aliases:
+          - Hidroeletrica
+          - hidroeletrica
+          - UHE
+          - hidreletrica
+          - hidro
+          filter: TRIM(id_tipousina) = 'Hidroelétrica'
+        Nuclear:
+          aliases:
+          - Nuclear
+          - nuclear
+          - UNA
+          filter: TRIM(id_tipousina) = 'Nuclear'
+        Termica:
+          aliases:
+          - Termica
+          - termica
+          - UTE
+          - termeletrica
+          filter: TRIM(id_tipousina) = 'Térmica'
+      nom_tpinsumo:
+        HDCE:
+          aliases:
+          - HDCE
+          - horas disponiveis com restricao de energia
+          filter: nom_tpinsumo = 'HDCE'
+        HDF:
+          aliases:
+          - HDF
+          - horas de indisponibilidade forcada
+          - horas forcadas
+          filter: nom_tpinsumo = 'HDF'
+        HDP:
+          aliases:
+          - HDP
+          - horas de indisponibilidade programada
+          - horas programadas
+          filter: nom_tpinsumo = 'HDP'
+        HEDF:
+          aliases:
+          - HEDF
+          - horas de indisponibilidade forcada estendida
+          filter: nom_tpinsumo = 'HEDF'
+        HEDP:
+          aliases:
+          - HEDP
+          - horas de indisponibilidade programada estendida
+          filter: nom_tpinsumo = 'HEDP'
+        HP:
+          aliases:
+          - HP
+          - horas de operacao
+          - horas em operacao
+          filter: nom_tpinsumo = 'HP'
+        HRD:
+          aliases:
+          - HRD
+          - horas de restricao de despacho
+          filter: nom_tpinsumo = 'HRD'
+        HS:
+          aliases:
+          - HS
+          - horas do periodo
+          - horas do mes
+          filter: nom_tpinsumo = 'HS'
+      num_versao:
+        '1':
+          aliases:
+          - versao 1
+          - versao inicial
+          - '1'
+          - '1.0'
+          filter: CAST(num_versao AS INTEGER) = 1
+        '2':
+          aliases:
+          - versao 2
+          - primeira revisao
+          - '2'
+          - '2.0'
+          filter: CAST(num_versao AS INTEGER) = 2
+        '3':
+          aliases:
+          - versao 3
+          - segunda revisao
+          - '3'
+          - '3.0'
+          filter: CAST(num_versao AS INTEGER) = 3
+        '4':
+          aliases:
+          - versao 4
+          - terceira revisao
+          - '4'
+          - '4.0'
+          filter: CAST(num_versao AS INTEGER) = 4
+    sql_patterns:
+      parametro_mensal_por_tipo:
+        template: "SELECT id_tipousina,\n  DATE_TRUNC('month', TRY_CAST(din_referencia AS DATE)) AS mes,\n\
+          \  AVG(TRY_CAST(val_teifa AS DOUBLE)) AS teifa_media,\n  AVG(TRY_CAST(val_teip AS DOUBLE)) AS\
+          \ teip_media\nFROM {source}\nWHERE din_referencia IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: horas
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - parametro
+          grain: month
+      parametro_por_usina_periodo:
+        template: "SELECT nom_usina,\n  TRY_CAST(din_referencia AS DATE) AS data,\n  TRY_CAST(val_teifa\
+          \ AS DOUBLE) AS teifa,\n  TRY_CAST(val_teip AS DOUBLE) AS teip\nFROM {source}\nWHERE TRY_CAST(din_referencia\
+          \ AS DATE) >= CURRENT_DATE - INTERVAL '90 days'\nORDER BY nom_usina, data"
+        output_unit: horas
+        matches:
+          output_modes:
+          - total
+          - ranking
+          metrics:
+          - parametro
+          grain: month
+- property: fewShotQueries
+  value:
+  - question: Qual foi o total de horas disponíveis por tipo de usina ao longo de 2024, considerando apenas
+      a versão mais recente dos parâmetros?
+    sql: SELECT id_tipousina, nom_tpinsumo, SUM(val_parametro) AS total_horas, COUNT(DISTINCT cod_ceg)
+      AS qtd_unidades FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet')
+      WHERE TRY_CAST(dat_periodo AS DATE) >= DATE '2024-01-01' AND TRY_CAST(dat_periodo AS DATE) <= DATE
+      '2024-12-01' AND CAST(num_versao AS INTEGER) = ( SELECT MAX(CAST(num_versao AS INTEGER)) FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet')
+      AS sub WHERE sub.cod_ceg = cod_ceg AND sub.dat_periodo = dat_periodo AND sub.nom_tpinsumo = nom_tpinsumo
+      ) GROUP BY id_tipousina, nom_tpinsumo ORDER BY id_tipousina, nom_tpinsumo;
+  - question: Como evoluíram mensalmente as horas de indisponibilidade forçada das usinas hidrelétricas
+      entre 2022 e 2023?
+    sql: SELECT nom_usina, dat_periodo, nom_tpinsumo, SUM(val_parametro) AS total_horas_insumo FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet')
+      WHERE TRIM(id_tipousina) = 'UHE' AND TRY_CAST(dat_periodo AS DATE) >= DATE '2022-01-01' AND TRY_CAST(dat_periodo
+      AS DATE) <= DATE '2023-12-01' AND CAST(num_versao AS INTEGER) = 1 GROUP BY nom_usina, dat_periodo,
+      nom_tpinsumo ORDER BY nom_usina, dat_periodo, nom_tpinsumo;
+  - question: Quais unidades geradoras tiveram parâmetros revisados (num_versao > 1) e qual foi a diferença
+      entre a versão original e a revisada?
+    sql: SELECT v1.cod_ceg, v1.nom_usina, v1.nom_unidadegeradora, v1.dat_periodo, v1.nom_tpinsumo, v1.val_parametro
+      AS val_versao_1, v2.val_parametro AS val_versao_revisada, CAST(v2.num_versao AS INTEGER) AS num_versao_revisada,
+      (v2.val_parametro - v1.val_parametro) AS diferenca_horas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet')
+      AS v1 INNER JOIN read_parquet('s3://ons-aws-prod-opendata/dataset/taxa_teif_teip_parametro/*.parquet')
+      AS v2 ON v1.cod_ceg = v2.cod_ceg AND v1.dat_periodo = v2.dat_periodo AND v1.nom_tpinsumo = v2.nom_tpinsumo
+      WHERE CAST(v1.num_versao AS INTEGER) = 1 AND CAST(v2.num_versao AS INTEGER) > 1 AND v2.val_parametro
+      <> v1.val_parametro ORDER BY ABS(v2.val_parametro - v1.val_parametro) DESC LIMIT 100;
+- property: license
+  value: CC-BY

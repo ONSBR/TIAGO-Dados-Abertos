@@ -1,0 +1,893 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:balanco-energia-subsistema
+name: balanco-energia-subsistema
+tenant: ons
+tags:
+- SIN
+- SIN balanço horário
+- balanco energia subsistema
+- balanço de energia
+- balanço de energia subsistema
+- balanço energético subsistema
+- carga verificada
+- geração e carga por subsistema
+- geração eólica
+- geração hidráulica
+- geração solar
+- geração térmica
+- intercâmbio de energia
+- subsistema
+- série horária
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/balanco_energia_subsistema_ho/*.parquet
+  format: parquet
+description:
+  purpose: Suportar operadores do sistema elétrico, analistas de planejamento energético e reguladores
+    no acompanhamento do equilíbrio horário entre oferta e demanda de energia em cada subsistema do SIN,
+    permitindo análise da composição da matriz energética, avaliação de intercâmbios inter-regionais,
+    detecção de desvios entre programação e realização do despacho, e suporte a decisões de operação,
+    planejamento e regulação do setor elétrico brasileiro.
+  limitations: A coluna val_intercambio admite valores negativos por definição (importação líquida), mas
+    a soma de val_intercambio de todos os subsistemas para um mesmo din_instante deve ser próxima de zero.
+    Geração solar deve ser zero em períodos noturnos (aproximadamente 21h–04h). Geração eólica deve ser
+    zero ou muito próxima de zero para o subsistema Norte (N) e para períodos anteriores a 2005 em qualquer
+    subsistema, dado o histórico de expansão eólica no Brasil.
+  usage: Recuperar este dataset quando a pergunta envolver balanço carga-geração horário por subsistema
+    do SIN, composição da matriz energética (hidráulica, térmica, eólica, solar), intercâmbio líquido
+    entre subsistemas ou análise de equilíbrio oferta-demanda em granularidade horária.
+domain: carga
+schema:
+- name: balanco_energia_subsistema
+  physicalType: parquet
+  logicalType: object
+  physicalName: balanco_energia_subsistema
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador alfanumérico do subsistema elétrico do SIN. Valores possíveis: SE (Sudeste/Centro-Oeste),
+      S (Sul), NE (Nordeste), N (Norte) e SIN (linha AGREGADA oficial = soma exata dos 4 subsistemas,
+      presente em todos os anos). CUIDADO: somar sem filtrar esta coluna DOBRA o total — use = ''SIN''
+      para o total oficial ou <> ''SIN'' para abrir por subsistema. Compõe a chave primária natural junto
+      com din_instante.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - id subsistema
+      - código do subsistema
+      - sigla subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+      - SIN
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome completo do subsistema elétrico correspondente ao id_subsistema. Exemplos: Sudeste/Centro-Oeste,
+      Sul, Nordeste, Norte.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - subsistema
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SISTEMA INTERLIGADO NACIONAL
+      - SUDESTE/CENTRO-OESTE
+      - SUL
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data e hora do registro horário do balanço de energia. Representa o instante de referência
+      (início do intervalo horário) para os valores de geração, carga e intercâmbio registrados. Granularidade
+      horária confirmada pela descrição CKAN e pelo tipo TIMESTAMP no schema físico. Compõe a chave primária
+      natural junto com id_subsistema.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data
+      - hora
+      - instante
+      - data hora
+      - timestamp
+      - data e hora
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_gerhidraulica
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Geração hidráulica verificada no subsistema no instante de referência, expressa em MWmed.
+      Representa a potência média gerada pelas usinas hidrelétricas do subsistema no intervalo horário.
+      Valores negativos são fisicamente impossíveis em condições normais (exceto usinas reversíveis, raras
+      no SIN).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração hidráulica
+      - geração hidrelétrica
+      - hidráulica
+      - hidro
+      - geração hídrica
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_gerhidraulica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_gertermica
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Geração térmica verificada no subsistema no instante de referência, expressa em MWmed.
+      Inclui usinas termelétricas a gás natural, carvão, óleo combustível, nuclear e biomassa despachadas
+      no período. Valores negativos são fisicamente impossíveis.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração térmica
+      - geração termelétrica
+      - térmica
+      - termelétrica
+      - despacho térmico
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_gertermica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_gereolica
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Geração eólica verificada no subsistema no instante de referência, expressa em MWmed.
+      Representa a potência média gerada pelos parques eólicos do subsistema no intervalo horário. Valores
+      próximos de zero são esperados para o subsistema Norte (N) e para períodos anteriores à expansão
+      eólica (~2005).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração eólica
+      - eólica
+      - vento
+      - geração eólica verificada
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_gereolica AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_gersolar
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Geração solar fotovoltaica verificada no subsistema no instante de referência, expressa
+      em MWmed. Inclui geração centralizada (UFV) e distribuída (GD solar). Valores zero são esperados
+      em períodos noturnos e em anos anteriores à expansão solar (~2015). Pode incluir geração distribuída
+      a partir de determinado período de revisão metodológica.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração solar
+      - solar
+      - fotovoltaica
+      - geração fotovoltaica
+      - GD solar
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_gersolar AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_carga
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Carga verificada (demanda de energia elétrica) no subsistema no instante de referência,
+      expressa em MWmed. Representa o consumo total verificado no subsistema, incluindo perdas de transmissão
+      e distribuição. É a variável central do balanço carga-geração. Valores zero ou negativos são fisicamente
+      impossíveis para subsistemas em operação normal.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - carga
+      - demanda
+      - consumo
+      - carga verificada
+      - demanda verificada
+      - carga do sistema
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_carga AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_intercambio
+    physicalType: VARCHAR
+    logicalType: number
+    description: 'Intercâmbio líquido de energia verificado no subsistema no instante de referência, expresso
+      em MWmed. Valor positivo indica exportação líquida; valor negativo indica importação líquida. A
+      soma dos intercâmbios de todos os subsistemas para um mesmo din_instante deve ser próxima de zero
+      (balanço sistêmico do SIN).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - intercâmbio
+      - intercambio
+      - troca de energia
+      - exportação
+      - importação
+      - fluxo entre subsistemas
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_intercambio AS DOUBLE)
+    - property: unit
+      value: MWmed
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/balanco-energia-subsistema
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanto foi gerado por subsistema
+  - geracao por fonte por hora
+  - matriz eletrica do sin
+  - participacao de cada fonte
+  - quanto a eolica representou
+  - carga e geracao juntas
+  - de onde veio a energia
+  - mix de geracao verificado
+  - geracao eolica total
+  - geracao solar total
+  - geracao termica total
+  - geracao hidraulica total
+  - geracao total do sin
+  - matriz energetica
+  - participacao das fontes na matriz
+  - geracao renovavel
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver balanço carga-geração horário por subsistema
+    do SIN, composição da matriz energética (hidráulica, térmica, eólica, solar), intercâmbio líquido
+    entre subsistemas ou análise de equilíbrio oferta-demanda em granularidade horária. Também relevante
+    para perguntas sobre evolução histórica da geração renovável, picos de carga por subsistema e análise
+    de despacho verificado no Sistema Interligado Nacional.
+- property: agentInstructions
+  value: |
+    - [id_subsistema] DUPLA CONTAGEM: o dataset contém a linha agregada SIN (Sistema Interligado Nacional) JUNTO com os 4 subsistemas, em TODOS os anos (5 registros por hora). SIN = soma exata de SE+S+NE+N. Somar sem filtrar id_subsistema conta cada MWh DUAS vezes (total sai 2x o real). Para totais do SIN use id_subsistema = 'SIN' (linha oficial); para abrir por subsistema use id_subsistema <> 'SIN'. NUNCA agregue as 5 linhas juntas. Pergunta sem subsistema explícito = escopo SIN (Brasil inteiro): filtre id_subsistema = 'SIN' também para picos/máximos (MAX sem filtro pega a linha SIN por ser a maior — certo por sorte; MAX com filtro de UM subsistema responde só aquele subsistema, NÃO o Brasil).
+
+    - [val_intercambio] A coluna val_intercambio admite valores negativos por definição (importação líquida), porém valores muito negativos ou muito positivos podem indicar inconsistências no processo de consistência recorrente. O balanço físico exige que a soma dos intercâmbios de todos os subsistemas seja aproximadamente zero em cada instante horário.
+
+    - [val_gersolar] Geração solar deve ser zero em períodos noturnos (aproximadamente 19h-06h horário local) e para anos anteriores a 2013, quando a capacidade instalada fotovoltaica era desprezível no SIN. Valores negativos são fisicamente impossíveis.
+
+    - [val_gereolica] Geração eólica deve ser próxima de zero para anos anteriores a 2005, quando a capacidade instalada eólica era desprezível no SIN. Valores negativos são fisicamente impossíveis e indicam inconsistência nos dados.
+
+    - [val_carga] Carga verificada deve ser sempre positiva e dentro de faixas históricas plausíveis por subsistema. Valores negativos ou próximos de zero são fisicamente impossíveis para subsistemas ativos. Valores acima de 100.000 MWmed devem ser investigados.
+
+    - [din_instante] Série temporal horária pode apresentar lacunas (horas faltantes) ou duplicatas por subsistema, especialmente em períodos de transição de horário de verão ou durante revisões retroativas do processo de consistência recorrente. Espera-se exatamente 5 registros por hora (SE, S, NE, N e a linha agregada SIN).
+
+    - [val_gerhidraulica] Geração hidráulica deve ser sempre não-negativa. Valores negativos são fisicamente impossíveis para geração hidráulica agregada por subsistema e indicam inconsistência nos dados. Monitorar também valores extremamente elevados que possam indicar erros de escala ou unidade.
+
+    - [val_gertermica] Geração térmica deve ser sempre não-negativa. Valores negativos são fisicamente impossíveis para geração térmica agregada por subsistema e indicam inconsistência nos dados. Monitorar também valores extremamente elevados que possam indicar erros de escala ou unidade.
+
+    - [id_subsistema] A chave primária natural é (din_instante, id_subsistema). Duplicatas nessa combinação indicam falha no processo de exportação ou revisão retroativa sem remoção do registro original. Devem ser investigadas antes de qualquer agregação temporal ou espacial.
+
+    - [tipos] As colunas `val_carga`, `val_gereolica`, `val_gerhidraulica`, `val_gersolar`, `val_gertermica`, `val_intercambio` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+    - [id_subsistema / nom_subsistema — padding] id_subsistema vem PREENCHIDO com espacos (padding a 3 chars: 'N  ', 'NE ', 'S  ', 'SE ', 'SIN'). SEMPRE use TRIM(id_subsistema) em filtros de igualdade/IN — sem TRIM o filtro casa nada e retorna 0 linhas (falso negativo). Obs: nom_subsistema NAO e padded (nomes completos de tamanho variavel).
+
+    - [val_gerX/val_carga — conversao de unidade] As colunas val_gerX e val_carga sao MW por intervalo horario (MWmed da hora). Energia: SUM(val)/1000 = GWh (ou *interval_hours). Potencia media: AVG(val) = MWmed. NUNCA multiplique por 730/x horas nem faca GWh*1000 para obter MWmed.
+- property: typicalQuestions
+  value:
+  - Qual foi a geração hidráulica média do subsistema Sudeste/Centro-Oeste em janeiro de 2024?
+  - Como evoluiu a participação da geração eólica no subsistema Nordeste entre 2010 e 2024?
+  - Qual subsistema foi o maior exportador líquido de energia no verão de 2023?
+  - Qual foi a carga máxima verificada no SIN em 2024 e em qual hora ocorreu?
+  - Como se compõe a matriz de geração do subsistema Sul em períodos de baixa hidrologia?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Qual foi a geração solar no Nordeste ontem?"
+  - "Ranking de geração eólica por subsistema em 2026"
+  - "Qual subsistema tá mandando mais hidráulica hoje?"
+  - "Quanto a solar cresceu no NE entre janeiro e agosto de 2026?"
+  - "Comparar geração hidráulica Sudeste vs Sul em agosto 2026"
+  - "Eólica tá crescendo no Nordeste?"
+  - "Como evoluiu a solar no SIN ao longo de 2026?"
+  - "Ranking de geração total por subsistema em setembro 2026"
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_subsistema
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_energia_subsistema_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2000-01-01'
+- property: semantics
+  value:
+    measure_terms:
+    - balanco
+    - matriz
+    - fonte
+    - fontes
+    - intercambio
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: subsistema
+      entity: fonte_agregada
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      has_total_row:
+        column: id_subsistema
+        values:
+        - SIN
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: _pivot(val_gereolica, val_gerhidraulica, val_gersolar, val_gertermica)
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: geracao_total
+      label: Geração Total
+      columns:
+      - val_gerhidraulica
+      - val_gertermica
+      - val_gereolica
+      - val_gersolar
+      expression: TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+        AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+            AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+            AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+            AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+            AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+            AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica
+            AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+    - id: gerhidraulica
+      label: Geração Hidráulica
+      columns:
+      - val_gerhidraulica
+      expression: TRY_CAST(val_gerhidraulica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_gerhidraulica AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_gerhidraulica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_gerhidraulica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_gerhidraulica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_gerhidraulica AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_gerhidraulica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração hidráulica
+      - geração hidrelétrica
+      - hidráulica
+      - hidro
+      - geração hídrica
+      - hidraulica
+      - hidreletrica
+      - hidrica
+      - uhe
+      - agua
+    - id: gertermica
+      label: Geração Térmica
+      columns:
+      - val_gertermica
+      expression: TRY_CAST(val_gertermica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_gertermica AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_gertermica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_gertermica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_gertermica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_gertermica AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_gertermica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração térmica
+      - geração termelétrica
+      - térmica
+      - termelétrica
+      - despacho térmico
+      - termica
+      - termeletrica
+      - ute
+    - id: gereolica
+      label: Geração Eólica
+      columns:
+      - val_gereolica
+      expression: TRY_CAST(val_gereolica AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_gereolica AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_gereolica AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_gereolica AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_gereolica AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_gereolica AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_gereolica AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração eólica
+      - eólica
+      - vento
+      - geração eólica verificada
+      - eolica
+      - energia dos ventos
+      - wind
+      - parques eolicos
+    - id: gersolar
+      label: Geração Solar
+      columns:
+      - val_gersolar
+      expression: TRY_CAST(val_gersolar AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_gersolar AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_gersolar AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_gersolar AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração solar
+      - solar
+      - fotovoltaica
+      - geração fotovoltaica
+      - GD solar
+      - fv
+      - energia solar
+    - id: carga
+      label: Carga Verificada
+      columns:
+      - val_carga
+      expression: TRY_CAST(val_carga AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_carga AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_carga AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_carga AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - carga
+      - demanda
+      - consumo
+      - carga verificada
+      - demanda verificada
+      - carga do sistema
+    - id: intercambio
+      label: Intercâmbio
+      columns:
+      - val_intercambio
+      expression: TRY_CAST(val_intercambio AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_intercambio AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_intercambio AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_intercambio AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_intercambio AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_intercambio AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_intercambio AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - intercâmbio
+      - intercambio
+      - troca de energia
+      - exportação
+      - importação
+      - fluxo entre subsistemas
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+        SIN:
+          aliases:
+          - sistema interligado nacional
+          - brasil
+          - nacional
+          - sin
+          filter: id_subsistema = 'SIN'
+      fonte:
+        hidraulica:
+          aliases:
+          - hidraulica
+          - hidreletrica
+          - hidrica
+          - uhe
+          - agua
+          - hidro
+          columns:
+          - val_gerhidraulica
+        termica:
+          aliases:
+          - termica
+          - termeletrica
+          - ute
+          - despacho termico
+          columns:
+          - val_gertermica
+        eolica:
+          aliases:
+          - eolica
+          - vento
+          - energia dos ventos
+          - wind
+          - parques eolicos
+          columns:
+          - val_gereolica
+        solar:
+          aliases:
+          - solar
+          - fotovoltaica
+          - fv
+          - energia solar
+          - gd solar
+          columns:
+          - val_gersolar
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          filter: nom_subsistema = 'NORTE'
+        SISTEMA INTERLIGADO NACIONAL:
+          aliases:
+          - SISTEMA INTERLIGADO NACIONAL
+          filter: nom_subsistema = 'SISTEMA INTERLIGADO NACIONAL'
+        SUDESTE/CENTRO-OESTE:
+          aliases:
+          - SUDESTE/CENTRO-OESTE
+          filter: nom_subsistema = 'SUDESTE/CENTRO-OESTE'
+        SUL:
+          aliases:
+          - SUL
+          filter: nom_subsistema = 'SUL'
+    sql_patterns:
+      geracao_total_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM((TRY_CAST(val_gerhidraulica AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica\
+          \ AS DOUBLE) + TRY_CAST(val_gersolar AS DOUBLE)) * 1.0) / 1000 AS valor\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM din_instante) = {year}\n  AND id_subsistema NOT IN ('SIN')\nGROUP BY 1,\
+          \ 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao_total
+          grain: month
+        validated_params:
+          year: '2002'
+      balanco_horario_subsistema:
+        template: "SELECT din_instante, id_subsistema,\n  TRY_CAST(val_gerhidraulica AS DOUBLE) AS hidraulica_mwmed,\n\
+          \  TRY_CAST(val_gertermica AS DOUBLE) AS termica_mwmed,\n  TRY_CAST(val_gereolica AS DOUBLE)\
+          \ AS eolica_mwmed,\n  TRY_CAST(val_gersolar AS DOUBLE) AS solar_mwmed,\n  TRY_CAST(val_carga\
+          \ AS DOUBLE) AS carga_mwmed\nFROM {source}\nWHERE TRY_CAST(din_instante AS DATE) = '{data}'\n\
+          ORDER BY din_instante"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - geracao_total
+          - carga
+          - intercambio
+          grain: hour
+      intercambio_liquido_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM(TRY_CAST(val_intercambio AS DOUBLE) * 1.0) / 1000 AS intercambio_gwh\nFROM {source}\n\
+          WHERE id_subsistema NOT IN ('SIN')\n  AND din_instante BETWEEN {start} AND {end}\nGROUP BY 1,\
+          \ 2\nORDER BY 1, intercambio_gwh DESC"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - intercambio
+          grain: month
+        validated_params:
+          start: '2000-01-01 00:00:00'
+          end: '2002-04-13 09:00:00'
+      geracao_por_fonte_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  SUM(TRY_CAST(val_gerhidraulica\
+          \ AS DOUBLE)) / 1000 AS hidraulica_gwh,\n  SUM(TRY_CAST(val_gertermica AS DOUBLE)) / 1000 AS\
+          \ termica_gwh,\n  SUM(TRY_CAST(val_gereolica AS DOUBLE)) / 1000 AS eolica_gwh,\n  SUM(TRY_CAST(val_gersolar\
+          \ AS DOUBLE)) / 1000 AS solar_gwh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante\
+          \ AS TIMESTAMP)) = {year}\n  AND id_subsistema NOT IN ('SIN')\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao_total
+          grain: month
+        validated_params:
+          year: '2025'
+      geracao_por_fonte_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(val_gerhidraulica\
+          \ AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS hidraulica_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(val_gertermica AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)),\
+          \ 1) AS termica_mwmed,\n  ROUND(SUM(TRY_CAST(val_gereolica AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante\
+          \ AS TIMESTAMP)), 1) AS eolica_mwmed,\n  ROUND(SUM(TRY_CAST(val_gersolar AS DOUBLE)) / COUNT(DISTINCT\
+          \ TRY_CAST(din_instante AS TIMESTAMP)), 1) AS solar_mwmed\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\n  AND id_subsistema NOT IN ('SIN')\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - geracao_total
+          grain: month
+        validated_params:
+          year: '2025'
+      geracao_por_fonte_anual:
+        template: "WITH a AS (\n  SELECT\n    SUM(TRY_CAST(val_gerhidraulica AS DOUBLE)) AS hidraulica,\n\
+          \    SUM(TRY_CAST(val_gertermica AS DOUBLE)) AS termica,\n    SUM(TRY_CAST(val_gereolica AS\
+          \ DOUBLE)) AS eolica,\n    SUM(TRY_CAST(val_gersolar AS DOUBLE)) AS solar\n  FROM {source}\n\
+          \  WHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\n    AND id_subsistema\
+          \ NOT IN ('SIN')\n)\nSELECT fonte,\n       ROUND(energia / 1000, 1) AS energia_gwh,\n      \
+          \ ROUND(100.0 * energia / (SELECT hidraulica + termica + eolica + solar FROM a), 1) AS participacao_pct\n\
+          FROM (\n  SELECT 'Hidraulica' AS fonte, hidraulica AS energia FROM a\n  UNION ALL SELECT 'Termica',\
+          \ termica FROM a\n  UNION ALL SELECT 'Eolica', eolica FROM a\n  UNION ALL SELECT 'Solar', solar\
+          \ FROM a\n) t\nORDER BY energia_gwh DESC"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao_total
+          grain: year
+        validated_params:
+          year: '2024'
+      geracao_total_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(val_gerhidraulica\
+          \ AS DOUBLE) + TRY_CAST(val_gertermica AS DOUBLE) + TRY_CAST(val_gereolica AS DOUBLE) + TRY_CAST(val_gersolar\
+          \ AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS geracao_total_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\n  AND\
+          \ id_subsistema NOT IN ('SIN')\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - geracao_total
+          grain: month
+        validated_params:
+          year: '2025'
+      intercambio_diario_por_subsistema:
+        template: "SELECT\n  DATE_TRUNC('day', TRY_CAST(din_instante AS TIMESTAMP)) AS dia,\n  TRIM(id_subsistema)\
+          \ AS id_subsistema,\n  ROUND(AVG(TRY_CAST(val_intercambio AS DOUBLE)), 1) AS intercambio_medio_mwmed,\n\
+          \  ROUND(MIN(TRY_CAST(val_intercambio AS DOUBLE)), 1) AS intercambio_min_mwmed,\n  ROUND(MAX(TRY_CAST(val_intercambio\
+          \ AS DOUBLE)), 1) AS intercambio_max_mwmed,\n  COUNT(TRY_CAST(val_intercambio AS DOUBLE)) AS\
+          \ horas\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\n\
+          \  AND EXTRACT(MONTH FROM TRY_CAST(din_instante AS TIMESTAMP)) = {month}\n  AND TRIM(id_subsistema)\
+          \ IN ('N', 'NE', 'S', 'SE')\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - intercambio
+          grain: day
+        validated_params:
+          year: '2026'
+          month: '8'
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu a participação percentual da geração eólica na carga do subsistema Nordeste
+      mês a mês?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema, AVG(TRY_CAST(val_gereolica AS DOUBLE))
+      AS media_eolica_mwmed, AVG(val_carga) AS media_carga_mwmed, ROUND(100.0 * AVG(val_gereolica) / NULLIF(AVG(val_carga),
+      0), 2) AS participacao_eolica_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_energia_subsistema_ho/*.parquet')
+      WHERE id_subsistema = 'NE' AND din_instante >= '2015-01-01' GROUP BY DATE_TRUNC('month', TRY_CAST(din_instante
+      AS TIMESTAMP)), id_subsistema ORDER BY mes DESC LIMIT 100;
+  - question: Qual foi o pico de carga horária em cada subsistema do SIN durante o ano de 2024 e em que
+      data/hora ocorreu?
+    sql: WITH ranked AS ( SELECT id_subsistema, nom_subsistema, din_instante, val_carga, ROW_NUMBER()
+      OVER (PARTITION BY id_subsistema ORDER BY val_carga DESC) AS rn FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_energia_subsistema_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' ) SELECT id_subsistema, nom_subsistema,
+      din_instante AS instante_pico, val_carga AS pico_carga_mwmed FROM ranked WHERE rn = 1 ORDER BY pico_carga_mwmed
+      DESC;
+  - question: Qual foi o balanço entre geração total e carga verificada no SIN nas últimas 24 horas disponíveis?
+    sql: WITH ultima_data AS ( SELECT MAX(DATE_TRUNC('day', TRY_CAST(din_instante AS TIMESTAMP))) AS max_dia
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_energia_subsistema_ho/*.parquet')
+      ) SELECT b.din_instante, SUM((b.val_gerhidraulica) * 1.0) / 1000 AS geracao_hidraulica_sin, SUM((b.val_gertermica)
+      * 1.0) / 1000 AS geracao_termica_sin, SUM((b.val_gereolica) * 1.0) / 1000 AS geracao_eolica_sin,
+      SUM((b.val_gersolar) * 1.0) / 1000 AS geracao_solar_sin, SUM((b.val_gerhidraulica + b.val_gertermica
+      + b.val_gereolica + b.val_gersolar) * 1.0) / 1000 AS geracao_total_sin, SUM((b.val_carga) * 1.0)
+      / 1000 AS carga_total_sin, SUM((b.val_gerhidraulica + b.val_gertermica + b.val_gereolica + b.val_gersolar)
+      * 1.0) / 1000 - SUM((b.val_carga) * 1.0) / 1000 AS saldo_balanco FROM read_parquet('s3://ons-aws-prod-opendata/dataset/balanco_energia_subsistema_ho/*.parquet')
+      AS b CROSS JOIN ultima_data AS u WHERE DATE_TRUNC('day', b.din_instante) = u.max_dia GROUP BY b.din_instante
+      ORDER BY b.din_instante;
+- property: license
+  value: CC-BY

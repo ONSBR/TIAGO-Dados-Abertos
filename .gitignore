@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Coverage
+htmlcov/
+coverage.xml
+.coverage
+
+# Ruff
+.ruff_cache/
+
+# Cache de contratos: ARTEFATO, gerado por scripts/build_contracts_cache.py.
+# A fonte de verdade sao os YAML em contracts/ — versionar o cache criaria uma
+# segunda verdade que envelhece calada.
+contracts_cache.json
+
+# Arquivos temporarios na raiz com prefixo underscore. Root-anchored (/) de
+# proposito: um "_*" solto casaria com arquivos internos do pacote em src/.
+/_*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Resultados de benchmark ponta a ponta: carregam perguntas reais de usuarios.
+tests/benchmark_*.json
+# Agentes locais do Kiro CLI, com caminhos absolutos desta maquina.
+.kiro/
+
+# Scripts de teste (workflow local)
+scripts_test/

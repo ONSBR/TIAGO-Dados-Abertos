@@ -1,0 +1,375 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_disponibilidade_ft_conversor
+name: ind_disponibilidade_ft_conversor
+tenant: ons
+tags:
+- DISPFTConv
+- FTConv
+- HVDC
+- HVDC disponibilidade
+- ONS
+- confiabilidade
+- conversor
+- disponibilidade
+- disponibilidade FT conversora
+- função-transmissão
+- indicador disponibilidade conversor
+- indicador-operacional
+- mensal
+- transmissão
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_conversor_me/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que analistas de transmissão, gestores do ONS e agentes regulatórios monitorem o desempenho
+    operacional mensal dos conversores do sistema de transmissão brasileiro, avaliando o cumprimento de
+    metas regulatórias de disponibilidade, identificando períodos de indisponibilidade por categoria técnica
+    e suportando decisões de manutenção preventiva, planejamento da confiabilidade e elaboração de relatórios
+    de desempenho do sistema HVDC.
+  limitations: O campo val_dispftconv admite o valor 0. Com poucas linhas para o periodo coberto a partir de jan/2023 e multiplos valores de cod_caracteristica, pode haver meses sem registro
+    para determinadas características técnicas. O significado exato dos valores de cod_caracteristica
+    não está documentado no dicionário de dados disponível (título e colunas CKAN estão vazios).
+  usage: Recuperar este dataset quando o analista perguntar sobre disponibilidade de conversores de transmissão,
+    indicadores DISPFTConv, desempenho de equipamentos HVDC ou metas regulatórias de disponibilidade de
+    Funções Transmissão Conversoras.
+domain: transmissão
+schema:
+- name: ind_disponibilidade_ft_conversor
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_disponibilidade_ft_conversor
+  properties:
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da característica técnica do conversor, provavelmente representando
+      o nível de tensão ou tipo de Função Transmissão Conversora (FTConv) agregada. Utilizado para segmentar
+      os indicadores de disponibilidade por categoria técnica do equipamento conversor.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - caracteristica
+      - nivel_tensao
+      - tipo_conversor
+      - categoria_conversor
+      - cod_ft_conversor
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - FT - 13.8
+      - FT - 500
+      - FT - 525
+      - FT - 800
+  - name: dat_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador de disponibilidade, sempre no primeiro dia do mês (ex:
+      2023-01-01, 2023-02-01), confirmando granularidade mensal. Representa o mês de competência do indicador
+      DISPFTConv calculado.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_referencia
+      - data
+      - mes_referencia
+      - competencia
+      - periodo
+      - dat_ref
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_dispftconv
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor percentual do Indicador de Disponibilidade das Funções Transmissão Conversoras
+      (DISPFTConv), agregado por nível de tensão em base mensal. Varia de 0.0 (indisponível) a 100.0 (totalmente
+      disponível), representando o percentual de tempo em que os conversores estiveram disponíveis para
+      operação no mês de referência.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade_conversor
+      - disp_ft_conv
+      - disponibilidade_ftconv
+      - indicador_disponibilidade
+      - percentual_disponibilidade
+      - val_disp
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+    - property: enum
+      value:
+      - 0.0
+      - 7.47087814
+      - 19.85648148
+      - 46.87731481
+      - 47.78521825
+      - 47.90770609
+      - 50.0
+      - 50.00896057
+      - 54.6087963
+      - 56.36111111
+      - 66.59722222
+      - 84.85648148
+      - 97.42361111
+      - 97.77777778
+      - 98.12996032
+      - 98.8172043
+      - 99.01657706
+      - 99.10185185
+      - 99.50716846
+      - 99.63933692
+      - 99.94175627
+      - 99.97535842
+      - 99.97759857
+      - 100.0
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_disponibilidade_ft_conversor
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - disponibilidade dos conversores
+  - elo de corrente continua disponivel
+  - hvdc parado ou disponivel
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando o analista perguntar sobre disponibilidade de conversores de transmissão,
+    indicadores DISPFTConv, desempenho de equipamentos HVDC ou metas regulatórias de disponibilidade de
+    Funções Transmissão Conversoras. Também relevante quando a pergunta envolver comparação de disponibilidade
+    entre diferentes tipos de Funções Transmissão (conversores, linhas, transformadores) em base mensal.
+- property: agentInstructions
+  value: '- [val_dispftconv] O valor mínimo registrado é 0.0, indicando períodos de indisponibilidade
+    total de alguma característica de conversor. Valores iguais a 0.0 devem ser investigados para distinguir
+    indisponibilidade real de possível falha de reporte ou ausência de equipamento no período.
+
+
+    - [cod_caracteristica] O domínio de valores de cod_caracteristica não está documentado no dicionário
+    de dados disponível. Com apenas 54 linhas cobrindo ~41 meses, estima-se entre 1 e 3 valores distintos.
+    Recomenda-se inspecionar os valores únicos para confirmar se representam níveis de tensão (ex: "500kV",
+    "±600kV") ou outro tipo de classificação técnica dos conversores.
+
+
+    - [dat_referencia] Com poucas linhas para o periodo coberto a partir de 2023-01, a serie pode apresentar meses ausentes para algum cod_caracteristica caso haja mais de um valor distinto. Recomenda-se verificar
+    a completude temporal por característica para identificar lacunas na série histórica.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a disponibilidade média dos conversores de transmissão em 2024?
+  - Quais características técnicas de conversores apresentaram menor disponibilidade nos últimos 12 meses?
+  - Como evoluiu o indicador DISPFTConv ao longo dos meses de 2023 a 2026?
+  - Houve meses com indisponibilidade total (0%) de algum tipo de conversor?
+  - Como a disponibilidade dos conversores se compara com a de linhas e transformadores no mesmo período?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Tem dados de HVDC pra julho de 2026?"
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_conversor_me/*.parquet',
+    union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    family: ind_disponibilidade_ft
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: dat_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - dat_referencia
+      - cod_caracteristica
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: dispftconv
+      label: Disponibilidade FT Conversora (DISPFTConv)
+      columns:
+      - val_dispftconv
+      expression: val_dispftconv
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_dispftconv)
+          unit: '%'
+        maximum:
+          sql: MAX(val_dispftconv)
+          unit: '%'
+        minimum:
+          sql: MIN(val_dispftconv)
+          unit: '%'
+        time_series:
+          sql: AVG(val_dispftconv)
+          unit: '%'
+        ranking:
+          sql: AVG(val_dispftconv)
+          unit: '%'
+        comparison:
+          sql: AVG(val_dispftconv)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - disponibilidade_conversor
+      - disp_ft_conv
+      - disponibilidade_ftconv
+      - indicador_disponibilidade
+      - percentual_disponibilidade
+      - val_disp
+      - DISPFTConv
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      cod_caracteristica:
+        FT - 13.8:
+          aliases:
+          - FT - 13.8
+          - ft 13.8
+          - 13.8kV
+          - conversor 13.8
+          filter: cod_caracteristica = 'FT - 13.8'
+        FT - 500:
+          aliases:
+          - FT - 500
+          - ft 500
+          - 500kV conversor
+          - conversor 500
+          filter: cod_caracteristica = 'FT - 500'
+        FT - 525:
+          aliases:
+          - FT - 525
+          - ft 525
+          - 525kV conversor
+          - conversor 525
+          filter: cod_caracteristica = 'FT - 525'
+        FT - 800:
+          aliases:
+          - FT - 800
+          - ft 800
+          - 800kV conversor
+          - conversor 800
+          - HVDC 800kV
+          filter: cod_caracteristica = 'FT - 800'
+      val_dispftconv:
+        indisponibilidade_total:
+          aliases:
+          - indisponivel
+          - indisponibilidade total
+          - zero disponibilidade
+          - 0%
+          filter: val_dispftconv = 0
+        disponibilidade_plena:
+          aliases:
+          - disponivel 100%
+          - disponibilidade plena
+          - 100%
+          filter: val_dispftconv = 100
+    sql_patterns:
+      dispftconv_serie_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,\n  cod_caracteristica,\n\
+          \  AVG(val_dispftconv) AS disponibilidade_media_pct\nFROM {source}\nWHERE EXTRACT(YEAR FROM\
+          \ TRY_CAST(dat_referencia AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          - time_series
+          metrics:
+          - dispftconv
+          grain: month
+        validated_params:
+          year: '2026'
+      dispftconv_por_caracteristica:
+        template: "SELECT cod_caracteristica,\n  AVG(val_dispftconv) AS disponibilidade_media_pct,\n \
+          \ MIN(val_dispftconv) AS disponibilidade_minima_pct,\n  MAX(val_dispftconv) AS disponibilidade_maxima_pct\n\
+          FROM {source}\nWHERE dat_referencia BETWEEN {start_date} AND {end_date}\nGROUP BY 1\nORDER BY\
+          \ 2 ASC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          - minimum
+          - maximum
+          - comparison
+          metrics:
+          - dispftconv
+          grain: period
+        validated_params:
+          start_date: '2026-01-01'
+          end_date: '2026-05-01'
+      dispftconv_indisponibilidade_total:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,\n  cod_caracteristica,\n\
+          \  val_dispftconv AS disponibilidade_pct\nFROM {source}\nWHERE val_dispftconv = 0\nORDER BY\
+          \ 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - minimum
+          metrics:
+          - dispftconv
+          grain: month
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu mensalmente o indicador de disponibilidade dos conversores por característica
+      técnica entre 2023 e 2026?
+    sql: SELECT cod_caracteristica, DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes_referencia,
+      val_dispftconv FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_conversor_me/*.parquet')
+      ORDER BY cod_caracteristica, mes_referencia;
+  - question: Qual foi a disponibilidade média anual dos conversores por característica técnica em cada
+      ano?
+    sql: SELECT cod_caracteristica, YEAR(dat_referencia) AS ano, ROUND(AVG(val_dispftconv), 2) AS media_disponibilidade_pct,
+      MIN(val_dispftconv) AS min_disponibilidade_pct, MAX(val_dispftconv) AS max_disponibilidade_pct,
+      COUNT(*) AS qtd_meses FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_conversor_me/*.parquet')
+      GROUP BY cod_caracteristica, YEAR(dat_referencia) ORDER BY cod_caracteristica, ano;
+  - question: Quais meses apresentaram disponibilidade de conversores abaixo de 95%?
+    sql: SELECT cod_caracteristica, dat_referencia, val_dispftconv, ROUND(100.0 - val_dispftconv, 2) AS
+      indisponibilidade_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_conversor_me/*.parquet')
+      WHERE val_dispftconv < 95.0 ORDER BY val_dispftconv ASC, dat_referencia;
+- property: license
+  value: CC-BY

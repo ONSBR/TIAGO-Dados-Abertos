@@ -1,0 +1,863 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_confiarb_severidade
+name: ind_confiarb_severidade
+tenant: ons
+tags:
+- ONS
+- SIN
+- SM
+- Submodulo-9.1
+- confiabilidade
+- confiabilidade rede básica
+- ind_confiarb_severidade
+- indicador SM
+- indicador-SM
+- qualidade-operativa
+- rede-basica
+- severidade das perturbações
+- severidade perturbações rede básica SM
+- severidade-perturbacoes
+- subsistema
+- transmissao
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_confiarb_severidade/*.parquet
+  format: parquet
+description:
+  purpose: Permitir o monitoramento, regulação e planejamento da manutenção da rede básica de transmissão
+    do SIN por agentes de transmissão, ONS e ANEEL, fornecendo a evolução histórica da severidade das
+    perturbações por nível geográfico e periodicidade. Suporta decisões de desempenho operativo, conformidade
+    regulatória com o Submódulo 9.1 dos Procedimentos de Rede e análise integrada de confiabilidade do
+    sistema de transmissão.
+  limitations: O valor máximo de val_sm1 é 339, consideravelmente superior às demais faixas (val_sm2 máx=79,
+    val_sm3 máx=45, val_sm4 máx=24, val_sm5 máx=16). O dataset contém registros mensais e anuais para
+    a mesma combinação de dsc_agregacao, cod_caracteristica e din_referencia. O período cobre a partir de 2007-01-01.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de severidade de perturbações (SM),
+    confiabilidade da rede básica de transmissão, faixas de gravidade de eventos elétricos ou desempenho
+    operativo do SIN por subsistema, região ou estado.
+domain: qualidade
+schema:
+- name: ind_confiarb_severidade
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_confiarb_severidade
+  properties:
+  - name: dsc_agregacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nível de agregação geográfica do indicador. Indica se o registro corresponde ao Sistema
+      Interligado Nacional (SIN), a um subsistema elétrico (SE/CO, S, NE, N), a uma região geográfica
+      ou a um estado federativo.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - agregacao
+      - nivel_geografico
+      - regiao
+      - subsistema
+      - area
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Estado
+      - Região Geográfica
+      - Sistema
+      - Subsistema
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da característica ou categoria de perturbação avaliada pelo indicador
+      SM, conforme definido no Submódulo 9.1 dos Procedimentos de Rede do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_caracteristica
+      - cod_caract
+      - caracteristica_codigo
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - CO
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - N
+      - NE
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - S
+      - SBR
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: dsc_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Descrição textual da característica ou categoria de perturbação avaliada, complementando
+      o código cod_caracteristica. Identifica o tipo de evento ou faixa de severidade monitorada na rede
+      básica.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - descricao_caracteristica
+      - dsc_caract
+      - nome_caracteristica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - Centro-Oeste
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - NORDESTE
+      - NORTE
+      - Nordeste
+      - Norte
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - SUDESTE
+      - SUL
+      - Sistema Brasileiro
+      - Sudeste
+      - Sul
+      - TOCANTINS
+  - name: id_periodicidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador da periodicidade do registro. Distingue entre registros de apuração mensal
+      e registros de consolidação anual, ambos presentes no dataset conforme descrito nos metadados CKAN.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - periodicidade
+      - tipo_periodicidade
+      - frequencia
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AN
+      - ME
+  - name: din_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador, representando o primeiro dia do mês ou ano ao qual
+      o registro se refere. Para registros mensais, corresponde ao primeiro dia do mês apurado; para registros
+      anuais, ao primeiro dia do ano consolidado. Cobre o período de janeiro de 2007 em diante.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data_referencia
+      - competencia
+      - mes_referencia
+      - ano_referencia
+      - din_ref
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_sm1
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Severidade das Perturbações (SM) para a faixa 1 de severidade
+      (menor severidade / maior frequência). Representa a contagem ou índice de perturbações enquadradas
+      na primeira faixa de severidade conforme Submódulo 9.1. Valores variam de 0 a 339.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - sm1
+      - severidade_faixa1
+      - val_severidade_1
+      - perturbacoes_sm1
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: índice
+  - name: val_sm2
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Severidade das Perturbações (SM) para a faixa 2 de severidade.
+      Representa perturbações de severidade intermediária-baixa. Valores variam de 0 a 79, consideravelmente
+      menores que val_sm1, indicando escala decrescente de frequência por faixa.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - sm2
+      - severidade_faixa2
+      - val_severidade_2
+      - perturbacoes_sm2
+    - property: semanticType
+      value: METRIC
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 9.0
+      - 10.0
+      - 11.0
+      - 12.0
+      - 13.0
+      - 14.0
+      - 15.0
+      - 16.0
+      - 17.0
+      - 18.0
+      - 19.0
+      - 20.0
+      - 21.0
+      - 22.0
+      - 23.0
+      - 24.0
+      - 25.0
+      - 26.0
+      - 27.0
+      - 28.0
+      - 29.0
+      - 30.0
+      - 31.0
+      - 32.0
+      - 33.0
+      - 34.0
+      - 36.0
+      - 41.0
+      - 43.0
+      - 48.0
+      - 79.0
+    - property: unit
+      value: índice
+  - name: val_sm3
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Severidade das Perturbações (SM) para a faixa 3 de severidade.
+      Representa perturbações de severidade intermediária. Valores variam de 0 a 45.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - sm3
+      - severidade_faixa3
+      - val_severidade_3
+      - perturbacoes_sm3
+    - property: semanticType
+      value: METRIC
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 9.0
+      - 10.0
+      - 11.0
+      - 12.0
+      - 13.0
+      - 14.0
+      - 15.0
+      - 16.0
+      - 17.0
+      - 18.0
+      - 19.0
+      - 20.0
+      - 21.0
+      - 22.0
+      - 23.0
+      - 24.0
+      - 25.0
+      - 26.0
+      - 27.0
+      - 28.0
+      - 29.0
+      - 30.0
+      - 31.0
+      - 32.0
+      - 33.0
+      - 37.0
+      - 38.0
+      - 39.0
+      - 41.0
+      - 45.0
+    - property: unit
+      value: índice
+  - name: val_sm4
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Severidade das Perturbações (SM) para a faixa 4 de severidade.
+      Representa perturbações de severidade intermediária-alta. Valores variam de 0 a 24.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - sm4
+      - severidade_faixa4
+      - val_severidade_4
+      - perturbacoes_sm4
+    - property: semanticType
+      value: METRIC
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 9.0
+      - 10.0
+      - 11.0
+      - 12.0
+      - 14.0
+      - 15.0
+      - 16.0
+      - 17.0
+      - 18.0
+      - 19.0
+      - 20.0
+      - 21.0
+      - 24.0
+    - property: unit
+      value: índice
+  - name: val_sm5
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Valor do Indicador de Severidade das Perturbações (SM) para a faixa 5 de severidade
+      (maior severidade / menor frequência). Representa as perturbações mais graves da rede básica. Valores
+      variam de 0 a 16, os menores entre as cinco faixas, confirmando a escala decrescente de frequência
+      por severidade.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - sm5
+      - severidade_faixa5
+      - val_severidade_5
+      - perturbacoes_sm5
+      - perturbacoes_graves
+    - property: semanticType
+      value: METRIC
+    - property: enum
+      value:
+      - 0.0
+      - 1.0
+      - 2.0
+      - 3.0
+      - 4.0
+      - 5.0
+      - 6.0
+      - 7.0
+      - 8.0
+      - 12.0
+      - 13.0
+      - 15.0
+      - 16.0
+    - property: unit
+      value: índice
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_confiarb_severidade
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - gravidade das perturbacoes
+  - quao severos foram os eventos
+  - severidade de ocorrencias na rede
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de severidade de perturbações (SM),
+    confiabilidade da rede básica de transmissão, faixas de gravidade de eventos elétricos ou desempenho
+    operativo do SIN por subsistema, região ou estado. Também relevante para análises regulatórias do
+    Submódulo 9.1 dos Procedimentos de Rede do ONS e comparações históricas de confiabilidade entre agregações
+    geográficas.
+- property: agentInstructions
+  value: '- [id_periodicidade] A tabela contém registros de duas periodicidades distintas (Mensal e Anual)
+    misturados na mesma partição. Consultas que não filtram por id_periodicidade podem duplicar ou distorcer
+    agregações temporais, pois um mesmo período (ex: 2024) aparece tanto como 12 registros mensais quanto
+    como 1 registro anual para cada entidade geográfica.
+
+
+    - [val_sm1] O valor máximo de val_sm1 é 339, significativamente superior aos demais níveis de severidade
+    (SM2 máx=79, SM3 máx=45, SM4 máx=24, SM5 máx=16). Valores muito elevados de SM1 podem corresponder
+    a períodos de alta perturbação sistêmica ou a registros de agregação SIN/anual que acumulam ocorrências
+    de todos os subsistemas. Recomenda-se verificar o contexto de dsc_agregacao e id_periodicidade.
+
+
+    - [val_sm2] Valor máximo de val_sm2 é 79, consideravelmente acima da mediana esperada para perturbações
+    de nível 2. Picos podem indicar eventos sistêmicos relevantes ou acumulação em registros anuais do
+    SIN. Monitorar para subsidiar análises regulatórias de penalidades conforme Submódulo 9.1.
+
+
+    - [din_referencia] O dataset cobre o período de 2007-01-01 em diante. Podem existir lacunas temporais
+    para determinadas combinações de entidade geográfica e periodicidade, especialmente em estados ou
+    regiões com histórico de dados incompleto nos anos iniciais da série (2007-2010). A atualização diária
+    (12h e 19h) pode gerar versões intermediárias com dados parciais do mês corrente.
+
+
+    - [dsc_agregacao] A combinação (dsc_agregacao, cod_caracteristica, id_periodicidade, din_referencia)
+    define a chave primária natural. Dado que o processo de consistência é recorrente e atualizado diariamente,
+    podem existir registros duplicados para o período mais recente caso o pipeline de ingestão não realize
+    deduplicação adequada antes da escrita no Parquet.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi a evolução mensal do indicador de severidade SM1 para o subsistema Sudeste/Centro-Oeste nos
+    últimos 5 anos?
+  - Quais meses apresentaram maior número de perturbações graves (SM5) no SIN entre 2015 e 2025?
+  - Como se compara a severidade das perturbações entre os subsistemas SE/CO, S, NE e N em 2023?
+  - Qual a tendência anual do indicador SM para o SIN desde 2007?
+  - Em quais regiões geográficas ocorreram os maiores valores de SM4 e SM5 nos últimos 3 anos?
+- property: granularity
+  value: anual
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_severidade/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2007-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 semana
+      temporal_column: din_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - din_referencia
+      - dsc_agregacao
+      - cod_caracteristica
+      - id_periodicidade
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: sm1
+      label: Sm1
+      columns:
+      - val_sm1
+      expression: val_sm1
+      quantity_kind: count
+      unit_native: indice
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_sm1)
+          unit: indice
+        average:
+          sql: AVG(val_sm1)
+          unit: indice
+        maximum:
+          sql: MAX(val_sm1)
+          unit: indice
+        time_series:
+          sql: SUM(val_sm1)
+          unit: indice
+        ranking:
+          sql: SUM(val_sm1)
+          unit: indice
+        comparison:
+          sql: SUM(val_sm1)
+          unit: indice
+      interval_hours: 168.0
+      aliases:
+      - sm1
+      - severidade_faixa1
+      - val_severidade_1
+      - perturbacoes_sm1
+      - faixa 1
+      - menor severidade
+      - maior frequencia
+    - id: sm2
+      label: Sm2
+      columns:
+      - val_sm2
+      expression: val_sm2
+      quantity_kind: count
+      unit_native: indice
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_sm2)
+          unit: indice
+        average:
+          sql: AVG(val_sm2)
+          unit: indice
+        maximum:
+          sql: MAX(val_sm2)
+          unit: indice
+        time_series:
+          sql: SUM(val_sm2)
+          unit: indice
+        ranking:
+          sql: SUM(val_sm2)
+          unit: indice
+        comparison:
+          sql: SUM(val_sm2)
+          unit: indice
+      interval_hours: 168.0
+      aliases:
+      - sm2
+      - severidade_faixa2
+      - val_severidade_2
+      - perturbacoes_sm2
+      - faixa 2
+      - severidade intermediaria baixa
+    - id: sm3
+      label: Sm3
+      columns:
+      - val_sm3
+      expression: val_sm3
+      quantity_kind: count
+      unit_native: indice
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_sm3)
+          unit: indice
+        average:
+          sql: AVG(val_sm3)
+          unit: indice
+        maximum:
+          sql: MAX(val_sm3)
+          unit: indice
+        time_series:
+          sql: SUM(val_sm3)
+          unit: indice
+        ranking:
+          sql: SUM(val_sm3)
+          unit: indice
+        comparison:
+          sql: SUM(val_sm3)
+          unit: indice
+      interval_hours: 168.0
+      aliases:
+      - sm3
+      - severidade_faixa3
+      - val_severidade_3
+      - perturbacoes_sm3
+      - faixa 3
+      - severidade intermediaria
+    - id: sm4
+      label: Sm4
+      columns:
+      - val_sm4
+      expression: val_sm4
+      quantity_kind: count
+      unit_native: indice
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_sm4)
+          unit: indice
+        average:
+          sql: AVG(val_sm4)
+          unit: indice
+        maximum:
+          sql: MAX(val_sm4)
+          unit: indice
+        time_series:
+          sql: SUM(val_sm4)
+          unit: indice
+        ranking:
+          sql: SUM(val_sm4)
+          unit: indice
+        comparison:
+          sql: SUM(val_sm4)
+          unit: indice
+      interval_hours: 168.0
+      aliases:
+      - sm4
+      - severidade_faixa4
+      - val_severidade_4
+      - perturbacoes_sm4
+      - faixa 4
+      - severidade intermediaria alta
+    - id: sm5
+      label: Sm5
+      columns:
+      - val_sm5
+      expression: val_sm5
+      quantity_kind: count
+      unit_native: indice
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_sm5)
+          unit: indice
+        average:
+          sql: AVG(val_sm5)
+          unit: indice
+        maximum:
+          sql: MAX(val_sm5)
+          unit: indice
+        time_series:
+          sql: SUM(val_sm5)
+          unit: indice
+        ranking:
+          sql: SUM(val_sm5)
+          unit: indice
+        comparison:
+          sql: SUM(val_sm5)
+          unit: indice
+      interval_hours: 168.0
+      aliases:
+      - sm5
+      - severidade_faixa5
+      - val_severidade_5
+      - perturbacoes_sm5
+      - perturbacoes_graves
+      - faixa 5
+      - maior severidade
+      - eventos graves
+      - perturbacoes criticas
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      dsc_agregacao:
+        Estado:
+          aliases:
+          - Estado
+          - estado
+          - UF
+          - uf
+          filter: dsc_agregacao = 'Estado'
+        Regiao Geografica:
+          aliases:
+          - Regiao Geografica
+          - regiao geografica
+          - Região Geográfica
+          - regiao
+          filter: dsc_agregacao = 'Região Geográfica'
+        Sistema:
+          aliases:
+          - Sistema
+          - sistema
+          - SIN
+          - sin
+          - sistema brasileiro
+          - nacional
+          filter: dsc_agregacao = 'Sistema'
+        Subsistema:
+          aliases:
+          - Subsistema
+          - subsistema
+          - submercado
+          filter: dsc_agregacao = 'Subsistema'
+      cod_caracteristica:
+        SBR:
+          aliases:
+          - SBR
+          - sistema brasileiro
+          - SIN
+          - nacional
+          filter: cod_caracteristica = 'SBR'
+        SE:
+          aliases:
+          - SE
+          - sudeste
+          - SE/CO
+          filter: cod_caracteristica = 'SE'
+        CO:
+          aliases:
+          - CO
+          - centro-oeste
+          filter: cod_caracteristica = 'CO'
+        S:
+          aliases:
+          - S
+          - sul
+          filter: cod_caracteristica = 'S'
+        NE:
+          aliases:
+          - NE
+          - nordeste
+          filter: cod_caracteristica = 'NE'
+        N:
+          aliases:
+          - N
+          - norte
+          filter: cod_caracteristica = 'N'
+      id_periodicidade:
+        AN:
+          aliases:
+          - AN
+          - anual
+          - ano
+          - consolidado anual
+          filter: id_periodicidade = 'AN'
+        ME:
+          aliases:
+          - ME
+          - mensal
+          - mes
+          - apuracao mensal
+          filter: id_periodicidade = 'ME'
+    sql_patterns:
+      sm1_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_referencia AS TIMESTAMP)) AS mes,\n  SUM(val_sm1)\
+          \ AS valor\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) =\
+          \ {year}\n  AND id_periodicidade = 'ME'\nGROUP BY 1\nORDER BY 1"
+        output_unit: indice
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - sm1
+          grain: month
+        validated_params:
+          year: '2026'
+      sm5_graves_por_subsistema:
+        template: "SELECT cod_caracteristica,\n  SUM(val_sm5) AS total_sm5\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_referencia AS TIMESTAMP)) = {year}\n  AND id_periodicidade = 'ME'\n  AND\
+          \ dsc_agregacao = 'Subsistema'\nGROUP BY 1\nORDER BY 2 DESC"
+        output_unit: indice
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - sm5
+          grain: year
+        validated_params:
+          year: '2026'
+      todas_faixas_sin_anual:
+        template: "SELECT EXTRACT(YEAR FROM TRY_CAST(din_referencia AS TIMESTAMP)) AS ano,\n  SUM(val_sm1)\
+          \ AS sm1,\n  SUM(val_sm2) AS sm2,\n  SUM(val_sm3) AS sm3,\n  SUM(val_sm4) AS sm4,\n  SUM(val_sm5)\
+          \ AS sm5\nFROM {source}\nWHERE id_periodicidade = 'AN'\n  AND cod_caracteristica = 'SBR'\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: indice
+        matches:
+          output_modes:
+          - time_series
+          - comparison
+          metrics:
+          - sm1
+          - sm2
+          - sm3
+          - sm4
+          - sm5
+          grain: year
+- property: fewShotQueries
+  value:
+  - question: Qual foi a evolução mensal do indicador SM1 em cada subsistema elétrico nos últimos 3 anos?
+    sql: SELECT cod_caracteristica, dsc_caracteristica, CAST(din_referencia AS DATE) AS mes_referencia,
+      val_sm1 FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_severidade/*.parquet')
+      WHERE id_periodicidade = 'ME' AND dsc_agregacao = 'Subsistema' AND din_referencia >= CAST('2023-01-01'
+      AS TIMESTAMP) ORDER BY cod_caracteristica, din_referencia;
+  - question: Quais foram os 20 meses com maior índice de perturbações mais severas (SM5) no SIN desde
+      2007?
+    sql: SELECT CAST(din_referencia AS DATE) AS mes_referencia, dsc_caracteristica, val_sm5, val_sm4,
+      val_sm3 FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_severidade/*.parquet')
+      WHERE id_periodicidade = 'ME' AND dsc_agregacao = 'SIN' ORDER BY val_sm5 DESC LIMIT 20;
+  - question: Como se comparam os indicadores anuais SM1 a SM5 entre os quatro subsistemas elétricos em
+      2023?
+    sql: SELECT cod_caracteristica, dsc_caracteristica, val_sm1, val_sm2, val_sm3, val_sm4, val_sm5, (val_sm1
+      + val_sm2 + val_sm3 + val_sm4 + val_sm5) AS total_sm FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_confiarb_severidade/*.parquet')
+      WHERE id_periodicidade = 'AN' AND dsc_agregacao = 'Subsistema' AND YEAR(din_referencia) = 2023 ORDER
+      BY total_sm DESC;
+- property: license
+  value: CC-BY

@@ -1,0 +1,981 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:intercambio_modalidade
+name: intercambio_modalidade
+tenant: ons
+tags:
+- HVDC
+- ONS
+- SIN
+- conversora
+- energia_eletrica
+- horario
+- intercambio
+- intercambio HVDC
+- intercambio contratual
+- intercambio emergencial
+- intercambio por modalidade
+- intercambio_internacional
+- intercambio_modalidade
+- modalidade_contratual
+- programado_verificado
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/intercambio_modalidade_ho/*.parquet
+  format: parquet
+description:
+  purpose: Suporta operadores do ONS e agentes do setor elétrico no acompanhamento, auditoria e reconciliação
+    dos intercâmbios de energia por modalidade contratual em base horária, permitindo decisões de despacho,
+    programação operativa, liquidação de contratos de intercâmbio internacional e análise de desvios entre
+    volumes programados e verificados por conversora e patamar horário.
+  limitations: Coluna armazena valores numéricos (MWh) como VARCHAR devido ao formato de serialização;
+    operações aritméticas diretas falharão silenciosamente ou gerarão erro de tipo. Coluna armazena valores
+    numéricos (MWh) como VARCHAR devido a formato de serialização; requer TRY_CAST para uso em agregações.
+    Coluna armazena valores numéricos (MWh) como VARCHAR devido ao formato de serialização; requer TRY_CAST
+    para uso em agregações.
+  usage: Recuperar este dataset quando a pergunta envolver análise de intercâmbio de energia discriminado
+    por modalidade contratual (contratual, emergencial, oportunidade, teste ou excepcional) em nível de
+    patamar horário por conversora de frequência ou estação HVDC.
+domain: intercâmbio
+schema:
+- name: intercambio_modalidade
+  physicalType: parquet
+  logicalType: object
+  physicalName: intercambio_modalidade
+  properties:
+  - name: nom_conversora
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da conversora de frequência ou estação HVDC responsável pelo intercâmbio de energia
+      registrado
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - conversora
+      - estacao_conversora
+      - nome_conversora
+      - usina_conversora
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - CI ACARAY
+      - CI CV.GARABI 1
+      - CI CV.GARABI 2
+      - CI CV.URUGUAIANA
+      - CI MELO
+      - CI RIVERA
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Instante de referência do patamar horário ao qual os valores de intercâmbio se referem
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data_hora
+      - timestamp
+      - hora
+      - patamar
+      - data_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_modalidadecontratual
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia intercambiada na modalidade contratual (MWh) no patamar horário — valor verificado/realizado
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio_contratual
+      - modalidade_contratual
+      - energia_contratual
+      - val_contratual
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_modalidadecontratual AS DOUBLE)
+    - property: unit
+      value: MWh
+  - name: val_modalidadeemergencial
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia intercambiada na modalidade emergencial (MWh) no patamar horário — valor verificado/realizado
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio_emergencial
+      - modalidade_emergencial
+      - energia_emergencial
+      - val_emergencial
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_modalidadeemergencial AS DOUBLE)
+    - property: unit
+      value: MWh
+  - name: val_modalidadeoportunidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia intercambiada na modalidade oportunidade (MWh) no patamar horário — valor verificado/realizado
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio_oportunidade
+      - modalidade_oportunidade
+      - energia_oportunidade
+      - val_oportunidade
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_modalidadeoportunidade AS DOUBLE)
+    - property: unit
+      value: MWh
+  - name: val_modalidadeteste
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia intercambiada na modalidade teste (MWh) no patamar horário — valor verificado/realizado
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio_teste
+      - modalidade_teste
+      - energia_teste
+      - val_teste
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_modalidadeteste AS DOUBLE)
+    - property: unit
+      value: MWh
+  - name: val_modalidadeexcepcional
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia intercambiada na modalidade excepcional (MWh) no patamar horário — valor verificado/realizado;
+      ausente (nulos em boa parte das linhas) quando essa modalidade não ocorre
+    customProperties:
+    - property: aliases
+      value:
+      - intercambio_excepcional
+      - modalidade_excepcional
+      - energia_excepcional
+      - val_excepcional
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_modalidadeexcepcional AS DOUBLE)
+    - property: unit
+      value: MWh
+    - property: enum
+      value:
+      - '0.0'
+  - name: nom_paisconversora
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do país ao qual a conversora está associada; preenchido apenas para conversoras
+      internacionais (a maior parte dos registros têm valor, nulos na maior parte das linhas)
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - pais_conversora
+      - pais
+      - nome_pais
+      - country
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Argentina
+      - Uruguai
+  - name: val_progmodalidadecontratual
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia programada na modalidade contratual (MWh) para o patamar horário; disponível
+      apenas para subconjunto de conversoras
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - programado_contratual
+      - prog_contratual
+      - val_prog_contratual
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progmodalidadecontratual AS DOUBLE)
+    - property: unit
+      value: MWh
+  - name: val_progmodalidadeemergencial
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia programada na modalidade emergencial (MWh) para o patamar horário; disponível
+      apenas para subconjunto de conversoras
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - programado_emergencial
+      - prog_emergencial
+      - val_prog_emergencial
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progmodalidadeemergencial AS DOUBLE)
+    - property: unit
+      value: MWh
+    - property: enum
+      value:
+      - '-1100.000'
+      - '-200.000'
+      - '-250.000'
+      - '-275.000'
+      - '-500.000'
+      - '-550.000'
+      - '-675.000'
+      - '-800.000'
+      - '-825.000'
+      - '-850.000'
+      - '0.000'
+  - name: val_progmodalidadeoportunidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia programada na modalidade oportunidade (MWh) para o patamar horário; disponível
+      apenas para subconjunto de conversoras
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - programado_oportunidade
+      - prog_oportunidade
+      - val_prog_oportunidade
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE)
+    - property: unit
+      value: MWh
+    - property: enum
+      value:
+      - '0.000'
+  - name: val_progmodalidadeteste
+    physicalType: VARCHAR
+    logicalType: string
+    description: Energia programada na modalidade teste (MWh) para o patamar horário; disponível apenas
+      para subconjunto de conversoras
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - programado_teste
+      - prog_teste
+      - val_prog_teste
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_progmodalidadeteste AS DOUBLE)
+    - property: unit
+      value: MWh
+    - property: enum
+      value:
+      - '0.000'
+  - name: val_totalprogramado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Soma total da energia programada em todas as modalidades (MWh) para o patamar horário;
+      disponível apenas para subconjunto de conversoras
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - total_programado
+      - intercambio_programado_total
+      - prog_total
+      - energia_programada_total
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_totalprogramado AS DOUBLE)
+    - property: unit
+      value: MWh
+  - name: val_totalverificado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Soma total da energia verificada/realizada em todas as modalidades (MWh) para o patamar
+      horário; disponível apenas para subconjunto de conversoras
+    customProperties:
+    - property: availableFrom
+      value: '2026'
+    - property: coverageNote
+      value: Coluna ausente nos arquivos anteriores a 2026 (1 de 4 periodos da serie, que comeca em 2023). Como a fonte e' lida com union_by_name, consulta que inclua periodo anterior recebe NULL e nao erro, e AVG/SUM ignoram nulo - filtre o periodo ou declare a cobertura na resposta. Apurado em 2026-09-07.
+    - property: aliases
+      value:
+      - total_verificado
+      - intercambio_verificado_total
+      - energia_verificada_total
+      - total_realizado
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_totalverificado AS DOUBLE)
+    - property: unit
+      value: MWh
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/intercambio_modalidade
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - intercambio por tipo de contrato
+  - intercambio emergencial ou contratual
+  - modalidade do intercambio
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver análise de intercâmbio de energia discriminado
+    por modalidade contratual (contratual, emergencial, oportunidade, teste ou excepcional) em nível de
+    patamar horário por conversora de frequência ou estação HVDC. Também relevante para comparações entre
+    volumes programados e verificados de intercâmbio, auditoria de contratos de intercâmbio internacional
+    e identificação de acionamentos emergenciais por conversora no Sistema Interligado Nacional.
+- property: agentInstructions
+  value: |
+    - [val_modalidadecontratual] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8). Contém valores numéricos representando MWh. Todas as operações aritméticas e agregações falharão sem conversão explícita de tipo.
+
+    - [val_modalidadeemergencial] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8). Contém valores numéricos representando MWh. Todas as operações aritméticas e agregações falharão sem conversão explícita de tipo.
+
+    - [val_modalidadeoportunidade] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8). Contém valores numéricos representando MWh. Todas as operações aritméticas e agregações falharão sem conversão explícita de tipo.
+
+    - [val_modalidadeteste] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8). Contém valores numéricos representando MWh. Todas as operações aritméticas e agregações falharão sem conversão explícita de tipo.
+
+    - [val_modalidadeexcepcional] Boa parte dos registros possuem nulo nesta coluna, indicando que a modalidade excepcional não é aplicável a todas as conversoras ou períodos. Além disso, é armazenada como VARCHAR pelo formato de serialização. Filtros sem tratamento de nulo podem distorcer análises.
+
+    - [nom_paisconversora] A maior parte dos registros possuem nulo nesta coluna. O padrão de nulidade coincide com as colunas val_prog* e val_total*, sugerindo que apenas conversoras internacionais ou HVDC possuem este campo preenchido. Joins ou filtros por país sem tratamento de nulo excluirão a maioria dos registros.
+
+    - [val_progmodalidadecontratual] A maior parte dos registros possuem nulo nesta coluna. Dados programados estão disponíveis apenas para um subconjunto de conversoras, possivelmente as internacionais ou HVDC. Além disso, é armazenada como VARCHAR pelo formato de serialização.
+
+    - [val_progmodalidadeemergencial] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8), com nulos na maior parte das linhas. Contém valores numéricos representando MWh programados na modalidade emergencial. Requer TRY_CAST para uso analítico.
+
+    - [val_progmodalidadeoportunidade] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8), com nulos na maior parte das linhas. Contém valores numéricos representando MWh programados na modalidade oportunidade. Requer TRY_CAST para uso analítico.
+
+    - [val_progmodalidadeteste] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização (object→UTF8), com nulos na maior parte das linhas. Contém valores numéricos representando MWh programados na modalidade teste. Requer TRY_CAST para uso analítico.
+
+    - [val_totalprogramado] A maior parte dos registros possuem nulo nesta coluna. Disponível apenas para subconjunto de conversoras (possivelmente internacionais/HVDC). Além disso, é armazenada como VARCHAR pelo formato de serialização. Recomenda-se verificar consistência com a soma das modalidades programadas individuais.
+
+    - [val_totalverificado] A maior parte dos registros possuem nulo nesta coluna. Disponível apenas para subconjunto de conversoras (possivelmente internacionais/HVDC). Além disso, é armazenada como VARCHAR pelo formato de serialização. Recomenda-se verificar consistência com a soma das modalidades verificadas individuais.
+
+    - [nom_conversora] Valores com trailing spaces detectados em 'nom_conversora'. Use TRIM() em filtros WHERE para evitar perda de registros.
+    - [nom_paisconversora] Valores com trailing spaces detectados em 'nom_paisconversora'. Use TRIM() em filtros WHERE para evitar perda de registros.
+    - [nom_paisconversora] Coluna 'nom_paisconversora' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [val_progmodalidadecontratual] Coluna 'val_progmodalidadecontratual' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [val_progmodalidadeemergencial] Coluna 'val_progmodalidadeemergencial' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [val_progmodalidadeoportunidade] Coluna 'val_progmodalidadeoportunidade' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [val_progmodalidadeteste] Coluna 'val_progmodalidadeteste' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [val_totalprogramado] Coluna 'val_totalprogramado' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [val_totalverificado] Coluna 'val_totalverificado' ausente em arquivos históricos (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2023.parquet). Presente apenas a partir de versões recentes (ex: INTERCAMBIO_ENERGIA_MODALIDADE_2026.parquet). Queries históricas retornarão NULL para esta coluna. Use union_by_name=true ao combinar arquivos de diferentes períodos.
+    - [tipos] As colunas `val_modalidadecontratual`, `val_modalidadeemergencial`, `val_modalidadeexcepcional`, `val_modalidadeoportunidade`, `val_modalidadeteste` mudam de tipo entre arquivos anuais (texto em uns, número em outros); cada uma traz `castExpression` no schema: use-o em toda agregação e comparação.
+- property: typicalQuestions
+  value:
+  - Qual foi o volume de intercâmbio contratual pela conversora de Uruguaiana em janeiro de 2024?
+  - Quais conversoras apresentaram maior volume de intercâmbio emergencial no último trimestre?
+  - Qual é o desvio médio entre o intercâmbio programado e verificado por modalidade e conversora?
+  - Em quais patamares horários ocorreram intercâmbios na modalidade excepcional em 2023?
+  - Qual a participação percentual de cada modalidade contratual no intercâmbio total por conversora internacional?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_modalidade_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    family: intercambio
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - nom_conversora
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: modalidadecontratual
+      label: Intercambio Contratual Verificado
+      columns:
+      - val_modalidadecontratual
+      expression: TRY_CAST(val_modalidadecontratual AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - intercambio_contratual
+      - modalidade_contratual
+      - energia_contratual
+      - val_contratual
+    - id: modalidadeemergencial
+      label: Intercambio Emergencial Verificado
+      columns:
+      - val_modalidadeemergencial
+      expression: TRY_CAST(val_modalidadeemergencial AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_modalidadeemergencial AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_modalidadeemergencial AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_modalidadeemergencial AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_modalidadeemergencial AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_modalidadeemergencial AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_modalidadeemergencial AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - intercambio_emergencial
+      - modalidade_emergencial
+      - energia_emergencial
+      - val_emergencial
+      - acionamento_emergencial
+    - id: modalidadeoportunidade
+      label: Intercambio Oportunidade Verificado
+      columns:
+      - val_modalidadeoportunidade
+      expression: TRY_CAST(val_modalidadeoportunidade AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_modalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_modalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - intercambio_oportunidade
+      - modalidade_oportunidade
+      - energia_oportunidade
+      - val_oportunidade
+    - id: modalidadeteste
+      label: Intercambio Teste Verificado
+      columns:
+      - val_modalidadeteste
+      expression: TRY_CAST(val_modalidadeteste AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_modalidadeteste AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_modalidadeteste AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_modalidadeteste AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_modalidadeteste AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_modalidadeteste AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_modalidadeteste AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - intercambio_teste
+      - modalidade_teste
+      - energia_teste
+      - val_teste
+    - id: modalidadeexcepcional
+      label: Intercambio Excepcional Verificado
+      columns:
+      - val_modalidadeexcepcional
+      expression: TRY_CAST(val_modalidadeexcepcional AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_modalidadeexcepcional AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_modalidadeexcepcional AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_modalidadeexcepcional AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_modalidadeexcepcional AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_modalidadeexcepcional AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_modalidadeexcepcional AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - intercambio_excepcional
+      - modalidade_excepcional
+      - energia_excepcional
+      - val_excepcional
+    - id: progmodalidadecontratual
+      label: Intercambio Contratual Programado
+      columns:
+      - val_progmodalidadecontratual
+      expression: TRY_CAST(val_progmodalidadecontratual AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - programado_contratual
+      - prog_contratual
+      - val_prog_contratual
+      - contratual_programado
+    - id: progmodalidadeemergencial
+      label: Intercambio Emergencial Programado
+      columns:
+      - val_progmodalidadeemergencial
+      expression: TRY_CAST(val_progmodalidadeemergencial AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progmodalidadeemergencial AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_progmodalidadeemergencial AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_progmodalidadeemergencial AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_progmodalidadeemergencial AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_progmodalidadeemergencial AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_progmodalidadeemergencial AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - programado_emergencial
+      - prog_emergencial
+      - val_prog_emergencial
+      - emergencial_programado
+    - id: progmodalidadeoportunidade
+      label: Intercambio Oportunidade Programado
+      columns:
+      - val_progmodalidadeoportunidade
+      expression: TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_progmodalidadeoportunidade AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - programado_oportunidade
+      - prog_oportunidade
+      - val_prog_oportunidade
+      - oportunidade_programado
+    - id: progmodalidadeteste
+      label: Intercambio Teste Programado
+      columns:
+      - val_progmodalidadeteste
+      expression: TRY_CAST(val_progmodalidadeteste AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_progmodalidadeteste AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_progmodalidadeteste AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_progmodalidadeteste AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_progmodalidadeteste AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_progmodalidadeteste AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_progmodalidadeteste AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - programado_teste
+      - prog_teste
+      - val_prog_teste
+      - teste_programado
+    - id: totalprogramado
+      label: Total Intercambio Programado
+      columns:
+      - val_totalprogramado
+      expression: TRY_CAST(val_totalprogramado AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_totalprogramado AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_totalprogramado AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_totalprogramado AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_totalprogramado AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_totalprogramado AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_totalprogramado AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - total_programado
+      - intercambio_programado_total
+      - prog_total
+      - energia_programada_total
+    - id: totalverificado
+      label: Total Intercambio Verificado
+      columns:
+      - val_totalverificado
+      expression: TRY_CAST(val_totalverificado AS DOUBLE)
+      quantity_kind: energy
+      unit_native: MWh
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_totalverificado AS DOUBLE))
+          unit: MWh
+        average:
+          sql: AVG(TRY_CAST(val_totalverificado AS DOUBLE))
+          unit: MWh
+        maximum:
+          sql: MAX(TRY_CAST(val_totalverificado AS DOUBLE))
+          unit: MWh
+        time_series:
+          sql: SUM(TRY_CAST(val_totalverificado AS DOUBLE))
+          unit: MWh
+        ranking:
+          sql: SUM(TRY_CAST(val_totalverificado AS DOUBLE))
+          unit: MWh
+        comparison:
+          sql: SUM(TRY_CAST(val_totalverificado AS DOUBLE))
+          unit: MWh
+      interval_hours: 1.0
+      aliases:
+      - total_verificado
+      - intercambio_verificado_total
+      - energia_verificada_total
+      - total_realizado
+      - intercambio_total
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      nom_conversora:
+        acaray:
+          aliases:
+          - acaray
+          - CI ACARAY
+          - conversora acaray
+          filter: TRIM(nom_conversora) = 'CI ACARAY'
+        garabi1:
+          aliases:
+          - garabi 1
+          - garabi1
+          - CI CV.GARABI 1
+          - garabi um
+          filter: TRIM(nom_conversora) = 'CI CV.GARABI 1'
+        garabi2:
+          aliases:
+          - garabi 2
+          - garabi2
+          - CI CV.GARABI 2
+          - garabi dois
+          filter: TRIM(nom_conversora) = 'CI CV.GARABI 2'
+        uruguaiana:
+          aliases:
+          - uruguaiana
+          - CI CV.URUGUAIANA
+          - conversora uruguaiana
+          filter: TRIM(nom_conversora) = 'CI CV.URUGUAIANA'
+        melo:
+          aliases:
+          - melo
+          - CI MELO
+          - conversora melo
+          filter: TRIM(nom_conversora) = 'CI MELO'
+        rivera:
+          aliases:
+          - rivera
+          - CI RIVERA
+          - conversora rivera
+          filter: TRIM(nom_conversora) = 'CI RIVERA'
+      nom_paisconversora:
+        argentina:
+          aliases:
+          - argentina
+          - Argentina
+          - arg
+          filter: TRIM(nom_paisconversora) = 'Argentina'
+        uruguai:
+          aliases:
+          - uruguai
+          - Uruguai
+          - uru
+          filter: TRIM(nom_paisconversora) = 'Uruguai'
+    sql_patterns:
+      modalidadecontratual_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  TRIM(nom_conversora)\
+          \ AS conversora,\n  SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE)) AS intercambio_contratual_mwh\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1, 2\nORDER BY 1, 2"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - modalidadecontratual
+          grain: month
+        validated_params:
+          year: '2026'
+      desvio_programado_verificado:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  TRIM(nom_conversora)\
+          \ AS conversora,\n  SUM(TRY_CAST(val_totalprogramado AS DOUBLE)) AS total_programado_mwh,\n\
+          \  SUM(TRY_CAST(val_totalverificado AS DOUBLE)) AS total_verificado_mwh,\n  SUM(TRY_CAST(val_totalverificado\
+          \ AS DOUBLE)) - SUM(TRY_CAST(val_totalprogramado AS DOUBLE)) AS desvio_mwh\nFROM {source}\n\
+          WHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\n  AND val_totalprogramado\
+          \ IS NOT NULL\n  AND val_totalverificado IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - totalprogramado
+          - totalverificado
+          grain: month
+        validated_params:
+          year: '2026'
+      emergencial_por_conversora:
+        template: "SELECT TRIM(nom_conversora) AS conversora,\n  SUM(TRY_CAST(val_modalidadeemergencial\
+          \ AS DOUBLE)) AS intercambio_emergencial_mwh\nFROM {source}\nWHERE din_instante >= '{start_date}'\n\
+          \  AND din_instante < '{end_date}'\nGROUP BY 1\nORDER BY 2 DESC"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - modalidadeemergencial
+          grain: period
+        validated_params:
+          start_date: '2026-01-01'
+          end_date: '2026-07-16'
+      participacao_modalidade:
+        template: "SELECT TRIM(nom_conversora) AS conversora,\n  SUM(TRY_CAST(val_modalidadecontratual\
+          \ AS DOUBLE)) AS contratual_mwh,\n  SUM(TRY_CAST(val_modalidadeemergencial AS DOUBLE)) AS emergencial_mwh,\n\
+          \  SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE)) AS oportunidade_mwh,\n  SUM(TRY_CAST(val_modalidadeteste\
+          \ AS DOUBLE)) AS teste_mwh,\n  COALESCE(SUM(TRY_CAST(val_modalidadeexcepcional AS DOUBLE)),\
+          \ 0) AS excepcional_mwh\nFROM {source}\nWHERE din_instante >= '{start_date}'\n  AND din_instante\
+          \ < '{end_date}'\nGROUP BY 1\nORDER BY 1"
+        output_unit: MWh
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - modalidadecontratual
+          - modalidadeemergencial
+          - modalidadeoportunidade
+          - modalidadeteste
+          - modalidadeexcepcional
+          grain: period
+        validated_params:
+          start_date: '2026-01-01'
+          end_date: '2026-07-16'
+- property: fewShotQueries
+  value:
+  - question: Qual a participação percentual de cada modalidade no intercâmbio total verificado por conversora
+      em 2024?
+    sql: SELECT nom_conversora, ROUND(SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE)), 2) AS total_contratual_mwh,
+      ROUND(SUM(TRY_CAST(val_modalidadeemergencial AS DOUBLE)), 2) AS total_emergencial_mwh, ROUND(SUM(TRY_CAST(val_modalidadeoportunidade
+      AS DOUBLE)), 2) AS total_oportunidade_mwh, ROUND(SUM(TRY_CAST(val_modalidadeteste AS DOUBLE)), 2)
+      AS total_teste_mwh, ROUND(SUM(COALESCE(TRY_CAST(val_modalidadeexcepcional AS DOUBLE), 0.0)), 2)
+      AS total_excepcional_mwh, ROUND( SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE)) + SUM(TRY_CAST(val_modalidadeemergencial
+      AS DOUBLE)) + SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE)) + SUM(TRY_CAST(val_modalidadeteste
+      AS DOUBLE)) + SUM(COALESCE(TRY_CAST(val_modalidadeexcepcional AS DOUBLE), 0.0)), 2) AS total_geral_mwh
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_modalidade_ho/*.parquet') WHERE
+      din_instante >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY nom_conversora ORDER BY total_geral_mwh
+      DESC;
+  - question: Qual conversora apresentou maior desvio absoluto entre intercâmbio programado e verificado
+      na modalidade contratual em 2024?
+    sql: SELECT nom_conversora, COUNT(*) AS patamares_com_dados, ROUND(SUM(TRY_CAST(val_progmodalidadecontratual
+      AS DOUBLE)), 2) AS total_programado_mwh, ROUND(SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE)),
+      2) AS total_verificado_mwh, ROUND( SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE)) - SUM(TRY_CAST(val_progmodalidadecontratual
+      AS DOUBLE)), 2) AS desvio_liquido_mwh, ROUND( ABS(SUM(TRY_CAST(val_modalidadecontratual AS DOUBLE))
+      - SUM(TRY_CAST(val_progmodalidadecontratual AS DOUBLE))), 2) AS desvio_absoluto_mwh FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_modalidade_ho/*.parquet')
+      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' AND val_progmodalidadecontratual
+      IS NOT NULL AND val_modalidadecontratual IS NOT NULL GROUP BY nom_conversora ORDER BY desvio_absoluto_mwh
+      DESC;
+  - question: Como evoluiu mensalmente o intercâmbio na modalidade oportunidade ao longo de 2023 e 2024?
+    sql: SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia, nom_conversora,
+      ROUND(SUM(TRY_CAST(val_modalidadeoportunidade AS DOUBLE)), 2) AS total_oportunidade_mwh, COUNT(*)
+      AS patamares_horarios FROM read_parquet('s3://ons-aws-prod-opendata/dataset/intercambio_modalidade_ho/*.parquet')
+      WHERE din_instante >= '2023-01-01' AND din_instante < '2025-01-01' GROUP BY DATE_TRUNC('month',
+      TRY_CAST(din_instante AS TIMESTAMP)), nom_conversora ORDER BY mes_referencia, nom_conversora;
+- property: license
+  value: CC-BY

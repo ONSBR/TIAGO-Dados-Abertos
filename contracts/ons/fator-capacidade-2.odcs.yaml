@@ -1,0 +1,1025 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:fator-capacidade-2
+name: fator-capacidade-2
+tenant: ons
+tags:
+- FC eólico
+- FC solar
+- ONS
+- SIN
+- capacity factor
+- fator capacidade eólica
+- fator de aproveitamento
+- fator de capacidade
+- fator-de-capacidade
+- geração-eólica
+- geração-programada
+- geração-verificada
+- horário
+- por-usina
+- solar-fotovoltaica
+- usinas-renováveis
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/fator_capacidade_2_di/*.parquet
+  format: parquet
+description:
+  purpose: Permitir que analistas do ONS, agentes do setor elétrico, pesquisadores e reguladores avaliem
+    o desempenho horário de usinas eólicas e solares fotovoltaicas no SIN, identificando padrões de variabilidade,
+    desvios entre geração programada e verificada, e aproveitamento da capacidade instalada por usina,
+    subsistema, estado e tipo de fonte. Suporta decisões de planejamento da operação, previsão de geração
+    renovável, estudos de integração de fontes intermitentes, avaliação de acurácia de modelos de previsão
+    e análises regulatórias de desempenho de empreendimentos cadastrados na ANEEL.
+  limitations: Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização no dataset
+    fator-capacidade-2. Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização no
+    dataset fator-capacidade-2. Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização
+    no dataset fator-capacidade-2.
+  usage: Recuperar este dataset quando a pergunta envolver fator de capacidade, aproveitamento de capacidade
+    instalada, desempenho horário ou variabilidade de usinas eólicas ou solares fotovoltaicas no SIN.
+domain: geração
+schema:
+- name: fator_capacidade_2
+  physicalType: parquet
+  logicalType: object
+  physicalName: fator_capacidade_2
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador do subsistema elétrico ao qual a usina pertence (ex: SE, S, NE,
+      N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+      - cod_subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome por extenso do subsistema elétrico (ex: Sudeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - região
+      - nome do sistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado brasileiro onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - sigla estado
+      - unidade federativa
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - BA
+      - CE
+      - MA
+      - MG
+      - PB
+      - PE
+      - PI
+      - RN
+      - RS
+      - SC
+      - SP
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome por extenso do estado brasileiro onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome estado
+      - estado por extenso
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BAHIA
+      - CEARA
+      - MARANHAO
+      - MINAS GERAIS
+      - PARAIBA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - SANTA CATARINA
+      - SAO PAULO
+  - name: cod_pontoconexao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código do ponto de conexão da usina à rede de transmissão do SIN
+    customProperties:
+    - property: aliases
+      value:
+      - ponto de conexão
+      - ponto conexão
+      - cod ponto conexão
+      - barra de conexão
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_pontoconexao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do ponto de conexão da usina à rede de transmissão do SIN
+    customProperties:
+    - property: aliases
+      value:
+      - nome ponto de conexão
+      - nome barra conexão
+      - subestação de conexão
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_localizacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da localidade ou município onde a usina está instalada
+    customProperties:
+    - property: aliases
+      value:
+      - localização
+      - município
+      - cidade
+      - localidade
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Interior
+      - Litoral
+  - name: val_latitudesecoletora
+    physicalType: DOUBLE
+    logicalType: number
+    description: Latitude geográfica da subestação coletora da usina (coordenada WGS84, valores negativos
+      indicam hemisfério sul)
+    customProperties:
+    - property: aliases
+      value:
+      - latitude subestação coletora
+      - lat coletora
+      - latitude coletora
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: val_longitudesecoletora
+    physicalType: DOUBLE
+    logicalType: number
+    description: Longitude geográfica da subestação coletora da usina (coordenada WGS84, valores negativos
+      indicam hemisfério oeste)
+    customProperties:
+    - property: aliases
+      value:
+      - longitude subestação coletora
+      - lon coletora
+      - longitude coletora
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: val_latitudepontoconexao
+    physicalType: DOUBLE
+    logicalType: number
+    description: Latitude geográfica do ponto de conexão da usina à rede (coordenada WGS84); poucos nulos presentes
+    customProperties:
+    - property: aliases
+      value:
+      - latitude ponto de conexão
+      - lat ponto conexão
+      - latitude conexão
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: val_longitudepontoconexao
+    physicalType: DOUBLE
+    logicalType: number
+    description: Longitude geográfica do ponto de conexão da usina à rede (coordenada WGS84); poucos nulos presentes
+    customProperties:
+    - property: aliases
+      value:
+      - longitude ponto de conexão
+      - lon ponto conexão
+      - longitude conexão
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: graus decimais
+  - name: nom_modalidadeoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Modalidade de operação da usina no âmbito do despacho pelo ONS (ex: despachada centralizadamente,
+      auto-despacho)'
+    customProperties:
+    - property: aliases
+      value:
+      - modalidade operação
+      - modalidade
+      - modo operação
+      - tipo despacho
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Conjunto de Usinas
+      - Tipo I
+      - Tipo II-B
+  - name: nom_tipousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Tipo da fonte geradora da usina (Eólica ou Solar Fotovoltaica)
+    customProperties:
+    - property: aliases
+      value:
+      - tipo usina
+      - fonte
+      - tipo geração
+      - tecnologia
+      - fonte geradora
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Eólica
+      - Solar
+  - name: nom_usina_conjunto
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da usina individual ou conjunto de usinas eólicas/solares conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - nome usina
+      - usina
+      - conjunto
+      - nome conjunto
+      - nome da usina
+    - property: semanticType
+      value: DIMENSION
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador único da usina ou conjunto de usinas no cadastro do ONS
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - id ONS
+      - código ONS
+      - identificador ONS
+      - id usina ONS
+    - property: semanticType
+      value: IDENTIFIER
+  - name: ceg
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código de Empreendimento de Geração (CEG) da ANEEL, identificador regulatório único da
+      usina
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - CEG
+      - código ANEEL
+      - código empreendimento
+      - código geração
+      - registro ANEEL
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - '-'
+      - EOL.CV.CE.028631-1.01
+      - EOL.CV.CE.028699-0.01
+      - EOL.CV.CE.030841-2.01
+      - EOL.CV.CE.033756-0.01
+      - EOL.CV.RN.028443-2.01
+      - EOL.CV.RN.028444-0.01
+      - EOL.CV.RN.030339-9.01
+      - EOL.CV.RN.030416-6.01
+      - EOL.CV.RN.030417-4.01
+      - EOL.CV.RS.028712-1.01
+      - EOL.CV.RS.031302-5.01
+      - UFV.RS.RN.034184-3.01
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora do instante de referência da medição horária do fator de capacidade (granularidade
+      horária)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data hora
+      - timestamp
+      - hora
+      - data e hora
+      - din_instante
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_geracaoprogramada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração programada da usina no instante de referência em MWmed. Armazenada como VARCHAR
+      no Parquet pelo formato de serialização. Tipo semântico intencional é DOUBLE.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração programada
+      - programação geração
+      - geração prevista
+      - programa geração
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaoprogramada AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_geracaoverificada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Geração verificada (real) da usina no instante de referência em MWmed. Armazenada como
+      VARCHAR no Parquet pelo formato de serialização; requer TRY_CAST(val_geracaoverificada AS DOUBLE)
+      para uso analítico. Tipo semântico intencional é DOUBLE.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração verificada
+      - geração real
+      - geração medida
+      - geração observada
+      - geração efetiva
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_geracaoverificada AS DOUBLE)
+    - property: unit
+      value: MWmed
+  - name: val_capacidadeinstalada
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Capacidade instalada da usina ou conjunto de usinas no instante de referência em MW.
+      Armazenada como VARCHAR no Parquet pelo formato de serialização; requer TRY_CAST(val_capacidadeinstalada
+      AS DOUBLE) para uso analítico. Tipo semântico intencional é DOUBLE.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade instalada
+      - potência instalada
+      - capacidade nominal
+      - potência nominal
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_capacidadeinstalada AS DOUBLE)
+    - property: unit
+      value: MW
+  - name: val_fatorcapacidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Fator de capacidade horário da usina, calculado como razão entre geração verificada
+      e capacidade instalada (valor esperado entre 0 e 1, em p.u.). Armazenado como VARCHAR no Parquet
+      pelo formato de serialização; requer TRY_CAST(val_fatorcapacidade AS DOUBLE) para uso analítico.
+      Tipo semântico intencional é DOUBLE.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - fator de capacidade
+      - FC
+      - capacity factor
+      - fator capacidade
+      - aproveitamento
+    - property: semanticType
+      value: METRIC
+    - property: castExpression
+      value: TRY_CAST(val_fatorcapacidade AS DOUBLE)
+    - property: unit
+      value: p.u.
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/fator-capacidade-2
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - aproveitamento das eolicas
+  - quanto a usina gerou do que poderia
+  - fator de capacidade solar
+  - desempenho das renovaveis
+  - rendimento do parque eolico
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver fator de capacidade, aproveitamento de capacidade
+    instalada, desempenho horário ou variabilidade de usinas eólicas ou solares fotovoltaicas no SIN.
+    Também relevante para perguntas sobre desvio entre geração programada e verificada de renováveis intermitentes,
+    análise de perfil horário de geração renovável, ou avaliação de desempenho de empreendimentos cadastrados
+    na ANEEL por CEG.
+- property: agentInstructions
+  value: '- [val_geracaoprogramada] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos representando MW de geração programada. Qualquer operação aritmética ou de
+    agregação retornará erro ou resultado incorreto sem conversão explícita.
+
+
+    - [val_geracaoverificada] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos representando MW de geração verificada. Operações aritméticas sem TRY_CAST
+    resultarão em erro de tipo no DuckDB.
+
+
+    - [val_capacidadeinstalada] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos representando MW de capacidade instalada. Sem TRY_CAST, cálculos de fator
+    de capacidade derivados desta coluna produzirão resultados incorretos.
+
+
+    - [val_fatorcapacidade] Coluna armazenada como VARCHAR no Parquet devido ao formato de serialização.
+    Contém valores numéricos representando o fator de capacidade (razão entre geração verificada e capacidade
+    instalada). Sem TRY_CAST, análises estatísticas do indicador principal do dataset serão inviáveis.
+
+
+    - [val_latitudepontoconexao] Poucos registros possuem valor nulo na latitude do
+    ponto de conexão. Embora a proporção seja baixa, pode impactar análises geoespaciais que dependam
+    das coordenadas do ponto de conexão para mapeamento ou cálculo de distâncias.
+
+
+    - [val_longitudepontoconexao] Poucos registros possuem valor nulo na longitude do
+    ponto de conexão, coincidindo com os nulos de val_latitudepontoconexao. As usinas afetadas não possuem
+    coordenadas completas do ponto de conexão cadastradas no ONS.
+
+
+    - [din_instante] A serie e horaria e ativa, iniciada em 2009-07-01. Meca a cobertura corrente antes de
+    assumir qualquer recorte. A cobertura histórica completa requer acesso a múltiplos
+    datasets/arquivos do ONS; este glob isolado não representa série contínua de longo prazo.
+
+    '
+- property: typicalQuestions
+  value:
+  - Qual foi o fator de capacidade médio das usinas eólicas do Nordeste em janeiro de 2022?
+  - Quais usinas solares apresentaram maior desvio entre geração programada e verificada?
+  - Como varia o fator de capacidade horário das usinas eólicas ao longo do dia?
+  - Qual a capacidade instalada total de usinas eólicas despachadas pelo ONS por subsistema?
+  - Quais usinas tiveram fator de capacidade acima de 0,8 em algum instante horário?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Qual o desvio médio entre geração programada e verificada das eólicas?"
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/fator_capacidade_2_di/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2009-07-01'
+- property: semantics
+  value:
+    measure_terms:
+    - fator de capacidade
+    - capacity factor
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - ceg
+      - id_ons
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: nom_tipousina
+      usina: ceg
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: geracaoprogramada
+      label: Geracaoprogramada
+      columns:
+      - val_geracaoprogramada
+      expression: TRY_CAST(val_geracaoprogramada AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaoprogramada AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaoprogramada AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaoprogramada AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração programada
+      - programação geração
+      - geração prevista
+      - programa geração
+    - id: geracaoverificada
+      label: Geracaoverificada
+      columns:
+      - val_geracaoverificada
+      expression: TRY_CAST(val_geracaoverificada AS DOUBLE)
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((TRY_CAST(val_geracaoverificada AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(TRY_CAST(val_geracaoverificada AS DOUBLE))
+          unit: MWmed
+        peak_power:
+          sql: MAX(TRY_CAST(val_geracaoverificada AS DOUBLE))
+          unit: MWmed
+        time_series:
+          sql: AVG(TRY_CAST(val_geracaoverificada AS DOUBLE))
+          unit: MWmed
+        ranking:
+          sql: SUM((TRY_CAST(val_geracaoverificada AS DOUBLE)) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(TRY_CAST(val_geracaoverificada AS DOUBLE))
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração verificada
+      - geração real
+      - geração medida
+      - geração observada
+      - geração efetiva
+    - id: capacidadeinstalada
+      label: Capacidadeinstalada
+      columns:
+      - val_capacidadeinstalada
+      expression: TRY_CAST(val_capacidadeinstalada AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(TRY_CAST(val_capacidadeinstalada AS DOUBLE))
+          unit: MW
+        maximum:
+          sql: MAX(TRY_CAST(val_capacidadeinstalada AS DOUBLE))
+          unit: MW
+        time_series:
+          sql: SUM(TRY_CAST(val_capacidadeinstalada AS DOUBLE))
+          unit: MW
+        ranking:
+          sql: SUM(TRY_CAST(val_capacidadeinstalada AS DOUBLE))
+          unit: MW
+        comparison:
+          sql: SUM(TRY_CAST(val_capacidadeinstalada AS DOUBLE))
+          unit: MW
+      interval_hours: 1.0
+      aliases:
+      - capacidade instalada
+      - potência instalada
+      - capacidade nominal
+      - potência nominal
+    - id: fatorcapacidade
+      label: Fatorcapacidade
+      columns:
+      - val_fatorcapacidade
+      expression: TRY_CAST(val_fatorcapacidade AS DOUBLE)
+      quantity_kind: capacity
+      unit_native: p.u.
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(TRY_CAST(val_fatorcapacidade AS DOUBLE))
+          unit: p.u.
+        maximum:
+          sql: MAX(TRY_CAST(val_fatorcapacidade AS DOUBLE))
+          unit: p.u.
+        minimum:
+          sql: MIN(TRY_CAST(val_fatorcapacidade AS DOUBLE))
+          unit: p.u.
+        time_series:
+          sql: AVG(TRY_CAST(val_fatorcapacidade AS DOUBLE))
+          unit: p.u.
+        ranking:
+          sql: AVG(TRY_CAST(val_fatorcapacidade AS DOUBLE))
+          unit: p.u.
+        comparison:
+          sql: AVG(TRY_CAST(val_fatorcapacidade AS DOUBLE))
+          unit: p.u.
+      interval_hours: 1.0
+      aliases:
+      - fator de capacidade
+      - FC
+      - capacity factor
+      - fator capacidade
+      - aproveitamento
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          filter: nom_subsistema = 'Sul'
+      id_estado:
+        BA:
+          aliases:
+          - bahia
+          - BA
+          filter: id_estado = 'BA'
+        CE:
+          aliases:
+          - ceara
+          - CE
+          filter: id_estado = 'CE'
+        MA:
+          aliases:
+          - maranhao
+          - MA
+          filter: id_estado = 'MA'
+        MG:
+          aliases:
+          - minas gerais
+          - MG
+          filter: id_estado = 'MG'
+        PB:
+          aliases:
+          - paraiba
+          - PB
+          filter: id_estado = 'PB'
+        PE:
+          aliases:
+          - pernambuco
+          - PE
+          filter: id_estado = 'PE'
+        PI:
+          aliases:
+          - piaui
+          - PI
+          filter: id_estado = 'PI'
+        RN:
+          aliases:
+          - rio grande do norte
+          - RN
+          filter: id_estado = 'RN'
+        RS:
+          aliases:
+          - rio grande do sul
+          - RS
+          filter: id_estado = 'RS'
+        SC:
+          aliases:
+          - santa catarina
+          - SC
+          filter: id_estado = 'SC'
+        SP:
+          aliases:
+          - sao paulo
+          - SP
+          filter: id_estado = 'SP'
+      nom_estado:
+        BAHIA:
+          aliases:
+          - BAHIA
+          - Bahia
+          filter: nom_estado = 'BAHIA'
+        CEARA:
+          aliases:
+          - CEARA
+          - Ceara
+          filter: nom_estado = 'CEARA'
+        MARANHAO:
+          aliases:
+          - MARANHAO
+          - Maranhao
+          filter: nom_estado = 'MARANHAO'
+        MINAS GERAIS:
+          aliases:
+          - MINAS GERAIS
+          - Minas Gerais
+          filter: nom_estado = 'MINAS GERAIS'
+        PARAIBA:
+          aliases:
+          - PARAIBA
+          - Paraiba
+          filter: nom_estado = 'PARAIBA'
+        PERNAMBUCO:
+          aliases:
+          - PERNAMBUCO
+          - Pernambuco
+          filter: nom_estado = 'PERNAMBUCO'
+        PIAUI:
+          aliases:
+          - PIAUI
+          - Piaui
+          filter: nom_estado = 'PIAUI'
+        RIO GRANDE DO NORTE:
+          aliases:
+          - RIO GRANDE DO NORTE
+          - Rio Grande do Norte
+          filter: nom_estado = 'RIO GRANDE DO NORTE'
+        RIO GRANDE DO SUL:
+          aliases:
+          - RIO GRANDE DO SUL
+          - Rio Grande do Sul
+          filter: nom_estado = 'RIO GRANDE DO SUL'
+        SANTA CATARINA:
+          aliases:
+          - SANTA CATARINA
+          - Santa Catarina
+          filter: nom_estado = 'SANTA CATARINA'
+        SAO PAULO:
+          aliases:
+          - SAO PAULO
+          - Sao Paulo
+          filter: nom_estado = 'SAO PAULO'
+      nom_localizacao:
+        Interior:
+          aliases:
+          - interior
+          - Interior
+          filter: nom_localizacao = 'Interior'
+        Litoral:
+          aliases:
+          - litoral
+          - Litoral
+          - costeiro
+          - costa
+          filter: nom_localizacao = 'Litoral'
+      nom_modalidadeoperacao:
+        Conjunto de Usinas:
+          aliases:
+          - conjunto de usinas
+          - conjunto
+          filter: nom_modalidadeoperacao = 'Conjunto de Usinas'
+        Tipo I:
+          aliases:
+          - tipo I
+          - tipo 1
+          - despacho centralizado
+          filter: nom_modalidadeoperacao = 'Tipo I'
+        Tipo II-B:
+          aliases:
+          - tipo II-B
+          - tipo 2B
+          - auto-despacho
+          filter: nom_modalidadeoperacao = 'Tipo II-B'
+      nom_tipousina:
+        Eolica:
+          aliases:
+          - eolica
+          - eólica
+          - eol
+          - vento
+          - wind
+          filter: nom_tipousina = 'Eólica'
+        Solar:
+          aliases:
+          - solar
+          - fotovoltaica
+          - UFV
+          - FV
+          - solar fotovoltaica
+          filter: nom_tipousina = 'Solar'
+      ceg:
+        EOL.CV.CE.028631-1.01:
+          aliases:
+          - EOL.CV.CE.028631-1.01
+          filter: ceg = 'EOL.CV.CE.028631-1.01'
+        EOL.CV.CE.028699-0.01:
+          aliases:
+          - EOL.CV.CE.028699-0.01
+          filter: ceg = 'EOL.CV.CE.028699-0.01'
+        EOL.CV.CE.030841-2.01:
+          aliases:
+          - EOL.CV.CE.030841-2.01
+          filter: ceg = 'EOL.CV.CE.030841-2.01'
+        EOL.CV.CE.033756-0.01:
+          aliases:
+          - EOL.CV.CE.033756-0.01
+          filter: ceg = 'EOL.CV.CE.033756-0.01'
+        EOL.CV.RN.028443-2.01:
+          aliases:
+          - EOL.CV.RN.028443-2.01
+          filter: ceg = 'EOL.CV.RN.028443-2.01'
+        EOL.CV.RN.028444-0.01:
+          aliases:
+          - EOL.CV.RN.028444-0.01
+          filter: ceg = 'EOL.CV.RN.028444-0.01'
+        EOL.CV.RN.030339-9.01:
+          aliases:
+          - EOL.CV.RN.030339-9.01
+          filter: ceg = 'EOL.CV.RN.030339-9.01'
+        EOL.CV.RN.030416-6.01:
+          aliases:
+          - EOL.CV.RN.030416-6.01
+          filter: ceg = 'EOL.CV.RN.030416-6.01'
+        EOL.CV.RN.030417-4.01:
+          aliases:
+          - EOL.CV.RN.030417-4.01
+          filter: ceg = 'EOL.CV.RN.030417-4.01'
+        EOL.CV.RS.028712-1.01:
+          aliases:
+          - EOL.CV.RS.028712-1.01
+          filter: ceg = 'EOL.CV.RS.028712-1.01'
+        EOL.CV.RS.031302-5.01:
+          aliases:
+          - EOL.CV.RS.031302-5.01
+          filter: ceg = 'EOL.CV.RS.031302-5.01'
+        UFV.RS.RN.034184-3.01:
+          aliases:
+          - UFV.RS.RN.034184-3.01
+          filter: ceg = 'UFV.RS.RN.034184-3.01'
+    sql_patterns:
+      fatorcapacidade_medio_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  id_subsistema,\n\
+          \  nom_tipousina,\n  AVG(TRY_CAST(val_fatorcapacidade AS DOUBLE)) AS fator_capacidade_medio\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1, 2, 3\nORDER BY 1, 2, 3"
+        output_unit: p.u.
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - fatorcapacidade
+          grain: month
+        validated_params:
+          year: '2022'
+      geracaoverificada_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  id_subsistema,\n\
+          \  nom_tipousina,\n  SUM((TRY_CAST(val_geracaoverificada AS DOUBLE)) * 1.0) / 1000 AS energia_gwh\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1, 2, 3\nORDER BY 1, 2, 3"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaoverificada
+          grain: month
+        validated_params:
+          year: '2022'
+      desvio_programado_verificado:
+        template: "SELECT nom_usina_conjunto,\n  ceg,\n  AVG(TRY_CAST(val_geracaoverificada AS DOUBLE)\
+          \ - TRY_CAST(val_geracaoprogramada AS DOUBLE)) AS desvio_medio_mwmed,\n  AVG(ABS(TRY_CAST(val_geracaoverificada\
+          \ AS DOUBLE) - TRY_CAST(val_geracaoprogramada AS DOUBLE))) AS desvio_absoluto_medio_mwmed\n\
+          FROM {source}\nWHERE TRY_CAST(val_geracaoprogramada AS DOUBLE) IS NOT NULL\n  AND TRY_CAST(val_geracaoverificada\
+          \ AS DOUBLE) IS NOT NULL\nGROUP BY 1, 2\nORDER BY desvio_absoluto_medio_mwmed DESC"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - comparison
+          metrics:
+          - geracaoverificada
+          - geracaoprogramada
+          grain: usina
+      capacidade_instalada_por_subsistema:
+        template: "SELECT id_subsistema,\n  nom_tipousina,\n  SUM(TRY_CAST(val_capacidadeinstalada AS\
+          \ DOUBLE)) AS capacidade_total_mw\nFROM {source}\nWHERE din_instante = ( SELECT MAX(din_instante)\
+          \ FROM {source} )\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: MW
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - capacidadeinstalada
+          grain: subsistema
+      geracaoprogramada_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,\n\
+          \  SUM((TRY_CAST(val_geracaoprogramada AS DOUBLE)) * 1.0) / 1000 AS valor\nFROM {source}\nWHERE\
+          \ EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1, 2\nORDER BY 1,\
+          \ 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaoprogramada
+          grain: month
+        validated_params:
+          year: '2022'
+- property: fewShotQueries
+  value:
+  - question: Qual foi o fator de capacidade médio de usinas eólicas e solares por subsistema no período
+      disponível?
+    sql: SELECT nom_tipousina, id_subsistema, nom_subsistema, ROUND(AVG(TRY_CAST(val_fatorcapacidade AS
+      DOUBLE)), 4) AS fc_medio, ROUND(MIN(TRY_CAST(val_fatorcapacidade AS DOUBLE)), 4) AS fc_min, ROUND(MAX(TRY_CAST(val_fatorcapacidade
+      AS DOUBLE)), 4) AS fc_max, COUNT(DISTINCT id_ons) AS qtd_usinas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/fator_capacidade_2_di/*.parquet')
+      GROUP BY nom_tipousina, id_subsistema, nom_subsistema ORDER BY nom_tipousina, fc_medio DESC
+  - question: Quais usinas apresentaram maior desvio absoluto entre geração programada e verificada, indicando
+      possível curtailment ou erro de previsão?
+    sql: SELECT id_ons, nom_usina_conjunto, nom_tipousina, id_subsistema, ROUND(AVG( ABS( TRY_CAST(val_geracaoverificada
+      AS DOUBLE) - TRY_CAST(val_geracaoprogramada AS DOUBLE) ) ), 2) AS desvio_medio_mw, ROUND(AVG(TRY_CAST(val_geracaoprogramada
+      AS DOUBLE)), 2) AS prog_media_mw, ROUND(AVG(TRY_CAST(val_geracaoverificada AS DOUBLE)), 2) AS verif_media_mw,
+      COUNT(*) AS horas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/fator_capacidade_2_di/*.parquet')
+      GROUP BY id_ons, nom_usina_conjunto, nom_tipousina, id_subsistema ORDER BY desvio_medio_mw DESC
+      LIMIT 20
+  - question: Como o fator de capacidade de usinas solares varia ao longo das horas do dia?
+    sql: SELECT EXTRACT(HOUR FROM TRY_CAST(din_instante AS TIMESTAMP)) AS hora_do_dia, ROUND(AVG(TRY_CAST(val_fatorcapacidade
+      AS DOUBLE)), 4) AS fc_medio, ROUND(MAX(TRY_CAST(val_fatorcapacidade AS DOUBLE)), 4) AS fc_max, COUNT(*)
+      AS observacoes FROM read_parquet('s3://ons-aws-prod-opendata/dataset/fator_capacidade_2_di/*.parquet')
+      WHERE nom_tipousina = 'Solar Fotovoltaica' GROUP BY EXTRACT(HOUR FROM TRY_CAST(din_instante AS TIMESTAMP))
+      ORDER BY hora_do_dia
+- property: license
+  value: CC-BY

@@ -1,0 +1,1097 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:energia-vertida-turbinavel
+name: energia-vertida-turbinavel
+tenant: ons
+tags:
+- EVT
+- ONS
+- SIN
+- aproveitamento-hidrico
+- energia turbinável perdida
+- energia vertida aproveitável
+- energia vertida turbinável
+- energia-vertida-turbinavel
+- geracao-hidraulica
+- hidrologia
+- horario
+- perda hidráulica turbinável
+- usinas-hidreletricas
+- vazao-vertida
+- vertimento turbinável
+- vertimento-turbinavel
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/energia_vertida_turbinavel_ho/*.parquet
+  format: parquet
+description:
+  purpose: Monitorar, em periodicidade horária e por usina hidrelétrica, os volumes de energia vertida
+    turbinável e vazões associadas, permitindo que operadores do ONS, planejadores energéticos e agentes
+    do setor elétrico identifiquem perdas de geração por vertimento turbinável, avaliem o aproveitamento
+    hidráulico das usinas, subsidiem decisões de despacho e otimização do uso dos recursos hídricos, e
+    apoiem análises de eficiência operacional e conformidade regulatória perante ANEEL e CCEE.
+  limitations: Valor máximo de 6609. Valor máximo de 222890. Valor máximo de 204.
+  usage: Recuperar este dataset quando a pergunta envolver perdas de geração por vertimento hidráulico,
+    aproveitamento de vazões turináveis, eficiência operacional de usinas hidrelétricas ou análise de
+    oportunidades de geração não aproveitadas.
+domain: hidrologia
+schema:
+- name: energia_vertida_turbinavel
+  physicalType: parquet
+  logicalType: object
+  physicalName: energia_vertida_turbinavel
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a usina pertence (ex: SE, S, NE, N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+      - id subsistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome completo do subsistema elétrico ao qual a usina pertence
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema
+      - nome do subsistema
+      - região
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - SUDESTE
+      - SUL
+  - name: nom_bacia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da bacia hidrográfica onde a usina está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - bacia
+      - bacia hidrográfica
+      - bacia hidrológica
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - AMAZONAS
+      - ARAGUARI
+      - CAPIVARI
+      - DOCE
+      - GRANDE
+      - IGUACU
+      - ITABAPOANA
+      - ITAJAI
+      - JACUI
+      - JEQUITINHONHA
+      - MUCURI
+      - PARAGUACU
+      - PARAGUAI
+      - PARAIBA DO SUL
+      - PARANA
+      - PARANAIBA
+      - PARANAPANEMA
+      - PARNAIBA
+      - SANTA MARIA VIT
+      - SAO FRANCISCO
+      - TIETE
+      - TOCANTINS
+      - URUGUAI
+  - name: nom_rio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do rio no qual a usina hidrelétrica está instalada
+    customProperties:
+    - property: aliases
+      value:
+      - rio
+      - nome do rio
+      - curso d'água
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_agente
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente gerador (empresa) responsável pela operação da usina
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - empresa
+      - gerador
+      - concessionária
+      - nome do agente
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_reservatorio
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do reservatório ou usina hidrelétrica, identificador textual da unidade geradora
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - reservatório
+      - nome da usina
+      - nome do reservatório
+      - planta
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_usina
+    physicalType: INTEGER
+    logicalType: integer
+    description: Código numérico único que identifica a usina hidrelétrica no sistema ONS. Varia de 1
+      a 315.
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da usina
+      - código usina
+      - id usina
+      - identificador da usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Instante de início do intervalo horário de medição. O valor 00:00 representa o intervalo
+      entre 00:00:00 e 00:59:59 do mesmo dia. Granularidade horária.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - hora
+      - data hora
+      - timestamp
+      - data e hora
+      - período
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_geracao
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Geração efetiva de energia elétrica da usina no intervalo horário, em MW médios. Representa
+      a potência média gerada durante a hora. Mínimo observado: 0.0, máximo: 14147.78 MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - geração
+      - geração elétrica
+      - potência gerada
+      - geração da usina
+      - MW gerado
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_disponibilidade
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Capacidade de geração disponível da usina no intervalo horário, em MW médios. Representa
+      a potência que poderia ser gerada considerando as unidades disponíveis. Mínimo: 0.0, máximo: 13966.125
+      MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade
+      - capacidade disponível
+      - potência disponível
+      - MW disponível
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_vazaoturbinada
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão total turbinada pela usina no intervalo horário, em m³/s. Representa o volume
+      de água efetivamente passado pelas turbinas por segundo. Mínimo: 0.0, máximo: 222890.0 m³/s.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão turbinada
+      - vazão nas turbinas
+      - turbinamento
+      - Q turbinado
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaovertida
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Vazão total vertida pela usina no intervalo horário, em m³/s. Inclui tanto a parcela
+      turbinável quanto a não turbinável. Mínimo: 0.0, máximo: 41498.0 m³/s.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão vertida
+      - vertimento total
+      - Q vertido
+      - vazão de vertimento
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_vazaovertidanaoturbinavel
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Parcela da vazão vertida que não pode ser aproveitada para geração de energia (vertimento
+      não turbinável), em m³/s. Ocorre quando o vertimento é obrigatório por restrições operativas ou
+      de segurança. Mínimo: 0.0, máximo: 4538.0 m³/s.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão vertida não turbinável
+      - vertimento não turbinável
+      - Q não turbinável
+      - vazão não aproveitável
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_produtividade
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Produtividade específica da usina no intervalo horário, expressa em MW/(m³/s). Representa
+      a eficiência de conversão hidráulica: quantidade de energia gerada por unidade de vazão turbinada.
+      Mínimo: 0.0, máximo: 204.63 MW/(m³/s).
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - produtividade
+      - eficiência hidráulica
+      - rendimento
+      - produtividade específica
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW/(m³/s)
+  - name: val_folgadegeracao
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Folga de geração disponível na usina no intervalo horário, em MW médios. Representa
+      a diferença entre a disponibilidade e a geração efetiva, indicando a capacidade ociosa que poderia
+      ser despachada. Mínimo: 0.0, máximo: 7643.287 MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - folga de geração
+      - capacidade ociosa
+      - margem de geração
+      - folga
+      - reserva de geração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_energiavertida
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Energia total vertida pela usina no intervalo horário, em MW médios. Corresponde à energia
+      que seria gerada se toda a vazão vertida fosse turbinada. Inclui componentes turbináveis e não turbináveis.
+      Mínimo: 0.0, máximo: 13465.6505 MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - energia vertida
+      - energia de vertimento
+      - energia perdida por vertimento
+      - vertimento em energia
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: val_vazaovertidaturbinavel
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Parcela da vazão vertida que poderia ser aproveitada para geração de energia (vertimento
+      turbinável), em m³/s. Representa a perda de oportunidade de geração por limitação de capacidade
+      instalada ou restrições de despacho. Mínimo: 0.0, máximo: 35063.0 m³/s.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - vazão vertida turbinável
+      - vertimento turbinável
+      - Q turbinável vertido
+      - vazão aproveitável vertida
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: m³/s
+  - name: val_energiavertidaturbinavel
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Energia vertida turbinável no intervalo horário, em MW médios. Métrica central do dataset:
+      representa a energia que poderia ter sido gerada a partir da vazão vertida turbinável, mas foi perdida.
+      Indicador de perda de oportunidade de geração. Mínimo: 0.0, máximo: 6609.185 MW.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - energia vertida turbinável
+      - EVT
+      - energia turbinável perdida
+      - perda turbinável
+      - energia de vertimento turbinável
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/energia-vertida-turbinavel
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quanta energia foi desperdicada
+  - agua vertida que daria energia
+  - perda por vertimento
+  - geracao perdida na hidraulica
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver perdas de geração por vertimento hidráulico,
+    aproveitamento de vazões turináveis, eficiência operacional de usinas hidrelétricas ou análise de
+    oportunidades de geração não aproveitadas. Também relevante para perguntas sobre balanço hídrico horário
+    por usina, produtividade específica e correlação entre vertimento e despacho no SIN.
+- property: agentInstructions
+  value: '- [val_energiavertidaturbinavel] Valor máximo de 6.609,19 MWmed é extremamente elevado para
+    uma única usina em um intervalo horário. Pode representar grandes usinas como Itaipu em situações
+    excepcionais de cheia, mas merece validação para identificar possíveis erros de consolidação.
+
+
+    - [val_vazaoturbinada] Valor máximo de 222.890 m³/s é excepcionalmente alto. A vazão turbinada máxima
+    de Itaipu é ~17.000 m³/s; valores acima de 50.000 m³/s merecem investigação para descartar erros de
+    escala ou unidade no dataset energia-vertida-turbinavel.
+
+
+    - [val_produtividade] Valor máximo de 204,63 MW/(m³/s) é muito superior ao esperado para usinas hidrelétricas
+    brasileiras (tipicamente 0,5–1,5 MW/(m³/s)). Pode indicar erro de unidade, divisão por vazão próxima
+    de zero ou problema de consolidação no dataset energia-vertida-turbinavel.
+
+
+    - [val_vazaovertidanaoturbinavel] Máximo de 1.506 m³/s é muito inferior ao máximo de val_vazaovertida
+    (41.498 m³/s), confirmando que a maior parte do vertimento é turbinável. Verificar se registros com
+    val_vazaovertidanaoturbinavel > 0 e val_vazaovertidaturbinavel = 0 são consistentes no dataset energia-vertida-turbinavel.
+
+
+    - [din_instante] Dataset cobre 11+ anos com atualização diária. Possíveis lacunas horárias por falhas
+    de telemetria ou reprocessamento. A partir de 2024 os arquivos são mensais (MES-ANO), o que pode gerar
+    descontinuidades na transição de arquivos anuais para mensais no dataset energia-vertida-turbinavel.
+
+
+    - [val_geracao] Valor máximo de 14.147,78 MWmed próximo à capacidade instalada de Itaipu (~14.000
+    MW). Verificar se existem registros com val_geracao > val_disponibilidade no dataset energia-vertida-turbinavel,
+    pois indicariam inconsistência lógica.
+
+
+    - [val_energiavertida] Verificar consistência entre val_energiavertida (total) e val_energiavertidaturbinavel
+    (parcela). Registros onde val_energiavertida < val_energiavertidaturbinavel indicam inconsistência
+    lógica no dataset energia-vertida-turbinavel (total menor que parcela turbinável).
+
+
+    - [val_folgadegeracao] Valor máximo de 8.688,58 MWmed é muito elevado. Verificar se registros com
+    val_folgadegeracao > val_disponibilidade existem no dataset energia-vertida-turbinavel, pois indicariam
+    folga maior que a própria disponibilidade — inconsistência lógica.
+
+
+    - [cod_usina] A chave primária natural é (cod_usina, din_instante). Verificar se existem registros
+    duplicados para a mesma usina no mesmo instante horário no dataset energia-vertida-turbinavel, o que
+    indicaria problema no processo de consolidação ou ingestão dos arquivos parquet.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais usinas tiveram maior energia vertida turbinável no verão de 2024?
+  - Qual foi a perda acumulada de geração por vertimento turbinável no subsistema Sudeste em 2023?
+  - Em quais horas do dia ocorrem mais eventos de vertimento turbinável na bacia do Paraná?
+  - Qual a relação entre afluência e energia vertida turbinável em Itaipu nos últimos 5 anos?
+  - Quais usinas apresentam maior produtividade específica média e ainda assim registram vertimento turbinável?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Quais usinas desperdisaram mais agua em vertimento na bacia do Paraná?"
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/energia_vertida_turbinavel_ho/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2015-01-01'
+- property: semantics
+  value:
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 hora
+      temporal_column: din_instante
+      spatial: usina
+      entity: reservatorio
+      one_row_per:
+      - din_instante
+      - id_subsistema
+      - cod_usina
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: nom_reservatorio
+      bacia: nom_bacia
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: geracao
+      label: Geracao
+      columns:
+      - val_geracao
+      expression: val_geracao
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_geracao) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_geracao)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_geracao)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_geracao)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_geracao) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_geracao)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - geração
+      - geração elétrica
+      - potência gerada
+      - geração da usina
+      - MW gerado
+    - id: disponibilidade
+      label: Disponibilidade
+      columns:
+      - val_disponibilidade
+      expression: val_disponibilidade
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_disponibilidade) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_disponibilidade)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_disponibilidade)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_disponibilidade)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_disponibilidade) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_disponibilidade)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - disponibilidade
+      - capacidade disponível
+      - potência disponível
+      - MW disponível
+    - id: vazaoturbinada
+      label: Vazaoturbinada
+      columns:
+      - val_vazaoturbinada
+      expression: val_vazaoturbinada
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaoturbinada)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaoturbinada)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaoturbinada)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão turbinada
+      - vazão nas turbinas
+      - turbinamento
+      - Q turbinado
+    - id: vazaovertida
+      label: Vazaovertida
+      columns:
+      - val_vazaovertida
+      expression: val_vazaovertida
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaovertida)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaovertida)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaovertida)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão vertida
+      - vertimento total
+      - Q vertido
+      - vazão de vertimento
+    - id: vazaovertidanaoturbinavel
+      label: Vazaovertidanaoturbinavel
+      columns:
+      - val_vazaovertidanaoturbinavel
+      expression: val_vazaovertidanaoturbinavel
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaovertidanaoturbinavel)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão vertida não turbinável
+      - vertimento não turbinável
+      - Q não turbinável
+      - vazão não aproveitável
+    - id: produtividade
+      label: Produtividade
+      columns:
+      - val_produtividade
+      expression: val_produtividade
+      quantity_kind: intensive
+      unit_native: MW/(m³/s)
+      default_aggregation: sum
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_produtividade)
+          unit: MW/(m³/s)
+        maximum:
+          sql: MAX(val_produtividade)
+          unit: MW/(m³/s)
+        time_series:
+          sql: AVG(val_produtividade)
+          unit: MW/(m³/s)
+        ranking:
+          sql: AVG(val_produtividade)
+          unit: MW/(m³/s)
+        comparison:
+          sql: AVG(val_produtividade)
+          unit: MW/(m³/s)
+      interval_hours: 1.0
+      aliases:
+      - produtividade
+      - eficiência hidráulica
+      - rendimento
+      - produtividade específica
+      - produtividade hidraulica
+    - id: folgadegeracao
+      label: Folgadegeracao
+      columns:
+      - val_folgadegeracao
+      expression: val_folgadegeracao
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_folgadegeracao) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_folgadegeracao)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_folgadegeracao)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_folgadegeracao)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_folgadegeracao) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_folgadegeracao)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - folga de geração
+      - capacidade ociosa
+      - margem de geração
+      - folga
+      - reserva de geração
+    - id: energiavertida
+      label: Energiavertida
+      columns:
+      - val_energiavertida
+      expression: val_energiavertida
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_energiavertida) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_energiavertida)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_energiavertida)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_energiavertida)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_energiavertida) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_energiavertida)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - energia vertida
+      - energia de vertimento
+      - energia perdida por vertimento
+      - vertimento em energia
+    - id: vazaovertidaturbinavel
+      label: Vazaovertidaturbinavel
+      columns:
+      - val_vazaovertidaturbinavel
+      expression: val_vazaovertidaturbinavel
+      quantity_kind: flow
+      unit_native: m³/s
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_vazaovertidaturbinavel)
+          unit: m³/s
+        peak:
+          sql: MAX(val_vazaovertidaturbinavel)
+          unit: m³/s
+        minimum:
+          sql: MIN(val_vazaovertidaturbinavel)
+          unit: m³/s
+        time_series:
+          sql: AVG(val_vazaovertidaturbinavel)
+          unit: m³/s
+        ranking:
+          sql: AVG(val_vazaovertidaturbinavel)
+          unit: m³/s
+        comparison:
+          sql: AVG(val_vazaovertidaturbinavel)
+          unit: m³/s
+      interval_hours: 1.0
+      aliases:
+      - vazão vertida turbinável
+      - vertimento turbinável
+      - Q turbinável vertido
+      - vazão aproveitável vertida
+    - id: energiavertidaturbinavel
+      label: Energiavertidaturbinavel
+      columns:
+      - val_energiavertidaturbinavel
+      expression: val_energiavertidaturbinavel
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM((val_energiavertidaturbinavel) * 1.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_energiavertidaturbinavel)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_energiavertidaturbinavel)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_energiavertidaturbinavel)
+          unit: MWmed
+        ranking:
+          sql: SUM((val_energiavertidaturbinavel) * 1.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_energiavertidaturbinavel)
+          unit: MWmed
+      interval_hours: 1.0
+      aliases:
+      - energia vertida turbinável
+      - EVT
+      - energia turbinável perdida
+      - perda turbinável
+      - energia de vertimento turbinável
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          filter: nom_subsistema = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          filter: nom_subsistema = 'NORTE'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          filter: nom_subsistema = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          filter: nom_subsistema = 'SUL'
+      nom_bacia:
+        AMAZONAS:
+          aliases:
+          - AMAZONAS
+          - amazonia
+          filter: nom_bacia = 'AMAZONAS'
+        ARAGUARI:
+          aliases:
+          - ARAGUARI
+          filter: nom_bacia = 'ARAGUARI'
+        CAPIVARI:
+          aliases:
+          - CAPIVARI
+          filter: nom_bacia = 'CAPIVARI'
+        DOCE:
+          aliases:
+          - DOCE
+          - rio doce
+          filter: nom_bacia = 'DOCE'
+        GRANDE:
+          aliases:
+          - GRANDE
+          - rio grande
+          filter: nom_bacia = 'GRANDE'
+        IGUACU:
+          aliases:
+          - IGUACU
+          - iguaçu
+          filter: nom_bacia = 'IGUACU'
+        ITABAPOANA:
+          aliases:
+          - ITABAPOANA
+          filter: nom_bacia = 'ITABAPOANA'
+        ITAJAI:
+          aliases:
+          - ITAJAI
+          - itajaí
+          filter: nom_bacia = 'ITAJAI'
+        JACUI:
+          aliases:
+          - JACUI
+          - jacuí
+          filter: nom_bacia = 'JACUI'
+        JEQUITINHONHA:
+          aliases:
+          - JEQUITINHONHA
+          filter: nom_bacia = 'JEQUITINHONHA'
+        MUCURI:
+          aliases:
+          - MUCURI
+          filter: nom_bacia = 'MUCURI'
+        PARAGUACU:
+          aliases:
+          - PARAGUACU
+          - paraguaçu
+          filter: nom_bacia = 'PARAGUACU'
+        PARAGUAI:
+          aliases:
+          - PARAGUAI
+          filter: nom_bacia = 'PARAGUAI'
+        PARAIBA DO SUL:
+          aliases:
+          - PARAIBA DO SUL
+          - paraíba do sul
+          filter: nom_bacia = 'PARAIBA DO SUL'
+        PARANA:
+          aliases:
+          - PARANA
+          - paraná
+          filter: nom_bacia = 'PARANA'
+        PARANAIBA:
+          aliases:
+          - PARANAIBA
+          - paranaíba
+          filter: nom_bacia = 'PARANAIBA'
+        PARANAPANEMA:
+          aliases:
+          - PARANAPANEMA
+          filter: nom_bacia = 'PARANAPANEMA'
+        PARNAIBA:
+          aliases:
+          - PARNAIBA
+          - parnaíba
+          filter: nom_bacia = 'PARNAIBA'
+        SANTA MARIA VIT:
+          aliases:
+          - SANTA MARIA VIT
+          - santa maria vitoria
+          filter: nom_bacia = 'SANTA MARIA VIT'
+        SAO FRANCISCO:
+          aliases:
+          - SAO FRANCISCO
+          - são francisco
+          - sao francisco
+          filter: nom_bacia = 'SAO FRANCISCO'
+        TIETE:
+          aliases:
+          - TIETE
+          - tietê
+          filter: nom_bacia = 'TIETE'
+        TOCANTINS:
+          aliases:
+          - TOCANTINS
+          filter: nom_bacia = 'TOCANTINS'
+        URUGUAI:
+          aliases:
+          - URUGUAI
+          filter: nom_bacia = 'URUGUAI'
+    sql_patterns:
+      evt_mensal_por_usina:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  nom_reservatorio,\n\
+          \  SUM(TRY_CAST(val_energiavertidaturbinavel AS DOUBLE) * 0.5) AS evt_mwh\nFROM {source}\nWHERE\
+          \ TRY_CAST(din_instante AS TIMESTAMP) IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - energiavertidaturbinavel
+          grain: month
+      produtividade_media_por_usina:
+        template: "SELECT nom_reservatorio,\n  nom_bacia,\n  AVG(TRY_CAST(val_produtividade AS DOUBLE))\
+          \ AS produtividade_media\nFROM {source}\nWHERE TRY_CAST(val_produtividade AS DOUBLE) BETWEEN\
+          \ 0.1 AND 10.0\n  AND TRY_CAST(val_vazaoturbinada AS DOUBLE) > 0\nGROUP BY 1, 2\nORDER BY produtividade_media\
+          \ DESC"
+        output_unit: MW/(m³/s)
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - produtividade
+      geracao_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  nom_reservatorio,\n\
+          \  SUM(TRY_CAST(val_geracao AS DOUBLE) * 0.5) AS geracao_mwh\nFROM {source}\nWHERE TRY_CAST(din_instante\
+          \ AS TIMESTAMP) IS NOT NULL\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracao
+          grain: month
+      folga_geracao_horaria:
+        template: "SELECT din_instante,\n  nom_reservatorio,\n  AVG(TRY_CAST(val_folgadegeracao AS DOUBLE))\
+          \ AS folga_mwmed\nFROM {source}\nWHERE TRY_CAST(din_instante AS TIMESTAMP) >= CURRENT_TIMESTAMP\
+          \ - INTERVAL '7 days'\nGROUP BY 1, 2\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - folgadegeracao
+          grain: hour
+      energia_vertida_turbinavel_mensal_gwh:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_disponibilidade\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_disponibilidade_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_energiavertida\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_energiavertida_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_energiavertidaturbinavel\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_energiavertidaturbinavel_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_folgadegeracao\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_folgadegeracao_gwh,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao\
+          \ AS VARCHAR) AS DOUBLE)) * 1.0 / 1000, 1) AS val_geracao_gwh\nFROM {source}\nWHERE EXTRACT(YEAR\
+          \ FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          grain: month
+        validated_params:
+          year: '2025'
+      energia_vertida_turbinavel_mensal_mwmed:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_disponibilidade\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_disponibilidade_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_energiavertida AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante\
+          \ AS TIMESTAMP)), 1) AS val_energiavertida_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_energiavertidaturbinavel\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_energiavertidaturbinavel_mwmed,\n\
+          \  ROUND(SUM(TRY_CAST(TRY_CAST(val_folgadegeracao AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante\
+          \ AS TIMESTAMP)), 1) AS val_folgadegeracao_mwmed,\n  ROUND(SUM(TRY_CAST(TRY_CAST(val_geracao\
+          \ AS VARCHAR) AS DOUBLE)) / COUNT(DISTINCT TRY_CAST(din_instante AS TIMESTAMP)), 1) AS val_geracao_mwmed\n\
+          FROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(din_instante AS TIMESTAMP)) = {year}\nGROUP\
+          \ BY 1\nORDER BY 1"
+        output_unit: MWmed
+        matches:
+          output_modes:
+          - average_power
+          grain: month
+        validated_params:
+          year: '2025'
+- property: fewShotQueries
+  value:
+  - question: Quais usinas hidrelétricas tiveram maior energia vertida turbinável acumulada no ano de
+      2024?
+    sql: SELECT cod_usina, nom_reservatorio, nom_bacia, id_subsistema, SUM((val_energiavertidaturbinavel)
+      * 1.0) / 1000 AS total_evt_mwmed, COUNT(*) AS horas_com_vertimento FROM read_parquet('s3://ons-aws-prod-opendata/dataset/energia_vertida_turbinavel_ho/*.parquet')
+      WHERE YEAR(din_instante) = 2024 AND val_energiavertidaturbinavel > 0 GROUP BY cod_usina, nom_reservatorio,
+      nom_bacia, id_subsistema ORDER BY total_evt_mwmed DESC LIMIT 20;
+  - question: Como evoluiu mensalmente a energia vertida turbinável em cada subsistema elétrico entre
+      2020 e 2024?
+    sql: SELECT id_subsistema, nom_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
+      AS mes_referencia, SUM((val_energiavertidaturbinavel) * 1.0) / 1000 AS total_evt_mwmed, SUM((val_energiavertida)
+      * 1.0) / 1000 AS total_ev_mwmed, CASE WHEN SUM((val_energiavertida) * 1.0) / 1000 > 0 THEN ROUND(SUM((val_energiavertidaturbinavel)
+      * 1.0) / 1000 / SUM((val_energiavertida) * 1.0) / 1000 * 100, 2) ELSE 0 END AS pct_turbinavel FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/energia_vertida_turbinavel_ho/*.parquet') WHERE
+      din_instante >= '2020-01-01' AND din_instante < '2025-01-01' GROUP BY id_subsistema, nom_subsistema,
+      DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) ORDER BY id_subsistema, mes_referencia;
+  - question: Qual o fator de aproveitamento hidráulico (geração / disponibilidade) médio por usina em
+      2023, considerando apenas horas com vertimento turbinável?
+    sql: SELECT cod_usina, nom_reservatorio, nom_bacia, id_subsistema, COUNT(*) AS horas_com_evt, ROUND(AVG(val_geracao),
+      2) AS geracao_media_mwmed, ROUND(AVG(val_disponibilidade), 2) AS disponibilidade_media_mwmed, ROUND(AVG(val_energiavertidaturbinavel),
+      2) AS evt_medio_mwmed, CASE WHEN AVG(val_disponibilidade) > 0 THEN ROUND(AVG(val_geracao) / AVG(val_disponibilidade)
+      * 100, 2) ELSE NULL END AS fator_aproveitamento_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/energia_vertida_turbinavel_ho/*.parquet')
+      WHERE YEAR(din_instante) = 2023 AND val_energiavertidaturbinavel > 0 AND val_disponibilidade > 0
+      GROUP BY cod_usina, nom_reservatorio, nom_bacia, id_subsistema ORDER BY evt_medio_mwmed DESC LIMIT
+      30;
+- property: license
+  value: CC-BY

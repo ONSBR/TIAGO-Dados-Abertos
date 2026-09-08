@@ -1,0 +1,9 @@
+{
+  "_comment": "Troque <ABS_PATH> pelo caminho absoluto do repositorio clonado. Em Linux/macOS o comando e <ABS_PATH>/.venv/bin/mcp-tiago-dados-abertos. Os contratos sao encontrados sozinhos; MCP_CONTRACTS_DIR so e preciso para apontar outro corpus.",
+  "mcpServers": {
+    "mcp-tiago-dados-abertos": {
+      "command": "<ABS_PATH>/.venv/Scripts/mcp-tiago-dados-abertos.exe",
+      "args": ["--stdio"]
+    }
+  }
+}

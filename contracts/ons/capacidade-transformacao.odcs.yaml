@@ -1,0 +1,884 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:capacidade-transformacao
+name: capacidade-transformacao
+tenant: ons
+tags:
+- AT rede básica
+- cadastro-equipamentos
+- capacidade de transformação
+- capacidade trafo
+- mva
+- ons
+- potencia-nominal
+- rede-basica
+- sin
+- subestacao
+- tensao-kv
+- trafo
+- transformador
+- transformador rede básica
+- transformação SIN
+- transmissao
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/capacidade-transformacao/*.parquet
+  format: parquet
+description:
+  purpose: Suportar planejadores e operadores do sistema elétrico na análise da capacidade de transformação
+    instalada na Rede Básica do SIN, permitindo estudos de fluxo de potência, avaliação de adequação da
+    infraestrutura de transmissão, decisões sobre expansão da rede, manutenção de equipamentos e conformidade
+    regulatória com normas ANEEL/ONS. Utilizado por agentes de transmissão, pesquisadores e reguladores
+    para inventário e diagnóstico da infraestrutura de transformação.
+  limitations: Parte dos registros (aproximadamente 384 linhas) possuem val_tensaoterciario_kv nulo. Poucos registros possuem num_barra_primario nulo, indicando transformadores sem barra primária associada no modelo computacional. Poucos registros possuem num_barra_secundario nulo, indicando transformadores sem barra secundária associada no modelo computacional.
+  usage: Recuperar este dataset quando a pergunta envolver capacidade instalada de transformação, inventário
+    de transformadores da Rede Básica, potência nominal em MVA por subestação ou subsistema, tensões de
+    transformação (primário/secundário/terciário), agentes proprietários de transformadores ou análise
+    de infraestrutura de transformação do SIN.
+domain: transmissao
+schema:
+- name: capacidade_transformacao
+  physicalType: parquet
+  logicalType: object
+  physicalName: capacidade_transformacao
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual o transformador pertence (ex: SE, S, NE,
+      N)'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - id_sistema
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - S
+      - SE
+  - name: nom_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Nome por extenso do subsistema elétrico (ex: Sudeste/Centro-Oeste, Sul, Nordeste, Norte)'
+    customProperties:
+    - property: aliases
+      value:
+      - nome_subsistema
+      - regiao_subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Nordeste
+      - Norte
+      - Sudeste/Centro-Oeste
+      - Sul
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla do estado da federação onde a subestação está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - uf
+      - sigla_estado
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome por extenso do estado da federação onde a subestação está localizada
+    customProperties:
+    - property: aliases
+      value:
+      - nome_estado
+      - estado_nome
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Acre
+      - Alagoas
+      - Amapá
+      - Amazonas
+      - Bahia
+      - Ceará
+      - Distrito Federal
+      - Espírito Santo
+      - Goiás
+      - Maranhão
+      - Mato Grosso
+      - Mato Grosso do Sul
+      - Minas Gerais
+      - Paraná
+      - Paraíba
+      - Pará
+      - Pernambuco
+      - Piauí
+      - Rio Grande do Norte
+      - Rio Grande do Sul
+      - Rio de Janeiro
+      - Rondônia
+      - Roraima
+      - Santa Catarina
+      - Sergipe
+      - São Paulo
+      - Tocantins
+  - name: nom_tipotransformador
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo do transformador conforme classificação ONS (ex: Autotransformador, Transformador
+      de dois enrolamentos, Transformador de três enrolamentos)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo_transformador
+      - tipo_equipamento
+      - classificacao_transformador
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - TRANSFORMADOR DE 2 TERMINAIS
+      - TRANSFORMADOR DE 3 TERMINAIS
+  - name: nom_agenteproprietario
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente proprietário do transformador conforme cadastro ONS (concessionária de
+      transmissão ou geração)
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - proprietario
+      - empresa
+      - concessionaria
+      - transmissora
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_subestacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da subestação onde o transformador está instalado
+    customProperties:
+    - property: aliases
+      value:
+      - subestacao
+      - nome_subestacao
+      - se
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_transformador
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome ou designação do transformador dentro da subestação, geralmente incluindo tensões
+      e número de identificação
+    customProperties:
+    - property: aliases
+      value:
+      - transformador
+      - nome_transformador
+      - designacao_transformador
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_equipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código único do equipamento no cadastro ONS, utilizado como identificador primário do
+      transformador
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - codigo_equipamento
+      - id_equipamento
+      - cod_trafo
+    - property: semanticType
+      value: IDENTIFIER
+  - name: dat_entradaoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de entrada em operação do transformador. Armazenada como VARCHAR no Parquet; requer
+      conversão para DATE em análises temporais
+    customProperties:
+    - property: aliases
+      value:
+      - data_entrada_operacao
+      - data_operacao
+      - entrada_operacao
+      - data_comissionamento
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_desativacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de desativação do transformador. Armazenada como VARCHAR; valor pode representar
+      data futura, data passada ou indicador de equipamento ativo (ex: ''9999-12-31''). Requer conversão
+      para DATE em análises temporais'
+    customProperties:
+    - property: aliases
+      value:
+      - data_desativacao
+      - data_retirada
+      - desativacao
+      - data_baixa
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_tensaoprimario_kv
+    physicalType: DOUBLE
+    logicalType: number
+    description: Tensão nominal do enrolamento primário do transformador em quilovolts (kV)
+    customProperties:
+    - property: aliases
+      value:
+      - tensao_primario
+      - tensao_alta
+      - kv_primario
+      - tensao_at
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: kV
+    - property: enum
+      value:
+      - 69.0
+      - 132.0
+      - 138.0
+      - 230.0
+      - 289.0
+      - 345.0
+      - 440.0
+      - 500.0
+      - 765.0
+  - name: val_tensaosecundario_kv
+    physicalType: DOUBLE
+    logicalType: number
+    description: Tensão nominal do enrolamento secundário do transformador em quilovolts (kV)
+    customProperties:
+    - property: aliases
+      value:
+      - tensao_secundario
+      - tensao_media
+      - kv_secundario
+      - tensao_mt
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: kV
+    - property: enum
+      value:
+      - 11.0
+      - 11.9
+      - 13.8
+      - 16.0
+      - 17.5
+      - 20.0
+      - 22.0
+      - 23.0
+      - 34.5
+      - 44.0
+      - 69.0
+      - 88.0
+      - 138.0
+      - 161.0
+      - 230.0
+      - 289.0
+      - 345.0
+      - 440.0
+      - 500.0
+  - name: val_tensaoterciario_kv
+    physicalType: DOUBLE
+    logicalType: number
+    description: Tensão nominal do enrolamento terciário do transformador em quilovolts (kV). Nulo para
+      transformadores de dois enrolamentos
+    customProperties:
+    - property: aliases
+      value:
+      - tensao_terciario
+      - tensao_baixa
+      - kv_terciario
+      - tensao_bt
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: kV
+    - property: enum
+      value:
+      - 4.16
+      - 4.63
+      - 6.0
+      - 6.3
+      - 6.6
+      - 6.9
+      - 13.2
+      - 13.8
+      - 20.0
+      - 34.5
+      - 69.0
+  - name: val_potencianominal_mva
+    physicalType: DOUBLE
+    logicalType: number
+    description: Potência nominal do transformador em megavolt-ampere (MVA), representando a capacidade
+      máxima de transformação
+    customProperties:
+    - property: aliases
+      value:
+      - potencia_nominal
+      - capacidade_transformacao
+      - mva
+      - potencia_mva
+      - capacidade_mva
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: nom_tipoderede
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo de rede elétrica ao qual o transformador pertence (ex: Rede Básica), conforme classificação
+      regulatória ANEEL/ONS'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo_rede
+      - classificacao_rede
+      - rede
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BASICA
+      - COMPLEMENTAR
+  - name: num_barra_primario
+    physicalType: INTEGER
+    logicalType: integer
+    description: Número da barra elétrica associada ao enrolamento primário do transformador no modelo
+      computacional do SIN. Nulo para poucos equipamentos sem barra associada
+    customProperties:
+    - property: aliases
+      value:
+      - barra_primario
+      - barra_at
+      - numero_barra_primario
+      - barra_alta_tensao
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_barra_secundario
+    physicalType: INTEGER
+    logicalType: integer
+    description: Número da barra elétrica associada ao enrolamento secundário do transformador no modelo
+      computacional do SIN. Nulo para poucos equipamentos sem barra associada
+    customProperties:
+    - property: aliases
+      value:
+      - barra_secundario
+      - barra_mt
+      - numero_barra_secundario
+      - barra_media_tensao
+    - property: semanticType
+      value: IDENTIFIER
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/capacidade-transformacao
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quantos transformadores existem
+  - capacidade das subestacoes em mva
+  - transformadores por subestacao
+  - quantos mva instalados
+  - lista de transformadores
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver capacidade instalada de transformação, inventário
+    de transformadores da Rede Básica, potência nominal em MVA por subestação ou subsistema, tensões de
+    transformação (primário/secundário/terciário), agentes proprietários de transformadores ou análise
+    de infraestrutura de transformação do SIN. Também relevante para perguntas sobre adequação da rede
+    de transmissão, expansão de subestações e estudos de fluxo de potência que requerem dados cadastrais
+    de transformadores.
+- property: agentInstructions
+  value: '- [val_tensaoterciario_kv] Parte dos registros possuem val_tensaoterciario_kv nulo. Comportamento
+    esperado para transformadores de dois enrolamentos, que não possuem enrolamento terciário. Filtrar
+    por nom_tipotransformador antes de agregar para evitar distorções.
+
+
+    - [num_barra_primario] Poucos registros possuem num_barra_primario nulo, indicando transformadores
+    sem barra primária cadastrada no modelo de rede. Pode impactar joins com datasets de modelagem elétrica
+    e estudos de fluxo de potência.
+
+
+    - [num_barra_secundario] Poucos registros possuem num_barra_secundario nulo, proporção maior que
+    num_barra_primario. Transformadores sem barra secundária cadastrada podem estar em processo de comissionamento
+    ou com dados incompletos no sistema de origem.
+
+
+    - [dat_entradaoperacao] Coluna armazenada como VARCHAR no Parquet. Pode conter formatos de data heterogêneos
+    (YYYY-MM-DD, DD/MM/YYYY, etc.) provenientes do sistema de origem. Requer TRY_CAST ou strptime para
+    uso em filtros e ordenações temporais.
+
+
+    - [dat_desativacao] Coluna armazenada como VARCHAR no Parquet. Pode conter formatos de data heterogêneos.
+    Requer TRY_CAST para uso em filtros temporais. As datas cadastradas de desativacao comecam em 1990-12-31 e alcancam o presente; sao um cadastro, nao
+    uma serie temporal de medicoes.
+
+
+    - [cod_equipamento] cod_equipamento é a chave primária natural esperada. Duplicatas indicariam inconsistência
+    cadastral no sistema de origem ONS. Verificar existência de registros duplicados antes de usar como
+    chave de join.
+
+
+    - [val_potencianominal_mva] Potência nominal varia de 4,687 MVA a 1650 MVA. O valor mínimo de 4,687
+    MVA é incomum para transformadores da rede básica (tipicamente acima de 25 MVA) e pode indicar erro
+    de cadastro ou equipamento de características especiais. O máximo de 1650 MVA corresponde a grandes
+    autotransformadores de 765/500 kV.
+
+
+    - [nom_tipoderede] Valores com trailing spaces detectados em ''nom_tipoderede''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Qual é a capacidade total de transformação instalada por subsistema no SIN?
+  - Quais subestações possuem maior potência nominal de transformação instalada?
+  - Quais agentes proprietários detêm mais transformadores de extra-alta tensão (500 kV ou acima)?
+  - Quantos transformadores de três enrolamentos estão cadastrados na Rede Básica?
+  - Quais transformadores foram desativados nos últimos anos e qual era sua capacidade?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Subestações com trafo de 765 kV em operação"
+  - "Qual a maior potência nominal de trafo em MG?"
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_subestacao
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-transformacao/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '1965-03-29'
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      temporal_column: dat_entradaoperacao
+      spatial: subestacao
+      entity: subestacao
+      one_row_per:
+      - dat_entradaoperacao
+      - id_subsistema
+      - cod_equipamento
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: nom_subestacao
+      patamar: null
+    metrics:
+    - id: tensaoprimario_kv
+      label: Tensaoprimario Kv
+      columns:
+      - val_tensaoprimario_kv
+      expression: val_tensaoprimario_kv
+      quantity_kind: numeric
+      unit_native: kV
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_tensaoprimario_kv)
+          unit: kV
+        average:
+          sql: AVG(val_tensaoprimario_kv)
+          unit: kV
+        maximum:
+          sql: MAX(val_tensaoprimario_kv)
+          unit: kV
+        time_series:
+          sql: SUM(val_tensaoprimario_kv)
+          unit: kV
+        ranking:
+          sql: SUM(val_tensaoprimario_kv)
+          unit: kV
+        comparison:
+          sql: SUM(val_tensaoprimario_kv)
+          unit: kV
+      aliases:
+      - tensao_primario
+      - tensao_alta
+      - kv_primario
+      - tensao_at
+    - id: tensaosecundario_kv
+      label: Tensaosecundario Kv
+      columns:
+      - val_tensaosecundario_kv
+      expression: val_tensaosecundario_kv
+      quantity_kind: numeric
+      unit_native: kV
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_tensaosecundario_kv)
+          unit: kV
+        average:
+          sql: AVG(val_tensaosecundario_kv)
+          unit: kV
+        maximum:
+          sql: MAX(val_tensaosecundario_kv)
+          unit: kV
+        time_series:
+          sql: SUM(val_tensaosecundario_kv)
+          unit: kV
+        ranking:
+          sql: SUM(val_tensaosecundario_kv)
+          unit: kV
+        comparison:
+          sql: SUM(val_tensaosecundario_kv)
+          unit: kV
+      aliases:
+      - tensao_secundario
+      - tensao_media
+      - kv_secundario
+      - tensao_mt
+    - id: tensaoterciario_kv
+      label: Tensaoterciario Kv
+      columns:
+      - val_tensaoterciario_kv
+      expression: val_tensaoterciario_kv
+      quantity_kind: numeric
+      unit_native: kV
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_tensaoterciario_kv)
+          unit: kV
+        average:
+          sql: AVG(val_tensaoterciario_kv)
+          unit: kV
+        maximum:
+          sql: MAX(val_tensaoterciario_kv)
+          unit: kV
+        time_series:
+          sql: SUM(val_tensaoterciario_kv)
+          unit: kV
+        ranking:
+          sql: SUM(val_tensaoterciario_kv)
+          unit: kV
+        comparison:
+          sql: SUM(val_tensaoterciario_kv)
+          unit: kV
+      aliases:
+      - tensao_terciario
+      - tensao_baixa
+      - kv_terciario
+      - tensao_bt
+    - id: potencianominal_mva
+      label: Potencianominal Mva
+      columns:
+      - val_potencianominal_mva
+      expression: val_potencianominal_mva
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_potencianominal_mva)
+          unit: MVA
+        maximum:
+          sql: MAX(val_potencianominal_mva)
+          unit: MVA
+        time_series:
+          sql: SUM(val_potencianominal_mva)
+          unit: MVA
+        ranking:
+          sql: SUM(val_potencianominal_mva)
+          unit: MVA
+        comparison:
+          sql: SUM(val_potencianominal_mva)
+          unit: MVA
+      aliases:
+      - potencia_nominal
+      - capacidade_transformacao
+      - mva
+      - potencia_mva
+      - capacidade_mva
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: cadastro
+    value_aliases:
+      subsistema:
+        SE:
+          aliases:
+          - sudeste
+          - centro-oeste
+          - se/co
+          - sudeste centro-oeste
+          filter: id_subsistema = 'SE'
+        S:
+          aliases:
+          - sul
+          filter: id_subsistema = 'S'
+        NE:
+          aliases:
+          - nordeste
+          filter: id_subsistema = 'NE'
+        N:
+          aliases:
+          - norte
+          filter: id_subsistema = 'N'
+      nom_subsistema:
+        Nordeste:
+          aliases:
+          - Nordeste
+          filter: nom_subsistema = 'Nordeste'
+        Norte:
+          aliases:
+          - Norte
+          filter: nom_subsistema = 'Norte'
+        Sudeste/Centro-Oeste:
+          aliases:
+          - Sudeste/Centro-Oeste
+          filter: nom_subsistema = 'Sudeste/Centro-Oeste'
+        Sul:
+          aliases:
+          - Sul
+          filter: nom_subsistema = 'Sul'
+      nom_tipotransformador:
+        TRANSFORMADOR DE 2 TERMINAIS:
+          aliases:
+          - dois terminais
+          - dois enrolamentos
+          - 2 terminais
+          - 2 enrolamentos
+          - bifasico
+          filter: nom_tipotransformador = 'TRANSFORMADOR DE 2 TERMINAIS'
+        TRANSFORMADOR DE 3 TERMINAIS:
+          aliases:
+          - tres terminais
+          - tres enrolamentos
+          - 3 terminais
+          - 3 enrolamentos
+          - trifasico
+          filter: nom_tipotransformador = 'TRANSFORMADOR DE 3 TERMINAIS'
+      nom_tipoderede:
+        BASICA:
+          aliases:
+          - rede basica
+          - basica
+          - RB
+          filter: TRIM(nom_tipoderede) = 'BASICA'
+        COMPLEMENTAR:
+          aliases:
+          - rede complementar
+          - complementar
+          filter: TRIM(nom_tipoderede) = 'COMPLEMENTAR'
+      val_tensaoprimario_kv:
+        '69.0':
+          aliases:
+          - 69 kV
+          - 69kV
+          filter: val_tensaoprimario_kv = 69
+        '132.0':
+          aliases:
+          - 132 kV
+          - 132kV
+          filter: val_tensaoprimario_kv = 132
+        '138.0':
+          aliases:
+          - 138 kV
+          - 138kV
+          filter: val_tensaoprimario_kv = 138
+        '230.0':
+          aliases:
+          - 230 kV
+          - 230kV
+          filter: val_tensaoprimario_kv = 230
+        '289.0':
+          aliases:
+          - 289 kV
+          - 289kV
+          filter: val_tensaoprimario_kv = 289
+        '345.0':
+          aliases:
+          - 345 kV
+          - 345kV
+          filter: val_tensaoprimario_kv = 345
+        '440.0':
+          aliases:
+          - 440 kV
+          - 440kV
+          filter: val_tensaoprimario_kv = 440
+        '500.0':
+          aliases:
+          - 500 kV
+          - 500kV
+          - extra alta tensao
+          filter: val_tensaoprimario_kv = 500
+        '765.0':
+          aliases:
+          - 765 kV
+          - 765kV
+          - ultra alta tensao
+          filter: val_tensaoprimario_kv = 765
+      val_tensaosecundario_kv:
+        '11.0':
+          aliases:
+          - 11 kV
+          filter: val_tensaosecundario_kv = 11
+        '13.8':
+          aliases:
+          - 13.8 kV
+          filter: val_tensaosecundario_kv = 13.8
+        '34.5':
+          aliases:
+          - 34.5 kV
+          filter: val_tensaosecundario_kv = 34.5
+        '69.0':
+          aliases:
+          - 69 kV
+          filter: val_tensaosecundario_kv = 69
+        '138.0':
+          aliases:
+          - 138 kV
+          filter: val_tensaosecundario_kv = 138
+        '230.0':
+          aliases:
+          - 230 kV
+          filter: val_tensaosecundario_kv = 230
+        '345.0':
+          aliases:
+          - 345 kV
+          filter: val_tensaosecundario_kv = 345
+        '500.0':
+          aliases:
+          - 500 kV
+          filter: val_tensaosecundario_kv = 500
+      val_tensaoterciario_kv:
+        '13.8':
+          aliases:
+          - 13.8 kV
+          filter: val_tensaoterciario_kv = 13.8
+        '34.5':
+          aliases:
+          - 34.5 kV
+          filter: val_tensaoterciario_kv = 34.5
+        '69.0':
+          aliases:
+          - 69 kV
+          filter: val_tensaoterciario_kv = 69
+    sql_patterns:
+      capacidade_total_por_subsistema:
+        template: "SELECT id_subsistema, nom_subsistema,\n  COUNT(*) AS qtd_transformadores,\n  SUM(val_potencianominal_mva)\
+          \ AS total_mva\nFROM {source}\nWHERE dat_desativacao IS NULL\n  OR TRY_CAST(dat_desativacao\
+          \ AS DATE) > CURRENT_DATE\nGROUP BY id_subsistema, nom_subsistema\nORDER BY total_mva DESC"
+        output_unit: MVA
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - potencianominal_mva
+          grain: subsistema
+      transformadores_ativos:
+        template: "SELECT *\nFROM {source}\nWHERE dat_desativacao IS NULL\n  OR TRY_CAST(dat_desativacao\
+          \ AS DATE) > CURRENT_DATE\nORDER BY nom_subestacao, nom_transformador"
+        output_unit: null
+        matches:
+          output_modes:
+          - listing
+          grain: equipamento
+      capacidade_por_subestacao:
+        template: "SELECT nom_subestacao, nom_agenteproprietario, id_subsistema,\n  COUNT(*) AS qtd_transformadores,\n\
+          \  SUM(val_potencianominal_mva) AS total_mva\nFROM {source}\nWHERE dat_desativacao IS NULL\n\
+          \  OR TRY_CAST(dat_desativacao AS DATE) > CURRENT_DATE\nGROUP BY nom_subestacao, nom_agenteproprietario,\
+          \ id_subsistema\nORDER BY total_mva DESC"
+        output_unit: MVA
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - potencianominal_mva
+          grain: subestacao
+      transformadores_tres_enrolamentos:
+        template: "SELECT nom_subestacao, nom_transformador, nom_agenteproprietario,\n  val_tensaoprimario_kv,\
+          \ val_tensaosecundario_kv, val_tensaoterciario_kv,\n  val_potencianominal_mva\nFROM {source}\n\
+          WHERE nom_tipotransformador = 'TRANSFORMADOR DE 3 TERMINAIS'\n  AND (dat_desativacao IS NULL\
+          \ OR TRY_CAST(dat_desativacao AS DATE) > CURRENT_DATE)\nORDER BY val_potencianominal_mva DESC"
+        output_unit: MVA
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - potencianominal_mva
+          grain: equipamento
+- property: fewShotQueries
+  value:
+  - question: Qual é a capacidade total de transformação instalada em cada subsistema elétrico do SIN?
+    sql: SELECT id_subsistema, nom_subsistema, COUNT(*) AS qtd_transformadores, ROUND(SUM(val_potencianominal_mva),
+      2) AS potencia_total_mva, ROUND(AVG(val_potencianominal_mva), 2) AS potencia_media_mva FROM read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-transformacao/*.parquet')
+      GROUP BY id_subsistema, nom_subsistema ORDER BY potencia_total_mva DESC
+  - question: Quais são as subestações com maior capacidade total de transformação instalada na rede básica?
+    sql: SELECT nom_subestacao, nom_subsistema, nom_estado, COUNT(*) AS qtd_transformadores, ROUND(SUM(val_potencianominal_mva),
+      2) AS potencia_total_mva FROM read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-transformacao/*.parquet')
+      GROUP BY nom_subestacao, nom_subsistema, nom_estado ORDER BY potencia_total_mva DESC LIMIT 20
+  - question: Qual é a participação de cada agente de transmissão na capacidade de transformação da rede
+      básica?
+    sql: SELECT nom_agenteproprietario, COUNT(*) AS qtd_transformadores, ROUND(SUM(val_potencianominal_mva),
+      2) AS potencia_total_mva, ROUND(100.0 * SUM(val_potencianominal_mva) / SUM(SUM(val_potencianominal_mva))
+      OVER (), 2) AS participacao_pct FROM read_parquet('s3://ons-aws-prod-opendata/dataset/capacidade-transformacao/*.parquet')
+      GROUP BY nom_agenteproprietario ORDER BY potencia_total_mva DESC
+- property: license
+  value: CC-BY

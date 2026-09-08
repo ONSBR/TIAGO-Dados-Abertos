@@ -1,0 +1,523 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ind_disponibilidade_ft_trlt
+name: ind_disponibilidade_ft_trlt
+tenant: ons
+tags:
+- DISP
+- DISP FT LT
+- INDISPFF
+- INDISPPF
+- ONS
+- Submódulo 9.2
+- disponibilidade
+- disponibilidade de transmissão
+- disponibilidade função transmissão
+- função transmissão
+- indicadores de transmissão ONS
+- indisponibilidade
+- linha de transmissão
+- transformador
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_trlt_me/*.parquet
+  format: parquet
+description:
+  purpose: Prover indicadores mensais de desempenho operacional de linhas de transmissão e transformadores
+    do Sistema Interligado Nacional (SIN) para uso por agentes de transmissão, reguladores da ANEEL e
+    o próprio ONS, suportando decisões de cálculo de receita permitida, aplicação de penalidades contratuais,
+    planejamento de manutenção preventiva e monitoramento de conformidade com o Submódulo 9.2 dos Procedimentos
+    de Rede.
+  limitations: O valor mínimo de val_disp é 88,69%, indicando que alguns equipamentos apresentam disponibilidade
+    abaixo de 90% em determinados meses. O valor máximo de val_indispff é 11,31%, representando indisponibilidade
+    forçada elevada em casos pontuais. O valor máximo de val_indisppf é 11,17%, representando indisponibilidade
+    programada elevada em casos pontuais.
+  usage: Recuperar este dataset quando a pergunta envolver indicadores de desempenho operacional de linhas
+    de transmissão ou transformadores, especificamente disponibilidade (DISP), indisponibilidade programada
+    (INDISPPF) ou indisponibilidade forçada (INDISPFF) em granularidade mensal.
+domain: transmissão
+schema:
+- name: ind_disponibilidade_ft_trlt
+  physicalType: parquet
+  logicalType: object
+  physicalName: ind_disponibilidade_ft_trlt
+  properties:
+  - name: cod_caracteristica
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código identificador da função transmissão, representando o equipamento (linha de transmissão
+      ou transformador) e/ou nível de tensão associado. Utilizado para agregar os indicadores de disponibilidade
+      conforme o Submódulo 9.2 dos Procedimentos de Rede do ONS. Compõe a chave primária natural do dataset
+      junto com dat_referencia.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código da característica
+      - função transmissão
+      - código do equipamento
+      - cod_ft
+      - característica
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - FTLD - 600
+      - FTLD - 800
+      - FTLT - 230
+      - FTLT - 345
+      - FTLT - 440
+      - FTLT - 500
+      - FTLT - 765
+      - FTTR - 138
+      - FTTR - 230
+      - FTTR - 289
+      - FTTR - 345
+      - FTTR - 440
+      - FTTR - 500
+      - FTTR - 765
+      - FTTR - 88
+  - name: dat_referencia
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: 'Data de referência do indicador mensal, sempre registrada no primeiro dia do mês (ex:
+      2023-01-01 00:00:00). Representa o mês de competência dos indicadores de disponibilidade calculados
+      conforme Submódulo 9.2 dos Procedimentos de Rede do ONS.
+
+      '
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - data de referência
+      - mês de referência
+      - competência
+      - período
+      - dat_ref
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_disp
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador percentual de Disponibilidade (DISP) da Função Transmissão no mês de referência.
+      Representa a fração do tempo em que o equipamento (linha de transmissão ou transformador) esteve
+      disponível para operação, conforme Submódulo 9.2 dos Procedimentos de Rede do ONS. Valores observados
+      entre 88,69% e 100%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - disponibilidade
+      - DISP
+      - índice de disponibilidade
+      - disponibilidade da função transmissão
+      - percentual de disponibilidade
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_indisppf
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador percentual de Indisponibilidade Programada (INDISPPF) da Função Transmissão
+      no mês de referência. Representa a fração do tempo em que o equipamento esteve indisponível por
+      manutenção programada, conforme Submódulo 9.2 dos Procedimentos de Rede do ONS. Valores observados
+      entre 0% e 11,17%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - indisponibilidade programada
+      - INDISPPF
+      - indisponibilidade forçada programada
+      - manutenção programada
+      - indisponibilidade planejada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+  - name: val_indispff
+    physicalType: DOUBLE
+    logicalType: number
+    description: 'Indicador percentual de Indisponibilidade Forçada (INDISPFF) da Função Transmissão no
+      mês de referência. Representa a fração do tempo em que o equipamento esteve indisponível por falha
+      não programada (forçada), conforme Submódulo 9.2 dos Procedimentos de Rede do ONS. Valores observados
+      entre 0% e 11,31%.
+
+      '
+    customProperties:
+    - property: aliases
+      value:
+      - indisponibilidade forçada
+      - INDISPFF
+      - falha forçada
+      - desligamento forçado
+      - indisponibilidade não programada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: '%'
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ind_disponibilidade_ft_trlt
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - disponibilidade das linhas de transmissao
+  - quanto a linha ficou indisponivel
+  - indisponibilidade da transmissao
+  - desempenho das linhas e transformadores
+  - taxa de indisponibilidade da rede
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver indicadores de desempenho operacional de linhas
+    de transmissão ou transformadores, especificamente disponibilidade (DISP), indisponibilidade programada
+    (INDISPPF) ou indisponibilidade forçada (INDISPFF) em granularidade mensal. Também relevante para
+    análises de conformidade com Submódulo 9.2, cálculo de receita permitida de transmissoras e monitoramento
+    de penalidades contratuais de agentes de transmissão perante a ANEEL.
+- property: agentInstructions
+  value: '- [val_disp] Valor mínimo observado de 88,69% indica episódios de disponibilidade significativamente
+    abaixo de 100%. Valores abaixo de 90% podem indicar eventos críticos de indisponibilidade que merecem
+    investigação. Verificar se a soma val_disp + val_indisppf + val_indispff é próxima de 100% nesses
+    registros, pois a metodologia do Submódulo 9.2 pode permitir sobreposições.
+
+
+    - [val_indispff] Valor máximo observado de 11,31% para indisponibilidade forçada é elevado e pode
+    indicar eventos excepcionais de falha em determinadas características/níveis de tensão. Registros
+    com val_indispff acima de 5% devem ser investigados para validação da consistência dos dados.
+
+
+    - [val_indisppf] Valor máximo observado de 11,17% para indisponibilidade programada é elevado. Combinado
+    com val_indispff alto no mesmo registro, pode resultar em soma total superior a 100%, indicando possível
+    sobreposição metodológica ou erro de dados conforme Submódulo 9.2.
+
+
+    - [cod_caracteristica] Não há dicionário de dados disponível para cod_caracteristica, tornando desconhecidos
+    os valores válidos do domínio. É necessário validar se os valores presentes correspondem a categorias
+    esperadas de tipos de função transmissão e níveis de tensão. Valores inesperados podem indicar inconsistência
+    na carga dos dados.
+
+
+    - [dat_referencia] A serie temporal cobre a partir de 2023-01. Possíveis lacunas mensais
+    por cod_caracteristica devem ser verificadas, pois ausência de registros em determinados meses pode
+    indicar falha na carga ou indisponibilidade de dados para aquela característica no período.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais linhas de transmissão tiveram maior indisponibilidade forçada nos últimos 12 meses?
+  - Qual a disponibilidade média mensal por função transmissão em 2024?
+  - Quais equipamentos apresentaram indisponibilidade programada acima de 5% em algum mês?
+  - Como evoluiu o indicador DISP das funções transmissão entre 2023 e 2026?
+  - Quais meses registraram maior concentração de eventos de indisponibilidade forçada no sistema de transmissão?
+- property: granularity
+  value: horária
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_trlt_me/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2023-01-01'
+- property: semantics
+  value:
+    family: ind_disponibilidade_ft
+    family_default: true
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 dia
+      temporal_column: dat_referencia
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - dat_referencia
+      - cod_caracteristica
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: disp
+      label: Disp
+      columns:
+      - val_disp
+      expression: val_disp
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_disp)
+          unit: '%'
+        maximum:
+          sql: MAX(val_disp)
+          unit: '%'
+        minimum:
+          sql: MIN(val_disp)
+          unit: '%'
+        time_series:
+          sql: AVG(val_disp)
+          unit: '%'
+        ranking:
+          sql: AVG(val_disp)
+          unit: '%'
+        comparison:
+          sql: AVG(val_disp)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - disponibilidade
+      - DISP
+      - indice de disponibilidade
+      - disponibilidade da funcao transmissao
+      - percentual de disponibilidade
+    - id: indisppf
+      label: Indisppf
+      columns:
+      - val_indisppf
+      expression: val_indisppf
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indisppf)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indisppf)
+          unit: '%'
+        time_series:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        ranking:
+          sql: AVG(val_indisppf)
+          unit: '%'
+        comparison:
+          sql: AVG(val_indisppf)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - indisponibilidade programada
+      - INDISPPF
+      - indisponibilidade forcada programada
+      - manutencao programada
+      - indisponibilidade planejada
+    - id: indispff
+      label: Indispff
+      columns:
+      - val_indispff
+      expression: val_indispff
+      quantity_kind: ratio
+      unit_native: '%'
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_indispff)
+          unit: '%'
+        maximum:
+          sql: MAX(val_indispff)
+          unit: '%'
+        minimum:
+          sql: MIN(val_indispff)
+          unit: '%'
+        time_series:
+          sql: AVG(val_indispff)
+          unit: '%'
+        ranking:
+          sql: AVG(val_indispff)
+          unit: '%'
+        comparison:
+          sql: AVG(val_indispff)
+          unit: '%'
+      interval_hours: 24.0
+      aliases:
+      - indisponibilidade forcada
+      - INDISPFF
+      - falha forcada
+      - desligamento forcado
+      - indisponibilidade nao programada
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      cod_caracteristica:
+        FTLD - 600:
+          aliases:
+          - FTLD 600
+          - linha dc 600kV
+          filter: cod_caracteristica = 'FTLD - 600'
+        FTLD - 800:
+          aliases:
+          - FTLD 800
+          - linha dc 800kV
+          filter: cod_caracteristica = 'FTLD - 800'
+        FTLT - 230:
+          aliases:
+          - FTLT 230
+          - linha 230kV
+          - linha transmissao 230
+          filter: cod_caracteristica = 'FTLT - 230'
+        FTLT - 345:
+          aliases:
+          - FTLT 345
+          - linha 345kV
+          - linha transmissao 345
+          filter: cod_caracteristica = 'FTLT - 345'
+        FTLT - 440:
+          aliases:
+          - FTLT 440
+          - linha 440kV
+          - linha transmissao 440
+          filter: cod_caracteristica = 'FTLT - 440'
+        FTLT - 500:
+          aliases:
+          - FTLT 500
+          - linha 500kV
+          - linha transmissao 500
+          filter: cod_caracteristica = 'FTLT - 500'
+        FTLT - 765:
+          aliases:
+          - FTLT 765
+          - linha 765kV
+          - linha transmissao 765
+          filter: cod_caracteristica = 'FTLT - 765'
+        FTTR - 88:
+          aliases:
+          - FTTR 88
+          - transformador 88kV
+          filter: cod_caracteristica = 'FTTR - 88'
+        FTTR - 138:
+          aliases:
+          - FTTR 138
+          - transformador 138kV
+          filter: cod_caracteristica = 'FTTR - 138'
+        FTTR - 230:
+          aliases:
+          - FTTR 230
+          - transformador 230kV
+          filter: cod_caracteristica = 'FTTR - 230'
+        FTTR - 289:
+          aliases:
+          - FTTR 289
+          - transformador 289kV
+          filter: cod_caracteristica = 'FTTR - 289'
+        FTTR - 345:
+          aliases:
+          - FTTR 345
+          - transformador 345kV
+          filter: cod_caracteristica = 'FTTR - 345'
+        FTTR - 440:
+          aliases:
+          - FTTR 440
+          - transformador 440kV
+          filter: cod_caracteristica = 'FTTR - 440'
+        FTTR - 500:
+          aliases:
+          - FTTR 500
+          - transformador 500kV
+          filter: cod_caracteristica = 'FTTR - 500'
+        FTTR - 765:
+          aliases:
+          - FTTR 765
+          - transformador 765kV
+          filter: cod_caracteristica = 'FTTR - 765'
+    sql_patterns:
+      disp_medio_mensal_por_caracteristica:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,\n  cod_caracteristica,\n\
+          \  AVG(val_disp) AS disp_medio_pct\nFROM {source}\nWHERE EXTRACT(YEAR FROM dat_referencia) =\
+          \ {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - average
+          metrics:
+          - disp
+          grain: month
+        validated_params:
+          year: '2026'
+      maior_indispff_por_caracteristica:
+        template: "SELECT\n  cod_caracteristica,\n  MAX(val_indispff) AS max_indispff_pct,\n  AVG(val_indispff)\
+          \ AS avg_indispff_pct\nFROM {source}\nWHERE dat_referencia >= CAST('{start_date}' AS TIMESTAMP)\n\
+          \  AND dat_referencia <= CAST('{end_date}' AS TIMESTAMP)\nGROUP BY 1\nORDER BY 2 DESC"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - maximum
+          - ranking
+          metrics:
+          - indispff
+          grain: period
+        validated_params:
+          start_date: '2026-01-01'
+          end_date: '2026-06-01'
+      evolucao_indicadores_mensal:
+        template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,\n  cod_caracteristica,\n\
+          \  AVG(val_disp) AS disp_pct,\n  AVG(val_indisppf) AS indisppf_pct,\n  AVG(val_indispff) AS\
+          \ indispff_pct\nFROM {source}\nGROUP BY 1, 2\nORDER BY 1, 2"
+        output_unit: '%'
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - disp
+          - indisppf
+          - indispff
+          grain: month
+- property: fewShotQueries
+  value:
+  - question: Qual foi a disponibilidade média dos transformadores por característica ao longo de 2024?
+    sql: SELECT cod_caracteristica, DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) AS mes,
+      ROUND(AVG(val_disp), 4) AS disp_media, ROUND(AVG(val_indisppf), 4) AS indisppf_media, ROUND(AVG(val_indispff),
+      4) AS indispff_media FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_trlt_me/*.parquet')
+      WHERE dat_referencia >= '2024-01-01' AND dat_referencia < '2025-01-01' GROUP BY cod_caracteristica,
+      DATE_TRUNC('month', TRY_CAST(dat_referencia AS TIMESTAMP)) ORDER BY cod_caracteristica, mes;
+  - question: Quais características de transformadores tiveram maior indisponibilidade forçada acumulada
+      no período disponível?
+    sql: SELECT cod_caracteristica, COUNT(*) AS meses_com_dados, ROUND(AVG(val_indispff), 4) AS indispff_media,
+      ROUND(MAX(val_indispff), 4) AS indispff_max, ROUND(MIN(val_disp), 4) AS disp_minima FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_trlt_me/*.parquet')
+      GROUP BY cod_caracteristica ORDER BY indispff_media DESC LIMIT 20;
+  - question: Existem registros onde a soma de disponibilidade e indisponibilidades não totaliza aproximadamente
+      100%?
+    sql: SELECT cod_caracteristica, dat_referencia, val_disp, val_indisppf, val_indispff, ROUND(val_disp
+      + val_indisppf + val_indispff, 4) AS soma_total, CASE WHEN (val_disp + val_indisppf + val_indispff)
+      > 100.01 THEN 'ACIMA_100' WHEN (val_disp + val_indisppf + val_indispff) < 99.0 THEN 'ABAIXO_99'
+      ELSE 'OK' END AS status_soma FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ind_disponibilidade_ft_trlt_me/*.parquet')
+      WHERE (val_disp + val_indisppf + val_indispff) > 100.01 OR (val_disp + val_indisppf + val_indispff)
+      < 99.0 ORDER BY soma_total DESC LIMIT 100;
+- property: license
+  value: CC-BY

@@ -1,0 +1,474 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:ofertapreco-importacao
+name: ofertapreco-importacao
+tenant: ons
+tags:
+- agentes-comercializadores
+- argentina
+- ccee
+- importacao-de-energia
+- intercambio-internacional
+- mercado-de-energia
+- oferta de preço importação
+- oferta de preço importação energia
+- oferta importação Argentina
+- oferta importação Uruguai
+- oferta-de-preco
+- ons
+- preço declarado importação
+- preço importação energia
+- sin
+- uruguai
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/ofertapreco-importacao-se/*.parquet
+  format: parquet
+description:
+  purpose: Subsidiar operadores do ONS e agentes do mercado de energia elétrico brasileiro nas decisões
+    de despacho e intercâmbio internacional, fornecendo os preços declarados por agentes comercializadores
+    para importação de energia da Argentina e do Uruguai. Suporta análises de competitividade de ofertas,
+    auditoria de transações de importação, liquidação financeira no âmbito da CCEE e estudos de planejamento
+    de curto prazo do SIN.
+  limitations: Coluna armazenada como VARCHAR em vez de DATE/TIMESTAMP, impedindo operações temporais
+    nativas (ORDER BY, BETWEEN, MIN/MAX de datas). Coluna armazenada como VARCHAR em vez de DATE/TIMESTAMP,
+    impedindo operações temporais nativas. O valor máximo de 2282.
+  usage: Recuperar este dataset quando a pergunta envolver preços declarados por agentes para importação
+    de energia elétrica da Argentina ou do Uruguai ao SIN, incluindo análises de competitividade de ofertas,
+    histórico de preços de importação por agente ou bloco, e correlação entre preços declarados e intercâmbio
+    internacional realizado.
+domain: preco
+schema:
+- name: ofertapreco_importacao
+  physicalType: parquet
+  logicalType: object
+  physicalName: ofertapreco_importacao
+  properties:
+  - name: nom_pais
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do país de origem da energia importada (Argentina ou Uruguai)
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - país
+      - pais de origem
+      - origem da importação
+      - país exportador
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ARGENTINA
+      - URUGUAI
+  - name: nom_agente
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente comercializador responsável pela declaração da oferta de preço de importação
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - agente
+      - comercializador
+      - agente comercializador
+      - empresa
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BANCO BTG
+      - BOLT
+      - ELETROBRAS
+      - ENEL
+      - TRADENER
+  - name: nom_bloco
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do bloco de oferta ao qual o preço declarado está associado, representando uma faixa
+      ou segmento de energia ofertada
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - bloco
+      - bloco de oferta
+      - segmento de oferta
+      - faixa de energia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BLOCO 1
+      - BLOCO 2
+      - BLOCO 3
+      - BLOCO 4
+      - BLOCO 5
+      - BLOCO 6
+      - BLOCO 7
+      - BLOCO 8
+      - BLOCO 9
+  - name: dat_iniciovalidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de início da validade do preço declarado pelo agente, armazenada como VARCHAR em
+      vez de DATE — requer conversão para consultas temporais
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - início de validade
+      - data início
+      - início do período
+      - data de vigência inicial
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_fimvalidade
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de fim da validade do preço declarado pelo agente, armazenada como VARCHAR em vez
+      de DATE — requer conversão para consultas temporais
+    customProperties:
+    - property: aliases
+      value:
+      - fim de validade
+      - data fim
+      - fim do período
+      - data de vigência final
+      - data de expiração
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_preco
+    physicalType: DOUBLE
+    logicalType: number
+    description: Valor do preço declarado pelo agente comercializador para oferta de importação de energia,
+      em R$/MWh
+    customProperties:
+    - property: aliases
+      value:
+      - preço
+      - preço de oferta
+      - valor do preço
+      - preço de importação
+      - oferta de preço
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: R$/MWh
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/ofertapreco-importacao
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - preco ofertado para importar
+  - quanto os agentes pediram para importar
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Recuperar este dataset quando a pergunta envolver preços declarados por agentes para importação
+    de energia elétrica da Argentina ou do Uruguai ao SIN, incluindo análises de competitividade de ofertas,
+    histórico de preços de importação por agente ou bloco, e correlação entre preços declarados e intercâmbio
+    internacional realizado. Também relevante para auditorias de liquidação de transações de importação
+    e estudos de despacho com energia importada.
+- property: agentInstructions
+  value: '- [dat_iniciovalidade] A coluna dat_iniciovalidade está armazenada como VARCHAR no schema físico,
+    embora represente uma data. Operações de filtragem temporal, ordenação e cálculo de intervalos requerem
+    conversão explícita para DATE. Risco de ordenação lexicográfica incorreta se o formato não for estritamente
+    ISO (YYYY-MM-DD) em todos os registros.
+
+
+    - [dat_fimvalidade] A coluna dat_fimvalidade está armazenada como VARCHAR no schema físico, embora
+    represente uma data de fim de vigência. Requer conversão explícita para DATE em operações temporais.
+    Deve-se verificar se dat_fimvalidade >= dat_iniciovalidade em todos os registros.
+
+
+    - [val_preco] O valor máximo de val_preco é 2282,36, enquanto o mínimo é 23,61 — amplitude de aproximadamente
+    97x. Valores muito elevados podem representar ofertas em períodos de escassez extrema ou erros de
+    declaração. Recomenda-se monitorar registros acima de 3 desvios padrão da média.
+
+
+    - [nom_bloco] Não há dicionário de dados disponível para nom_bloco. Recomenda-se inspecionar os valores
+    únicos para verificar padronização de nomenclatura (maiúsculas, acentuação, abreviações) e confirmar
+    se representam patamares de carga (Pesada, Média, Leve) ou blocos horários numerados.
+
+
+    - [nom_agente] Risco de duplicatas na chave primária composta (nom_pais, nom_agente, nom_bloco, dat_iniciovalidade)
+    caso um mesmo agente submeta múltiplas ofertas para o mesmo bloco e período. Deve-se verificar se
+    a combinação dessas quatro colunas é de fato única em todos os registros.
+
+    '
+- property: typicalQuestions
+  value:
+  - Quais agentes declararam ofertas de preço para importação de energia da Argentina na última semana?
+  - Qual é o preço médio de oferta de importação por país (Argentina vs Uruguai) ao longo do tempo?
+  - Quais blocos de oferta apresentam os maiores preços declarados para importação?
+  - Existe correlação entre os preços declarados de importação e os volumes de intercâmbio internacional
+    realizados?
+  - Quais agentes comercializadores têm histórico de ofertas de preço acima de 500 R$/MWh para importação?
+- property: granularity
+  value: semanal
+- property: spatialGranularity
+  value: nacional
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/ofertapreco-importacao-se/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2019-01-01'
+- property: semantics
+  value:
+    family: importacao_exportacao
+    family_default: false
+    temporal_perspective: verificado
+    row_grain:
+      temporal: 1 semana
+      temporal_column: dat_iniciovalidade
+      spatial: nacional
+      entity: dataset_row
+      one_row_per:
+      - dat_iniciovalidade
+      - nom_pais
+      - nom_agente
+      - nom_bloco
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: preco
+      label: Preco
+      columns:
+      - val_preco
+      expression: val_preco
+      quantity_kind: price
+      unit_native: R$/MWh
+      default_aggregation: avg
+      forbidden_aggregations:
+      - sum
+      aggregation_modes:
+        average:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+        maximum:
+          sql: MAX(val_preco)
+          unit: R$/MWh
+        minimum:
+          sql: MIN(val_preco)
+          unit: R$/MWh
+        time_series:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+        ranking:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+        comparison:
+          sql: AVG(val_preco)
+          unit: R$/MWh
+      interval_hours: 168.0
+      aliases:
+      - preço
+      - preço de oferta
+      - valor do preço
+      - preço de importação
+      - oferta de preço
+      - preco de importacao
+      - oferta de preco
+      - preco declarado
+      - valor ofertado
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: false
+      supports_ranking: false
+      primary_use_case: serie_temporal
+    value_aliases:
+      nom_pais:
+        ARGENTINA:
+          aliases:
+          - ARGENTINA
+          - Argentina
+          - argentina
+          - ARG
+          filter: nom_pais = 'ARGENTINA'
+        URUGUAI:
+          aliases:
+          - URUGUAI
+          - Uruguai
+          - uruguai
+          - URU
+          filter: nom_pais = 'URUGUAI'
+      nom_agente:
+        BANCO BTG:
+          aliases:
+          - BANCO BTG
+          - BTG
+          - BTG Pactual
+          filter: nom_agente = 'BANCO BTG'
+        BOLT:
+          aliases:
+          - BOLT
+          - Bolt
+          filter: nom_agente = 'BOLT'
+        ELETROBRAS:
+          aliases:
+          - ELETROBRAS
+          - Eletrobras
+          - eletrobras
+          filter: nom_agente = 'ELETROBRAS'
+        ENEL:
+          aliases:
+          - ENEL
+          - Enel
+          filter: nom_agente = 'ENEL'
+        TRADENER:
+          aliases:
+          - TRADENER
+          - Tradener
+          filter: nom_agente = 'TRADENER'
+      nom_bloco:
+        BLOCO 1:
+          aliases:
+          - BLOCO 1
+          - bloco 1
+          - bloco1
+          - B1
+          filter: nom_bloco = 'BLOCO 1'
+        BLOCO 2:
+          aliases:
+          - BLOCO 2
+          - bloco 2
+          - bloco2
+          - B2
+          filter: nom_bloco = 'BLOCO 2'
+        BLOCO 3:
+          aliases:
+          - BLOCO 3
+          - bloco 3
+          - bloco3
+          - B3
+          filter: nom_bloco = 'BLOCO 3'
+        BLOCO 4:
+          aliases:
+          - BLOCO 4
+          - bloco 4
+          - bloco4
+          - B4
+          filter: nom_bloco = 'BLOCO 4'
+        BLOCO 5:
+          aliases:
+          - BLOCO 5
+          - bloco 5
+          - bloco5
+          - B5
+          filter: nom_bloco = 'BLOCO 5'
+        BLOCO 6:
+          aliases:
+          - BLOCO 6
+          - bloco 6
+          - bloco6
+          - B6
+          filter: nom_bloco = 'BLOCO 6'
+        BLOCO 7:
+          aliases:
+          - BLOCO 7
+          - bloco 7
+          - bloco7
+          - B7
+          filter: nom_bloco = 'BLOCO 7'
+        BLOCO 8:
+          aliases:
+          - BLOCO 8
+          - bloco 8
+          - bloco8
+          - B8
+          filter: nom_bloco = 'BLOCO 8'
+        BLOCO 9:
+          aliases:
+          - BLOCO 9
+          - bloco 9
+          - bloco9
+          - B9
+          filter: nom_bloco = 'BLOCO 9'
+    sql_patterns:
+      preco_medio_por_pais:
+        template: "SELECT nom_pais,\n  AVG(val_preco) AS preco_medio_R_MWh\nFROM {source}\nGROUP BY nom_pais\n\
+          ORDER BY preco_medio_R_MWh DESC"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          - comparison
+          metrics:
+          - preco
+          grain: all_time
+      preco_mensal:
+        template: "SELECT DATE_TRUNC('month', TRY_CAST(dat_iniciovalidade AS DATE)) AS mes,\n  AVG(val_preco)\
+          \ AS preco_medio_R_MWh\nFROM {source}\nWHERE EXTRACT(YEAR FROM TRY_CAST(dat_iniciovalidade AS\
+          \ DATE)) = {year}\nGROUP BY 1\nORDER BY 1"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          - time_series
+          metrics:
+          - preco
+          grain: month
+        validated_params:
+          year: '2026'
+      preco_por_agente_bloco:
+        template: "SELECT nom_agente, nom_bloco,\n  AVG(val_preco) AS preco_medio_R_MWh,\n  MAX(val_preco)\
+          \ AS preco_maximo_R_MWh\nFROM {source}\nWHERE nom_pais = '{pais}'\nGROUP BY nom_agente, nom_bloco\n\
+          ORDER BY preco_medio_R_MWh DESC"
+        output_unit: R$/MWh
+        matches:
+          output_modes:
+          - average
+          - maximum
+          - ranking
+          metrics:
+          - preco
+          grain: agent_block
+        validated_params:
+          pais: URUGUAI
+- property: fewShotQueries
+  value:
+  - question: Como evoluiu o preço médio de importação de energia da Argentina e do Uruguai ao longo dos
+      anos?
+    sql: SELECT nom_pais, YEAR(TRY_CAST(dat_iniciovalidade AS DATE)) AS ano, ROUND(AVG(val_preco), 2)
+      AS preco_medio, ROUND(MIN(val_preco), 2) AS preco_minimo, ROUND(MAX(val_preco), 2) AS preco_maximo,
+      COUNT(*) AS qtd_ofertas FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ofertapreco-importacao-se/*.parquet')
+      WHERE TRY_CAST(dat_iniciovalidade AS DATE) IS NOT NULL GROUP BY nom_pais, YEAR(TRY_CAST(dat_iniciovalidade
+      AS DATE)) ORDER BY nom_pais, ano;
+  - question: Qual é o preço médio de importação de energia por bloco/patamar de carga para cada país?
+    sql: SELECT nom_pais, nom_bloco, ROUND(AVG(val_preco), 2) AS preco_medio, ROUND(MEDIAN(val_preco),
+      2) AS preco_mediano, ROUND(STDDEV(val_preco), 2) AS desvio_padrao, COUNT(*) AS qtd_ofertas FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/ofertapreco-importacao-se/*.parquet') GROUP BY
+      nom_pais, nom_bloco ORDER BY nom_pais, preco_medio DESC;
+  - question: Quais agentes comercializadores declararam os maiores preços de oferta para importação de
+      energia?
+    sql: SELECT nom_agente, nom_pais, ROUND(AVG(val_preco), 2) AS preco_medio, ROUND(MAX(val_preco), 2)
+      AS preco_maximo, COUNT(*) AS qtd_ofertas, MIN(TRY_CAST(dat_iniciovalidade AS DATE)) AS primeira_oferta,
+      MAX(TRY_CAST(dat_iniciovalidade AS DATE)) AS ultima_oferta FROM read_parquet('s3://ons-aws-prod-opendata/dataset/ofertapreco-importacao-se/*.parquet')
+      WHERE TRY_CAST(dat_iniciovalidade AS DATE) IS NOT NULL GROUP BY nom_agente, nom_pais ORDER BY preco_medio
+      DESC LIMIT 20;
+- property: license
+  value: CC-BY

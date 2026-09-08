@@ -1,0 +1,1603 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:linha-transmissao
+name: linha-transmissao
+tenant: ons
+tags:
+- LT
+- ONS
+- SIN
+- capacidade-operativa
+- linha de transmissão
+- linha-de-transmissao
+- linhas de transmissão
+- parametros-eletricos
+- rede básica
+- rede complementar
+- rede-basica
+- rede-complementar
+- subestacao
+- subsistema
+- transmissao
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/linha_transmissao/*.parquet
+  format: parquet
+description:
+  purpose: Prover o cadastro de referência das linhas de transmissão do SIN para analistas de planejamento,
+    operação e regulação do sistema elétrico brasileiro, suportando estudos de fluxo de potência, análise
+    de contingências N-1 e N-2, gestão de ativos de transmissão, cálculo de capacidade de intercâmbio
+    entre subsistemas, monitoramento de restrições operativas e elaboração de relatórios regulatórios
+    para ANEEL e ONS. Utilizado como tabela-dimensão em joins com datasets operativos de restrições, intercâmbio
+    e disponibilidade de equipamentos.
+  limitations: Valor máximo de 2545. Valor mínimo de 0. Aproximadamente 2.
+  usage: Recuperar este dataset quando a pergunta envolver cadastro, parâmetros elétricos ou capacidades
+    operativas de linhas de transmissão do SIN, identificação de equipamentos por subestação terminal,
+    subsistema ou agente proprietário, ou quando for necessária uma tabela-dimensão de linhas para join
+    com datasets operativos de restrições, intercâmbio ou disponibilidade de equipamentos de transmissão.
+domain: transmissao
+schema:
+- name: linha_transmissao
+  physicalType: parquet
+  logicalType: object
+  physicalName: linha_transmissao
+  properties:
+  - name: id_subsistema_terminalde
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador do subsistema elétrico do terminal "de" (origem) da linha de transmissão
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema origem
+      - subsistema de
+      - subsistema terminal de
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - N
+      - NE
+      - PY
+      - S
+      - SE
+  - name: nom_subsistema_terminalde
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do subsistema elétrico do terminal "de" (origem) da linha de transmissão
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema origem
+      - nome subsistema de
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NORDESTE
+      - NORTE
+      - PARAGUAI
+      - SUDESTE
+      - SUL
+  - name: id_subsistema_terminalpara
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador do subsistema elétrico do terminal "para" (destino) da linha de transmissão;
+      nulo para linhas com terminal externo ao sistema ou em cadastramento
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema destino
+      - subsistema para
+      - subsistema terminal para
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AR
+      - N
+      - NE
+      - PY
+      - S
+      - SE
+      - UY
+      - VE
+  - name: nom_subsistema_terminalpara
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do subsistema elétrico do terminal "para" (destino) da linha de transmissão; nulo
+      para linhas com terminal externo ao sistema ou em cadastramento
+    customProperties:
+    - property: aliases
+      value:
+      - nome subsistema destino
+      - nome subsistema para
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ARGENTINA
+      - NORDESTE
+      - NORTE
+      - PARAGUAI
+      - SUDESTE
+      - SUL
+      - URUGUAI
+      - VENEZUELA
+  - name: id_estado_terminalde
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla da Unidade Federativa (estado) onde se localiza o terminal "de" (origem) da linha
+    customProperties:
+    - property: aliases
+      value:
+      - UF origem
+      - estado de
+      - sigla estado origem
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - PY
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+  - name: nom_estado_de
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do estado (Unidade Federativa) do terminal "de" (origem) da linha de transmissão
+    customProperties:
+    - property: aliases
+      value:
+      - nome estado origem
+      - estado origem
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DADOS REF. PARAGUAI
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+  - name: id_estado_terminalpara
+    physicalType: VARCHAR
+    logicalType: string
+    description: Sigla da Unidade Federativa (estado) onde se localiza o terminal "para" (destino) da
+      linha; nulo para linhas com terminal externo ao sistema ou em cadastramento
+    customProperties:
+    - property: aliases
+      value:
+      - UF destino
+      - estado para
+      - sigla estado destino
+    - property: semanticType
+      value: IDENTIFIER
+    - property: enum
+      value:
+      - AC
+      - AL
+      - AM
+      - AP
+      - AR
+      - BA
+      - CE
+      - DF
+      - ES
+      - GO
+      - MA
+      - MG
+      - MS
+      - MT
+      - PA
+      - PB
+      - PE
+      - PI
+      - PR
+      - PY
+      - RJ
+      - RN
+      - RO
+      - RR
+      - RS
+      - SC
+      - SE
+      - SP
+      - TO
+      - UY
+      - VE
+  - name: nom_estado_para
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do estado (Unidade Federativa) do terminal "para" (destino) da linha de transmissão;
+      nulo para linhas com terminal externo ao sistema ou em cadastramento
+    customProperties:
+    - property: aliases
+      value:
+      - nome estado destino
+      - estado destino
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - ACRE
+      - ALAGOAS
+      - AMAPA
+      - AMAZONAS
+      - BAHIA
+      - CEARA
+      - DADOS REF. ARGENTINA
+      - DADOS REF. PARAGUAI
+      - DADOS REF. URUGUAI
+      - DADOS REF. VENEZUELA
+      - DISTRITO FEDERAL
+      - ESPIRITO SANTO
+      - GOIAS
+      - MARANHAO
+      - MATO GROSSO
+      - MATO GROSSO DO SUL
+      - MINAS GERAIS
+      - PARA
+      - PARAIBA
+      - PARANA
+      - PERNAMBUCO
+      - PIAUI
+      - RIO DE JANEIRO
+      - RIO GRANDE DO NORTE
+      - RIO GRANDE DO SUL
+      - RONDONIA
+      - RORAIMA
+      - SANTA CATARINA
+      - SAO PAULO
+      - SERGIPE
+      - TOCANTINS
+  - name: nom_subestacao_de
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da subestação do terminal "de" (origem) da linha de transmissão
+    customProperties:
+    - property: aliases
+      value:
+      - subestação origem
+      - SE de
+      - subestação de
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_subestacao_para
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome da subestação do terminal "para" (destino) da linha de transmissão; nulo para linhas
+      com terminal externo ao sistema ou em cadastramento
+    customProperties:
+    - property: aliases
+      value:
+      - subestação destino
+      - SE para
+      - subestação para
+    - property: semanticType
+      value: DIMENSION
+  - name: val_niveltensao_kv
+    physicalType: DOUBLE
+    logicalType: number
+    description: Nível de tensão nominal da linha de transmissão em quilovolts (kV); cobre a faixa de
+      230 kV a 800 kV
+    customProperties:
+    - property: aliases
+      value:
+      - tensão
+      - nível de tensão
+      - kV
+      - tensão nominal
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: kV
+    - property: enum
+      value:
+      - 230.0
+      - 345.0
+      - 440.0
+      - 500.0
+      - 525.0
+      - 600.0
+      - 765.0
+      - 800.0
+  - name: nom_tipoderede
+    physicalType: VARCHAR
+    logicalType: string
+    description: Tipo de rede ao qual a linha pertence (Rede Básica ou Rede Complementar)
+    customProperties:
+    - property: aliases
+      value:
+      - tipo de rede
+      - classificação da rede
+      - rede básica ou complementar
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BASICA
+      - COMPLEMENTAR
+  - name: nom_tipolinha
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Tipo da linha de transmissão (ex.: LT - Linha de Transmissão, CS - Cabo Submarino, etc.)'
+    customProperties:
+    - property: aliases
+      value:
+      - tipo linha
+      - classificação linha
+      - tipo de linha de transmissão
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - LINHA DC
+      - LINHA DE TRANSMISSÃO
+      - RAMAL DE LINHA
+  - name: nom_agenteproprietario
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente proprietário (empresa concessionária ou transmissora) responsável pela
+      linha de transmissão
+    customProperties:
+    - property: aliases
+      value:
+      - proprietário
+      - agente
+      - transmissora
+      - concessionária
+      - empresa proprietária
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_linhadetransmissao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome oficial da linha de transmissão conforme cadastro do ONS
+    customProperties:
+    - property: aliases
+      value:
+      - nome da LT
+      - nome linha
+      - identificação da linha
+      - denominação da linha
+    - property: semanticType
+      value: DIMENSION
+  - name: cod_equipamento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código único do equipamento (linha de transmissão) no cadastro do ONS; chave primária
+      natural do dataset
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código equipamento
+      - código LT
+      - ID equipamento
+      - código da linha
+    - property: semanticType
+      value: IDENTIFIER
+  - name: dat_entradaoperacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data de entrada em operação da linha de transmissão; armazenada como VARCHAR no Parquet
+      (requer conversão para DATE em validações)
+    customProperties:
+    - property: aliases
+      value:
+      - data entrada operação
+      - data início operação
+      - data comissionamento
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_desativacao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Data de desativação da linha de transmissão; armazenada como VARCHAR no Parquet; pode
+      conter valor sentinela para linhas ativas (ex.: ''9999-12-31'' ou string vazia)'
+    customProperties:
+    - property: aliases
+      value:
+      - data desativação
+      - data fim operação
+      - data retirada
+    - property: semanticType
+      value: TIMESTAMP
+  - name: dat_prevista
+    physicalType: VARCHAR
+    logicalType: string
+    description: Data prevista para entrada em operação ou para algum evento cadastral da linha; armazenada
+      como VARCHAR no Parquet
+    customProperties:
+    - property: aliases
+      value:
+      - data prevista
+      - data previsão
+      - data prevista operação
+    - property: semanticType
+      value: TIMESTAMP
+  - name: val_comprimento
+    physicalType: DOUBLE
+    logicalType: number
+    description: Comprimento físico da linha de transmissão em quilômetros; valores próximos de zero podem
+      indicar linhas fictícias ou transformadores modelados como linhas
+    customProperties:
+    - property: aliases
+      value:
+      - comprimento
+      - extensão
+      - extensão da linha
+      - km da linha
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: km
+  - name: val_resistencia
+    physicalType: DOUBLE
+    logicalType: number
+    description: Resistência elétrica série da linha de transmissão em por unidade (pu), conforme base
+      do ONS
+    customProperties:
+    - property: aliases
+      value:
+      - resistência
+      - resistência série
+      - R da linha
+      - parâmetro R
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: pu
+  - name: val_reatancia
+    physicalType: DOUBLE
+    logicalType: number
+    description: Reatância elétrica série da linha de transmissão em por unidade (pu); valor máximo de
+      2545.0 é atípico e requer validação
+    customProperties:
+    - property: aliases
+      value:
+      - reatância
+      - reatância série
+      - X da linha
+      - parâmetro X
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: pu
+  - name: val_shunt
+    physicalType: DOUBLE
+    logicalType: number
+    description: Susceptância shunt (admitância capacitiva) da linha de transmissão em por unidade (pu)
+    customProperties:
+    - property: aliases
+      value:
+      - shunt
+      - susceptância shunt
+      - B da linha
+      - parâmetro B
+      - admitância shunt
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: pu
+  - name: val_capacoperlongasemlimit
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa de longa duração sem limite de emergência em MVA; nulos em boa parte das linhas
+      indicam linhas sem limite sazonal definido
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade longa sem limite
+      - capacidade operativa longa sem limite
+      - cap op longa SL
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperlongacomlimit
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa de longa duração com limite de emergência em MVA; nulos em boa parte das linhas
+      indicam linhas sem limite sazonal definido
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade longa com limite
+      - capacidade operativa longa com limite
+      - cap op longa CL
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacopercurtasemlimit
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa de curta duração sem limite de emergência em MVA; nulos em boa parte das linhas
+      indicam linhas sem limite sazonal definido
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade curta sem limite
+      - capacidade operativa curta sem limite
+      - cap op curta SL
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacopercurtacomlimit
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa de curta duração com limite de emergência em MVA; nulos em boa parte das linhas
+      indicam linhas sem limite sazonal definido
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade curta com limite
+      - capacidade operativa curta com limite
+      - cap op curta CL
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacidadeoperveraodialonga
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de verão, período diurno, longa duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade verão dia longa
+      - cap op verão dia longa
+      - limite verão dia longa duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacidadeoperveraonoitelonga
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de verão, período noturno, longa duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade verão noite longa
+      - cap op verão noite longa
+      - limite verão noite longa duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperinvernodialonga
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de inverno, período diurno, longa duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade inverno dia longa
+      - cap op inverno dia longa
+      - limite inverno dia longa duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperinvernonoitelonga
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de inverno, período noturno, longa duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade inverno noite longa
+      - cap op inverno noite longa
+      - limite inverno noite longa duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperveradiacurta
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de verão, período diurno, curta duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade verão dia curta
+      - cap op verão dia curta
+      - limite verão dia curta duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperveraonoitecurta
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de verão, período noturno, curta duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade verão noite curta
+      - cap op verão noite curta
+      - limite verão noite curta duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperinvernodiacurta
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de inverno, período diurno, curta duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade inverno dia curta
+      - cap op inverno dia curta
+      - limite inverno dia curta duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: val_capacoperinvernonoitecurta
+    physicalType: DOUBLE
+    logicalType: number
+    description: Capacidade operativa sazonal de inverno, período noturno, curta duração em MVA; nulos em boa parte das linhas
+    customProperties:
+    - property: aliases
+      value:
+      - capacidade inverno noite curta
+      - cap op inverno noite curta
+      - limite inverno noite curta duração
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MVA
+  - name: num_barra_de
+    physicalType: INTEGER
+    logicalType: integer
+    description: Número da barra elétrica do terminal "de" (origem) da linha no modelo de rede do ONS;
+      chave de join com datasets de barras e fluxo de potência
+    customProperties:
+    - property: aliases
+      value:
+      - barra de
+      - barra origem
+      - número barra de
+      - barra terminal de
+    - property: semanticType
+      value: IDENTIFIER
+  - name: num_barra_para
+    physicalType: INTEGER
+    logicalType: integer
+    description: Número da barra elétrica do terminal "para" (destino) da linha no modelo de rede do ONS;
+      poucos nulos para linhas com terminal externo; chave de join com datasets de barras
+    customProperties:
+    - property: aliases
+      value:
+      - barra para
+      - barra destino
+      - número barra para
+      - barra terminal para
+    - property: semanticType
+      value: IDENTIFIER
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Atualizado diariamente
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/linha-transmissao
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: vectorTags
+  value:
+  - quantas linhas de transmissao existem
+  - lista de linhas de transmissao
+  - extensao das linhas
+  - comprimento das linhas
+  - quem e o dono da linha
+  - linhas por nivel de tensao
+  - linhas de 500 kv
+  - mapa das linhas
+  - cadastro de linhas
+  - linhas por empresa transmissora
+- property: aiContext
+  value: 'Recuperar este dataset quando a pergunta envolver cadastro, parâmetros elétricos ou capacidades
+    operativas de linhas de transmissão do SIN, identificação de equipamentos por subestação terminal,
+    subsistema ou agente proprietário, ou quando for necessária uma tabela-dimensão de linhas para join
+    com datasets operativos de restrições, intercâmbio ou disponibilidade de equipamentos de transmissão.
+    Termos relacionados: ONS, capacidade-operativa, linha de transmissão, linha-de-transmissao, parametros-eletricos.'
+- property: agentInstructions
+  value: '- [val_comprimento] Valor mínimo de 0,0001 km indica registros com comprimento praticamente
+    nulo, possivelmente representando transformadores ou conexões internas de subestação modelados como
+    linhas de comprimento desprezível no modelo de rede.
+
+    - [val_reatancia] Valor máximo de 2545 Ω é extremamente elevado para uma linha de transmissão convencional.
+    Pode indicar uso de unidade em pu (por unidade) em vez de ohms absolutos, ou erro de cadastro em linhas
+    muito longas.
+
+    - [val_capacidadeoperveraodialonga] Nulos em boa parte das linhas indicam que quase metade das linhas não possui
+    capacidade operativa sazonal de longa duração (verão/dia) definida. Linhas sem este campo podem estar
+    usando apenas os limites genéricos val_capacoperlonga*.
+
+    - [val_capacoperveradiacurta] Nulos em boa parte das linhas — taxa ligeiramente superior às capacidades de longa
+    duração, indicando que os limites de emergência sazonais são ainda menos frequentemente cadastrados
+    que os limites contínuos.
+
+    - [num_barra_para] Poucos nulos em num_barra_para, ligeiramente superior ao padrão dos demais campos do terminal "para". Pode indicar linhas cujo terminal destino ainda não foi modelado no sistema
+    de barras do ONS.
+
+    - [nom_subestacao_para] Poucos nulos em nom_subestacao_para, consistente com id_subsistema_terminalpara,
+    id_estado_terminalpara e nom_estado_para — indicando um conjunto de linhas cujo terminal destino não
+    está completamente cadastrado.
+
+    - [dat_entradaoperacao] Coluna de data armazenada como VARCHAR no Parquet em vez de DATE. Requer TRY_CAST
+    para uso em filtros e ordenações temporais. Sem nulos, mas o tipo físico impede operações de data
+    nativas.
+
+    - [dat_desativacao] Coluna de data armazenada como VARCHAR no Parquet em vez de DATE. Requer TRY_CAST
+    para uso em filtros temporais. As datas cadastradas de desativacao comecam em 1990-12-31 e alcancam o presente.
+
+    - [dat_prevista] Coluna de data armazenada como VARCHAR no Parquet em vez de DATE. Requer TRY_CAST
+    para uso em filtros e comparações temporais.
+
+    - [val_resistencia] Valor mínimo de 0,0 Ω para resistência série pode indicar linhas modeladas como
+    ideais (sem perdas resistivas) ou erros de cadastro. Verificar se são os mesmos registros com val_comprimento
+    próximo de zero.
+
+    - [cod_equipamento] cod_equipamento é a chave primária natural esperada. Verificar se existem duplicatas
+    que possam indicar versões múltiplas do mesmo equipamento ou erros de carga.
+
+    - [nom_tipoderede] Valores com trailing spaces detectados em ''nom_tipoderede''. Use TRIM() em filtros
+    WHERE para evitar perda de registros.'
+- property: typicalQuestions
+  value:
+  - Quais são as linhas de transmissão de 500 kV da CHESF no subsistema Nordeste?
+  - Qual a capacidade operativa de longa duração das linhas de interligação entre os subsistemas SE e
+    NE?
+  - Quais linhas de transmissão ainda não possuem capacidade operativa sazonal definida?
+  - Qual o comprimento total da rede básica de 500 kV por estado?
+  - Quais linhas de transmissão conectam as subestações de ANGRA e ADRIANÓPOLIS?
+  # geradas e validadas pelo benchmark em 2026-09-06
+  - "Qual a resistência das LTs de 765 kV?"
+  - "Distancia media de uma linha de transmissao no Brasil?"
+- property: granularity
+  value: STATIC
+- property: spatialGranularity
+  value: por_linha
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/linha_transmissao/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '1959-01-24'
+- property: semantics
+  value:
+    temporal_perspective: cadastral
+    row_grain:
+      temporal: STATIC
+      temporal_column: dat_entradaoperacao
+      spatial: por_linha
+      entity: dataset_row
+      one_row_per:
+      - dat_entradaoperacao
+      - cod_equipamento
+    dimension_columns:
+      subsistema: null
+      fonte: null
+      usina: null
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: comprimento
+      label: Comprimento
+      columns:
+      - val_comprimento
+      expression: val_comprimento
+      quantity_kind: numeric
+      unit_native: km
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_comprimento)
+          unit: km
+        average:
+          sql: AVG(val_comprimento)
+          unit: km
+        maximum:
+          sql: MAX(val_comprimento)
+          unit: km
+        ranking:
+          sql: SUM(val_comprimento)
+          unit: km
+        comparison:
+          sql: SUM(val_comprimento)
+          unit: km
+      aliases:
+      - comprimento
+      - extensao
+      - extensao da linha
+      - km da linha
+    - id: resistencia
+      label: Resistencia
+      columns:
+      - val_resistencia
+      expression: val_resistencia
+      quantity_kind: numeric
+      unit_native: pu
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_resistencia)
+          unit: pu
+        maximum:
+          sql: MAX(val_resistencia)
+          unit: pu
+        comparison:
+          sql: AVG(val_resistencia)
+          unit: pu
+      aliases:
+      - resistencia
+      - resistencia serie
+      - R da linha
+      - parametro R
+    - id: reatancia
+      label: Reatancia
+      columns:
+      - val_reatancia
+      expression: val_reatancia
+      quantity_kind: numeric
+      unit_native: pu
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_reatancia)
+          unit: pu
+        maximum:
+          sql: MAX(val_reatancia)
+          unit: pu
+        comparison:
+          sql: AVG(val_reatancia)
+          unit: pu
+      aliases:
+      - reatancia
+      - reatancia serie
+      - X da linha
+      - parametro X
+    - id: shunt
+      label: Shunt
+      columns:
+      - val_shunt
+      expression: val_shunt
+      quantity_kind: numeric
+      unit_native: pu
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        average:
+          sql: AVG(val_shunt)
+          unit: pu
+        maximum:
+          sql: MAX(val_shunt)
+          unit: pu
+        comparison:
+          sql: AVG(val_shunt)
+          unit: pu
+      aliases:
+      - shunt
+      - susceptancia shunt
+      - B da linha
+      - parametro B
+      - admitancia shunt
+    - id: capacoperlongasemlimit
+      label: Capacidade Operativa Longa Sem Limite
+      columns:
+      - val_capacoperlongasemlimit
+      expression: val_capacoperlongasemlimit
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperlongasemlimit)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperlongasemlimit)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperlongasemlimit)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperlongasemlimit)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperlongasemlimit)
+          unit: MVA
+      aliases:
+      - capacidade longa sem limite
+      - capacidade operativa longa sem limite
+      - cap op longa SL
+    - id: capacoperlongacomlimit
+      label: Capacidade Operativa Longa Com Limite
+      columns:
+      - val_capacoperlongacomlimit
+      expression: val_capacoperlongacomlimit
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperlongacomlimit)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperlongacomlimit)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperlongacomlimit)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperlongacomlimit)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperlongacomlimit)
+          unit: MVA
+      aliases:
+      - capacidade longa com limite
+      - capacidade operativa longa com limite
+      - cap op longa CL
+    - id: capacopercurtasemlimit
+      label: Capacidade Operativa Curta Sem Limite
+      columns:
+      - val_capacopercurtasemlimit
+      expression: val_capacopercurtasemlimit
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacopercurtasemlimit)
+          unit: MVA
+        average:
+          sql: AVG(val_capacopercurtasemlimit)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacopercurtasemlimit)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacopercurtasemlimit)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacopercurtasemlimit)
+          unit: MVA
+      aliases:
+      - capacidade curta sem limite
+      - capacidade operativa curta sem limite
+      - cap op curta SL
+    - id: capacopercurtacomlimit
+      label: Capacidade Operativa Curta Com Limite
+      columns:
+      - val_capacopercurtacomlimit
+      expression: val_capacopercurtacomlimit
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacopercurtacomlimit)
+          unit: MVA
+        average:
+          sql: AVG(val_capacopercurtacomlimit)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacopercurtacomlimit)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacopercurtacomlimit)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacopercurtacomlimit)
+          unit: MVA
+      aliases:
+      - capacidade curta com limite
+      - capacidade operativa curta com limite
+      - cap op curta CL
+    - id: capacidadeoperveraodialonga
+      label: Capacidade Operativa Verao Dia Longa
+      columns:
+      - val_capacidadeoperveraodialonga
+      expression: val_capacidadeoperveraodialonga
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacidadeoperveraodialonga)
+          unit: MVA
+        average:
+          sql: AVG(val_capacidadeoperveraodialonga)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacidadeoperveraodialonga)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacidadeoperveraodialonga)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacidadeoperveraodialonga)
+          unit: MVA
+      aliases:
+      - capacidade verao dia longa
+      - cap op verao dia longa
+      - limite verao dia longa duracao
+    - id: capacidadeoperveraonoitelonga
+      label: Capacidade Operativa Verao Noite Longa
+      columns:
+      - val_capacidadeoperveraonoitelonga
+      expression: val_capacidadeoperveraonoitelonga
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacidadeoperveraonoitelonga)
+          unit: MVA
+        average:
+          sql: AVG(val_capacidadeoperveraonoitelonga)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacidadeoperveraonoitelonga)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacidadeoperveraonoitelonga)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacidadeoperveraonoitelonga)
+          unit: MVA
+      aliases:
+      - capacidade verao noite longa
+      - cap op verao noite longa
+      - limite verao noite longa duracao
+    - id: capacoperinvernodialonga
+      label: Capacidade Operativa Inverno Dia Longa
+      columns:
+      - val_capacoperinvernodialonga
+      expression: val_capacoperinvernodialonga
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperinvernodialonga)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperinvernodialonga)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperinvernodialonga)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperinvernodialonga)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperinvernodialonga)
+          unit: MVA
+      aliases:
+      - capacidade inverno dia longa
+      - cap op inverno dia longa
+      - limite inverno dia longa duracao
+    - id: capacoperinvernonoitelonga
+      label: Capacidade Operativa Inverno Noite Longa
+      columns:
+      - val_capacoperinvernonoitelonga
+      expression: val_capacoperinvernonoitelonga
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperinvernonoitelonga)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperinvernonoitelonga)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperinvernonoitelonga)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperinvernonoitelonga)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperinvernonoitelonga)
+          unit: MVA
+      aliases:
+      - capacidade inverno noite longa
+      - cap op inverno noite longa
+      - limite inverno noite longa duracao
+    - id: capacoperveradiacurta
+      label: Capacidade Operativa Verao Dia Curta
+      columns:
+      - val_capacoperveradiacurta
+      expression: val_capacoperveradiacurta
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperveradiacurta)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperveradiacurta)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperveradiacurta)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperveradiacurta)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperveradiacurta)
+          unit: MVA
+      aliases:
+      - capacidade verao dia curta
+      - cap op verao dia curta
+      - limite verao dia curta duracao
+    - id: capacoperveraonoitecurta
+      label: Capacidade Operativa Verao Noite Curta
+      columns:
+      - val_capacoperveraonoitecurta
+      expression: val_capacoperveraonoitecurta
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperveraonoitecurta)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperveraonoitecurta)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperveraonoitecurta)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperveraonoitecurta)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperveraonoitecurta)
+          unit: MVA
+      aliases:
+      - capacidade verao noite curta
+      - cap op verao noite curta
+      - limite verao noite curta duracao
+    - id: capacoperinvernodiacurta
+      label: Capacidade Operativa Inverno Dia Curta
+      columns:
+      - val_capacoperinvernodiacurta
+      expression: val_capacoperinvernodiacurta
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperinvernodiacurta)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperinvernodiacurta)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperinvernodiacurta)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperinvernodiacurta)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperinvernodiacurta)
+          unit: MVA
+      aliases:
+      - capacidade inverno dia curta
+      - cap op inverno dia curta
+      - limite inverno dia curta duracao
+    - id: capacoperinvernonoitecurta
+      label: Capacidade Operativa Inverno Noite Curta
+      columns:
+      - val_capacoperinvernonoitecurta
+      expression: val_capacoperinvernonoitecurta
+      quantity_kind: capacity
+      unit_native: MVA
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(val_capacoperinvernonoitecurta)
+          unit: MVA
+        average:
+          sql: AVG(val_capacoperinvernonoitecurta)
+          unit: MVA
+        maximum:
+          sql: MAX(val_capacoperinvernonoitecurta)
+          unit: MVA
+        ranking:
+          sql: MAX(val_capacoperinvernonoitecurta)
+          unit: MVA
+        comparison:
+          sql: MAX(val_capacoperinvernonoitecurta)
+          unit: MVA
+      aliases:
+      - capacidade inverno noite curta
+      - cap op inverno noite curta
+      - limite inverno noite curta duracao
+    query_routing:
+      supports_listing: true
+      supports_time_series: false
+      supports_comparison: true
+      supports_ranking: false
+      primary_use_case: cadastro
+    value_aliases:
+      id_subsistema_terminalde:
+        N:
+          aliases:
+          - N
+          - norte origem
+          filter: id_subsistema_terminalde = 'N'
+        NE:
+          aliases:
+          - NE
+          - nordeste origem
+          filter: id_subsistema_terminalde = 'NE'
+        PY:
+          aliases:
+          - PY
+          - paraguai origem
+          filter: id_subsistema_terminalde = 'PY'
+        S:
+          aliases:
+          - S
+          - sul origem
+          filter: id_subsistema_terminalde = 'S'
+        SE:
+          aliases:
+          - SE
+          - sudeste origem
+          filter: id_subsistema_terminalde = 'SE'
+      nom_subsistema_terminalde:
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          - nordeste
+          filter: nom_subsistema_terminalde = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          - norte
+          filter: nom_subsistema_terminalde = 'NORTE'
+        PARAGUAI:
+          aliases:
+          - PARAGUAI
+          - paraguai
+          filter: nom_subsistema_terminalde = 'PARAGUAI'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          - sudeste
+          filter: nom_subsistema_terminalde = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          - sul
+          filter: nom_subsistema_terminalde = 'SUL'
+      id_subsistema_terminalpara:
+        AR:
+          aliases:
+          - AR
+          - argentina destino
+          filter: id_subsistema_terminalpara = 'AR'
+        N:
+          aliases:
+          - N
+          - norte destino
+          filter: id_subsistema_terminalpara = 'N'
+        NE:
+          aliases:
+          - NE
+          - nordeste destino
+          filter: id_subsistema_terminalpara = 'NE'
+        PY:
+          aliases:
+          - PY
+          - paraguai destino
+          filter: id_subsistema_terminalpara = 'PY'
+        S:
+          aliases:
+          - S
+          - sul destino
+          filter: id_subsistema_terminalpara = 'S'
+        SE:
+          aliases:
+          - SE
+          - sudeste destino
+          filter: id_subsistema_terminalpara = 'SE'
+        UY:
+          aliases:
+          - UY
+          - uruguai destino
+          filter: id_subsistema_terminalpara = 'UY'
+        VE:
+          aliases:
+          - VE
+          - venezuela destino
+          filter: id_subsistema_terminalpara = 'VE'
+      nom_subsistema_terminalpara:
+        ARGENTINA:
+          aliases:
+          - ARGENTINA
+          - argentina
+          filter: nom_subsistema_terminalpara = 'ARGENTINA'
+        NORDESTE:
+          aliases:
+          - NORDESTE
+          filter: nom_subsistema_terminalpara = 'NORDESTE'
+        NORTE:
+          aliases:
+          - NORTE
+          filter: nom_subsistema_terminalpara = 'NORTE'
+        PARAGUAI:
+          aliases:
+          - PARAGUAI
+          filter: nom_subsistema_terminalpara = 'PARAGUAI'
+        SUDESTE:
+          aliases:
+          - SUDESTE
+          filter: nom_subsistema_terminalpara = 'SUDESTE'
+        SUL:
+          aliases:
+          - SUL
+          filter: nom_subsistema_terminalpara = 'SUL'
+        URUGUAI:
+          aliases:
+          - URUGUAI
+          - uruguai
+          filter: nom_subsistema_terminalpara = 'URUGUAI'
+        VENEZUELA:
+          aliases:
+          - VENEZUELA
+          - venezuela
+          filter: nom_subsistema_terminalpara = 'VENEZUELA'
+      val_niveltensao_kv:
+        '230':
+          aliases:
+          - 230 kV
+          - 230kV
+          - '230'
+          filter: val_niveltensao_kv = 230
+        '345':
+          aliases:
+          - 345 kV
+          - 345kV
+          - '345'
+          filter: val_niveltensao_kv = 345
+        '440':
+          aliases:
+          - 440 kV
+          - 440kV
+          - '440'
+          filter: val_niveltensao_kv = 440
+        '500':
+          aliases:
+          - 500 kV
+          - 500kV
+          - '500'
+          filter: val_niveltensao_kv = 500
+        '525':
+          aliases:
+          - 525 kV
+          - 525kV
+          - '525'
+          filter: val_niveltensao_kv = 525
+        '600':
+          aliases:
+          - 600 kV
+          - 600kV
+          - '600'
+          filter: val_niveltensao_kv = 600
+        '765':
+          aliases:
+          - 765 kV
+          - 765kV
+          - '765'
+          filter: val_niveltensao_kv = 765
+        '800':
+          aliases:
+          - 800 kV
+          - 800kV
+          - '800'
+          filter: val_niveltensao_kv = 800
+      nom_tipoderede:
+        BASICA:
+          aliases:
+          - BASICA
+          - rede basica
+          - basica
+          filter: TRIM(nom_tipoderede) = 'BASICA'
+        COMPLEMENTAR:
+          aliases:
+          - COMPLEMENTAR
+          - rede complementar
+          - complementar
+          filter: TRIM(nom_tipoderede) = 'COMPLEMENTAR'
+      nom_tipolinha:
+        LINHA DC:
+          aliases:
+          - LINHA DC
+          - linha dc
+          - corrente continua
+          - HVDC
+          filter: nom_tipolinha = 'LINHA DC'
+        LINHA DE TRANSMISSAO:
+          aliases:
+          - LINHA DE TRANSMISSAO
+          - LT
+          - linha de transmissao
+          filter: nom_tipolinha = 'LINHA DE TRANSMISSÃO'
+        RAMAL DE LINHA:
+          aliases:
+          - RAMAL DE LINHA
+          - ramal
+          - ramal de linha
+          filter: nom_tipolinha = 'RAMAL DE LINHA'
+    sql_patterns:
+      listar_linhas_por_tensao:
+        template: "SELECT nom_linhadetransmissao, nom_subestacao_de, nom_subestacao_para,\n  nom_subsistema_terminalde,\
+          \ nom_subsistema_terminalpara,\n  val_niveltensao_kv, val_comprimento\nFROM {source}\nWHERE\
+          \ val_niveltensao_kv = {tensao_kv}\nORDER BY nom_linhadetransmissao"
+        output_unit: km
+        matches:
+          output_modes:
+          - listing
+          metrics:
+          - comprimento
+          grain: por_linha
+      comprimento_total_por_estado:
+        template: "SELECT nom_estado_de AS estado,\n  SUM(val_comprimento) AS comprimento_total_km\nFROM\
+          \ {source}\nWHERE TRIM(nom_tipoderede) = 'BASICA'\n  AND val_niveltensao_kv = {tensao_kv}\n\
+          GROUP BY nom_estado_de\nORDER BY comprimento_total_km DESC"
+        output_unit: km
+        matches:
+          output_modes:
+          - total
+          - ranking
+          metrics:
+          - comprimento
+          grain: por_estado
+      capacidade_operativa_por_subsistema:
+        template: "SELECT nom_subsistema_terminalde, nom_subsistema_terminalpara,\n  MAX(val_capacoperlongasemlimit)\
+          \ AS cap_longa_sl_mva,\n  MAX(val_capacoperlongacomlimit) AS cap_longa_cl_mva\nFROM {source}\n\
+          WHERE nom_subsistema_terminalde = '{subsistema_de}'\n  AND nom_subsistema_terminalpara = '{subsistema_para}'\n\
+          GROUP BY nom_subsistema_terminalde, nom_subsistema_terminalpara"
+        output_unit: MVA
+        matches:
+          output_modes:
+          - comparison
+          - maximum
+          metrics:
+          - capacoperlongasemlimit
+          - capacoperlongacomlimit
+          grain: por_interligacao
+      linhas_sem_capacidade_sazonal:
+        template: "SELECT cod_equipamento, nom_linhadetransmissao,\n  nom_subestacao_de, nom_subestacao_para\n\
+          FROM {source}\nWHERE val_capacidadeoperveraodialonga IS NULL\n  AND val_capacoperinvernodialonga\
+          \ IS NULL\nORDER BY nom_linhadetransmissao"
+        output_unit: null
+        matches:
+          output_modes:
+          - listing
+          metrics: []
+          grain: por_linha
+      linhas_ativas:
+        template: "SELECT cod_equipamento, nom_linhadetransmissao,\n  nom_subestacao_de, nom_subestacao_para,\n\
+          \  val_niveltensao_kv,\n  TRY_CAST(dat_entradaoperacao AS DATE) AS dat_entrada\nFROM {source}\n\
+          WHERE (dat_desativacao IS NULL\n   OR TRY_CAST(dat_desativacao AS DATE) >= CURRENT_DATE\n  \
+          \ OR dat_desativacao = '9999-12-31')\nORDER BY nom_linhadetransmissao"
+        output_unit: null
+        matches:
+          output_modes:
+          - listing
+          metrics: []
+          grain: por_linha
+- property: fewShotQueries
+  value:
+  - question: Quantas linhas de transmissão existem por subsistema de origem e nível de tensão, e qual
+      a extensão total em km?
+    sql: SELECT id_subsistema_terminalde, nom_subsistema_terminalde, val_niveltensao_kv, COUNT(*) AS qtd_linhas,
+      ROUND(SUM(val_comprimento), 1) AS comprimento_total_km, ROUND(AVG(val_comprimento), 1) AS comprimento_medio_km
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/linha_transmissao/*.parquet') WHERE val_comprimento
+      IS NOT NULL AND val_comprimento >= 0.01 GROUP BY id_subsistema_terminalde, nom_subsistema_terminalde,
+      val_niveltensao_kv ORDER BY id_subsistema_terminalde, val_niveltensao_kv DESC
+  - question: Qual a capacidade operativa total de longa duração sem limitação por agente proprietário,
+      considerando apenas linhas com limite definido?
+    sql: SELECT nom_agenteproprietario, COUNT(*) AS qtd_linhas_com_limite, ROUND(SUM(val_capacoperlongasemlimit),
+      0) AS soma_cap_longa_sem_limit_mw, ROUND(AVG(val_capacoperlongasemlimit), 0) AS media_cap_longa_sem_limit_mw,
+      ROUND(MIN(val_capacoperlongasemlimit), 0) AS min_cap_mw, ROUND(MAX(val_capacoperlongasemlimit),
+      0) AS max_cap_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/linha_transmissao/*.parquet')
+      WHERE val_capacoperlongasemlimit IS NOT NULL GROUP BY nom_agenteproprietario ORDER BY soma_cap_longa_sem_limit_mw
+      DESC LIMIT 20
+  - question: Quais linhas de transmissão conectam subsistemas diferentes (interligações) e quais são
+      seus parâmetros elétricos?
+    sql: SELECT nom_linhadetransmissao, cod_equipamento, id_subsistema_terminalde, id_subsistema_terminalpara,
+      val_niveltensao_kv, val_comprimento, val_resistencia, val_reatancia, val_shunt, val_capacoperlongasemlimit,
+      nom_agenteproprietario FROM read_parquet('s3://ons-aws-prod-opendata/dataset/linha_transmissao/*.parquet')
+      WHERE id_subsistema_terminalde IS NOT NULL AND id_subsistema_terminalpara IS NOT NULL AND id_subsistema_terminalde
+      <> id_subsistema_terminalpara ORDER BY val_niveltensao_kv DESC, val_comprimento DESC
+- property: license
+  value: CC-BY
