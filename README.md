@@ -6,7 +6,8 @@
 # MCP TIAGO Dados Abertos — ONS
 
 [![tests](https://github.com/ONSBR/TIAGO-Dados-Abertos/actions/workflows/tests.yml/badge.svg)](https://github.com/ONSBR/TIAGO-Dados-Abertos/actions/workflows/tests.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![PyPI](https://img.shields.io/pypi/v/mcp-tiago-dados-abertos.svg)](https://pypi.org/project/mcp-tiago-dados-abertos/)
+[![Python](https://img.shields.io/pypi/pyversions/mcp-tiago-dados-abertos.svg)](https://pypi.org/project/mcp-tiago-dados-abertos/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/ONSBR/TIAGO-Dados-Abertos/blob/main/LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple.svg)](https://modelcontextprotocol.io/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-1.0+-orange.svg)](https://duckdb.org/)
@@ -174,8 +175,17 @@ Veja instruções para cada cliente em [dados.ons.org.br/mcp](https://dados.ons.
 
 ## Instalação
 
-Requisitos: Python 3.11 ou mais recente e acesso à internet. O bucket do ONS é público e
-lido anonimamente. O pacote não está no PyPI; a instalação é por clone.
+Requisitos: Python 3.12 ou mais recente e acesso à internet. O bucket do ONS é público e
+lido anonimamente.
+
+O pacote está no PyPI. Para usar sem clonar o repositório:
+
+```bash
+uvx mcp-tiago-dados-abertos --stdio     # sem instalar nada
+pip install mcp-tiago-dados-abertos     # ou instalando no ambiente
+```
+
+Para trabalhar no código, clone:
 
 ```bash
 git clone https://github.com/ONSBR/TIAGO-Dados-Abertos.git
