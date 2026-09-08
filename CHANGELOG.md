@@ -5,6 +5,6 @@ servidor faz está no [README](README.md); aqui entram só as mudanças entre ve
 
 ## [Não lançado]
 
-## [1.0.1] — 2026-09-07
+## [1.0.1] — 2026-09-08
 
 Primeira publicação.
