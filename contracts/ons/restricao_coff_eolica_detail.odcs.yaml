@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 1.1.0
 kind: DataContract
 apiVersion: v3.1.0
 id: urn:ons-opendata:restricao_coff_eolica_detail
@@ -30,17 +30,17 @@ servers:
   location: s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet
   format: parquet
 description:
-  purpose: Registrar e disponibilizar o detalhamento por usina individual das restrições de geração eólica
-    por constrained-off, permitindo que operadores do ONS, agentes do setor elétrico, auditores da CCEE
-    e pesquisadores calculem a energia curtailed por usina, apurem compensações financeiras regulatórias,
-    monitorem a qualidade dos dados de vento e analisem o impacto operativo do curtailment eólico no SIN.
-    Suporta decisões de despacho, auditoria de restrições e estudos de planejamento da expansão eólica.
-  limitations: 'Valor máximo de 297,529 m/s é fisicamente impossível para velocidade do vento em operação
-    de turbinas eólicas (limite operacional típico: 25 m/s). val_geracaoestimada possui poucos nulos.'
-  usage: Recuperar este dataset quando a pergunta envolver restrições de geração eólica por constrained-off
-    com detalhamento por usina individual, cálculo de energia curtailed (diferença entre geração estimada
-    e verificada), análise de velocidade do vento em períodos de restrição, ou auditoria de modalidades
-    operativas (Tipo I, Tipo II-B, Tipo II-C) em granularidade semi-horária.
+  purpose: Registrar e disponibilizar o detalhamento por usina individual das restrições de geração eólica por constrained-off,
+    permitindo que operadores do ONS, agentes do setor elétrico, auditores da CCEE e pesquisadores calculem a energia
+    curtailed por usina, apurem compensações financeiras regulatórias, monitorem a qualidade dos dados de vento
+    e analisem o impacto operativo do curtailment eólico no SIN. Suporta decisões de despacho, auditoria de restrições
+    e estudos de planejamento da expansão eólica.
+  limitations: 'Valor máximo de 297,529 m/s é fisicamente impossível para velocidade do vento em operação de turbinas
+    eólicas (limite operacional típico: 25 m/s). val_geracaoestimada possui poucos nulos.'
+  usage: Recuperar este dataset quando a pergunta envolver restrições de geração eólica por constrained-off com
+    detalhamento por usina individual, cálculo de energia curtailed (diferença entre geração estimada e verificada),
+    análise de velocidade do vento em períodos de restrição, ou auditoria de modalidades operativas (Tipo I, Tipo
+    II-B, Tipo II-C) em granularidade semi-horária.
 domain: geração
 schema:
 - name: restricao_coff_eolica_detail
@@ -51,8 +51,7 @@ schema:
   - name: id_subsistema
     physicalType: VARCHAR
     logicalType: string
-    description: 'Identificador do subsistema elétrico ao qual a usina eólica pertence (ex: NE, SE, S,
-      N)'
+    description: 'Identificador do subsistema elétrico ao qual a usina eólica pertence (ex: NE, SE, S, N)'
     customProperties:
     - property: aliases
       value:
@@ -93,9 +92,9 @@ schema:
   - name: nom_modalidadeoperacao
     physicalType: VARCHAR
     logicalType: string
-    description: 'Nome da modalidade de operação de constrained-off à qual a usina está classificada.
-      Valores possíveis: Tipo I (restrição por congestionamento de rede), Tipo II-B e Tipo II-C (restrições
-      por outros critérios operativos definidos pelo ONS).
+    description: 'Nome da modalidade de operação de constrained-off à qual a usina está classificada. Valores possíveis:
+      Tipo I (restrição por congestionamento de rede), Tipo II-B e Tipo II-C (restrições por outros critérios operativos
+      definidos pelo ONS).
 
       '
     customProperties:
@@ -115,8 +114,8 @@ schema:
   - name: nom_conjuntousina
     physicalType: VARCHAR
     logicalType: string
-    description: 'Nome do conjunto (agrupamento) de usinas ao qual a usina individual pertence. Representa
-      o complexo eólico ou grupo operativo de referência para fins de apuração do constrained-off.
+    description: 'Nome do conjunto (agrupamento) de usinas ao qual a usina individual pertence. Representa o complexo
+      eólico ou grupo operativo de referência para fins de apuração do constrained-off.
 
       '
     customProperties:
@@ -131,8 +130,8 @@ schema:
   - name: nom_usina
     physicalType: VARCHAR
     logicalType: string
-    description: 'Nome da usina eólica individual conforme cadastro do ONS. Identifica a unidade geradora
-      específica dentro do conjunto/complexo eólico.
+    description: 'Nome da usina eólica individual conforme cadastro do ONS. Identifica a unidade geradora específica
+      dentro do conjunto/complexo eólico.
 
       '
     customProperties:
@@ -147,8 +146,8 @@ schema:
   - name: id_ons
     physicalType: VARCHAR
     logicalType: string
-    description: 'Código identificador da usina no cadastro do ONS. Chave de referência para joins com
-      datasets de cadastro de usinas e outros datasets operativos do ONS.
+    description: 'Código identificador da usina no cadastro do ONS. Chave de referência para joins com datasets
+      de cadastro de usinas e outros datasets operativos do ONS.
 
       '
     primaryKey: true
@@ -164,8 +163,8 @@ schema:
   - name: ceg
     physicalType: VARCHAR
     logicalType: string
-    description: 'Código de Empreendimento de Geração (CEG) da ANEEL. Identificador único do empreendimento
-      gerador no cadastro regulatório. Permite join com bases da ANEEL e outros datasets do setor.
+    description: 'Código de Empreendimento de Geração (CEG) da ANEEL. Identificador único do empreendimento gerador
+      no cadastro regulatório. Permite join com bases da ANEEL e outros datasets do setor.
 
       '
     primaryKey: true
@@ -182,8 +181,8 @@ schema:
     physicalType: TIMESTAMP
     logicalType: timestamp
     description: 'Data e hora do instante de medição/apuração da restrição de constrained-off, com granularidade
-      de 30 minutos. Cada registro representa um intervalo de meia hora para a usina identificada. Cobre
-      o período de 2023-01-01 em diante.
+      de 30 minutos. Cada registro representa um intervalo de meia hora para a usina identificada. Cobre o período
+      de 2023-01-01 em diante.
 
       '
     primaryKey: true
@@ -201,9 +200,9 @@ schema:
   - name: val_ventoverificado
     physicalType: DOUBLE
     logicalType: number
-    description: 'Velocidade do vento verificada (medida) na usina eólica no instante de apuração, em
-      metros por segundo (m/s). Valores extremos (ex: 297,529 m/s) indicam dados inválidos, devendo ser
-      filtrados pelo flag flg_dadoventoinvalido=1.
+    description: 'Velocidade do vento verificada (medida) na usina eólica no instante de apuração, em metros por
+      segundo (m/s). Valores extremos (ex: 297,529 m/s) indicam dados inválidos, devendo ser filtrados pelo flag
+      flg_dadoventoinvalido=1.
 
       '
     customProperties:
@@ -218,11 +217,10 @@ schema:
     - property: unit
       value: m/s
   - name: flg_dadoventoinvalido
-    physicalType: DOUBLE
-    logicalType: number
-    description: 'Flag binária indicando a qualidade do dado de velocidade do vento. Valor 0 indica dado
-      de vento válido; valor 1 indica dado de vento inválido ou indisponível. Deve ser usado como filtro
-      ao analisar val_ventoverificado.
+    physicalType: INTEGER
+    logicalType: integer
+    description: 'Flag binária indicando a qualidade do dado de velocidade do vento. Valor 0 indica dado de vento
+      válido; valor 1 indica dado de vento inválido ou indisponível. Deve ser usado como filtro ao analisar val_ventoverificado.
 
       '
     customProperties:
@@ -241,10 +239,10 @@ schema:
   - name: val_geracaoestimada
     physicalType: DOUBLE
     logicalType: number
-    description: 'Geração eólica estimada para a usina no instante de apuração, em megawatts (MW). Representa
-      a geração que a usina poderia ter produzido na ausência da restrição de constrained-off, calculada
-      com base na velocidade do vento e curva de potência. Possui poucos nulos, possivelmente
-      em períodos sem estimativa disponível.
+    description: 'Geração eólica estimada para a usina no instante de apuração, em megawatts (MW). Representa a
+      geração que a usina poderia ter produzido na ausência da restrição de constrained-off, calculada com base
+      na velocidade do vento e curva de potência. Possui poucos nulos, possivelmente em períodos sem estimativa
+      disponível.
 
       '
     customProperties:
@@ -257,13 +255,13 @@ schema:
     - property: semanticType
       value: METRIC
     - property: unit
-      value: MW
+      value: MWmed
   - name: val_geracaoverificada
     physicalType: DOUBLE
     logicalType: number
-    description: 'Geração eólica verificada (medida) da usina no instante de apuração, em megawatts (MW).
-      Representa a geração efetivamente realizada durante o período de constrained-off. Máximo observado
-      de 150 MW, consistente com capacidade de usinas eólicas individuais.
+    description: 'Geração eólica verificada (medida) da usina no instante de apuração, em megawatts (MW). Representa
+      a geração efetivamente realizada durante o período de constrained-off. Máximo observado de 150 MW, consistente
+      com capacidade de usinas eólicas individuais.
 
       '
     customProperties:
@@ -277,7 +275,102 @@ schema:
     - property: semanticType
       value: METRIC
     - property: unit
-      value: MW
+      value: MWmed
+  - name: id_ons_conjuntousina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Identificador do Conjunto de Usinas no ONS (apenas para usinas com modalidade de operação Tipo
+      II-C)
+    customProperties:
+    - property: aliases
+      value:
+      - id_conjunto
+      - codigo_conjunto_ons
+    - property: semanticType
+      value: IDENTIFIER
+  - name: nom_origemvento
+    physicalType: VARCHAR
+    logicalType: string
+    description: Origem do dado de velocidade do vento, podendo ser do Sistema de Supervisão de Controle ou fornecido
+      pelo Agente em Pós-Operação.
+    customProperties:
+    - property: aliases
+      value:
+      - origem_vento
+      - fonte_vento
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Agente
+      - Supervisão
+  - name: flg_dadoventosupervisaoinvalido
+    physicalType: INTEGER
+    logicalType: integer
+    description: Indicativo do dado de vento encaminhado pelo agente pelo Sistema de Supervisão e Controle como
+      inválido. O dado é considerado inválido (flag = 1) quando há falha na medida recebida pelo Sistema de Supervisão
+      e Controle do ONS por mais de 6 minutos dentro da semi-hora correspondente.
+    customProperties:
+    - property: aliases
+      value:
+      - flag_vento_supervisao_invalido
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 0
+      - 1
+  - name: nom_origemgeracaoreferencia
+    physicalType: VARCHAR
+    logicalType: string
+    description: Origem da geração de referência, podendo ser da curva de produtividade, do histórico de geração
+      ou da garantia física.
+    customProperties:
+    - property: aliases
+      value:
+      - origem_referencia
+      - fonte_geracao_referencia
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - Curva
+      - Garantia Física
+      - Migrado do SAGIC
+      - Períodos Anteriores
+      - Períodos Anteriores/Garantia Física
+  - name: val_geracaoreferenciafinal
+    physicalType: DOUBLE
+    logicalType: number
+    description: Geração de Referência Final, em MWmed. Considera as regras de apuração estabelecidas na RO-AO.BR.13
+      aplicadas na Geração de Referência do Conjunto e distribuição proporcional nas usinas. O valor é calculado
+      apenas para os patamares em que houve restrição por indisponibilidade externa (REL), sendo encaminhado pelo
+      ONS à CCEE para fins de obtenção da geração frustrada e cálculo dos ESS por constrained-off.
+    customProperties:
+    - property: aliases
+      value:
+      - geracao_referencia_final
+      - referencia_final
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MWmed
+  - name: flg_geracaorestrita
+    physicalType: INTEGER
+    logicalType: integer
+    description: Indicativo se houve limitação da geração do Conjunto na semi-hora.
+    customProperties:
+    - property: aliases
+      value:
+      - flag_restricao
+      - geracao_restrita
+      - patamar_com_restricao
+    - property: semanticType
+      value: FLAG
+    - property: enum
+      value:
+      - 0
+      - 1
 team:
   name: ONS - Operador Nacional do Sistema Elétrico
   members:
@@ -302,68 +395,81 @@ customProperties:
 - property: partitionPruning
   value: year
 - property: aiContext
-  value: Recuperar este dataset quando a pergunta envolver restrições de geração eólica por constrained-off
-    com detalhamento por usina individual, cálculo de energia curtailed (diferença entre geração estimada
-    e verificada), análise de velocidade do vento em períodos de restrição, ou auditoria de modalidades
-    operativas (Tipo I, Tipo II-B, Tipo II-C) em granularidade semi-horária. Também relevante para perguntas
-    sobre compensações financeiras de usinas eólicas restritas e análise de curtailment no SIN.
+  value: Recuperar este dataset quando a pergunta envolver restrições de geração eólica por constrained-off com
+    detalhamento por usina individual, cálculo de energia curtailed (diferença entre geração estimada e verificada),
+    análise de velocidade do vento em períodos de restrição, ou auditoria de modalidades operativas (Tipo I, Tipo
+    II-B, Tipo II-C) em granularidade semi-horária. Também relevante para perguntas sobre compensações financeiras
+    de usinas eólicas restritas e análise de curtailment no SIN.
 - property: agentInstructions
-  value: '- [val_geracaoestimada] Poucos registros possuem val_geracaoestimada nulo. Ocorre possivelmente quando o modelo de estimativa não está disponível para o instante,
-    usina em manutenção, ou período de retroalimentação de dados ainda não processado. Nulos devem ser
-    tratados antes de calcular o volume de energia cortada (estimada - verificada).
+  value: '- [val_geracaoestimada] Poucos registros possuem val_geracaoestimada nulo. Ocorre possivelmente quando
+    o modelo de estimativa não está disponível para o instante, usina em manutenção, ou período de retroalimentação
+    de dados ainda não processado. Nulos devem ser tratados antes de calcular o volume de energia cortada (estimada
+    - verificada).
 
 
-    - [val_ventoverificado] val_ventoverificado apresenta valor máximo de 297,529, extremamente elevado
-    para velocidade de vento em m/s (velocidades operacionais típicas de turbinas eólicas ficam entre
-    0 e 25 m/s). Pode indicar erro de medição, unidade diferente em casos específicos, ou dado de anemômetro
-    com falha não capturada pelo flag flg_dadoventoinvalido.
+    - [val_ventoverificado] val_ventoverificado apresenta valor máximo de 297,529, extremamente elevado para velocidade
+    de vento em m/s (velocidades operacionais típicas de turbinas eólicas ficam entre 0 e 25 m/s). Pode indicar
+    medição atípica, unidade diferente em casos específicos, ou dado de anemômetro com leitura não capturada pelo
+    flag flg_dadoventoinvalido.
 
 
-    - [flg_dadoventoinvalido] flg_dadoventoinvalido é armazenado como DOUBLE (0.0 ou 1.0) em vez de BOOLEAN
-    ou INTEGER, o que pode causar confusão em filtros. Verificar se existem valores intermediários (ex:
-    0.5) que não sejam estritamente 0.0 ou 1.0, indicando possível corrupção ou uso indevido do campo.
+    - [flg_dadoventoinvalido] flg_dadoventoinvalido é armazenado como DOUBLE (0.0 ou 1.0) em vez de BOOLEAN ou INTEGER,
+    o que pode causar confusão em filtros. Verificar se existem valores intermediários (ex: 0.5) que não sejam estritamente
+    0.0 ou 1.0, indicando possível corrupção ou uso indevido do campo.
 
 
-    - [val_geracaoverificada] val_geracaoverificada apresenta valor máximo de 122,0 MW para uma usina
-    individual. Usinas eólicas individuais raramente ultrapassam 30-50 MW de capacidade instalada. Verificar
-    se registros com valores acima de 100 MW correspondem a usinas com capacidade instalada compatível
-    ou se representam agregações indevidas.
+    - [val_geracaoverificada] val_geracaoverificada apresenta valor máximo de 122,0 MW para uma usina individual.
+    Usinas eólicas individuais raramente ultrapassam 30-50 MW de capacidade instalada. Verificar se registros com
+    valores acima de 100 MW correspondem a usinas com capacidade instalada compatível ou se representam agregações
+    indevidas.
 
 
-    - [din_instante] Dado o processo de consistência recorrente com atualizações às 12h e 19h, podem existir
-    lacunas temporais para usinas específicas em determinados períodos, especialmente próximo à data de
-    início (2023-01-01) ou em períodos de manutenção do sistema. Verificar continuidade da série temporal
-    por usina.
+    - [din_instante] Dado o processo de consistência recorrente com atualizações às 12h e 19h, podem existir lacunas
+    temporais para usinas específicas em determinados períodos, especialmente próximo à data de início (2023-01-01)
+    ou em períodos de manutenção do sistema. Verificar continuidade da série temporal por usina.
 
 
-    - [ceg] A combinação (din_instante, id_ons, ceg) é assumida como chave primária natural. Verificar
-    se existem duplicatas que possam indicar reprocessamento parcial de dados ou sobreposição de arquivos
-    Parquet no S3 durante o processo de consistência recorrente.
+    - [ceg] A combinação (din_instante, id_ons, ceg) é assumida como chave primária natural. Verificar se existem
+    duplicatas que possam indicar reprocessamento parcial de dados ou sobreposição de arquivos Parquet no S3 durante
+    o processo de consistência recorrente.
 
-    '
+
+    - [flg_geracaorestrita] 1 quando houve limitacao da geracao do conjunto na semi-hora; use flg_geracaorestrita
+    = 1 para restringir a analise aos patamares com constrained-off (mais direto do que comparar estimada e verificada).
+
+
+    - [val_geracaoreferenciafinal] Preenchida apenas nos patamares com restricao REL apos a apuracao definitiva
+    do ONS (nulos na maior parte das linhas); e'' a base do calculo de geracao frustrada enviado a CCEE.
+
+
+    - [nom_origemgeracaoreferencia] Origem da referencia (Curva, Garantia Física, Migrado do SAGIC, Períodos Anteriores,
+    Períodos Anteriores/Garantia Física); util para segmentar a qualidade da estimativa.
+
+
+    - [flags] flg_* sao INTEGER 0/1 em todos os arquivos atuais.
+
+
+    - [din_instante] Serie desde 2021-10-01, patamares de 30 minutos, atualizada diariamente.'
 - property: typicalQuestions
   value:
-  - Qual foi a energia curtailed (não gerada por restrição) das usinas eólicas do subsistema NE em janeiro
-    de 2024?
+  - Qual foi a energia curtailed (não gerada por restrição) das usinas eólicas do subsistema NE em janeiro de 2024?
   - Quais usinas eólicas tiveram maior volume de constrained-off Tipo I no primeiro semestre de 2024?
   - Qual a diferença entre geração estimada e verificada por complexo eólico em um determinado mês?
   - Em quais períodos do dia ocorre maior concentração de constrained-off eólico no subsistema Nordeste?
-  - Qual a proporção de registros com dado de vento inválido por usina e como isso afeta o cálculo de
-    curtailment?
-  # geradas e validadas pelo benchmark em 2026-09-06
-  - "Top 10 usinas com maior curtailment acumulado no SE em 2024"
-  - "Qual horário do dia concentra mais COFF no NE?"
-  - "Geração verificada vs estimada das usinas do Ceará no Q1 2024"
-  - "Geração estimada vs verificada do complexo Y de março a maio 2024"
+  - Qual a proporção de registros com dado de vento inválido por usina e como isso afeta o cálculo de curtailment?
+  - Top 10 usinas com maior curtailment acumulado no SE em 2024
+  - Qual horário do dia concentra mais COFF no NE?
+  - Geração verificada vs estimada das usinas do Ceará no Q1 2024
+  - Geração estimada vs verificada do complexo Y de março a maio 2024
+  - Em quantos patamares de 30 minutos houve restrição (flg_geracaorestrita = 1) por usina no último mês?
 - property: granularity
   value: horária
 - property: spatialGranularity
   value: por_usina
 - property: sourceExpression
-  value: read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet',
-    union_by_name=true)
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet', union_by_name=true)
 - property: temporalCoverageStart
-  value: '2023-01-01'
+  value: '2021-10-01'
 - property: semantics
   value:
     measure_terms:
@@ -538,6 +644,34 @@ customProperties:
       - energia nao gerada
       - energia restringida
       - perda constrained-off
+    - id: geracaoreferenciafinal
+      label: Geração de referência final
+      columns:
+      - val_geracaoreferenciafinal
+      expression: val_geracaoreferenciafinal
+      quantity_kind: average_power
+      unit_native: MWmed
+      default_aggregation: avg
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_geracaoreferenciafinal * 0.5) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_geracaoreferenciafinal)
+          unit: MWmed
+        peak_power:
+          sql: MAX(val_geracaoreferenciafinal)
+          unit: MWmed
+        time_series:
+          sql: AVG(val_geracaoreferenciafinal)
+          unit: MWmed
+        ranking:
+          sql: SUM(val_geracaoreferenciafinal * 0.5) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_geracaoreferenciafinal)
+          unit: MWmed
     query_routing:
       supports_listing: false
       supports_time_series: true
@@ -644,12 +778,42 @@ customProperties:
           - dado invalido
           - flag invalido
           filter: flg_dadoventoinvalido = 1.0
+      nom_origemgeracaoreferencia:
+        Curva:
+          aliases:
+          - curva
+          filter: nom_origemgeracaoreferencia = 'Curva'
+        Garantia Física:
+          aliases:
+          - garantia física
+          filter: nom_origemgeracaoreferencia = 'Garantia Física'
+        Migrado do SAGIC:
+          aliases:
+          - migrado do sagic
+          filter: nom_origemgeracaoreferencia = 'Migrado do SAGIC'
+        Períodos Anteriores:
+          aliases:
+          - períodos anteriores
+          filter: nom_origemgeracaoreferencia = 'Períodos Anteriores'
+        Períodos Anteriores/Garantia Física:
+          aliases:
+          - períodos anteriores/garantia física
+          filter: nom_origemgeracaoreferencia = 'Períodos Anteriores/Garantia Física'
+      nom_origemvento:
+        Agente:
+          aliases:
+          - agente
+          filter: nom_origemvento = 'Agente'
+        Supervisão:
+          aliases:
+          - supervisão
+          filter: nom_origemvento = 'Supervisão'
     sql_patterns:
       curtailment_mensal_subsistema:
         template: "SELECT\n  DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,\n  id_subsistema,\n\
-          \  SUM((val_geracaoestimada - val_geracaoverificada) * 0.5) / 1000 AS energia_curtailed_gwh\n\
-          FROM {source}\nWHERE val_geracaoestimada IS NOT NULL\n  AND EXTRACT(YEAR FROM din_instante)\
-          \ = {year}\nGROUP BY 1, 2\nORDER BY 1, 2"
+          \  SUM((val_geracaoestimada - val_geracaoverificada) * 0.5) / 1000 AS energia_curtailed_gwh\nFROM {source}\n\
+          WHERE val_geracaoestimada IS NOT NULL\n  AND EXTRACT(YEAR FROM din_instante) = {year}\nGROUP BY 1, 2\n\
+          ORDER BY 1, 2"
         output_unit: GWh
         matches:
           output_modes:
@@ -660,9 +824,8 @@ customProperties:
         validated_params:
           year: '2023'
       vento_medio_usina:
-        template: "SELECT\n  nom_usina,\n  AVG(val_ventoverificado) AS vento_medio_ms\nFROM {source}\n\
-          WHERE flg_dadoventoinvalido = 0.0\n  AND din_instante BETWEEN '{start}' AND '{end}'\nGROUP BY\
-          \ 1\nORDER BY 2 DESC"
+        template: "SELECT\n  nom_usina,\n  AVG(val_ventoverificado) AS vento_medio_ms\nFROM {source}\nWHERE flg_dadoventoinvalido\
+          \ = 0.0\n  AND din_instante BETWEEN '{start}' AND '{end}'\nGROUP BY 1\nORDER BY 2 DESC"
         output_unit: m/s
         matches:
           output_modes:
@@ -674,9 +837,9 @@ customProperties:
           start: '2023-01-01 00:00:00'
           end: '2023-01-03 09:30:00'
       curtailment_por_modalidade:
-        template: "SELECT\n  nom_modalidadeoperacao,\n  SUM((val_geracaoestimada - val_geracaoverificada)\
-          \ * 0.5) / 1000 AS energia_curtailed_gwh\nFROM {source}\nWHERE val_geracaoestimada IS NOT NULL\n\
-          \  AND din_instante BETWEEN '{start}' AND '{end}'\nGROUP BY 1\nORDER BY 2 DESC"
+        template: "SELECT\n  nom_modalidadeoperacao,\n  SUM((val_geracaoestimada - val_geracaoverificada) * 0.5)\
+          \ / 1000 AS energia_curtailed_gwh\nFROM {source}\nWHERE val_geracaoestimada IS NOT NULL\n  AND din_instante\
+          \ BETWEEN '{start}' AND '{end}'\nGROUP BY 1\nORDER BY 2 DESC"
         output_unit: GWh
         matches:
           output_modes:
@@ -688,9 +851,9 @@ customProperties:
           start: '2023-01-01 00:00:00'
           end: '2023-01-03 09:30:00'
       curtailment_por_conjunto:
-        template: "SELECT\n  nom_conjuntousina,\n  SUM((val_geracaoestimada - val_geracaoverificada) *\
-          \ 0.5) / 1000 AS energia_curtailed_gwh\nFROM {source}\nWHERE val_geracaoestimada IS NOT NULL\n\
-          \  AND din_instante BETWEEN '{start}' AND '{end}'\nGROUP BY 1\nORDER BY 2 DESC"
+        template: "SELECT\n  nom_conjuntousina,\n  SUM((val_geracaoestimada - val_geracaoverificada) * 0.5) / 1000\
+          \ AS energia_curtailed_gwh\nFROM {source}\nWHERE val_geracaoestimada IS NOT NULL\n  AND din_instante BETWEEN\
+          \ '{start}' AND '{end}'\nGROUP BY 1\nORDER BY 2 DESC"
         output_unit: GWh
         matches:
           output_modes:
@@ -703,32 +866,34 @@ customProperties:
           end: '2023-01-03 09:30:00'
 - property: fewShotQueries
   value:
-  - question: Qual foi o total de energia cortada (MWh) por subsistema e modalidade de constrained-off
-      em janeiro de 2024?
+  - question: Qual foi o total de energia cortada (MWh) por subsistema e modalidade de constrained-off em janeiro
+      de 2024?
     sql: SELECT id_subsistema, nom_modalidadeoperacao, SUM((COALESCE(val_geracaoestimada, 0.0) - val_geracaoverificada)
-      * 1.0) * 0.5 AS energia_cortada_mwh, COUNT(*) AS num_intervalos, COUNT(DISTINCT id_ons) AS num_usinas
-      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet')
-      WHERE din_instante >= '2024-01-01' AND din_instante < '2024-02-01' AND val_geracaoestimada IS NOT
-      NULL GROUP BY id_subsistema, nom_modalidadeoperacao ORDER BY energia_cortada_mwh DESC
-  - question: Quais foram as 20 usinas eólicas com maior volume de energia cortada por constrained-off
-      em 2024?
-    sql: SELECT id_ons, nom_usina, nom_conjuntousina, id_subsistema, id_estado, nom_modalidadeoperacao,
-      SUM((COALESCE(val_geracaoestimada, 0.0) - val_geracaoverificada) * 0.5) / 1000 * 0.5 AS energia_cortada_gwh,
-      COUNT(*) AS num_intervalos_restringidos, AVG(val_geracaoestimada) AS media_geracao_estimada_mw,
-      AVG(val_geracaoverificada) AS media_geracao_verificada_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet')
-      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' AND val_geracaoestimada IS NOT
-      NULL GROUP BY id_ons, nom_usina, nom_conjuntousina, id_subsistema, id_estado, nom_modalidadeoperacao
-      ORDER BY energia_cortada_gwh DESC LIMIT 20
-  - question: Em quais usinas e períodos o dado de vento foi marcado como inválido e qual o impacto na
-      geração estimada?
-    sql: SELECT id_ons, nom_usina, id_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP))
-      AS mes_referencia, COUNT(*) AS total_intervalos, SUM(CASE WHEN flg_dadoventoinvalido = 1.0 THEN
-      1 ELSE 0 END) AS intervalos_vento_invalido, ROUND(100.0 * SUM(CASE WHEN flg_dadoventoinvalido =
-      1.0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_vento_invalido, AVG(CASE WHEN flg_dadoventoinvalido
-      = 1.0 THEN val_geracaoestimada END) AS media_estimada_vento_invalido, AVG(CASE WHEN flg_dadoventoinvalido
-      = 0.0 THEN val_geracaoestimada END) AS media_estimada_vento_valido FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet')
-      WHERE din_instante >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY id_ons, nom_usina, id_subsistema,
-      DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) HAVING SUM(CASE WHEN flg_dadoventoinvalido
-      = 1.0 THEN 1 ELSE 0 END) > 0 ORDER BY pct_vento_invalido DESC LIMIT 50
+      * 1.0) * 0.5 AS energia_cortada_mwh, COUNT(*) AS num_intervalos, COUNT(DISTINCT id_ons) AS num_usinas FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet') WHERE din_instante
+      >= '2024-01-01' AND din_instante < '2024-02-01' AND val_geracaoestimada IS NOT NULL GROUP BY id_subsistema,
+      nom_modalidadeoperacao ORDER BY energia_cortada_mwh DESC
+  - question: Quais foram as 20 usinas eólicas com maior volume de energia cortada por constrained-off em 2024?
+    sql: SELECT id_ons, nom_usina, nom_conjuntousina, id_subsistema, id_estado, nom_modalidadeoperacao, SUM((COALESCE(val_geracaoestimada,
+      0.0) - val_geracaoverificada) * 0.5) / 1000 * 0.5 AS energia_cortada_gwh, COUNT(*) AS num_intervalos_restringidos,
+      AVG(val_geracaoestimada) AS media_geracao_estimada_mw, AVG(val_geracaoverificada) AS media_geracao_verificada_mw
+      FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet') WHERE din_instante
+      >= '2024-01-01' AND din_instante < '2025-01-01' AND val_geracaoestimada IS NOT NULL GROUP BY id_ons, nom_usina,
+      nom_conjuntousina, id_subsistema, id_estado, nom_modalidadeoperacao ORDER BY energia_cortada_gwh DESC LIMIT
+      20
+  - question: Em quais usinas e períodos o dado de vento foi marcado como inválido e qual o impacto na geração estimada?
+    sql: SELECT id_ons, nom_usina, id_subsistema, DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes_referencia,
+      COUNT(*) AS total_intervalos, SUM(CASE WHEN flg_dadoventoinvalido = 1.0 THEN 1 ELSE 0 END) AS intervalos_vento_invalido,
+      ROUND(100.0 * SUM(CASE WHEN flg_dadoventoinvalido = 1.0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_vento_invalido,
+      AVG(CASE WHEN flg_dadoventoinvalido = 1.0 THEN val_geracaoestimada END) AS media_estimada_vento_invalido,
+      AVG(CASE WHEN flg_dadoventoinvalido = 0.0 THEN val_geracaoestimada END) AS media_estimada_vento_valido FROM
+      read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet') WHERE din_instante
+      >= '2024-01-01' AND din_instante < '2025-01-01' GROUP BY id_ons, nom_usina, id_subsistema, DATE_TRUNC('month',
+      TRY_CAST(din_instante AS TIMESTAMP)) HAVING SUM(CASE WHEN flg_dadoventoinvalido = 1.0 THEN 1 ELSE 0 END) >
+      0 ORDER BY pct_vento_invalido DESC LIMIT 50
+  - question: Quantos patamares com restrição ativa (flg_geracaorestrita = 1) cada usina teve em agosto de 2026?
+    sql: SELECT nom_usina, COUNT(*) AS patamares_com_restricao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_detail_tm/*.parquet',
+      union_by_name=true) WHERE flg_geracaorestrita = 1 AND din_instante >= '2026-08-01' AND din_instante < '2026-09-01'
+      GROUP BY nom_usina ORDER BY patamares_com_restricao DESC LIMIT 20
 - property: license
   value: CC-BY
