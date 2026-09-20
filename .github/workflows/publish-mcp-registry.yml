@@ -20,6 +20,15 @@ jobs:
         run: |
           curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
 
+      # server.json e' a versao que o registry le; ela e' gravada aqui a partir da fonte unica
+      # (__version__), para a release nao depender de edicao manual do arquivo.
+      - name: Sync server.json version with the package version
+        run: |
+          VERSION="$(python3 -c 'import re,pathlib; print(re.search(r"__version__ = \"([^\"]+)\"", pathlib.Path("src/mcp_tiago_dados_abertos/__init__.py").read_text()).group(1))')"
+          jq --arg v "$VERSION" '.version = $v | .packages |= map(.version = $v)' server.json > server.json.tmp
+          mv server.json.tmp server.json
+          echo "server.json em $VERSION"; jq '{version, packages: [.packages[].version]}' server.json
+
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login github-oidc
 

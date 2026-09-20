@@ -2,12 +2,12 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ONSBR/tiago-dados-abertos",
   "description": "MCP server que conecta agentes de IA aos dados abertos do ONS (Operador Nacional do Sistema)",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "mcp-tiago-dados-abertos",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "runtimeHint": "uvx",
       "transport": {"type": "stdio"},
       "packageArguments": [
