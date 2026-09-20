@@ -1,0 +1,686 @@
+version: 1.0.0
+kind: DataContract
+apiVersion: v3.1.0
+id: urn:ons-opendata:coff_fotovoltaica_intrasemihora
+name: coff_fotovoltaica_intrasemihora
+tenant: ons
+tags:
+- 30min
+- ONS
+- intra-semihorário
+- duração restrição
+- minutos restrição
+- razão restrição
+- origem restrição
+- fotovoltaica
+- usina-fotovoltaica
+- non-pii
+- public_data
+status: active
+servers:
+- server: production
+  type: s3
+  location: s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet
+  format: parquet
+description:
+  purpose: Registrar e disponibilizar as restrições operativas por constrained-off em usinas fotovoltaicas com detalhamento intra-semihorário (períodos de restrição dentro dos patamares de 30 minutos) para uso por operadores do ONS, agentes do setor elétrico, auditores regulatórios da ANEEL e analistas de energia. Suporta decisões de apuração e auditoria da duração das restrições operativas, análise de causas e duração de restrições por usina, planejamento operativo de redespacho, conformidade regulatória e estudos de integração de fontes renováveis ao Sistema Interligado Nacional.
+  limitations: Os dados disponibilizados fazem parte de um processo de consistência recorrente e, portanto, podem ser atualizados após a sua publicação. A chave natural é composta por (din_instante, id_ons, hor_final), permitindo múltiplos registros de restrição para a mesma usina no mesmo patamar de 30 minutos quando há diferentes períodos de restrição dentro do intervalo. A coluna dsc_restricao apresenta nulos na maior parte dos registros, indicando que a descrição textual detalhada é campo opcional e seu preenchimento não é sistemático.
+  usage: Recuperar este dataset quando a pergunta envolver restrições operativas de usinas fotovoltaicas com detalhamento de duração e horário exato dentro dos patamares de 30 minutos, curtailment solar por usina com análise de minutos de restrição, razão e origem da restrição (local ou sistêmica), ou geração limitada (teto) imposta por constrained-off com granularidade temporal fina.
+domain: geracao
+schema:
+- name: restricao_coff_fotovoltaica_intrasemihora
+  physicalType: parquet
+  logicalType: object
+  physicalName: restricao_coff_fotovoltaica_intrasemihora
+  properties:
+  - name: id_subsistema
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Identificador do subsistema elétrico ao qual a usina fotovoltaica pertence. Valores possíveis: NE, SE'
+    customProperties:
+    - property: aliases
+      value:
+      - subsistema
+      - sistema
+      - região elétrica
+      - cod_subsistema
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - NE
+      - SE
+  - name: id_estado
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Sigla da Unidade Federativa (estado) onde a usina fotovoltaica está localizada. Valores possíveis: BA, CE, GO, MG, MS, PB, PE, PI, RN, SP'
+    customProperties:
+    - property: aliases
+      value:
+      - estado
+      - UF
+      - unidade federativa
+      - sigla_estado
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - BA
+      - CE
+      - GO
+      - MG
+      - MS
+      - PB
+      - PE
+      - PI
+      - RN
+      - SP
+  - name: nom_agenteoperador
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome do agente operador responsável pela usina fotovoltaica conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - agente operador
+      - operador
+      - agente
+      - nome agente
+    - property: semanticType
+      value: DIMENSION
+  - name: nom_usina
+    physicalType: VARCHAR
+    logicalType: string
+    description: Nome individual da usina fotovoltaica conforme cadastro ONS
+    customProperties:
+    - property: aliases
+      value:
+      - usina
+      - nome da usina
+      - planta solar
+      - UFV
+      - planta fotovoltaica
+    - property: semanticType
+      value: DIMENSION
+  - name: id_ons
+    physicalType: VARCHAR
+    logicalType: string
+    description: Código identificador único da usina no sistema do ONS, utilizado como chave de referência no cadastro de agentes e usinas
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - código ONS
+      - id ONS
+      - identificador ONS
+      - código da usina
+    - property: semanticType
+      value: IDENTIFIER
+  - name: din_instante
+    physicalType: TIMESTAMP
+    logicalType: timestamp
+    description: Data e hora do instante de início do patamar de 30 minutos no qual ocorreu a restrição operativa
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - instante
+      - data hora
+      - timestamp
+      - data e hora
+      - patamar
+      - intervalo
+    - property: semanticType
+      value: TIMESTAMP
+  - name: hor_inicial
+    physicalType: VARCHAR
+    logicalType: string
+    description: Horário de início do período de restrição dentro do patamar de 30 minutos, no formato HH:MM:SS
+    customProperties:
+    - property: aliases
+      value:
+      - hora inicial
+      - início restrição
+      - horário início
+      - hora inicio
+    - property: semanticType
+      value: DIMENSION
+  - name: hor_final
+    physicalType: VARCHAR
+    logicalType: string
+    description: Horário de término do período de restrição dentro do patamar de 30 minutos, no formato HH:MM:SS. Compõe a chave natural junto com din_instante e id_ons
+    primaryKey: true
+    customProperties:
+    - property: aliases
+      value:
+      - hora final
+      - fim restrição
+      - horário fim
+      - hora fim
+    - property: semanticType
+      value: DIMENSION
+  - name: num_minutosrestricao
+    physicalType: BIGINT
+    logicalType: integer
+    description: Duração em minutos do período de restrição operativa por constrained-off dentro do patamar de 30 minutos
+    customProperties:
+    - property: aliases
+      value:
+      - minutos restrição
+      - duração restrição
+      - minutos coff
+      - tempo restrição
+      - minutos
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: minutos
+  - name: cod_razaorestricao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código da razão da restrição operativa. Valores possíveis: CNF (Confiabilidade), ENE (Energética), REL (Restrição Elétrica Local)'
+    customProperties:
+    - property: aliases
+      value:
+      - razão restrição
+      - motivo restrição
+      - causa restrição
+      - razao
+      - codigo razao
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - CNF
+      - ENE
+      - REL
+  - name: cod_origemrestricao
+    physicalType: VARCHAR
+    logicalType: string
+    description: 'Código da origem da restrição operativa. Valores possíveis: LOC (Local), SIS (Sistêmica)'
+    customProperties:
+    - property: aliases
+      value:
+      - origem restrição
+      - origem
+      - tipo origem
+      - codigo origem
+    - property: semanticType
+      value: DIMENSION
+    - property: enum
+      value:
+      - LOC
+      - SIS
+  - name: val_geracaolimitada
+    physicalType: DOUBLE
+    logicalType: number
+    description: Valor de geração limitada imposta pela restrição de constrained-off no período, representando o limite de potência (MW médio) ao qual a usina foi restringida
+    customProperties:
+    - property: aliases
+      value:
+      - geração limitada
+      - limite geração
+      - curtailment
+      - corte geração
+      - potência limitada
+    - property: semanticType
+      value: METRIC
+    - property: unit
+      value: MW
+  - name: dsc_restricao
+    physicalType: VARCHAR
+    logicalType: string
+    description: Descrição textual detalhada da restrição operativa. Apresenta nulos na maior parte dos registros, pois é campo opcional de preenchimento não sistemático
+    customProperties:
+    - property: aliases
+      value:
+      - descrição restrição
+      - descrição
+      - detalhamento restrição
+      - observação
+    - property: semanticType
+      value: DIMENSION
+team:
+  name: ONS - Operador Nacional do Sistema Elétrico
+  members:
+  - username: dadosabertos@ons.org.br
+    role: owner
+slaProperties:
+- property: freshness
+  value: P1D
+  description: Diariamento, as 12h e 19h
+authoritativeDefinitions:
+- url: https://dados.ons.org.br/dataset/coff_fotovoltaica_intrasemihora
+  type: businessDefinition
+  description: Portal ONS OpenData
+customProperties:
+- property: partitionPruning
+  value: year
+- property: aiContext
+  value: Restrições operativas por constrained-off em usinas fotovoltaicas com detalhamento intra-semihorário, registrando períodos de restrição dentro dos patamares de 30 minutos. Inclui horário inicial e final de cada período de restrição, duração em minutos, razão (CNF, ENE, REL) e origem (LOC, SIS) da restrição, além da geração limitada imposta (MW). A chave natural é (din_instante, id_ons, hor_final), permitindo múltiplos registros de restrição para a mesma usina no mesmo patamar quando há diferentes períodos de curtailment. Não traz geração verificada, referência nem energia não gerada (GNRa). Permite análise de duração e frequência de restrições por usina com granularidade temporal fina e identificação de causas de curtailment solar.
+- property: agentInstructions
+  value: |
+    - [din_instante] A chave natural é composta por (din_instante, id_ons, hor_final), permitindo múltiplos registros para a mesma usina no mesmo patamar de 30 minutos quando há diferentes períodos de restrição. Agregações por usina e patamar devem usar SUM(num_minutosrestricao) para obter a duração total de restrição no intervalo.
+
+    - [hor_inicial] Armazenado como VARCHAR no formato HH:MM:SS. Para análises de distribuição temporal de restrições ao longo do dia, use CAST ou EXTRACT para converter em tipo TIME ou extrair a hora. Comparações diretas de string funcionam para igualdade mas não para ranges temporais.
+
+    - [hor_final] Compõe a chave natural junto com din_instante e id_ons. Armazenado como VARCHAR no formato HH:MM:SS. A diferença entre hor_final e hor_inicial deve ser consistente com num_minutosrestricao; inconsistências indicam erro de carga ou reprocessamento.
+
+    - [num_minutosrestricao] Representa a duração em minutos do período de restrição dentro do patamar de 30 minutos. Valores esperados entre 0 e 30. Valores acima de 30 ou negativos indicam sobreposição de períodos; verificar antes de agregar. Multiplicar por val_geracaolimitada / 60 dá a energia correspondente ao limite imposto durante o evento (teto da restrição, em MWh), não a energia não gerada.
+
+    - [cod_razaorestricao] Valores possíveis: CNF (Confiabilidade), ENE (Energética), REL (Restrição Elétrica Local). Filtros devem usar esses códigos exatos. Análises de causa de restrição devem agrupar por este campo e cruzar com cod_origemrestricao para identificar padrões.
+
+    - [cod_origemrestricao] Valores possíveis: LOC (Local), SIS (Sistêmica). Restrições locais (LOC) indicam problemas na própria usina ou conexão; sistêmicas (SIS) indicam restrições de rede ou despacho. Análises de planejamento de expansão devem priorizar restrições SIS para identificar gargalos de transmissão.
+
+    - [val_geracaolimitada] Representa o limite de potência (MW) imposto pela restrição. ATENÇÃO: val_geracaolimitada × num_minutosrestricao / 60 é a energia correspondente ao limite imposto durante o evento (teto da restrição, em MWh), não a energia não gerada. Este dataset não tem geração de referência nem geração verificada, portanto não permite calcular energia não gerada, GNRa ou compensação financeira. Valores nulos podem indicar restrição total (geração zero) ou ausência de informação; verificar contexto com dsc_restricao.
+
+    - [dsc_restricao] Apresenta nulos na maior parte dos registros, pois é campo opcional de preenchimento não sistemático. Análises qualitativas baseadas neste campo cobrem apenas uma fração do universo de restrições. Não usar como filtro obrigatório em queries de agregação.
+
+    - [geral] O dataset é atualizado diariamente às 12h e 19h e faz parte de um processo de consistência recorrente, podendo haver atualizações retroativas. Análises de séries temporais devem considerar possíveis revisões de dados históricos.
+- property: typicalQuestions
+  value:
+  - Qual foi a duração total de restrições por constrained-off na usina X em janeiro de 2025?
+  - Quais usinas fotovoltaicas do Nordeste tiveram maior número de minutos de restrição acumulados no primeiro trimestre?
+  - Qual a razão de restrição mais frequente (CNF, ENE, REL) nas usinas fotovoltaicas do subsistema SE?
+  - Quantos períodos de restrição ocorreram por usina em cada patamar de 30 minutos durante o mês de agosto?
+  - Qual o percentual de restrições de origem local (LOC) versus sistêmica (SIS) por estado?
+  - Qual foi a geração limitada média imposta nas restrições por confiabilidade (CNF) no NE em 2024?
+  - Em quais horários do dia (hor_inicial) ocorrem mais restrições fotovoltaicas no subsistema SE?
+- property: vectorTags
+  value:
+  - duracao do curtailment solar
+  - quanto tempo a fotovoltaica ficou restrita
+  - minutos de constrained-off
+  - horario exato do corte solar
+  - inicio e fim da restricao fotovoltaica
+  - restricao intra-semihora fotovoltaica
+  - restricao local versus sistemica
+  - confiabilidade versus energia restricao
+- property: granularity
+  value: 30min
+- property: spatialGranularity
+  value: por_usina
+- property: sourceExpression
+  value: read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true)
+- property: temporalCoverageStart
+  value: '2024-04-01'
+- property: semantics
+  value:
+    row_grain:
+      temporal: 30 min
+      temporal_column: din_instante
+      spatial: usina
+      entity: usina
+      one_row_per:
+      - din_instante
+      - id_ons
+      - hor_final
+    temporal_perspective: verificado
+    dimension_columns:
+      subsistema: id_subsistema
+      fonte: null
+      usina: id_ons
+      reservatorio: null
+      bacia: null
+      subestacao: null
+      patamar: null
+    metrics:
+    - id: num_minutosrestricao
+      label: Num Minutosrestricao
+      columns:
+      - num_minutosrestricao
+      expression: num_minutosrestricao
+      quantity_kind: duration_minutes
+      unit_native: minutos
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total:
+          sql: SUM(num_minutosrestricao)
+          unit: minutos
+        average:
+          sql: AVG(num_minutosrestricao)
+          unit: minutos
+        maximum:
+          sql: MAX(num_minutosrestricao)
+          unit: minutos
+        time_series:
+          sql: SUM(num_minutosrestricao)
+          unit: minutos
+        ranking:
+          sql: SUM(num_minutosrestricao)
+          unit: minutos
+        comparison:
+          sql: SUM(num_minutosrestricao)
+          unit: minutos
+      interval_hours: 0.5
+      aliases:
+      - minutos restrição
+      - duração restrição
+      - minutos coff
+      - tempo restrição
+      - minutos
+    - id: geracaolimitada
+      label: Geração limitada (limite imposto; total_energy = energia no limite durante o evento, não energia não gerada)
+      columns:
+      - val_geracaolimitada
+      expression: val_geracaolimitada
+      quantity_kind: average_power
+      unit_native: MW
+      default_aggregation: sum
+      forbidden_aggregations: []
+      aggregation_modes:
+        total_energy:
+          sql: SUM(val_geracaolimitada * num_minutosrestricao / 60.0) / 1000
+          unit: GWh
+        average_power:
+          sql: AVG(val_geracaolimitada)
+          unit: MW
+        peak_power:
+          sql: MAX(val_geracaolimitada)
+          unit: MW
+        time_series:
+          sql: AVG(val_geracaolimitada)
+          unit: MW
+        ranking:
+          sql: SUM(val_geracaolimitada * num_minutosrestricao / 60.0) / 1000
+          unit: GWh
+        comparison:
+          sql: AVG(val_geracaolimitada)
+          unit: MW
+      interval_hours: 0.5
+      aliases:
+      - geração limitada
+      - limite geração
+      - curtailment
+      - corte geração
+      - potência limitada
+    query_routing:
+      supports_listing: false
+      supports_time_series: true
+      supports_comparison: true
+      supports_ranking: true
+      primary_use_case: serie_temporal
+    value_aliases:
+      subsistema:
+        NE:
+          aliases:
+          - nordeste
+          - ne
+          - subsistema nordeste
+          filter: id_subsistema = 'NE'
+        SE:
+          aliases:
+          - sudeste
+          - se
+          - subsistema sudeste
+          filter: id_subsistema = 'SE'
+      id_estado:
+        BA:
+          aliases:
+          - bahia
+          - ba
+          filter: id_estado = 'BA'
+        CE:
+          aliases:
+          - ceará
+          - ceara
+          - ce
+          filter: id_estado = 'CE'
+        GO:
+          aliases:
+          - goiás
+          - goias
+          - go
+          filter: id_estado = 'GO'
+        MG:
+          aliases:
+          - minas gerais
+          - minas
+          - mg
+          filter: id_estado = 'MG'
+        MS:
+          aliases:
+          - mato grosso do sul
+          - ms
+          filter: id_estado = 'MS'
+        PB:
+          aliases:
+          - paraíba
+          - paraiba
+          - pb
+          filter: id_estado = 'PB'
+        PE:
+          aliases:
+          - pernambuco
+          - pe
+          filter: id_estado = 'PE'
+        PI:
+          aliases:
+          - piauí
+          - piaui
+          - pi
+          filter: id_estado = 'PI'
+        RN:
+          aliases:
+          - rio grande do norte
+          - rn
+          filter: id_estado = 'RN'
+        SP:
+          aliases:
+          - são paulo
+          - sao paulo
+          - sp
+          filter: id_estado = 'SP'
+      cod_razaorestricao:
+        CNF:
+          aliases:
+          - confiabilidade
+          - cnf
+          - segurança
+          filter: cod_razaorestricao = 'CNF'
+        ENE:
+          aliases:
+          - energética
+          - energetica
+          - ene
+          - energia
+          filter: cod_razaorestricao = 'ENE'
+        REL:
+          aliases:
+          - restrição elétrica local
+          - restricao eletrica local
+          - rel
+          - local
+          filter: cod_razaorestricao = 'REL'
+      cod_origemrestricao:
+        LOC:
+          aliases:
+          - local
+          - loc
+          - usina
+          filter: cod_origemrestricao = 'LOC'
+        SIS:
+          aliases:
+          - sistêmica
+          - sistemica
+          - sis
+          - sistema
+          - rede
+          filter: cod_origemrestricao = 'SIS'
+    sql_patterns:
+      todas_metricas_mensal:
+        template: |-
+          SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,
+            ROUND(SUM(num_minutosrestricao), 1) AS num_minutosrestricao,
+            ROUND(AVG(val_geracaolimitada), 1) AS geracaolimitada
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1
+          ORDER BY 1
+        output_unit: minutos
+        matches:
+          output_modes:
+          - time_series
+          - comparison
+          metrics:
+          - num_minutosrestricao
+          - geracaolimitada
+          grain: month
+        validated_params:
+          year: '2026'
+      geracaolimitada_mensal_mwmed:
+        template: |-
+          SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,
+            AVG(val_geracaolimitada) AS valor
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1, 2
+          ORDER BY 1, 2
+        output_unit: MW
+        matches:
+          output_modes:
+          - average_power
+          metrics:
+          - geracaolimitada
+          grain: month
+        validated_params:
+          year: '2026'
+      num_minutosrestricao_mensal:
+        template: |-
+          SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,
+            SUM(num_minutosrestricao) AS valor
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1, 2
+          ORDER BY 1, 2
+        output_unit: minutos
+        matches:
+          output_modes:
+          - total
+          metrics:
+          - num_minutosrestricao
+          grain: month
+        validated_params:
+          year: '2026'
+      geracaolimitada_mensal:
+        template: |-
+          SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes, id_subsistema,
+            SUM(val_geracaolimitada * num_minutosrestricao / 60.0) / 1000 AS valor
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1, 2
+          ORDER BY 1, 2
+        output_unit: GWh
+        matches:
+          output_modes:
+          - total_energy
+          metrics:
+          - geracaolimitada
+          grain: month
+        validated_params:
+          year: '2026'
+      curtailment_fotovoltaico_mensal:
+        template: |-
+          SELECT DATE_TRUNC('month', TRY_CAST(din_instante AS TIMESTAMP)) AS mes,
+            id_subsistema,
+            SUM(num_minutosrestricao) AS total
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1, 2
+          ORDER BY 1, 3 DESC
+        output_unit: minutos
+        matches:
+          output_modes:
+          - time_series
+          metrics:
+          - num_minutosrestricao
+          grain: month
+        validated_params:
+          year: '2026'
+      ranking_num_minutosrestricao_por_subsistema:
+        template: |-
+          SELECT id_subsistema,
+            SUM(num_minutosrestricao) AS valor
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1
+          ORDER BY 2 DESC
+          LIMIT {limit}
+        output_unit: minutos
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - num_minutosrestricao
+          grain: year
+        validated_params:
+          year: '2026'
+          limit: '10'
+      ranking_geracaolimitada_por_subsistema:
+        template: |-
+          SELECT id_subsistema,
+            SUM(val_geracaolimitada * num_minutosrestricao / 60.0) / 1000 AS valor
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1
+          ORDER BY 2 DESC
+          LIMIT {limit}
+        output_unit: GWh
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - geracaolimitada
+          grain: year
+        validated_params:
+          year: '2026'
+          limit: '10'
+      ranking_num_minutosrestricao_por_ons:
+        template: |-
+          SELECT id_ons,
+            SUM(num_minutosrestricao) AS valor
+          FROM {source}
+          WHERE EXTRACT(YEAR FROM din_instante) = {year}
+          GROUP BY 1
+          ORDER BY 2 DESC
+          LIMIT {limit}
+        output_unit: minutos
+        matches:
+          output_modes:
+          - ranking
+          metrics:
+          - num_minutosrestricao
+          grain: year
+        validated_params:
+          year: '2026'
+          limit: '10'
+    family: restricao_fotovoltaica
+    family_default: false
+    measure_terms:
+    - duração
+    - duracao
+    - minutos
+    - intra-semihorário
+    - intra-semihora
+    - intrasemihora
+    - início e fim
+    - inicio e fim
+    - horário exato
+    - horario exato
+- property: fewShotQueries
+  value:
+  - question: Qual foi a duração total de restrições por constrained-off na usina X em janeiro de 2025?
+    sql: SELECT SUM(num_minutosrestricao) AS duracao_total_minutos FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true) WHERE nom_usina = 'X' AND din_instante >= '2025-01-01' AND din_instante < '2025-02-01'
+  - question: Quais usinas fotovoltaicas do Nordeste tiveram maior número de minutos de restrição acumulados no primeiro trimestre?
+    sql: SELECT nom_usina, SUM(num_minutosrestricao) AS total_minutos_restricao FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true) WHERE id_subsistema = 'NE' AND din_instante >= '2025-01-01' AND din_instante < '2025-04-01' GROUP BY nom_usina ORDER BY total_minutos_restricao DESC LIMIT 20
+  - question: Qual a razão de restrição mais frequente (CNF, ENE, REL) nas usinas fotovoltaicas do subsistema SE?
+    sql: SELECT cod_razaorestricao, COUNT(*) AS frequencia FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true) WHERE id_subsistema = 'SE' GROUP BY cod_razaorestricao ORDER BY frequencia DESC
+  - question: Qual o percentual de restrições de origem local (LOC) versus sistêmica (SIS) por estado?
+    sql: SELECT id_estado, cod_origemrestricao, COUNT(*) AS total_restricoes, ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (PARTITION BY id_estado), 2) AS percentual FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true) GROUP BY id_estado, cod_origemrestricao ORDER BY id_estado, cod_origemrestricao
+  - question: Qual foi a geração limitada média imposta nas restrições por confiabilidade (CNF) no NE em 2024?
+    sql: SELECT AVG(val_geracaolimitada) AS geracao_limitada_media_mw FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true) WHERE cod_razaorestricao = 'CNF' AND id_subsistema = 'NE' AND din_instante >= '2024-01-01' AND din_instante < '2025-01-01'
+  - question: Em quais horários do dia (hor_inicial) ocorrem mais restrições fotovoltaicas no subsistema SE?
+    sql: SELECT hor_inicial, COUNT(*) AS total_restricoes FROM read_parquet('s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_intrasemihora/*.parquet', union_by_name=true) WHERE id_subsistema = 'SE' GROUP BY hor_inicial ORDER BY total_restricoes DESC LIMIT 20
+- property: license
+  value: CC-BY

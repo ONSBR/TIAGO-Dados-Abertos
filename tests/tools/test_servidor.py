@@ -27,8 +27,14 @@ def test_config():
 
 
 def test_catalog_ons_count(catalog):
+    """Todo *.odcs.yaml em contracts/ons entra no catalogo: nenhum contrato e descartado
+    em silencio no load. O total nao e fixado porque muda a cada contrato novo."""
+    from mcp_tiago_dados_abertos.infra.config import CONTRACTS_DIR
+
+    esperado = len(list((CONTRACTS_DIR / "ons").glob("*.odcs.yaml")))
     ons = [k for k, v in catalog.items() if v["orgao"] == "ons"]
-    assert len(ons) == 78, f"Esperado 78 ONS, got {len(ons)}"
+    assert esperado > 0
+    assert len(ons) == esperado, f"Esperado {esperado} ONS (arquivos em contracts/ons), got {len(ons)}"
 
 
 def test_catalog_so_tem_ons(catalog):
