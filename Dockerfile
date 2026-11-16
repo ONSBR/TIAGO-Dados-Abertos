@@ -1,6 +1,6 @@
 # python:3.13.15-slim-trixie (digest fixado; a tag fica no comentario porque
 # o digest sozinho nao diz a versao). Precisa ser >= o requires-python.
-FROM python@sha256:e06cc1111ed84189e91866447f562b89faadbfbbb9937cd67e6bf4172cdb45df
+FROM python@sha256:df3f05ff4d74833f52146edd195c8f7913581b57796a820fb7e373457ace9bad
 
 WORKDIR /app
 
