@@ -1,6 +1,8 @@
 version: 2
 updates:
-  - package-ecosystem: pip
+  # uv e nao pip: o PR do bot precisa trazer o uv.lock, senao o CI (uv sync --frozen)
+  # testa a versao antiga e o verde nao vale.
+  - package-ecosystem: uv
     directory: /
     schedule:
       interval: weekly
