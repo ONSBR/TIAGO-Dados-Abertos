@@ -26,7 +26,7 @@ status: active
 servers:
 - server: production
   type: s3
-  location: s3://ons-aws-prod-opendata/dataset/restricao_coff_fotovoltaica_tm/*.parquet
+  location: s3://ons-aws-prod-opendata/dataset/restricao_coff_eolica_tm/*.parquet
   format: parquet
 description:
   purpose: Suporta a apuração de compensações financeiras por energia não gerada, o monitoramento operacional de
