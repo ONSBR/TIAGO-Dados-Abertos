@@ -76,3 +76,27 @@ def test_nenhuma_grafia_legada_no_corpus(corpus_docs):
             if p in legadas:
                 achados.append(f"{ds}: {p}")
     assert not achados, f"grafia legada no corpus: {achados}"
+
+
+def _prefixo_s3(texto):
+    """Diretorio do dataset dentro do bucket (sem o glob de arquivos)."""
+    m = re.search(r"s3://[^'\s)]+/dataset/([^/'\s)]+)/", texto or "")
+    return m.group(1) if m else None
+
+
+def test_location_e_source_expression_apontam_para_o_mesmo_dataset(corpus_docs):
+    """`servers[].location` e `sourceExpression` devem nomear o mesmo prefixo.
+
+    O motor executa SQL pela `sourceExpression`, mas `location` alimenta a poda
+    por particao, o esquema de resultado e o conselheiro de unidade. Divergencia
+    entre os dois passa em silencio pela execucao e so aparece como heuristica
+    errada — foi assim que um contrato eolico ficou com location solar.
+    """
+    divergentes = []
+    for ds, doc in corpus_docs:
+        loc = next((s.get("location", "") for s in doc.get("servers") or [] if s.get("location")), "")
+        src = next((x.get("value") for x in doc.get("customProperties") or [] if x.get("property") == "sourceExpression"), "")
+        p_loc, p_src = _prefixo_s3(loc), _prefixo_s3(src)
+        if p_loc and p_src and p_loc != p_src:
+            divergentes.append(f"{ds}: location={p_loc} sourceExpression={p_src}")
+    assert not divergentes, "location e sourceExpression divergem:\n  " + "\n  ".join(divergentes)
